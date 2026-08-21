@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Leiste — Prüfseite</title>
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/leiste.css">
+<style>
+  body { margin:0; font-family:'Space Grotesk',sans-serif; }
+  .buehne { display:flex; height:100vh; }
+  .scroller { flex:1; overflow-y:auto; background:#FBFAF6; }
+  .sp { max-width:520px; margin:0 auto; padding:56px 26px 1000px; }
+  .sp p { font-size:16.5px; line-height:1.8; margin:0 0 20px; }
+</style>
+<div class="buehne">
+  <div id="leiste"></div>
+  <div class="scroller" id="scroller">
+    <div class="sp" id="sp">
+      <section data-titel="Hallo" data-art="persoenlich"><p>Eins. Ein kurzer Abschnitt zum Anfang.</p></section>
+      <section data-titel="Wie ich angefangen hab" data-art="persoenlich"><p>Zwei. Etwas mehr Text, damit dieser Abschnitt länger wird als der erste und die Leiste etwas zu tun bekommt beim Verteilen der Etiketten.</p><p>Noch ein Absatz dazu.</p></section>
+      <section data-titel="The Race — Staffel 3" data-art="beruflich" data-farbe="#3E5A78"><p>Drei. Ein beruflicher Abschnitt mit Farbe.</p></section>
+      <section data-titel="Das Werkzeug, das ich mir gebaut habe" data-art="beruflich" data-farbe="#6E6E7A"><p>Vier. Ein sehr langer Titel, der umbrechen muss und nicht abgeschnitten werden darf.</p><p>Zweiter Absatz.</p></section>
+      <section data-titel="Bastian Keller" data-art="beruflich" data-farbe="#8E4E9B"><p>Fünf. Kurz.</p></section>
+      <section data-titel="Simplicissimus" data-art="beruflich" data-farbe="#A8913F"><p>Sechs. Auch kurz.</p></section>
+      <section data-titel="Blender" data-art="persoenlich"><p>Sieben.</p></section>
+      <section data-titel="Woher der Name kommt" data-art="persoenlich"><p>Acht.</p></section>
+      <section data-titel="Schreib mir" data-art="kontakt" data-farbe="#BFCC94"><p>Neun. Der Schluss.</p></section>
+    </div>
+  </div>
+</div>
+<script src="/assets/leiste.js"></script>
+<script>
+  const abschnitte = [...document.querySelectorAll('#sp section')].map((el, i) => ({
+    id: 'a' + i, titel: el.dataset.titel, art: el.dataset.art,
+    farbe: el.dataset.farbe || null, element: el,
+  }));
+  window.__leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte,
+    { scroller: document.getElementById('scroller') });
+</script>

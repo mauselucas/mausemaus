@@ -1,0 +1,77 @@
+/* mausemaus — die Zeitleiste. Werte aus dem Entwurfsdokument, nicht raten. */
+/* Eigenständiges Bauteil: verlässt sich nicht auf site.css' globalen
+   Box-Modell-Reset, sondern bringt ihn für sich selbst mit. */
+.mml, .mml *, .mml *::before, .mml *::after { box-sizing: border-box; }
+.mml {
+  --mml-dauer: 860ms;
+  --mml-kurve: cubic-bezier(.50, 0, .12, 1);
+  --mml-blass: #D6D3C4;
+  flex: none; width: 252px; position: relative; background: #FBFAF6;
+  border-right: 1px solid #EDEAE1; z-index: 6;
+  transition: width var(--mml-dauer) var(--mml-kurve);
+}
+.mml-zu { width: 64px; }
+
+.mml-marke { font-family:'Tropi',cursive,sans-serif; font-size:21px; line-height:1;
+  padding:22px 20px 0; color:#0D1821; white-space:nowrap;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-marke em { font-style:normal; color:#BFCC94; }
+.mml-zu .mml-marke { opacity:0; }
+.mml-mini { position:absolute; top:23px; left:0; width:64px; text-align:center; opacity:0;
+  font-family:'Tropi',cursive,sans-serif; font-size:22px; color:#0D1821;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-zu .mml-mini { opacity:1; }
+
+.mml-gleis { position:absolute; left:28px; top:74px; bottom:82px; width:8px;
+  border-radius:99px; background:#E9E6DC; }
+/* Segmente mit Abstand und abgerundet — lückenlos wurde geprüft und abgelehnt. */
+.mml-seg { position:absolute; left:0; width:8px; border-radius:99px; cursor:pointer; }
+.mml-seg:after { content:''; position:absolute; left:-10px; right:-10px; top:0; bottom:0; }
+
+.mml-etiketten { position:absolute; inset:0; pointer-events:none; }
+.mml-et { position:absolute; left:52px; width:172px; padding:5px 9px; border-radius:6px;
+  display:flex; gap:8px; align-items:flex-start; pointer-events:auto; cursor:pointer;
+  transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-punkt { width:6px; height:6px; border-radius:50%; margin-top:5.5px; flex:none; }
+.mml-titel { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:12.5px;
+  line-height:1.32; color:#5b625f; min-width:0; }
+.mml-et:hover { background:#F2EFE6; transform:translateX(2px); }
+.mml-et:hover .mml-titel { color:#0D1821; }
+.mml-et.mml-jetzt { background:#EFEDE2; }
+.mml-et.mml-jetzt .mml-titel { color:#0D1821; font-weight:600; }
+
+.mml-fuehrung { position:absolute; width:1px; background:#DAD6CA;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+
+.mml-kopf { position:absolute; left:22.5px; width:19px; height:19px; margin-top:-9.5px;
+  z-index:5; pointer-events:none; }
+.mml-rund { position:absolute; left:5px; top:5px; width:9px; height:9px; border-radius:50%;
+  background:#0D1821; box-shadow:0 0 0 4.5px #FBFAF6, 0 0 0 6px rgba(13,24,33,.22); }
+.mml-zeit { position:absolute; left:196px; top:2.5px; width:44px; text-align:right;
+  font-family:'Space Mono',monospace; font-size:9px; color:#B3AFA2;
+  font-variant-numeric: tabular-nums;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-sicht { position:absolute; left:26.5px; width:11px; border-radius:99px;
+  background:rgba(13,24,33,.055); z-index:3; pointer-events:none; }
+
+.mml-fuss { position:absolute; bottom:24px; left:28px;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-fuss div { display:flex; align-items:center; gap:7px; margin-bottom:5px;
+  font-family:'Space Grotesk',sans-serif; font-size:9.5px; line-height:1.4; color:#A8A398; }
+.mml-fuss span { width:8px; height:8px; border-radius:99px; }
+
+.mml-griff { position:absolute; bottom:22px; right:11px; width:23px; height:23px;
+  border-radius:7px; background:#F2EFE6; color:#9A9689; cursor:pointer; z-index:9;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Mono',monospace; font-size:11px;
+  transition: right var(--mml-dauer) var(--mml-kurve), background .15s, color .15s; }
+.mml-griff:hover { background:#BFCC94; color:#0D1821; }
+
+.mml-zu .mml-et, .mml-zu .mml-fuehrung, .mml-zu .mml-fuss, .mml-zu .mml-zeit {
+  opacity:0; pointer-events:none; }
+.mml-zu .mml-griff { right:-11.5px; }
+
+/* Wer weniger Bewegung eingestellt hat, bekommt keine. */
+@media (prefers-reduced-motion: reduce) {
+  .mml, .mml *, .mml-et, .mml-griff { transition-duration: 1ms !important; }
+}
