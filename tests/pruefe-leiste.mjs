@@ -121,12 +121,10 @@ await s.warte(1700);                      // deutlich länger als 760 ms Halten
 pruefe('Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
-/* Gegenprobe: mit Zeiger AUSSERHALB muss dasselbe Wegscrollen sie zuklappen —
-   sonst würde die Prüfung oben auch dann bestehen, wenn die Leiste nie zugeht. */
-await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
-await s.warte(1400);                      // 1100 ms nach Mausaustritt + Puffer
-pruefe('nach Mausaustritt geht sie zu (die Prüfung oben ist damit aussagekräftig)',
-  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+/* Die Leiste ist jetzt offen, der Zeiger drin, weit unten gescrollt.
+   Genau der Zustand, den der folgende Block als Ausgangslage braucht —
+   und er ist zugleich die Gegenprobe zur Zeile oben: Wenn die Leiste sich
+   gleich nach Mausaustritt schließt, war „bleibt offen" eine echte Aussage. */
 
 /* --- Maus raus: 1100 ms warten, dann zu --- */
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);

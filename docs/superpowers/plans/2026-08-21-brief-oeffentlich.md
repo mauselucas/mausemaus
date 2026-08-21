@@ -538,8 +538,8 @@ pruefe('Hochscrollen öffnet ohne Warten',
    ohnehin vom Zweig "hochscrollen = navigieren" aufgefangen und beweist
    über die Sperren gar nichts. Erst ein Sprung nach unten löst dieselbe
    Bedingung aus wie echtes Wegscrollen. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(200);
+await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
+await s.warte(300);                       // ganz oben, Leiste offen
 const zielIndex = JSON.parse(await s.werte(`(() => {
   const sc = document.getElementById('scroller');
   const ab = [...document.querySelectorAll('#sp section')];
@@ -549,24 +549,23 @@ const zielIndex = JSON.parse(await s.werte(`(() => {
 })()`));
 pruefe('es gibt einen Abschnitt weiter unten zum Anspringen', zielIndex > 0, 'Index ' + zielIndex);
 
-await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
-await s.warte(150);
+/* KEIN mouseenter — so verhält sich ein Berührungsgerät. Damit hängt diese
+   Prüfung allein an springtGerade und lässt sich einzeln widerlegen. */
 await s.werte(`document.querySelectorAll('.mml-et')[${zielIndex}].click()`);
 await s.warte(1700);
 const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
   zu: document.querySelector('.mml').classList.contains('mml-zu'),
   stand: document.getElementById('scroller').scrollTop
 })`));
-pruefe('der Klick ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
-pruefe('Klick in der Leiste klappt sie NICHT zu (Zeiger ist noch drin)', !nachKlick.zu);
+pruefe('der Tipp ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
+pruefe('Tippen auf ein Projekt klappt die Leiste nicht zu (ohne Mauszeiger)', !nachKlick.zu);
 
-/* Dasselbe über einen Klick auf den Balken statt auf das Etikett. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(200);
-await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+/* Dasselbe über einen Tipp auf den Balken statt auf das Etikett. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
+await s.warte(300);
 await s.werte(`document.querySelectorAll('.mml-seg')[${zielIndex}].click()`);
 await s.warte(1700);
-pruefe('auch ein Klick auf den Balken klappt sie nicht zu',
+pruefe('auch ein Tipp auf den Balken klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
 /* --- Die zweite Sperre, für sich allein geprüft ---
@@ -631,8 +630,8 @@ hinterlässt, den der nächste voraussetzt. Sie muss am Ende genau so lauten:
 1. Aufbau — Segmente, Etiketten, Breiten, Kurve, Dauer, Belegung des Gleises
 2. Pacing — 760 ms halten, dann zu
 3. Hochscrollen öffnet sofort *(Leiste danach: offen, oben)*
-4. Klick auf Etikett springt nach unten und klappt nicht zu *(springtGerade)*
-5. Klick auf Balken, dasselbe
+4. Tipp auf Etikett springt nach unten und klappt nicht zu *(springtGerade, ohne Mauszeiger)*
+5. Tipp auf Balken, dasselbe
 6. Wegscrollen bei Zeiger in der Leiste *(zeigerDrin)* — *(Leiste danach: offen, Zeiger drin, unten)*
 7. Maus raus: nach 400 ms noch offen, nach 1400 ms zu — dies ist zugleich die
    Gegenprobe zu 6.
@@ -882,12 +881,15 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
       letzterStand = stand;
 
       if (angepinnt) return;
-      /* Zeiger in der Leiste -> niemals von selbst zuklappen.
-         Ohne diese Sperre klappte die Leiste zu, sobald man in ihr ein
-         Projekt anklickte: das ausgelöste Scrollen zählte als "runter". */
-      if (zeigerDrin) { stopUhr(); return; }
-      /* Ein durch Klick ausgelöster Sprung ist kein Nutzer-Scrollen. */
+      /* Ein durch Klick oder Tipp ausgelöster Sprung ist kein Wegscrollen.
+         Auf Berührungsgeräten gibt es kein mouseenter — dort ist das die
+         EINZIGE Sperre, die das Zuklappen beim Antippen eines Projekts
+         verhindert. Genau dieser Fehler wurde gemeldet. */
       if (Date.now() - springtGerade < 900) return;
+      /* Hinweis: "Zeiger ist in der Leiste" wird NICHT hier abgefangen,
+         sondern allein in zumachen(). Zwei Sperren für dieselbe Sache
+         lassen sich einzeln nicht widerlegen — nimmt man eine weg,
+         ändert sich nichts Sichtbares, und keine Prüfung merkt es. */
 
       if (stand <= SCHWELLE) { stopUhr(); aufmachen(); return; }
       if (runter) {
@@ -944,13 +946,22 @@ Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**
 
 | Entfernte Zeile in `leiste.js` | Muss fehlschlagen |
 |---|---|
-| `if (Date.now() - springtGerade < 900) return;` | „Klick in der Leiste klappt sie NICHT zu" |
-| `if (zeigerDrin) { stopUhr(); return; }` | „Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu" |
+| `if (Date.now() - springtGerade < 900) return;` | „Tippen auf ein Projekt klappt die Leiste nicht zu" |
+| `!zeigerDrin` aus `function zumachen()` | „Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu" |
 
-Warum getrennt: Die beiden Sperren decken **verschiedene** Fälle ab. Beim Klick ist das sanfte
-Scrollen innerhalb der 900-ms-Schonfrist beendet, `zeigerDrin` wird dabei nie erreicht. Wer
-nur eine der beiden entfernt und die Prüfung weiterhin bestehen sieht, hat nichts bewiesen —
-genau das ist bei zwei früheren Fassungen dieser Prüfung passiert.
+Jede Sperre deckt genau einen Fall ab und ist einzeln widerlegbar:
+
+- **`springtGerade`** schützt den Sprung, der durch Klick oder Tipp ausgelöst wurde.
+  Die zugehörige Prüfung schickt deshalb **kein** `mouseenter` — so verhält sich ein
+  Berührungsgerät, und dort ist diese Sperre die einzige.
+- **`zeigerDrin` in `zumachen()`** schützt den Fall, dass jemand mit dem Zeiger in der
+  Leiste weiterscrollt.
+
+**Warum das wichtig ist:** In einer früheren Fassung stand `zeigerDrin` an **zwei** Stellen —
+zusätzlich in `aktualisieren()`. Nimmt man eine davon weg, ändert sich nichts Sichtbares,
+weil die andere weiterhin greift. Zwei Sperren für dieselbe Sache lassen sich einzeln nicht
+widerlegen, und keine Prüfung merkt, wenn eine verschwindet. Deshalb steht die Prüfung jetzt
+nur noch in `zumachen()`.
 
 - [ ] **Schritt 8: Festschreiben**
 
