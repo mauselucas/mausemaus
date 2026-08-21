@@ -52,9 +52,24 @@ Brief). Begründung des Nutzers:
 > optimierter Blog, wo man immer irgendwo Stellen findet mit Randnotizen und vielleicht auch
 > auf andere Seiten geführt wird wie so kleine Hintertürchen in ne ganz andere Welt."*
 
-Der Brief steht und fällt mit dem Text. „Schnitt und Motion Design für diverse Formate" macht
-daraus wieder die generische Seite, nur schmaler. **Ich schreibe den ersten Entwurf** aus dem,
-was Lucas im Gespräch erzählt hat; er schreibt ihn um, bis er sich nach ihm anhört.
+### Inhalt: bestehendes Material, unverändert
+
+**Ich schreibe keinen Brieftext.** Ausdrücklich so entschieden. Die Projekttexte und Bilder,
+die heute auf mausemaus.com stehen, werden **1:1 übernommen** — Wortlaut und Bilder bleiben,
+sie werden nur in die neue Form gesetzt.
+
+Die erste Fassung des Briefes setzt sich damit so zusammen:
+
+- Einstieg aus der vorhandenen Begrüßung und dem Intro der aktuellen Startseite
+- je ein Abschnitt pro Projekt, mit dessen vorhandenem Text, Bild und Video
+- Abschluss aus dem vorhandenen Kontaktteil
+
+Das ist noch kein Brief im vollen Sinn — die verbindende Erzählung dazwischen fehlt. Lucas
+schreibt sie, wann er mag; bis dahin ist die Seite vollständig und veröffentlichungsfähig.
+Der Aufbau ist so gebaut, dass später einfach Textblöcke dazwischengesetzt werden, ohne dass
+irgendetwas umgebaut werden muss.
+
+**Nicht ändern:** Wortlaut, Bilder und Videos der bestehenden Projekte.
 
 ---
 
@@ -223,6 +238,24 @@ Speichern Bescheid, ich gehe die Notizen durch und baue sie ein.
 **Zweistufig,** damit er nicht für Kleinigkeiten auf mich warten muss: Die Auswahlliste
 schaltet er selbst und sofort. Die Notizen sind für alles darüber hinaus.
 
+### Die Anleitung
+
+Das Einzige, was ich selbst schreibe: eine **Anleitung zu allen Funktionen des Editors** —
+welche Blöcke es gibt, was `/` alles kann, wie man ein Türchen setzt, wie man eine
+Abschnittsmarke benutzt, mit Beispielen.
+
+**Sie liegt im Admin, nicht auf der Website.** Ein Hilfe-Bereich neben dem Editor, den nur
+Lucas sieht. Begründung: Sie ist eine Anleitung für ihn, kein Inhalt für Besucher — als
+öffentliche Seite müsste sie versteckt oder archiviert werden, und archivierte Sachen
+liegen trotzdem in der Datenbank herum. Im Admin stellt sich die Frage gar nicht erst.
+
+Sie ist jederzeit auf- und zuklappbar; einmal zugeklappt bleibt sie zu. Wegwerfen muss sie
+also niemand.
+
+Dazu eine **Spielwiese**: eine Seite mit allen Blockarten als Beispiel, an der man
+herumprobieren kann, ohne etwas kaputtzumachen. Steht auf „Entwurf", ist also für Fremde
+unsichtbar, und darf gelöscht werden.
+
 ---
 
 ## 7. Datenmodell
@@ -262,6 +295,12 @@ bei einer Störung veraltete Texte.
 **Der geheime Schlüssel (`service_role` / `sb_secret_…`) gehört niemals in die Website.**
 Im Browser lebt ausschließlich der veröffentlichbare Schlüssel.
 
+**Versionierung:** Der Ordner ist seit dem 21. August 2026 ein lokales Git-Repository.
+Der Stand vor dem Umbau ist als erster Stand festgehalten. Rein lokal, kein GitHub, kein
+Konto nötig — es ist ein Sicherheitsnetz: Jeder Bauschritt wird festgehalten, und wenn etwas
+schiefgeht, lässt sich jederzeit auf einen früheren Stand zurückgehen. Lucas muss damit
+nichts tun; das übernehme ich.
+
 ---
 
 ## 9. Qualitätsmaßstab
@@ -289,6 +328,11 @@ Jeder Teil bekommt einen Feinschliff-Durchgang. Das ist die eigentliche Antwort 
 | 6 | Feinschliff-Durchgang über alles, Handy-Ansicht, `seed.js` neu | — |
 | 7 | Hochladen | — |
 
+**Früh hochladen ist ausdrücklich erwünscht** („auf mein Portfolio ist gerade eh nicht so viel
+Traffic"). Sobald Schritt 2 und 3 stehen, geht die Seite live; Editor und Spielereien kommen
+danach im laufenden Betrieb dazu. Das senkt das Risiko, weil jeder Schritt einzeln
+auf der echten Adresse geprüft wird, statt alles auf einmal.
+
 **Geprüft wird unter den echten Adressen** über den Netlify-Nachbau-Server (`/`, `/welt/slug`),
 nicht nur im Wurzelverzeichnis — genau dort ist der Pfad-Fehler von neulich aufgetreten.
 Handy-Ansicht mindestens 520 px breit prüfen (darunter liefert Chrome nur einen Ausschnitt).
@@ -298,8 +342,8 @@ Als anonymer Besucher prüfen, dass Entwürfe unsichtbar bleiben.
 
 ## 11. Offene Punkte
 
-- **Der Brieftext selbst.** Ich liefere den ersten Entwurf, Lucas schreibt ihn um.
-  Ohne echten Text funktioniert die Form nicht.
+- **Die verbindende Erzählung im Brief** schreibt Lucas selbst, wann er mag. Bis dahin
+  trägt die Seite die bestehenden Projekttexte.
 - **Welche Welten es geben soll.** Bisher gedacht: Blender · Mitbringsel von Celine ·
   Werkzeuge. Steht nicht fest.
 - **Abschnittslängen im Brief.** Sind einzelne Abschnitte sehr lang und andere sehr kurz,
