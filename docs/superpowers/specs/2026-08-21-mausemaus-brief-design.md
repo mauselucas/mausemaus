@@ -60,8 +60,11 @@ sie werden nur in die neue Form gesetzt.
 
 Die erste Fassung des Briefes setzt sich damit so zusammen:
 
-- Einstieg aus der vorhandenen Begrüßung und dem Intro der aktuellen Startseite
-- je ein Abschnitt pro Projekt, mit dessen vorhandenem Text, Bild und Video
+- Einstieg aus der vorhandenen Begrüßung, dem Intro und den vier Eckdaten
+- ein Abschnitt „Wer schneidet da" mit dem vorhandenen Profiltext, der
+  Werkzeugliste und der Kundenliste
+- je ein Abschnitt pro Projekt, mit dessen vorhandenem Text, Bild und Video —
+  einschließlich vorhandener Verweise auf Beiträge (`more_url`)
 - Abschluss aus dem vorhandenen Kontaktteil
 
 Das ist noch kein Brief im vollen Sinn — die verbindende Erzählung dazwischen fehlt. Lucas

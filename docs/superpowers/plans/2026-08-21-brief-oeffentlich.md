@@ -911,10 +911,38 @@ const d = JSON.parse(await s.werte(`(async () => {
 })()`));
 
 pruefe('fünf veröffentlichte Projekte gefunden', d.projekte === 5, String(d.projekte));
-pruefe('Abschnitte = Einstieg + Projekte + Kontakt', d.abschnitte === d.projekte + 2, String(d.abschnitte));
+pruefe('Abschnitte = Einstieg + Profil + Projekte + Kontakt', d.abschnitte === d.projekte + 3, String(d.abschnitte));
 pruefe('KEIN Projekttext wurde verändert', d.fehlendeTexte.length === 0, d.fehlendeTexte.join(','));
 pruefe('KEIN Projekttitel wurde verändert', d.fehlendeTitel.length === 0, d.fehlendeTitel.join(','));
 pruefe('KEIN Coverbild fehlt', d.fehlendeBilder.length === 0, d.fehlendeBilder.join(','));
+
+/* Alles, was auf der alten Startseite stand, muss auch im Brief stehen.
+   Ohne diese Prüfung verschwinden Eckdaten, Werkzeugliste und Kundenliste
+   still — sie hängen nicht an den Projekten, sondern an den Einstellungen. */
+const alt = JSON.parse(await s.werte(`(async () => {
+  const e = await window.mmLoadSettings();
+  const text = document.body.innerText;
+  const fehlt = [];
+  (e.infos || []).forEach(i => { if (i.zeile1 && !text.includes(i.zeile1)) fehlt.push('info:' + i.titel); });
+  (e.werkzeuge || []).forEach(w => { if (!text.includes(w.name)) fehlt.push('werkzeug:' + w.name); });
+  (e.kunden || []).forEach(k => { if (!text.includes(k)) fehlt.push('kunde:' + k); });
+  if (e.profil_text && !text.includes(e.profil_text.slice(0, 40))) fehlt.push('profil_text');
+  if (e.hero_intro && !text.includes(e.hero_intro.slice(0, 40))) fehlt.push('hero_intro');
+  if (e.email && !text.includes(e.email)) fehlt.push('email');
+  if (e.telefon && !text.includes(e.telefon)) fehlt.push('telefon');
+  return JSON.stringify({ fehlt });
+})()`));
+pruefe('KEIN Inhalt der alten Startseite fehlt', alt.fehlt.length === 0, alt.fehlt.join(','));
+
+/* Verweise von Projekten auf Beiträge dürfen nicht verschwinden. */
+const verweise = JSON.parse(await s.werte(`(async () => {
+  const ps = (await window.mmLoadProjects()).filter(p => p.status === 'published' && p.more_url);
+  return JSON.stringify({ soll: ps.map(p => p.more_url),
+    ist: [...document.querySelectorAll('.br-mehr a')].map(a => a.getAttribute('href')) });
+})()`));
+pruefe('Verweise auf Beiträge bleiben erhalten',
+  verweise.soll.every(u => verweise.ist.includes(u)),
+  'soll ' + verweise.soll.join(',') + ' / ist ' + verweise.ist.join(','));
 pruefe('Leiste hat für jeden Abschnitt ein Segment', d.leiste === d.abschnitte, String(d.leiste));
 
 /* Jedes Projekt braucht eine EIGENE Farbe — sonst sind Balken nicht unterscheidbar.
@@ -973,7 +1001,36 @@ Erwartet: Fehler, weil `index.html` noch die alte Startseite ist und `#brief` ni
         '<em>' + window.mm.esc(e.hero_line2 || 'Lucas :)') + '</em></h1>' +
       '<p class="br-kicker">' + window.mm.esc(e.hero_eyebrow || '') + '</p>' +
       '<div class="br-text">' + window.mm.renderMarkdown(e.hero_intro || '') + '</div>' +
-      (e.profil_text ? '<div class="br-text">' + window.mm.renderMarkdown(e.profil_text) + '</div>' : '');
+      /* Die vier Eckdaten (Basis, Status, Schwerpunkt, Ausbildung) standen auf der
+         alten Startseite und dürfen nicht verschwinden. */
+      (Array.isArray(e.infos) && e.infos.length
+        ? '<dl class="br-infos">' + e.infos.map(i =>
+            '<div' + (i.punkt ? ' class="br-punkt"' : '') + '>' +
+            '<dt>' + window.mm.esc(i.titel || '') + '</dt>' +
+            '<dd>' + window.mm.esc(i.zeile1 || '') +
+            (i.zeile2 ? '<span>' + window.mm.esc(i.zeile2) + '</span>' : '') + '</dd></div>').join('') +
+          '</dl>'
+        : '');
+
+    /* ---- Wer schneidet da: der vorhandene Profiltext samt Werkzeugliste ---- */
+    if (e.profil_text || e.profil_titel) {
+      const pr = neuerAbschnitt(e.profil_kicker || 'Über mich', 'persoenlich', null);
+      pr.innerHTML =
+        (e.profil_kicker ? '<p class="br-rolle">' + window.mm.esc(e.profil_kicker) + '</p>' : '') +
+        (e.profil_titel
+          ? '<h2 class="br-titel">' + window.mm.esc(e.profil_titel).replace(/\n/g, '<br>') + '</h2>'
+          : '') +
+        (e.profil_text ? '<div class="br-text">' + window.mm.renderMarkdown(e.profil_text) + '</div>' : '') +
+        (Array.isArray(e.werkzeuge) && e.werkzeuge.length
+          ? '<dl class="br-werkzeuge">' + e.werkzeuge.map(w =>
+              '<div><dt>' + window.mm.esc(w.name || '') + '</dt>' +
+              '<dd>' + window.mm.esc(w.stufe || '') + '</dd></div>').join('') + '</dl>'
+          : '') +
+        (Array.isArray(e.kunden) && e.kunden.length
+          ? '<p class="br-kunden">' + e.kunden.map(k =>
+              '<span>' + window.mm.esc(k) + '</span>').join('') + '</p>'
+          : '');
+    }
 
     /* ---- Ein Abschnitt je Projekt, Inhalt unverändert ---- */
     projekte.forEach((p, i) => {
@@ -1007,6 +1064,11 @@ Erwartet: Fehler, weil `index.html` noch die alte Startseite ist und `#brief` ni
       if (p.body) h += '<div class="br-text">' + window.mm.renderMarkdown(p.body) + '</div>';
       if (p.tags && p.tags.length)
         h += '<p class="br-marken">' + p.tags.map(t => '<span>' + window.mm.esc(t) + '</span>').join('') + '</p>';
+      /* "The Race" verweist über more_url auf die Werkzeug-Seite. Ohne diese
+         Zeile ginge der Verweis beim Umbau still verloren. */
+      if (p.more_url)
+        h += '<p class="br-mehr"><a class="mm-tuer" href="' + window.mm.esc(p.more_url) + '">' +
+             window.mm.esc(p.more_label || 'Mehr dazu') + '</a></p>';
       s.innerHTML = h;
     });
 
@@ -1107,6 +1169,26 @@ git commit -m "Brief setzt seine Abschnitte aus den vorhandenen Projekten zusamm
 .br-marken span { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.13em;
   text-transform:uppercase; color:#6E7873; border:1px solid #E2DFD3;
   border-radius:99px; padding:6px 11px; }
+
+/* Eckdaten, Werkzeuge, Kunden — alles, was von der alten Startseite mitkommt. */
+.br-infos, .br-werkzeuge { display:grid; gap:0; margin:26px 0 0; border-top:1px solid #E7E3D6; }
+.br-infos > div, .br-werkzeuge > div { display:flex; justify-content:space-between;
+  align-items:baseline; gap:16px; padding:11px 0; border-bottom:1px solid #E7E3D6; }
+.br-infos dt { font-family:'Space Mono',monospace; font-size:9.5px;
+  letter-spacing:.15em; text-transform:uppercase; color:#A8A79C; }
+.br-werkzeuge dt { font-family:'Space Grotesk',sans-serif; font-size:14.5px; color:#232c31; }
+.br-infos dd { font-family:'Space Grotesk',sans-serif; font-size:14.5px; color:#232c31; text-align:right; }
+.br-werkzeuge dd { font-family:'Space Mono',monospace; font-size:9.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:#A8A79C; }
+.br-infos dd span { display:block; font-size:12.5px; color:#6E7873; }
+.br-punkt dd { position:relative; padding-left:15px; }
+.br-punkt dd:before { content:''; position:absolute; left:0; top:7px; width:7px; height:7px;
+  border-radius:50%; background:#BFCC94; }
+.br-kunden { display:flex; flex-wrap:wrap; gap:7px; margin:22px 0 0; }
+.br-kunden span { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.14em;
+  text-transform:uppercase; color:#6E7873; }
+.br-kunden span + span:before { content:'·'; margin-right:8px; color:#CFCBBC; }
+.br-mehr { margin:18px 0 0; font-family:'Space Grotesk',sans-serif; font-size:15px; }
 
 .br-kontakt { display:flex; flex-direction:column; gap:6px; margin:18px 0 0; }
 .br-kontakt a { font-family:'Space Grotesk',sans-serif; font-size:17px; color:#0D1821; }
