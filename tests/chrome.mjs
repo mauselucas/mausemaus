@@ -27,12 +27,23 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
   const ws = new WebSocket(ziel.webSocketDebuggerUrl);
   await new Promise(r => (ws.onopen = r));
 
-  let n = 0; const offen = new Map();
-  ws.onmessage = e => { const m = JSON.parse(e.data); if (offen.has(m.id)) { offen.get(m.id)(m); offen.delete(m.id); } };
+  let n = 0; const offen = new Map(); const fehler = [];
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.id && offen.has(m.id)) { offen.get(m.id)(m); offen.delete(m.id); return; }
+    /* Fehler der Seite mitschreiben. Log.entryAdded meldet auch Dateien, die
+       nicht geladen werden konnten — genau der Fehler, der die Blog-Seiten
+       schon einmal ohne CSS ausgeliefert hat. */
+    if (m.method === 'Runtime.exceptionThrown')
+      fehler.push(m.params?.exceptionDetails?.exception?.description
+               || m.params?.exceptionDetails?.text || 'Ausnahme');
+    if (m.method === 'Log.entryAdded' && m.params?.entry?.level === 'error')
+      fehler.push(m.params.entry.text + (m.params.entry.url ? ' — ' + m.params.entry.url : ''));
+  };
   const ruf = (method, params = {}) => new Promise(res => {
     const id = ++n; offen.set(id, res); ws.send(JSON.stringify({ id, method, params })); });
 
-  await ruf('Page.enable'); await ruf('Runtime.enable');
+  await ruf('Page.enable'); await ruf('Runtime.enable'); await ruf('Log.enable');
   /* Feste Fenstergröße — sonst misst jeder Rechner etwas anderes.
      Unter 520 px liefert Chrome nur einen Ausschnitt, nie schmaler prüfen. */
   await ruf('Emulation.setDeviceMetricsOverride',
@@ -52,9 +63,8 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
       writeFileSync(pfad, Buffer.from(r.result.data, 'base64'));
       return pfad;
     },
-    async fehlerAufSeite() {
-      return this.werte(`JSON.stringify(window.__fehler || [])`);
-    },
+    /* Alles, was die Seite an Fehlern gemeldet hat, seit sie geöffnet wurde. */
+    fehlerAufSeite() { return fehler.slice(); },
     async zu() { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${ziel.id}`); },
   };
 }
