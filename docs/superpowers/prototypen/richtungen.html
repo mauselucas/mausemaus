@@ -1,0 +1,315 @@
+<link rel="stylesheet" href="https://mausemaus.com/assets/fonts.css">
+
+<style>
+.mm { --ink:#0D1821; --navy:#344966; --sky:#B4CDED; --paper:#F0F4EF;
+      --sage:#BFCC94; --line:#D5D9D2; --muted:#6E7873; }
+.mm * { box-sizing:border-box; }
+.tropi { font-family:'Tropi',cursive,sans-serif; font-weight:400; }
+.mono  { font-family:'Space Mono',monospace; }
+.grotesk { font-family:'Space Grotesk',sans-serif; }
+
+/* Fensterrahmen um jeden Entwurf */
+.fenster { border-radius:14px; overflow:hidden; border:1px solid rgba(0,0,0,.18);
+           box-shadow:0 18px 50px rgba(0,0,0,.28); background:#F0F4EF; }
+.leiste { background:#e6e6e6; padding:9px 14px; display:flex; align-items:center; gap:7px; }
+.leiste i { width:11px; height:11px; border-radius:50%; display:block; }
+.leiste .u { background:#ff5f57 } .leiste .g { background:#febc2e } .leiste .n { background:#28c840 }
+.leiste b { margin-left:12px; font:400 11px/1 'Space Mono',monospace; color:#777; }
+
+.mmwahl { margin:0 0 60px; }
+.kopfzeile { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin:0 0 14px; }
+.kopfzeile h3 { font:400 30px/1 'Tropi',cursive,sans-serif; margin:0; letter-spacing:.5px; }
+.kopfzeile .buchstabe { font:700 13px/1 'Space Mono',monospace; letter-spacing:.16em;
+   background:#BFCC94; color:#0D1821; padding:6px 10px; border-radius:6px; }
+.kopfzeile .art { font:400 13px/1 'Space Mono',monospace; color:#8a8f92; letter-spacing:.06em; }
+.beschreibung { max-width:760px; font:400 15px/1.65 'Space Grotesk',sans-serif;
+   color:#b9c0c4; margin:0 0 18px; }
+
+.waehlen { margin-top:16px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.knopf { font:700 12px/1 'Space Mono',monospace; letter-spacing:.14em; padding:13px 22px;
+   border-radius:999px; border:1.5px solid #BFCC94; color:#BFCC94; background:transparent;
+   cursor:pointer; transition:.15s; }
+.knopf:hover { background:#BFCC94; color:#0D1821; }
+.knopf.an { background:#BFCC94; color:#0D1821; }
+.pro { font:400 13.5px/1.6 'Space Grotesk',sans-serif; color:#9aa1a5; max-width:560px; }
+.pro b { color:#BFCC94; font-weight:500; }
+
+/* ============ Entwurf A — Zimmer ============ */
+.a { background:#F0F4EF; padding:34px 40px 30px; position:relative; min-height:430px; overflow:hidden; }
+.a .marke { font-family:'Tropi',cursive,sans-serif; font-size:30px; color:#0D1821; letter-spacing:.5px; }
+.a .marke span { color:#BFCC94; }
+.a .zettel { position:absolute; background:#fff; border-radius:5px; padding:13px 15px;
+   box-shadow:0 6px 20px rgba(13,24,33,.13); font-family:'Space Grotesk',sans-serif; }
+.a .z1 { top:96px; left:40px; width:290px; rotate:-1.6deg; }
+.a .z2 { top:120px; left:360px; width:215px; rotate:2.2deg; background:#BFCC94; }
+.a .z3 { top:262px; left:60px; width:250px; rotate:1.4deg; }
+.a .z4 { top:238px; left:352px; width:236px; rotate:-2deg; padding:0; overflow:hidden; }
+.a .kl { font:400 9.5px/1 'Space Mono',monospace; letter-spacing:.17em; color:#6E7873; text-transform:uppercase; }
+.a .gross { font:400 22px/1.15 'Tropi',cursive,sans-serif; margin-top:7px; color:#0D1821; }
+.a .txt { font-size:12.5px; line-height:1.55; color:#344966; margin-top:7px; }
+.a .navz { position:absolute; top:34px; right:40px; display:flex; gap:9px; }
+.a .navz i { font:400 11.5px/1 'Space Grotesk',sans-serif; font-style:normal; background:#fff;
+   padding:9px 13px; border-radius:4px; box-shadow:0 3px 10px rgba(13,24,33,.1); color:#344966; }
+.a .navz i:nth-child(1){rotate:-2deg} .a .navz i:nth-child(2){rotate:1.5deg} .a .navz i:nth-child(3){rotate:-1deg}
+.a .bild { height:96px; background:linear-gradient(120deg,#344966,#B4CDED); }
+.a .dackel { position:absolute; bottom:14px; right:46px; width:170px; opacity:.9; }
+.a .bl { position:absolute; opacity:.14; }
+
+/* ============ Entwurf B — Sammlung ============ */
+.b { background:#F0F4EF; padding:32px 40px 34px; min-height:430px; position:relative; overflow:hidden; }
+.b .oben { display:flex; justify-content:space-between; align-items:flex-start; }
+.b .marke { font-family:'Tropi',cursive,sans-serif; font-size:44px; line-height:.9; color:#0D1821; }
+.b .marke span { color:#BFCC94; }
+.b .satz { font:400 13px/1.6 'Space Grotesk',sans-serif; color:#344966; max-width:340px; margin-top:11px; }
+.b nav { display:flex; gap:22px; font:400 11px/1 'Space Mono',monospace;
+   letter-spacing:.15em; color:#6E7873; text-transform:uppercase; padding-top:9px; }
+.b .trenner { display:flex; align-items:center; gap:13px; margin:26px 0 18px; }
+.b .trenner span { flex:1; height:1px; background:#D5D9D2; }
+.b .trenner svg { width:19px; opacity:.5; }
+.b .karten { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
+.b .karte { background:#fff; border-radius:9px; overflow:hidden; border:1px solid #E3E7E2;
+   box-shadow:0 3px 12px rgba(13,24,33,.06); }
+.b .karte:nth-child(2){ rotate:-.8deg } .b .karte:nth-child(4){ rotate:.7deg }
+.b .kbild { height:78px; }
+.b .kbody { padding:11px 12px 14px; }
+.b .knum { font:400 9px/1 'Space Mono',monospace; color:#BFCC94; letter-spacing:.16em; }
+.b .ktitel { font:400 15px/1.1 'Tropi',cursive,sans-serif; margin-top:6px; color:#0D1821; }
+.b .kmeta { font:400 9.5px/1.45 'Space Grotesk',sans-serif; color:#6E7873; margin-top:6px; }
+.b .fuss { margin-top:24px; display:flex; align-items:center; justify-content:space-between;
+   border-top:1px solid #D5D9D2; padding-top:14px; }
+.b .fuss span { font:400 10.5px/1 'Space Mono',monospace; color:#6E7873; letter-spacing:.1em; }
+
+/* ============ Entwurf C — Jetzt ============ */
+.c { background:#F0F4EF; padding:30px 40px 32px; min-height:430px; position:relative; overflow:hidden; }
+.c .oben { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+.c .marke { font-family:'Tropi',cursive,sans-serif; font-size:27px; color:#0D1821; }
+.c .marke span { color:#BFCC94; }
+.c .tuer { font:400 10.5px/1 'Space Mono',monospace; letter-spacing:.13em; color:#344966;
+   border:1.5px dashed #BFCC94; border-radius:999px; padding:9px 15px; }
+.c .jetzt { background:#0D1821; border-radius:12px; padding:22px 24px; color:#F0F4EF; position:relative; overflow:hidden; }
+.c .jkopf { display:flex; align-items:center; gap:10px; }
+.c .punkt { width:8px; height:8px; border-radius:50%; background:#BFCC94; }
+.c .jkopf b { font:400 10.5px/1 'Space Mono',monospace; letter-spacing:.2em; color:#BFCC94; }
+.c .jgross { font:400 33px/1.05 'Tropi',cursive,sans-serif; margin:12px 0 4px; }
+.c .jgross em { font-style:normal; color:#BFCC94; }
+.c .jreihe { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(240,244,239,.16);
+   margin-top:20px; border-radius:7px; overflow:hidden; }
+.c .jz { background:#0D1821; padding:12px 13px; }
+.c .jz i { font:400 8.5px/1 'Space Mono',monospace; letter-spacing:.15em; color:#7d8a86; font-style:normal; }
+.c .jz p { font:400 12px/1.35 'Space Grotesk',sans-serif; margin:7px 0 0; color:#F0F4EF; }
+.c .arbeit { margin-top:20px; display:flex; gap:13px; }
+.c .aw { flex:1; background:#fff; border:1px solid #E3E7E2; border-radius:8px; overflow:hidden; }
+.c .awb { height:52px; }
+.c .awt { padding:9px 11px 12px; font:400 13px/1.1 'Tropi',cursive,sans-serif; color:#0D1821; }
+.c .awt i { display:block; font:400 8.5px/1 'Space Mono',monospace; color:#6E7873;
+   letter-spacing:.13em; font-style:normal; margin-top:5px; }
+.c .zeile { font:400 10.5px/1 'Space Mono',monospace; color:#6E7873; letter-spacing:.14em;
+   margin:20px 0 11px; display:flex; justify-content:space-between; }
+.c .dino { position:absolute; bottom:10px; right:34px; width:120px; opacity:.16; }
+
+@media (max-width:900px){
+  .b .karten { grid-template-columns:repeat(2,1fr) }
+  .c .jreihe { grid-template-columns:repeat(2,1fr) }
+  .a .zettel { position:static; rotate:none; width:auto; margin-bottom:11px }
+  .a .dackel, .c .dino { display:none }
+}
+</style>
+
+<h2>Drei Richtungen — welche fühlt sich nach dir an?</h2>
+<p class="subtitle">Echte Entwürfe mit deinen Schriften und Farben. Es geht noch nicht um Feinschliff, sondern um die Grundhaltung: Wie viel Lucas steht vorne?</p>
+
+<div class="mm">
+
+<!-- ══════════════ A ══════════════ -->
+<div class="mmwahl">
+  <div class="kopfzeile">
+    <span class="buchstabe">A</span>
+    <h3>Mein Zimmer</h3>
+    <span class="art">Person weit vorne</span>
+  </div>
+  <p class="beschreibung">Die Startseite ist kein Lebenslauf, sondern eine Ablage — Zettel, Fotos und Karten, die schief übereinanderliegen. Kein Jobtitel oben. Du stellst dich als Mensch vor, die Arbeit ist einer von mehreren Zetteln.</p>
+
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="a">
+      <div class="marke tropi">mausemaus<span>.</span></div>
+      <div class="navz"><i>meine Arbeit</i><i>Kram den ich mag</i><i>schreib mir</i></div>
+
+      <div class="zettel z1">
+        <div class="kl mono">wer hier wohnt</div>
+        <div class="gross tropi">Lucas, 22, Köln</div>
+        <div class="txt">Ich schneide Videos, mag Dackel, Dinos und Gänseblümchen und baue mir Werkzeuge, damit ich weniger arbeiten muss.</div>
+      </div>
+
+      <div class="zettel z2">
+        <div class="kl mono">gerade dran</div>
+        <div class="gross tropi" style="font-size:18px">Bastian Keller</div>
+        <div class="txt" style="color:#0D1821">Seit März. Reels, Thumbnails, ab und zu was Großes.</div>
+      </div>
+
+      <div class="zettel z3">
+        <div class="kl mono">zuletzt geguckt</div>
+        <div class="txt" style="margin-top:9px">„Perfect Days" — und dreimal hintereinander dieselbe Szene, weil der Schnitt so ruhig ist.</div>
+      </div>
+
+      <div class="zettel z4">
+        <div class="bild"></div>
+        <div style="padding:11px 14px 13px">
+          <div class="kl mono">arbeit</div>
+          <div class="gross tropi" style="font-size:17px">The Race — Staffel 3</div>
+        </div>
+      </div>
+
+      <svg class="dackel" viewBox="0 0 170 62" fill="#344966" opacity=".85">
+        <path d="M28 30 C22 26 20 16 26 12 C28 20 32 24 34 27 Z"/>
+        <rect x="30" y="24" width="96" height="22" rx="11"/>
+        <ellipse cx="134" cy="24" rx="15" ry="12.5"/>
+        <rect x="139" y="24" width="19" height="10" rx="5"/>
+        <ellipse cx="130" cy="29" rx="6.5" ry="12.5" fill="#0D1821" opacity=".55"/>
+        <circle cx="138" cy="20" r="1.9" fill="#F0F4EF"/>
+        <rect x="38" y="43" width="8" height="15" rx="4"/>
+        <rect x="54" y="43" width="8" height="15" rx="4"/>
+        <rect x="100" y="43" width="8" height="15" rx="4"/>
+        <rect x="116" y="43" width="8" height="15" rx="4"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="waehlen">
+    <button class="knopf" data-choice="a" onclick="pick(this,'A — Mein Zimmer')">Diese Richtung</button>
+    <div class="pro"><b>Stark:</b> Absolut unverwechselbar, niemand hat so eine Seite. <b>Riskant:</b> Ein Producer bei ProSieben sieht zuerst Zettel, nicht Arbeit.</div>
+  </div>
+</div>
+
+<!-- ══════════════ B ══════════════ -->
+<div class="mmwahl">
+  <div class="kopfzeile">
+    <span class="buchstabe">B</span>
+    <h3>Die Sammlung</h3>
+    <span class="art">warm, aber aufgeräumt</span>
+  </div>
+  <p class="beschreibung">Hell statt dunkel, ruhig, klar. Deine Projekte als Sammelkarten — dein Pokémon-und-Balatro-Muster als Form, nicht als Gag. Gänseblümchen trennen die Abschnitte, statt als Tapete herumzuliegen. Der Dackel taucht genau einmal auf, unten.</p>
+
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="b">
+      <div class="oben">
+        <div>
+          <div class="marke tropi">mausemaus<span>.</span></div>
+          <div class="satz">Ich bin Lucas. Ich schneide Videos in Köln und baue mir nebenbei Werkzeuge, damit ich weniger davon von Hand machen muss.</div>
+        </div>
+        <nav class="mono"><span>Sammlung</span><span>Über mich</span><span>Schreib mir</span></nav>
+      </div>
+
+      <div class="trenner">
+        <span></span>
+        <svg viewBox="0 0 303.13 275.3" fill="#BFCC94"><use href="#bl-a"/></svg>
+        <span></span>
+      </div>
+
+      <div class="karten">
+        <div class="karte">
+          <div class="kbild" style="background:linear-gradient(135deg,#6b3fa0,#c2418a)"></div>
+          <div class="kbody"><div class="knum mono">01 · LÄUFT</div><div class="ktitel tropi">Bastian Keller</div><div class="kmeta">Schnitt · Motion · Thumbnails</div></div>
+        </div>
+        <div class="karte">
+          <div class="kbild" style="background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></div>
+          <div class="kbody"><div class="knum mono">02</div><div class="ktitel tropi">The Race S3</div><div class="kmeta">Joyn/ProSieben</div></div>
+        </div>
+        <div class="karte">
+          <div class="kbild" style="background:linear-gradient(135deg,#c7a24a,#7a9b4e)"></div>
+          <div class="kbody"><div class="knum mono">03</div><div class="ktitel tropi">Simplicissimus</div><div class="kmeta">Schnitt · 2D · 3D</div></div>
+        </div>
+        <div class="karte">
+          <div class="kbild" style="background:linear-gradient(135deg,#3b6ea5,#9cc4e4)"></div>
+          <div class="kbody"><div class="knum mono">04</div><div class="ktitel tropi">Jules</div><div class="kmeta">YouTube</div></div>
+        </div>
+      </div>
+
+      <div class="fuss">
+        <span class="mono">© 2026 LUCAS SCHÖNWALD · KÖLN</span>
+        <svg viewBox="0 0 170 62" width="82" fill="#344966" opacity=".5">
+          <path d="M28 30 C22 26 20 16 26 12 C28 20 32 24 34 27 Z"/>
+          <rect x="30" y="24" width="96" height="22" rx="11"/>
+          <ellipse cx="134" cy="24" rx="15" ry="12.5"/>
+          <rect x="139" y="24" width="19" height="10" rx="5"/>
+          <ellipse cx="130" cy="29" rx="6.5" ry="12.5" opacity=".55"/>
+          <rect x="38" y="43" width="8" height="15" rx="4"/><rect x="54" y="43" width="8" height="15" rx="4"/>
+          <rect x="100" y="43" width="8" height="15" rx="4"/><rect x="116" y="43" width="8" height="15" rx="4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="waehlen">
+    <button class="knopf" data-choice="b" onclick="pick(this,'B — Die Sammlung')">Diese Richtung</button>
+    <div class="pro"><b>Stark:</b> Funktioniert vor jedem Kunden, fühlt sich trotzdem nach dir an. <b>Riskant:</b> Am nächsten dran an dem, was du schon hast — könnte dir zu brav sein.</div>
+  </div>
+</div>
+
+<!-- ══════════════ C ══════════════ -->
+<div class="mmwahl">
+  <div class="kopfzeile">
+    <span class="buchstabe">C</span>
+    <h3>Jetzt gerade</h3>
+    <span class="art">zwei Ebenen</span>
+  </div>
+  <p class="beschreibung">Deine Startseite zeigt nicht deinen Werdegang, sondern deine Woche. Woran du sitzt, was du zuletzt gesehen hast, was auf dem Schreibtisch steht. Ein Portfolio ist ein Archiv — du lebst im Moment. Also baut die Seite das nach. Hinten dran ein Türchen zum Persönlichen.</p>
+
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="c">
+      <div class="oben">
+        <div class="marke tropi">mausemaus<span>.</span></div>
+        <div class="tuer mono">HINTEN RUM →</div>
+      </div>
+
+      <div class="jetzt">
+        <div class="jkopf"><span class="punkt"></span><b class="mono">DIESE WOCHE</b></div>
+        <div class="jgross tropi">Schneide gerade an <em>Bastian</em>,<br>und lerne nebenbei Blender.</div>
+        <div class="jreihe">
+          <div class="jz"><i class="mono">ZULETZT GESEHEN</i><p>Perfect Days</p></div>
+          <div class="jz"><i class="mono">AUF DEM TISCH</i><p>Ein Dackel aus Ton, von Celine</p></div>
+          <div class="jz"><i class="mono">GERADE GELERNT</i><p>Geometry Nodes</p></div>
+          <div class="jz"><i class="mono">BALATRO</i><p>Ante 12, endlich</p></div>
+        </div>
+      </div>
+
+      <div class="zeile mono"><span>WAS ICH SONST SO GEMACHT HABE</span><span>05 PROJEKTE</span></div>
+      <div class="arbeit">
+        <div class="aw"><div class="awb" style="background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></div><div class="awt tropi">The Race S3<i class="mono">JOYN / PROSIEBEN</i></div></div>
+        <div class="aw"><div class="awb" style="background:linear-gradient(135deg,#c7a24a,#7a9b4e)"></div><div class="awt tropi">Simplicissimus<i class="mono">SCHNITT · 3D</i></div></div>
+        <div class="aw"><div class="awb" style="background:linear-gradient(135deg,#3b6ea5,#9cc4e4)"></div><div class="awt tropi">Jules<i class="mono">YOUTUBE</i></div></div>
+        <div class="aw"><div class="awb" style="background:linear-gradient(135deg,#4a4a52,#9a9aa2)"></div><div class="awt tropi">Rockstar Selfish<i class="mono">MUSIKVIDEO</i></div></div>
+      </div>
+
+      <svg class="dino" viewBox="0 0 140 76" fill="#344966">
+        <ellipse cx="64" cy="46" rx="34" ry="19"/>
+        <path d="M30 44 C14 42 8 32 4 22 C12 30 20 36 32 37 Z"/>
+        <path d="M86 40 C92 22 104 12 116 12 C126 12 132 18 132 25 C132 31 127 35 121 35 C116 35 113 32 113 28" stroke="#344966" stroke-width="11" fill="none" stroke-linecap="round"/>
+        <rect x="44" y="60" width="11" height="15" rx="5.5"/>
+        <rect x="62" y="60" width="11" height="15" rx="5.5"/>
+        <rect x="80" y="58" width="11" height="15" rx="5.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="waehlen">
+    <button class="knopf" data-choice="c" onclick="pick(this,'C — Jetzt gerade')">Diese Richtung</button>
+    <div class="pro"><b>Stark:</b> Die originellste der drei und passt genau zu dem, was du über dich gesagt hast. <b>Riskant:</b> Du musst sie ab und zu füttern, sonst steht da „diese Woche" und meint letzten Herbst.</div>
+  </div>
+</div>
+
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="bl-a"><path d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></g>
+</defs></svg>
+
+<script>
+function pick(btn, name){
+  document.querySelectorAll('.knopf').forEach(b=>b.classList.remove('an'));
+  btn.classList.add('an');
+  if (window.brainstorm) window.brainstorm.choice(btn.dataset.choice, { text: name });
+}
+</script>

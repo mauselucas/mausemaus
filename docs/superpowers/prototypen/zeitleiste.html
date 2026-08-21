@@ -1,0 +1,239 @@
+<link rel="stylesheet" href="https://mausemaus.com/assets/fonts.css">
+
+<style>
+.mm * { box-sizing:border-box; }
+.mm .tropi { font-family:'Tropi',cursive,sans-serif; font-weight:400; }
+.mm .mono  { font-family:'Space Mono',monospace; }
+
+.fenster { border-radius:14px; overflow:hidden; border:1px solid rgba(0,0,0,.18);
+           box-shadow:0 18px 50px rgba(0,0,0,.3); }
+.leiste { background:#e6e6e6; padding:9px 14px; display:flex; align-items:center; gap:7px; }
+.leiste i { width:11px; height:11px; border-radius:50%; display:block; }
+.leiste .u{background:#ff5f57}.leiste .g{background:#febc2e}.leiste .n{background:#28c840}
+.leiste b { margin-left:12px; font:400 11px/1 'Space Mono',monospace; color:#777; }
+.hinweis { font:400 14px/1.65 'Space Grotesk',sans-serif; color:#9aa1a5; margin:0 0 22px; max-width:800px; }
+.hinweis b { color:#BFCC94; font-weight:500; }
+
+/* ═══ Bühne ═══ */
+.buehne { display:flex; height:620px; background:#FBFAF6; }
+
+/* ═══ Zeitleiste ═══ */
+.rail { width:212px; flex:none; border-right:1px solid #EDEAE1; position:relative;
+        transition:width .36s cubic-bezier(.22,.9,.3,1); background:#FBFAF6; z-index:6; }
+.rail.zu { width:58px; }
+.rail .kopfz { padding:20px 16px 0; height:74px; }
+.rail .marke { font:400 20px/1 'Tropi',cursive,sans-serif; color:#0D1821; white-space:nowrap;
+   transition:opacity .2s; }
+.rail .marke em { font-style:normal; color:#BFCC94; }
+.rail.zu .marke { opacity:0; }
+.rail .mini { position:absolute; top:22px; left:0; width:58px; text-align:center; opacity:0;
+   transition:opacity .2s; font:400 21px/1 'Tropi',cursive,sans-serif; color:#0D1821; pointer-events:none; }
+.rail.zu .mini { opacity:1; }
+
+.gleis { position:absolute; left:27px; top:78px; bottom:74px; width:5px;
+         background:#E7E4DA; border-radius:3px; }
+.seg { position:absolute; left:0; width:5px; border-radius:3px; cursor:pointer; }
+.seg:after { content:''; position:absolute; left:-9px; right:-9px; top:0; bottom:0; }
+.seg .et { position:absolute; left:17px; top:50%; translate:0 -50%; white-space:nowrap;
+   font:400 11.5px/1.2 'Space Grotesk',sans-serif; color:#59615e; opacity:1;
+   transition:opacity .22s; pointer-events:none; }
+.rail.zu .seg .et { opacity:0; }
+.seg .et u { display:block; text-decoration:none; font:400 7.5px/1 'Space Mono',monospace;
+   letter-spacing:.15em; color:#A8A79C; margin-top:3px; }
+.seg.arbeit .et { color:#0D1821; }
+.seg:hover .et { color:#0D1821; }
+.seg.jetzt { box-shadow:0 0 0 3px rgba(191,204,148,.42); }
+
+.sicht { position:absolute; left:19px; width:21px; border-radius:11px;
+   background:rgba(13,24,33,.09); z-index:3; pointer-events:none; }
+.kopf { position:absolute; left:19px; width:21px; height:21px; margin-top:-10px; z-index:4;
+        pointer-events:none; transition:top .08s linear; }
+.kopf .rund { width:21px; height:21px; border-radius:50%; background:#0D1821;
+   border:3px solid #FBFAF6; box-shadow:0 2px 7px rgba(13,24,33,.32); }
+.kopf .strich { position:absolute; left:23px; top:9px; height:2px; width:170px; background:#0D1821;
+   opacity:.13; transition:opacity .22s; }
+.rail.zu .kopf .strich { opacity:0; }
+.kopf .zeit { position:absolute; left:30px; top:-2px; font:400 9.5px/1 'Space Mono',monospace;
+   color:#0D1821; background:#FBFAF6; padding:3px 5px; transition:opacity .22s; }
+.rail.zu .kopf .zeit { opacity:0; }
+
+.rail .fuss { position:absolute; bottom:16px; left:16px; right:14px; transition:opacity .22s; }
+.rail.zu .fuss { opacity:0; pointer-events:none; }
+.rail .fuss div { display:flex; align-items:center; gap:7px; font:400 9.5px/1 'Space Grotesk',sans-serif;
+   color:#8f948f; margin-bottom:6px; }
+.rail .fuss span { width:9px; height:9px; border-radius:2px; }
+
+.klammer { position:absolute; top:50%; right:-11px; translate:0 -50%; width:22px; height:46px;
+   border-radius:11px; background:#FBFAF6; border:1px solid #EDEAE1; cursor:pointer; z-index:8;
+   display:flex; align-items:center; justify-content:center;
+   font:400 10px/1 'Space Mono',monospace; color:#8f948f; }
+.klammer:hover { color:#0D1821; border-color:#BFCC94; }
+
+/* ═══ Brief ═══ */
+.scroller { flex:1; overflow-y:auto; scroll-behavior:smooth; position:relative; }
+.sp { max-width:520px; margin:0 auto; padding:54px 26px 210px; }
+.sp h4 { font:400 42px/1.05 'Tropi',cursive,sans-serif; margin:0 0 6px; color:#0D1821; }
+.sp .unter { font:400 10.5px/1 'Space Mono',monospace; letter-spacing:.16em; color:#A8A79C; margin-bottom:30px; }
+.sp p { font:400 16.5px/1.8 'Space Grotesk',sans-serif; color:#232c31; margin:0 0 20px; }
+.sp section { scroll-margin-top:20px; }
+.sp .film { margin:26px 0; border-radius:7px; overflow:hidden; box-shadow:0 9px 26px rgba(13,24,33,.16); }
+.sp .film .pic { height:150px; position:relative; }
+.sp .film .pic:after { content:'▶'; position:absolute; inset:0; display:flex; align-items:center;
+   justify-content:center; color:rgba(255,255,255,.92); font-size:26px; }
+.sp .film .un { background:#fff; padding:9px 12px; font:400 9.5px/1 'Space Mono',monospace;
+   color:#6E7873; letter-spacing:.13em; }
+.tuer { color:#0D1821; text-decoration:none; background:linear-gradient(transparent 62%,#E4EBCF 62%); }
+.tuer:after { content:'❀'; font-size:9px; color:#BFCC94; vertical-align:super; margin-left:2px; }
+
+.knopfreihe { margin-top:26px; display:flex; gap:12px; flex-wrap:wrap; }
+.knopf { font:700 12px/1 'Space Mono',monospace; letter-spacing:.13em; padding:13px 20px;
+   border-radius:999px; border:1.5px solid #BFCC94; color:#BFCC94; background:transparent; cursor:pointer; transition:.15s; }
+.knopf:hover,.knopf.an { background:#BFCC94; color:#0D1821; }
+</style>
+
+<h2>Die Seitenleiste als Zeitstrahl</h2>
+<p class="subtitle">Deine Idee, gebaut. Das ist kein Bild — es funktioniert. Scroll im Fenster.</p>
+
+<p class="hinweis"><b>Scroll im weißen Bereich</b> — nach ein paar Zeilen klappt die Leiste zu und der Kopf wandert mit. <b>Fahr mit der Maus drauf</b>, dann klappt sie wieder auf. <b>Klick auf einen Abschnitt</b>, um zu springen. Der Griff am Rand hält sie dauerhaft offen.</p>
+
+<div class="mm">
+<div class="fenster">
+  <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+  <div class="buehne">
+
+    <div class="rail" id="rail">
+      <div class="kopfz"><div class="marke tropi">mausemaus<em>.</em></div></div>
+      <div class="mini tropi">m</div>
+      <div class="gleis" id="gleis"></div>
+      <div class="sicht" id="sicht"></div>
+      <div class="kopf" id="kopf"><div class="rund"></div><div class="strich"></div><div class="zeit mono">00:00</div></div>
+      <div class="fuss">
+        <div><span style="background:#344966"></span>berufliche Projekte</div>
+        <div><span style="background:#D8DBCF"></span>persönliches</div>
+      </div>
+      <div class="klammer" id="klammer" title="dauerhaft offen halten">‹</div>
+    </div>
+
+    <div class="scroller" id="scroller">
+      <div class="sp" id="sp">
+
+        <section data-t="Hallo" data-art="p">
+          <h4 class="tropi">Hallo, ich bin Lucas.</h4>
+          <div class="unter mono">KÖLN-EHRENFELD · FREELANCE</div>
+          <p>Ich schneide Videos. Beruflich, seit ich neunzehn bin — und ich mag es immer noch, was ich nicht von allem behaupten kann.</p>
+          <p>Wenn du wenig Zeit hast: Links siehst du, wo die Arbeit steht. Die dunklen Abschnitte sind berufliche Projekte, die hellen bin ich. Spring ruhig.</p>
+        </section>
+
+        <section data-t="Wie ich angefangen hab" data-art="p">
+          <p>Angefangen hat es mit Mediendesign, dann Mediengestalter Bild und Ton. Ich bin dabei ziemlich schnell an dem Punkt gelandet, an dem ich lieber selbst schneide, als über Schnitt zu reden.</p>
+        </section>
+
+        <section data-t="The Race — Staffel 3" data-art="a" data-farbe="linear-gradient(180deg,#2a4a6b,#8a3b3b)">
+          <p>Am liebsten erzähle ich dir von <a class="tuer" href="#">The Race</a>. Adventure-Serie für Joyn und ProSieben, dritte Staffel, bei 33minutes. Schnitt und Motion.</p>
+          <div class="film"><div class="pic" style="background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></div><div class="un mono">THE RACE — STAFFEL 3 · JOYN / PROSIEBEN</div></div>
+        </section>
+
+        <section data-t="Das Werkzeug, das ich mir baute" data-art="a" data-farbe="linear-gradient(180deg,#4a4a52,#9a9aa2)">
+          <p>Irgendwann ist mir aufgefallen, dass ich jede einzelne Geldeinblendung von Hand baue. Hunderte davon. Also habe ich aufgehört zu schneiden und angefangen zu bauen.</p>
+          <p>Zwei Tage später lief es von allein — und ich habe für den Rest der Staffel keine Einblendung mehr angefasst. Seitdem baue ich mir ständig Sachen, die mir Arbeit abnehmen.</p>
+        </section>
+
+        <section data-t="Bastian Keller" data-art="a" data-farbe="linear-gradient(180deg,#6b3fa0,#c2418a)">
+          <p>Gerade läuft <a class="tuer" href="#">Bastian Keller</a>. Social Media, also Reels und Thumbnails, und zwischendurch was Großes. Das ist der Job, der aktuell weiterläuft, während du das hier liest.</p>
+        </section>
+
+        <section data-t="Simplicissimus" data-art="a" data-farbe="linear-gradient(180deg,#c7a24a,#7a9b4e)">
+          <p>Für Simplicissimus mache ich Feinschnitt und Animation. Da habe ich mir 3D beigebracht, weil es gebraucht wurde — und bin hängen geblieben.</p>
+        </section>
+
+        <section data-t="Blender" data-art="p">
+          <p>Was mich gerade wirklich beschäftigt, ist <a class="tuer" href="#">Blender</a>. Angefangen für einen Kunden, geblieben, weil ich abends freiwillig weitermache. Es macht mehr Spaß, als es sollte.</p>
+        </section>
+
+        <section data-t="Woher der Name kommt" data-art="p">
+          <p>Der Name kommt von <a class="tuer" href="#">Celine</a>. Wir haben uns beide Maus genannt, und irgendwann bin ich mausemaus geworden. Sie sagt, ich sei eine richtige Maus — lieb und herzlich. Das Wort ist hängen geblieben.</p>
+        </section>
+
+        <section data-t="Schreib mir" data-art="k" data-farbe="#BFCC94">
+          <p>Wenn du willst, dass ich was für dich schneide — schreib mir einfach. Ich antworte meistens noch am selben Tag.</p>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="knopfreihe">
+  <button class="knopf" data-choice="ja" onclick="pick(this,'Zeitstrahl sitzt')">Genau so</button>
+  <button class="knopf" data-choice="fast" onclick="pick(this,'Fast, Details ändern')">Fast — Details ändern</button>
+</div>
+</div>
+
+<script>
+(function(){
+  const rail=document.getElementById('rail'), gleis=document.getElementById('gleis'),
+        kopf=document.getElementById('kopf'), sicht=document.getElementById('sicht'),
+        sc=document.getElementById('scroller'),
+        klammer=document.getElementById('klammer');
+  const abschnitte=[...document.querySelectorAll('#sp section')];
+  let angepinnt=false;
+
+  // Segmente auf dem Gleis anlegen — Höhe proportional zur Textlänge
+  const gh=()=>gleis.getBoundingClientRect().height;
+  function bauen(){
+    gleis.querySelectorAll('.seg').forEach(s=>s.remove());
+    const ganz=sc.scrollHeight;   // gleicher Massstab wie Kopf und Sichtfenster
+    abschnitte.forEach((ab,i)=>{
+      const oben=ab.offsetTop, hoehe=ab.offsetHeight;
+      const s=document.createElement('div');
+      s.className='seg'+(ab.dataset.art==='a'?' arbeit':'');
+      s.style.top=(oben/ganz*100)+'%';
+      s.style.height=Math.max(2.2,(hoehe/ganz*100))+'%';
+      s.style.background=ab.dataset.farbe||'#D8DBCF';
+      s.innerHTML='<span class="et">'+ab.dataset.t+
+        (ab.dataset.art==='a'?'<u>BERUFLICH</u>':'')+'</span>';
+      s.onclick=()=>sc.scrollTo({top:oben-16,behavior:'smooth'});
+      gleis.appendChild(s);
+    });
+  }
+
+  function mmss(f){
+    const gesamt=214, s=Math.round(f*gesamt);
+    return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  }
+
+  function aktualisieren(){
+    const max=sc.scrollHeight-sc.clientHeight;
+    const f=max>0?Math.min(1,sc.scrollTop/max):0;          // nur fuer die Zeitangabe
+    const anteil=sc.scrollTop/sc.scrollHeight;             // Position im Dokument
+    const sichtbar=sc.clientHeight/sc.scrollHeight;
+    kopf.style.top=(gleis.offsetTop + anteil*gh())+'px';
+    sicht.style.top=(gleis.offsetTop + anteil*gh())+'px';
+    sicht.style.height=(sichtbar*gh())+'px';
+    kopf.querySelector('.zeit').textContent=mmss(f);
+    if(!angepinnt) rail.classList.toggle('zu', sc.scrollTop>70);
+    // aktuellen Abschnitt hervorheben
+    const mitte=sc.scrollTop+sc.clientHeight*0.45;
+    let akt=0;
+    abschnitte.forEach((ab,i)=>{ if(ab.offsetTop<=mitte) akt=i; });
+    // ganz unten immer den letzten Abschnitt markieren - er kann nie bis zur
+    // Schwelle hochscrollen, weil darunter kein Text mehr kommt
+    if (max>0 && sc.scrollTop>=max-4) akt=abschnitte.length-1;
+    gleis.querySelectorAll('.seg').forEach((s,i)=>s.classList.toggle('jetzt',i===akt));
+  }
+
+  rail.addEventListener('mouseenter',()=>rail.classList.remove('zu'));
+  rail.addEventListener('mouseleave',()=>{ if(!angepinnt && sc.scrollTop>70) rail.classList.add('zu'); });
+  klammer.onclick=()=>{ angepinnt=!angepinnt; klammer.textContent=angepinnt?'›':'‹';
+    klammer.style.color=angepinnt?'#0D1821':''; if(angepinnt) rail.classList.remove('zu'); };
+  sc.addEventListener('scroll',aktualisieren,{passive:true});
+  setTimeout(()=>{bauen();aktualisieren();},60);
+  window.addEventListener('resize',()=>{bauen();aktualisieren();});
+})();
+
+function pick(btn,name){
+  document.querySelectorAll('.knopf').forEach(b=>b.classList.remove('an'));
+  btn.classList.add('an');
+  if(window.brainstorm) window.brainstorm.choice(btn.dataset.choice,{text:name});
+}
+</script>

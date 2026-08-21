@@ -1,0 +1,288 @@
+<link rel="stylesheet" href="https://mausemaus.com/assets/fonts.css">
+
+<style>
+.mm { --ink:#0D1821; --navy:#344966; --sky:#B4CDED; --paper:#F0F4EF;
+      --sage:#BFCC94; --line:#D5D9D2; --muted:#6E7873; }
+.mm * { box-sizing:border-box; }
+.tropi { font-family:'Tropi',cursive,sans-serif; font-weight:400; }
+.mono  { font-family:'Space Mono',monospace; }
+
+.fenster { border-radius:14px; overflow:hidden; border:1px solid rgba(0,0,0,.18);
+           box-shadow:0 18px 50px rgba(0,0,0,.3); }
+.leiste { background:#e6e6e6; padding:9px 14px; display:flex; align-items:center; gap:7px; }
+.leiste i { width:11px; height:11px; border-radius:50%; display:block; }
+.leiste .u{background:#ff5f57}.leiste .g{background:#febc2e}.leiste .n{background:#28c840}
+.leiste b { margin-left:12px; font:400 11px/1 'Space Mono',monospace; color:#777; }
+
+.mmwahl { margin:0 0 64px; }
+.kopfzeile { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin:0 0 12px; }
+.kopfzeile h3 { font:400 32px/1 'Tropi',cursive,sans-serif; margin:0; letter-spacing:.5px; }
+.kopfzeile .buchstabe { font:700 13px/1 'Space Mono',monospace; letter-spacing:.16em;
+   background:#BFCC94; color:#0D1821; padding:6px 10px; border-radius:6px; }
+.kopfzeile .art { font:400 13px/1 'Space Mono',monospace; color:#8a8f92; letter-spacing:.06em; }
+.beschreibung { max-width:780px; font:400 15px/1.65 'Space Grotesk',sans-serif; color:#b9c0c4; margin:0 0 18px; }
+.waehlen { margin-top:16px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.knopf { font:700 12px/1 'Space Mono',monospace; letter-spacing:.14em; padding:13px 22px;
+   border-radius:999px; border:1.5px solid #BFCC94; color:#BFCC94; background:transparent; cursor:pointer; transition:.15s; }
+.knopf:hover,.knopf.an { background:#BFCC94; color:#0D1821; }
+.pro { font:400 13.5px/1.6 'Space Grotesk',sans-serif; color:#9aa1a5; max-width:600px; }
+.pro b { color:#BFCC94; font-weight:500; }
+
+/* ═══════════ D — Sammelalbum ═══════════ */
+.d { background:#E8EAE3; padding:0; min-height:470px; }
+.d .reiter { display:flex; gap:3px; padding:12px 26px 0; }
+.d .reiter i { font:400 10px/1 'Space Mono',monospace; letter-spacing:.14em; font-style:normal;
+   background:#cdd2c6; color:#5c635c; padding:10px 15px 12px; border-radius:6px 6px 0 0; }
+.d .reiter i.an { background:#F7F8F4; color:#0D1821; }
+.d .huelle { background:#F7F8F4; padding:24px 26px 28px; }
+.d .huellenkopf { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; }
+.d .huellenkopf .t { font:400 27px/1 'Tropi',cursive,sans-serif; }
+.d .huellenkopf .z { font:400 10px/1 'Space Mono',monospace; color:#8a8f92; letter-spacing:.15em; }
+.d .raster { display:grid; grid-template-columns:repeat(5,1fr); gap:15px; }
+.d .kt { aspect-ratio:.72; border-radius:9px; padding:7px; position:relative; overflow:hidden;
+   box-shadow:0 4px 14px rgba(13,24,33,.18); display:flex; flex-direction:column; }
+.d .kt .innen { flex:1; border-radius:5px; overflow:hidden; display:flex; flex-direction:column; background:#fff; }
+.d .kt .pic { flex:1; }
+.d .kt .cap { padding:6px 7px 7px; }
+.d .kt .cap b { display:block; font:400 12.5px/1.05 'Tropi',cursive,sans-serif; color:#0D1821; }
+.d .kt .cap i { display:block; font:400 7.5px/1.2 'Space Mono',monospace; color:#6E7873;
+   letter-spacing:.1em; font-style:normal; margin-top:4px; }
+.d .kt .ecke { position:absolute; top:6px; right:7px; font:400 8px/1 'Space Mono',monospace;
+   color:#fff; background:rgba(0,0,0,.35); padding:3px 5px; border-radius:3px; z-index:2; }
+.d .holo { background:linear-gradient(135deg,#BFCC94,#B4CDED 30%,#e7c9e8 55%,#BFCC94 80%,#B4CDED); }
+.d .norm { background:#344966; }
+.d .gold { background:linear-gradient(140deg,#d8c07a,#f4e6b8 45%,#c9a94e); }
+.d .leer { border:2px dashed #c9cec4; box-shadow:none; background:transparent;
+   display:flex; align-items:center; justify-content:center; }
+.d .leer span { font:400 9px/1.4 'Space Mono',monospace; color:#b0b6ac; text-align:center; letter-spacing:.1em; }
+
+/* ═══════════ E — Schreibtisch ═══════════ */
+.e { min-height:470px; position:relative; padding:0;
+     background:linear-gradient(170deg,#c6d9ee,#e4eddc 55%,#BFCC94); }
+.e .menue { background:rgba(255,255,255,.62); backdrop-filter:blur(9px); padding:5px 15px;
+   display:flex; align-items:center; gap:19px; font:400 11px/1 'Space Grotesk',sans-serif; color:#0D1821; }
+.e .menue .m1 { font-family:'Tropi',cursive,sans-serif; font-size:15px; }
+.e .menue .rechts { margin-left:auto; font-family:'Space Mono',monospace; font-size:10px; color:#40484a; }
+.e .icons { position:absolute; top:44px; left:20px; display:flex; flex-direction:column; gap:17px; width:78px; }
+.e .ic { text-align:center; }
+.e .ic .kasten { width:52px; height:42px; margin:0 auto; border-radius:5px 5px 4px 4px;
+   background:linear-gradient(#9fc0e0,#7ba3cd); box-shadow:0 2px 5px rgba(0,0,0,.2); position:relative; }
+.e .ic .kasten:before { content:''; position:absolute; top:-5px; left:4px; width:20px; height:6px;
+   border-radius:3px 3px 0 0; background:#9fc0e0; }
+.e .ic span { display:block; margin-top:5px; font:400 9.5px/1.25 'Space Grotesk',sans-serif;
+   color:#17323f; text-shadow:0 1px 2px rgba(255,255,255,.8); }
+.e .win { position:absolute; border-radius:9px; overflow:hidden; box-shadow:0 14px 38px rgba(13,24,33,.3);
+   background:#fff; }
+.e .wl { background:#ececec; padding:6px 9px; display:flex; gap:5px; align-items:center; }
+.e .wl i { width:9px; height:9px; border-radius:50%; }
+.e .wl b { margin-left:8px; font:400 9.5px/1 'Space Mono',monospace; color:#777; }
+.e .w1 { top:62px; left:122px; width:330px; }
+.e .w2 { top:186px; left:330px; width:340px; }
+.e .dock { position:absolute; bottom:12px; left:50%; translate:-50% 0; display:flex; gap:11px;
+   background:rgba(255,255,255,.55); backdrop-filter:blur(9px); padding:8px 13px; border-radius:15px;
+   box-shadow:0 5px 18px rgba(0,0,0,.15); }
+.e .dock div { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+
+/* ═══════════ F — Wiese ═══════════ */
+.f { min-height:470px; position:relative; overflow:hidden;
+     background:linear-gradient(#eaf2fb 0%,#f3f7ee 46%,#dfe9d0 100%); }
+.f .titel { position:absolute; top:26px; left:32px; z-index:5; }
+.f .titel b { font:400 40px/1 'Tropi',cursive,sans-serif; color:#0D1821; display:block; }
+.f .titel b em { font-style:normal; color:#BFCC94; }
+.f .titel span { font:400 11.5px/1.5 'Space Grotesk',sans-serif; color:#45514c; display:block; margin-top:7px; max-width:270px; }
+.f .bl { position:absolute; cursor:pointer; }
+.f .bl svg { width:100%; display:block; }
+.f .bl u { position:absolute; left:50%; translate:-50% 0; bottom:-19px; white-space:nowrap;
+   font:400 11px/1 'Space Grotesk',sans-serif; color:#2c3b34; text-decoration:none;
+   background:rgba(255,255,255,.8); padding:3px 7px; border-radius:4px; }
+.f .stiel { position:absolute; width:2.5px; background:#8fa86f; left:50%; translate:-50% 0; top:76%; }
+
+/* ═══════════ G — Der Brief ═══════════ */
+.g { background:#FBFAF6; padding:44px 0 40px; min-height:470px; }
+.g .sp { max-width:560px; margin:0 auto; padding:0 20px; position:relative; }
+.g h4 { font:400 46px/1.05 'Tropi',cursive,sans-serif; margin:0 0 22px; color:#0D1821; }
+.g p { font:400 16.5px/1.78 'Space Grotesk',sans-serif; color:#232c31; margin:0 0 19px; }
+.g p em { font-style:normal; border-bottom:2px solid #BFCC94; }
+.g .film { margin:26px 0; border-radius:6px; overflow:hidden; box-shadow:0 8px 24px rgba(13,24,33,.16); }
+.g .film .pic { height:150px; background:linear-gradient(135deg,#2a4a6b,#8a3b3b); position:relative; }
+.g .film .pic:after { content:'▶'; position:absolute; inset:0; display:flex; align-items:center;
+   justify-content:center; color:rgba(255,255,255,.9); font-size:26px; }
+.g .film .un { background:#fff; padding:9px 12px; font:400 10px/1 'Space Mono',monospace;
+   color:#6E7873; letter-spacing:.12em; }
+.g .rand { position:absolute; right:-186px; width:160px; font:400 12.5px/1.5 'Space Grotesk',sans-serif;
+   color:#8a9188; rotate:-1.6deg; }
+.g .rand:before { content:'↳'; display:block; color:#BFCC94; font-size:15px; margin-bottom:3px; }
+
+@media (max-width:1000px){
+  .d .raster{grid-template-columns:repeat(3,1fr)}
+  .g .rand{position:static;width:auto;rotate:none;margin:-8px 0 20px}
+  .e .win{position:static;width:auto;margin:10px}
+  .e .icons{display:none}
+}
+</style>
+
+<h2>Vier andere Formen — nicht nur andere Inhalte</h2>
+<p class="subtitle">Die ersten drei waren alle „Website mit Abschnitten". Diese hier sind es nicht. Jede benutzt eine ganz andere Grundform.</p>
+
+<div class="mm">
+
+<!-- ═══════ D ═══════ -->
+<div class="mmwahl">
+  <div class="kopfzeile"><span class="buchstabe">D</span><h3>Das Sammelalbum</h3><span class="art">alles ist eine Karte</span></div>
+  <p class="beschreibung">Die Seite ist ein Sammelordner mit Klarsichthüllen. Jede Karte ist ein Ding aus deinem Leben — und alle werden gleich behandelt: „The Race" steckt neben dem Dackel aus Ton, den Celine dir mitgebracht hat, neben einem Film, den du gut fandest. Das löst die Frage „wie privat" ganz von selbst, weil nichts getrennt wird. Deine Pokémon-Sammlung von früher, nur mit deinem Leben drin. Leere Hüllen zeigen, dass noch was kommt.</p>
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="d">
+      <div class="reiter"><i class="an">ALLES</i><i>ARBEIT</i><i>MITBRINGSEL</i><i>GESEHEN</i><i>GEBAUT</i></div>
+      <div class="huelle">
+        <div class="huellenkopf"><div class="t tropi">meine Sammlung</div><div class="z mono">23 VON 60 HÜLLEN GEFÜLLT</div></div>
+        <div class="raster">
+          <div class="kt holo"><span class="ecke mono">SELTEN</span><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></div><div class="cap"><b>The Race S3</b><i>ARBEIT · 2025</i></div></div></div>
+          <div class="kt norm"><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#8a6a4a,#c9a978)"></div><div class="cap"><b>Dackel aus Ton</b><i>VON CELINE</i></div></div></div>
+          <div class="kt norm"><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#3b5a4a,#88a878)"></div><div class="cap"><b>Perfect Days</b><i>GESEHEN · 5/5</i></div></div></div>
+          <div class="kt gold"><span class="ecke mono">SELBST</span><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#4a4a52,#9a9aa2)"></div><div class="cap"><b>Einblend&shy;automat</b><i>GEBAUT · AE</i></div></div></div>
+          <div class="kt norm"><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#6b3fa0,#c2418a)"></div><div class="cap"><b>Bastian Keller</b><i>ARBEIT · LÄUFT</i></div></div></div>
+          <div class="kt norm"><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#c7a24a,#7a9b4e)"></div><div class="cap"><b>Simplicissimus</b><i>ARBEIT · 3D</i></div></div></div>
+          <div class="kt norm"><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#a03f3f,#e08a5a)"></div><div class="cap"><b>Balatro</b><i>ANTE 12</i></div></div></div>
+          <div class="kt norm"><div class="innen"><div class="pic" style="background:linear-gradient(135deg,#3b6ea5,#9cc4e4)"></div><div class="cap"><b>Den Haag</b><i>CELINE IN WELLEN</i></div></div></div>
+          <div class="kt leer"><span>NOCH<br>LEER</span></div>
+          <div class="kt leer"><span>NOCH<br>LEER</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="waehlen"><button class="knopf" data-choice="d" onclick="pick(this,'D — Sammelalbum')">Diese Richtung</button>
+  <div class="pro"><b>Stark:</b> Deine zwei Muster — Sammeln und Karten — werden zur Struktur der ganzen Seite. Und Celines Mitbringsel bekommen einen Platz. <b>Riskant:</b> Kunden müssen zwischen Ton-Dackeln nach Arbeit suchen (lösbar über den Reiter „Arbeit").</div></div>
+</div>
+
+<!-- ═══════ E ═══════ -->
+<div class="mmwahl">
+  <div class="kopfzeile"><span class="buchstabe">E</span><h3>Mein Schreibtisch</h3><span class="art">die Seite ist ein Rechner</span></div>
+  <p class="beschreibung">Du sitzt den ganzen Tag am Rechner, machst fast nur Screenshots, und wir haben zusammen schon eine macOS-Oberfläche gebaut. Also ist die Seite dein Schreibtisch: Menüleiste, Ordner, offene Fenster, ein Dock. Man macht Ordner auf statt zu scrollen. Der Hintergrund ist eine Gänseblümchenwiese, im Dock sitzen Dackel und Dino.</p>
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="e">
+      <div class="menue"><span class="m1">mausemaus.</span><span>Ablage</span><span>Arbeit</span><span>Über mich</span><span>Hilfe</span><span class="rechts">Köln · 14&nbsp;°C · offen für Projekte</span></div>
+      <div class="icons">
+        <div class="ic"><div class="kasten"></div><span>Arbeit</span></div>
+        <div class="ic"><div class="kasten"></div><span>Kram</span></div>
+        <div class="ic"><div class="kasten"></div><span>Screenshots</span></div>
+      </div>
+      <div class="win w1">
+        <div class="wl"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><b>liesmich.txt</b></div>
+        <div style="padding:16px 18px 19px; font:400 12.5px/1.65 'Space Grotesk',sans-serif; color:#232c31">
+          <b style="font-family:'Tropi',cursive; font-size:19px; font-weight:400; display:block; margin-bottom:8px">Hallo :)</b>
+          Ich bin Lucas, 22, aus Köln. Ich schneide Videos, mag Dackel, Dinos und Gänseblümchen, und baue mir Werkzeuge, damit ich weniger von Hand machen muss.
+        </div>
+      </div>
+      <div class="win w2">
+        <div class="wl"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><b>Arbeit — 5 Objekte</b></div>
+        <div style="background:#fff">
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:15px 16px 18px">
+            <div style="text-align:center"><div style="height:44px;border-radius:4px;background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></div><span style="display:block;margin-top:5px;font:400 8.5px/1.2 'Space Grotesk',sans-serif;color:#333">The Race</span></div>
+            <div style="text-align:center"><div style="height:44px;border-radius:4px;background:linear-gradient(135deg,#6b3fa0,#c2418a)"></div><span style="display:block;margin-top:5px;font:400 8.5px/1.2 'Space Grotesk',sans-serif;color:#333">Bastian</span></div>
+            <div style="text-align:center"><div style="height:44px;border-radius:4px;background:linear-gradient(135deg,#c7a24a,#7a9b4e)"></div><span style="display:block;margin-top:5px;font:400 8.5px/1.2 'Space Grotesk',sans-serif;color:#333">Simplic.</span></div>
+            <div style="text-align:center"><div style="height:44px;border-radius:4px;background:linear-gradient(135deg,#3b6ea5,#9cc4e4)"></div><span style="display:block;margin-top:5px;font:400 8.5px/1.2 'Space Grotesk',sans-serif;color:#333">Jules</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="dock">
+        <div style="background:#fff"><svg viewBox="0 0 170 62" width="27" fill="#344966"><rect x="30" y="24" width="96" height="22" rx="11"/><ellipse cx="134" cy="24" rx="15" ry="12.5"/><rect x="139" y="24" width="19" height="10" rx="5"/><ellipse cx="130" cy="29" rx="6.5" ry="12.5" opacity=".5"/><rect x="38" y="43" width="8" height="15" rx="4"/><rect x="54" y="43" width="8" height="15" rx="4"/><rect x="100" y="43" width="8" height="15" rx="4"/><rect x="116" y="43" width="8" height="15" rx="4"/></svg></div>
+        <div style="background:#fff"><svg viewBox="0 0 140 76" width="27" fill="#344966"><ellipse cx="64" cy="46" rx="34" ry="19"/><path d="M30 44 C14 42 8 32 4 22 C12 30 20 36 32 37 Z"/><path d="M86 40 C92 22 104 12 116 12 C126 12 132 18 132 25 C132 31 127 35 121 35" stroke="#344966" stroke-width="11" fill="none" stroke-linecap="round"/><rect x="44" y="60" width="11" height="15" rx="5.5"/><rect x="80" y="58" width="11" height="15" rx="5.5"/></svg></div>
+        <div style="background:#fff"><svg viewBox="0 0 303.13 275.3" width="24" fill="#BFCC94"><use href="#bl-a"/></svg></div>
+        <div style="background:#0D1821; color:#BFCC94; font:400 17px/1 'Tropi',cursive">m</div>
+      </div>
+    </div>
+  </div>
+  <div class="waehlen"><button class="knopf" data-choice="e" onclick="pick(this,'E — Schreibtisch')">Diese Richtung</button>
+  <div class="pro"><b>Stark:</b> Sofort wiedererkennbar, verspielt, und passt zu jemandem, der am Rechner lebt und sich Werkzeuge baut. <b>Riskant:</b> Schreibtisch-Seiten gibt es schon einige — es müsste stark über Blumen, Dackel und deinen Ton eigen werden.</div></div>
+</div>
+
+<!-- ═══════ F ═══════ -->
+<div class="mmwahl">
+  <div class="kopfzeile"><span class="buchstabe">F</span><h3>Die Wiese</h3><span class="art">nichts ist ein Kasten</span></div>
+  <p class="beschreibung">Keine Karten, kein Raster, keine Abschnitte — eine Wiese. Jedes Gänseblümchen ist ein Ding. Große Blumen sind große Projekte, kleine sind Kleinigkeiten. Man läuft nach rechts statt nach unten. Und sie wächst: Jedes Mal, wenn du was fertig hast, kommt eine Blume dazu. Das ist die einzige der Formen, die man wirklich nirgends sonst sieht.</p>
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="f">
+      <div class="titel"><b class="tropi">mausemaus<em>.</em></b><span>Lucas, 22, Köln. Alles was ich gemacht habe, wächst hier. Lauf ruhig ein bisschen rum.</span></div>
+
+      <div class="bl" style="left:42%; top:120px; width:104px">
+        <div class="stiel" style="height:280px"></div>
+        <svg viewBox="0 0 303.13 275.3" fill="#F7F8F4" stroke="#d8ddd2" stroke-width="6"><use href="#bl-a"/></svg>
+        <u>The Race — Staffel 3</u>
+      </div>
+      <div class="bl" style="left:60%; top:186px; width:78px">
+        <div class="stiel" style="height:232px"></div>
+        <svg viewBox="0 0 303.13 275.3" fill="#BFCC94"><use href="#bl-a"/></svg>
+        <u>Bastian Keller · läuft</u>
+      </div>
+      <div class="bl" style="left:26%; top:222px; width:62px">
+        <div class="stiel" style="height:206px"></div>
+        <svg viewBox="0 0 303.13 275.3" fill="#F7F8F4" stroke="#d8ddd2" stroke-width="7"><use href="#bl-a"/></svg>
+        <u>Simplicissimus</u>
+      </div>
+      <div class="bl" style="left:76%; top:250px; width:52px">
+        <div class="stiel" style="height:186px"></div>
+        <svg viewBox="0 0 303.13 275.3" fill="#F7F8F4" stroke="#d8ddd2" stroke-width="8"><use href="#bl-a"/></svg>
+        <u>Rockstar Selfish</u>
+      </div>
+      <div class="bl" style="left:14%; top:290px; width:40px">
+        <div class="stiel" style="height:154px"></div>
+        <svg viewBox="0 0 303.13 275.3" fill="#e8d98a"><use href="#bl-a"/></svg>
+        <u>Jules</u>
+      </div>
+      <div class="bl" style="left:89%; top:300px; width:34px">
+        <div class="stiel" style="height:148px"></div>
+        <svg viewBox="0 0 303.13 275.3" fill="#F7F8F4" stroke="#d8ddd2" stroke-width="9"><use href="#bl-a"/></svg>
+      </div>
+
+      <svg style="position:absolute; bottom:6px; left:8%; width:148px" viewBox="0 0 170 62" fill="#5f6f57" opacity=".55">
+        <path d="M28 30 C22 26 20 16 26 12 C28 20 32 24 34 27 Z"/><rect x="30" y="24" width="96" height="22" rx="11"/>
+        <ellipse cx="134" cy="24" rx="15" ry="12.5"/><rect x="139" y="24" width="19" height="10" rx="5"/>
+        <ellipse cx="130" cy="29" rx="6.5" ry="12.5" opacity=".5"/>
+        <rect x="38" y="43" width="8" height="15" rx="4"/><rect x="54" y="43" width="8" height="15" rx="4"/>
+        <rect x="100" y="43" width="8" height="15" rx="4"/><rect x="116" y="43" width="8" height="15" rx="4"/>
+      </svg>
+      <div style="position:absolute; bottom:14px; right:22px; font:400 10px/1 'Space Mono',monospace; color:#6b7a6b; letter-spacing:.14em">← → LAUFEN · 23 BLUMEN</div>
+    </div>
+  </div>
+  <div class="waehlen"><button class="knopf" data-choice="f" onclick="pick(this,'F — Wiese')">Diese Richtung</button>
+  <div class="pro"><b>Stark:</b> Unverwechselbar, weich, wächst mit dir — und macht aus deinem Lieblingsmotiv endlich ein System statt Deko. <b>Riskant:</b> Die verspielteste von allen. Ein sehr nüchterner Producer könnte sie nicht ernst nehmen.</div></div>
+</div>
+
+<!-- ═══════ G ═══════ -->
+<div class="mmwahl">
+  <div class="kopfzeile"><span class="buchstabe">G</span><h3>Der Brief</h3><span class="art">radikal wenig</span></div>
+  <p class="beschreibung">Kein Layout. Keine Karten, keine Abschnitte, keine Navigation. Eine einzige Spalte Text in deiner echten Stimme — so wie du Celine zutextest, wenn dich was begeistert. Mittendrin, an der Stelle wo du sie erwähnst, hängen die Videos. Am Rand stehen Randnotizen. Das Gegenteil von allem, was gerade auf Portfolios passiert — und deshalb fällt es am meisten auf.</p>
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+    <div class="g">
+      <div class="sp">
+        <h4 class="tropi">Hallo, ich bin Lucas.</h4>
+        <p>Ich schneide Videos. Das mache ich beruflich, seit ich 19 bin, und ich mag es immer noch — was ich nicht bei allem sagen kann.</p>
+        <p>Am liebsten erzähle ich dir von <em>The Race</em>. Das war eine Adventure-Serie für Joyn, dritte Staffel, und irgendwann habe ich gemerkt, dass ich jede einzelne Geldeinblendung von Hand baue. Hunderte. Also habe ich mir ein Werkzeug gebaut, das das für mich macht.</p>
+        <div class="film"><div class="pic"></div><div class="un mono">THE RACE — STAFFEL 3 · JOYN / PROSIEBEN</div></div>
+        <p>Danach war Schluss mit von Hand. Ich baue mir seitdem ständig Sachen, die mir Arbeit abnehmen. Gerade lerne ich Blender, weil es mehr Spaß macht als es sollte.</p>
+        <div class="rand">Meine Freundin heißt Celine. Von ihr kommt der Name mausemaus. Sie findet, ich sei eine richtige Maus.</div>
+        <p>Wenn du willst, dass ich was für dich schneide — <em>schreib mir einfach</em>. Ich antworte meistens noch am selben Tag.</p>
+      </div>
+    </div>
+  </div>
+  <div class="waehlen"><button class="knopf" data-choice="g" onclick="pick(this,'G — Der Brief')">Diese Richtung</button>
+  <div class="pro"><b>Stark:</b> Kein Mensch kann das kopieren, weil es komplett aus deiner Stimme besteht. Sofort persönlich, ohne ein einziges privates Detail preiszugeben. <b>Riskant:</b> Du musst schreiben — und zwar echt, nicht Bewerbungsdeutsch. Das ist die einzige Form, wo die ganze Arbeit bei dir liegt, nicht bei mir.</div></div>
+</div>
+
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="bl-a"><path d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></g>
+</defs></svg>
+
+<script>
+function pick(btn, name){
+  document.querySelectorAll('.knopf').forEach(b=>b.classList.remove('an'));
+  btn.classList.add('an');
+  if (window.brainstorm) window.brainstorm.choice(btn.dataset.choice, { text: name });
+}
+</script>

@@ -1,0 +1,227 @@
+<link rel="stylesheet" href="https://mausemaus.com/assets/fonts.css">
+
+<style>
+.mm * { box-sizing:border-box; }
+.tropi { font-family:'Tropi',cursive,sans-serif; font-weight:400; }
+.mono  { font-family:'Space Mono',monospace; }
+
+.fenster { border-radius:14px; overflow:hidden; border:1px solid rgba(0,0,0,.18);
+           box-shadow:0 18px 50px rgba(0,0,0,.3); margin-bottom:14px; }
+.leiste { background:#e6e6e6; padding:9px 14px; display:flex; align-items:center; gap:7px; }
+.leiste i { width:11px; height:11px; border-radius:50%; display:block; }
+.leiste .u{background:#ff5f57}.leiste .g{background:#febc2e}.leiste .n{background:#28c840}
+.leiste b { margin-left:12px; font:400 11px/1 'Space Mono',monospace; color:#777; }
+.hinweis { font:400 13.5px/1.6 'Space Grotesk',sans-serif; color:#9aa1a5; margin:0 0 26px; max-width:760px; }
+.hinweis b { color:#BFCC94; font-weight:500; }
+.abschnitt { font:400 11px/1 'Space Mono',monospace; letter-spacing:.2em; color:#BFCC94;
+   margin:44px 0 12px; display:block; }
+
+/* ══════ die Seite selbst ══════ */
+.seite { background:#FBFAF6; display:grid; grid-template-columns:172px 1fr; min-height:640px; }
+
+/* Sprungleiste */
+.rail { border-right:1px solid #EAE7DE; padding:26px 16px 20px; position:relative; }
+.rail .marke { font:400 21px/1 'Tropi',cursive,sans-serif; color:#0D1821; }
+.rail .marke em { font-style:normal; color:#BFCC94; }
+.rail .kl { font:400 8.5px/1 'Space Mono',monospace; letter-spacing:.17em; color:#A8A79C; margin:26px 0 9px; }
+.rail a { display:flex; align-items:center; gap:8px; text-decoration:none; padding:5px 0;
+   font:400 11.5px/1.25 'Space Grotesk',sans-serif; color:#3a4247; }
+.rail a .chip { width:15px; height:15px; border-radius:3px; flex:none; }
+.rail a:hover { color:#0D1821; }
+.rail a:hover .chip { outline:2px solid #BFCC94; outline-offset:1.5px; }
+.rail .trenn { height:1px; background:#EAE7DE; margin:18px 0; }
+.rail .schreib { font:400 11.5px/1.4 'Space Grotesk',sans-serif; color:#3a4247; }
+.rail .bluete { position:absolute; bottom:18px; left:16px; width:34px; }
+.rail .bluete .pz { font:400 8px/1 'Space Mono',monospace; color:#B6B5A9; display:block; margin-top:4px; }
+
+/* Brief */
+.brief { padding:52px 0 46px; }
+.sp { max-width:520px; margin:0 auto; padding:0 26px; position:relative; }
+.sp h4 { font:400 44px/1.05 'Tropi',cursive,sans-serif; margin:0 0 6px; color:#0D1821; }
+.sp .unter { font:400 11px/1 'Space Mono',monospace; letter-spacing:.16em; color:#A8A79C; margin-bottom:26px; }
+.sp p { font:400 16.5px/1.8 'Space Grotesk',sans-serif; color:#232c31; margin:0 0 20px; }
+
+/* Hintertürchen */
+.tuer { position:relative; color:#0D1821; text-decoration:none;
+        background:linear-gradient(transparent 62%, #E4EBCF 62%); cursor:pointer; }
+.tuer:after { content:'❀'; font-size:9px; color:#BFCC94; vertical-align:super; margin-left:2px; }
+.tuer .vor { position:absolute; left:50%; translate:-50% 0; bottom:calc(100% + 11px); width:214px;
+   background:#0D1821; color:#F0F4EF; border-radius:8px; padding:11px 13px; opacity:0; visibility:hidden;
+   transition:.16s; box-shadow:0 10px 28px rgba(13,24,33,.34); z-index:9; }
+.tuer:hover .vor { opacity:1; visibility:visible; }
+.tuer .vor i { display:block; font:400 8px/1 'Space Mono',monospace; letter-spacing:.16em; color:#BFCC94; font-style:normal; }
+.tuer .vor b { display:block; font:400 16px/1.15 'Tropi',cursive,sans-serif; margin:6px 0 4px; }
+.tuer .vor span { font:400 10.5px/1.45 'Space Grotesk',sans-serif; color:#AEB6B2; }
+.tuer .vor:after { content:''; position:absolute; top:100%; left:50%; translate:-50% 0;
+   border:6px solid transparent; border-top-color:#0D1821; }
+
+/* Randnotiz */
+.rand { position:absolute; right:-192px; width:168px; font:400 12.5px/1.52 'Space Grotesk',sans-serif;
+   color:#8a9188; rotate:-1.4deg; }
+.rand:before { content:'↳'; display:block; color:#BFCC94; font-size:15px; margin-bottom:2px; }
+.rand.links { right:auto; left:-192px; rotate:1.4deg; text-align:right; }
+.rand.links:before { content:'↰'; }
+
+/* eingebettetes Video */
+.film { margin:28px 0; border-radius:7px; overflow:hidden; box-shadow:0 9px 26px rgba(13,24,33,.16); }
+.film .pic { height:158px; position:relative; }
+.film .pic:after { content:'▶'; position:absolute; inset:0; display:flex; align-items:center;
+   justify-content:center; color:rgba(255,255,255,.92); font-size:27px; }
+.film .un { background:#fff; padding:10px 13px; font:400 9.5px/1 'Space Mono',monospace;
+   color:#6E7873; letter-spacing:.13em; }
+
+/* ══════ die Welten hinter den Türen ══════ */
+.welten { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.welt { min-height:250px; padding:24px 26px; }
+.w-blender { background:#1b1b20; color:#EDEDF2; }
+.w-blender .kl { font:400 8.5px/1 'Space Mono',monospace; letter-spacing:.18em; color:#E8863B; }
+.w-blender h5 { font:400 27px/1.05 'Tropi',cursive,sans-serif; margin:9px 0 10px; }
+.w-blender p { font:400 12.5px/1.6 'Space Grotesk',sans-serif; color:#A5A5B0; margin:0 0 14px; }
+.w-blender .gitter { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.w-blender .gitter div { height:52px; border-radius:5px; background:linear-gradient(140deg,#3a3a46,#26262e); border:1px solid #33333f; }
+
+.w-celine { background:#F4E9E4; color:#3E2F2B; position:relative; overflow:hidden; }
+.w-celine .kl { font:400 8.5px/1 'Space Mono',monospace; letter-spacing:.18em; color:#C08A76; }
+.w-celine h5 { font:400 27px/1.05 'Tropi',cursive,sans-serif; margin:9px 0 10px; }
+.w-celine p { font:400 12.5px/1.6 'Space Grotesk',sans-serif; color:#6F5A53; margin:0 0 14px; max-width:82%; }
+.w-celine .regal { display:flex; gap:9px; align-items:flex-end; }
+.w-celine .regal div { border-radius:5px 5px 2px 2px; background:#D9BCAE; }
+
+.knopfreihe { margin-top:26px; display:flex; gap:12px; flex-wrap:wrap; }
+.knopf { font:700 12px/1 'Space Mono',monospace; letter-spacing:.13em; padding:13px 20px;
+   border-radius:999px; border:1.5px solid #BFCC94; color:#BFCC94; background:transparent; cursor:pointer; transition:.15s; }
+.knopf:hover,.knopf.an { background:#BFCC94; color:#0D1821; }
+
+@media (max-width:1080px){
+  .rand{position:static;width:auto;rotate:none;margin:-10px 0 20px;text-align:left}
+  .rand.links{text-align:left}
+  .seite{grid-template-columns:1fr}
+  .rail{border-right:none;border-bottom:1px solid #EAE7DE}
+  .welten{grid-template-columns:1fr}
+}
+</style>
+
+<h2>Der Brief — begehbar</h2>
+<p class="subtitle">So wie du's beschrieben hast: geführt statt sortiert, Randnotizen, Hintertürchen in andere Welten — und links eine Leiste, mit der ein Kunde in zwei Sekunden bei der Arbeit ist, ohne einen Satz zu lesen.</p>
+
+<p class="hinweis"><b>Fahr mit der Maus über die unterstrichenen Wörter mit dem Blümchen ❀</b> — das sind die Hintertürchen. Und über die Projekte links in der Leiste.</p>
+
+<div class="mm">
+
+<div class="fenster">
+  <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+  <div class="seite">
+
+    <!-- ══ Sprungleiste ══ -->
+    <div class="rail">
+      <div class="marke tropi">mausemaus<em>.</em></div>
+
+      <div class="kl">DIREKT ZUR ARBEIT</div>
+      <a href="#"><span class="chip" style="background:linear-gradient(135deg,#6b3fa0,#c2418a)"></span>Bastian Keller</a>
+      <a href="#"><span class="chip" style="background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></span>The Race S3</a>
+      <a href="#"><span class="chip" style="background:linear-gradient(135deg,#c7a24a,#7a9b4e)"></span>Simplicissimus</a>
+      <a href="#"><span class="chip" style="background:linear-gradient(135deg,#3b6ea5,#9cc4e4)"></span>Jules</a>
+      <a href="#"><span class="chip" style="background:linear-gradient(135deg,#4a4a52,#9a9aa2)"></span>Rockstar Selfish</a>
+
+      <div class="trenn"></div>
+      <div class="kl">SONST NOCH</div>
+      <a href="#"><span class="chip" style="background:#E8863B"></span>Blender-Kram</a>
+      <a href="#"><span class="chip" style="background:#D9BCAE"></span>Mitbringsel</a>
+      <a href="#"><span class="chip" style="background:#BFCC94"></span>Werkzeuge</a>
+
+      <div class="trenn"></div>
+      <div class="schreib">Schreib mir einfach —<br><span class="mono" style="font-size:10px;color:#7d8580">lucasschoenwald03<br>@gmail.com</span></div>
+
+      <div class="bluete">
+        <svg viewBox="0 0 303.13 275.3" fill="#BFCC94"><use href="#bl-a"/></svg>
+        <span class="pz">40 %</span>
+      </div>
+    </div>
+
+    <!-- ══ Brief ══ -->
+    <div class="brief">
+      <div class="sp">
+        <h4 class="tropi">Hallo, ich bin Lucas.</h4>
+        <div class="unter mono">KÖLN-EHRENFELD · SEIT 2024 FREELANCE</div>
+
+        <p>Ich schneide Videos. Beruflich, seit ich neunzehn bin — und ich mag es immer noch, was ich nicht von allem behaupten kann.</p>
+
+        <p>Am liebsten erzähle ich dir von
+          <a class="tuer" href="#">The Race<span class="vor"><i class="mono">HINTERTÜRCHEN</i><b>Wie ich mir das Werkzeug gebaut habe</b><span>Eine eigene Seite mit dem Nachbau der Oberfläche — du kannst sie anfassen.</span></span></a>.
+          Adventure-Serie für Joyn, dritte Staffel. Irgendwann ist mir aufgefallen, dass ich jede einzelne Geldeinblendung von Hand baue. Hunderte davon.</p>
+
+        <div class="rand">Falls du nur Arbeit sehen willst: links in der Leiste kommst du überall direkt hin. Ich nehm's dir nicht übel.</div>
+
+        <p>Also habe ich aufgehört zu schneiden und angefangen zu bauen. Zwei Tage später lief es von allein.</p>
+
+        <div class="film"><div class="pic" style="background:linear-gradient(135deg,#2a4a6b,#8a3b3b)"></div><div class="un mono">THE RACE — STAFFEL 3 · JOYN / PROSIEBEN</div></div>
+
+        <p>Seitdem baue ich mir ständig Sachen, die mir Arbeit abnehmen. Gerade sitze ich viel in
+          <a class="tuer" href="#">Blender<span class="vor"><i class="mono">HINTERTÜRCHEN</i><b>Was ich in 3D so anstelle</b><span>Eigene Welt, dunkel, orange. Nur Bilder und ein paar Sätze dazu.</span></span></a>,
+          weil es mehr Spaß macht als es sollte.</p>
+
+        <p>Nebenbei: Der Name kommt von
+          <a class="tuer" href="#">Celine<span class="vor"><i class="mono">HINTERTÜRCHEN</i><b>Das Regal mit den Mitbringseln</b><span>Sie bringt mir von überall was mit. Meistens Dackel. Manchmal Dinos.</span></span></a>.
+          Sie nennt mich so, weil ich angeblich eine richtige Maus bin.</p>
+
+        <div class="rand links">Kleine Blümchen im Text sind Türen. Manche führen woandershin, als du denkst.</div>
+
+        <p>Wenn du willst, dass ich was für dich schneide — schreib mir einfach. Ich antworte meistens noch am selben Tag.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<span class="abschnitt">UND DAS LIEGT HINTER ZWEI DER TÜREN</span>
+<p class="hinweis">Jede Tür führt in eine Welt, die <b>anders aussieht als der Brief</b> — andere Farben, andere Stimmung. Das ist der Reiz: Man weiß vorher nicht, wo man landet. Du legst jede Welt im Admin selbst an.</p>
+
+<div class="welten">
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com/blender</b></div>
+    <div class="welt w-blender">
+      <div class="kl">HINTER DER TÜR „BLENDER"</div>
+      <h5 class="tropi">Was ich in 3D anstelle</h5>
+      <p>Angefangen, weil ein Kunde was in 3D wollte. Geblieben, weil ich abends freiwillig weitermache.</p>
+      <div class="gitter"><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+  </div>
+
+  <div class="fenster">
+    <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com/mitbringsel</b></div>
+    <div class="welt w-celine">
+      <div class="kl">HINTER DER TÜR „CELINE"</div>
+      <h5 class="tropi">Das Regal</h5>
+      <p>Sie bringt mir von überall was mit. Fast immer ein Dackel oder ein Dino. Hier stehen sie alle.</p>
+      <div class="regal">
+        <div style="width:38px;height:46px"></div><div style="width:30px;height:34px"></div>
+        <div style="width:44px;height:52px"></div><div style="width:26px;height:29px"></div>
+        <div style="width:34px;height:40px"></div>
+      </div>
+      <svg style="position:absolute;bottom:-8px;right:12px;width:112px;opacity:.28" viewBox="0 0 170 62" fill="#8C6A5C">
+        <path d="M28 30 C22 26 20 16 26 12 C28 20 32 24 34 27 Z"/><rect x="30" y="24" width="96" height="22" rx="11"/>
+        <ellipse cx="134" cy="24" rx="15" ry="12.5"/><rect x="139" y="24" width="19" height="10" rx="5"/>
+        <rect x="38" y="43" width="8" height="15" rx="4"/><rect x="54" y="43" width="8" height="15" rx="4"/>
+        <rect x="100" y="43" width="8" height="15" rx="4"/><rect x="116" y="43" width="8" height="15" rx="4"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="knopfreihe">
+  <button class="knopf" data-choice="ja" onclick="pick(this,'Ja, so bauen')">Ja — so bauen</button>
+  <button class="knopf" data-choice="fast" onclick="pick(this,'Fast, aber Details ändern')">Fast — Details ändern</button>
+</div>
+
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="bl-a"><path d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></g>
+</defs></svg>
+
+<script>
+function pick(btn, name){
+  document.querySelectorAll('.knopf').forEach(b=>b.classList.remove('an'));
+  btn.classList.add('an');
+  if (window.brainstorm) window.brainstorm.choice(btn.dataset.choice, { text: name });
+}
+</script>

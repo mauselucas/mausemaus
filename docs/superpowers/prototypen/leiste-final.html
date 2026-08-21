@@ -1,0 +1,287 @@
+<link rel="stylesheet" href="https://mausemaus.com/assets/fonts.css">
+
+<style>
+.mm * { box-sizing:border-box; }
+.mm .tropi { font-family:'Tropi',cursive,sans-serif; font-weight:400; }
+.mm .mono  { font-family:'Space Mono',monospace; }
+
+.fenster { border-radius:14px; overflow:hidden; border:1px solid rgba(0,0,0,.18);
+           box-shadow:0 18px 50px rgba(0,0,0,.3); }
+.leiste { background:#e6e6e6; padding:9px 14px; display:flex; align-items:center; gap:7px; }
+.leiste i { width:11px; height:11px; border-radius:50%; display:block; }
+.leiste .u{background:#ff5f57}.leiste .g{background:#febc2e}.leiste .n{background:#28c840}
+.leiste b { margin-left:12px; font:400 11px/1 'Space Mono',monospace; color:#777; }
+
+.schalter { display:flex; margin:0 0 8px; border:1.5px solid #BFCC94; border-radius:999px;
+   overflow:hidden; width:max-content; }
+.schalter button { font:700 11.5px/1 'Space Mono',monospace; letter-spacing:.13em; padding:12px 24px;
+   border:0; background:transparent; color:#BFCC94; cursor:pointer; transition:.15s; }
+.schalter button.an { background:#BFCC94; color:#0D1821; }
+.tempo { font:400 10px/1 'Space Mono',monospace; letter-spacing:.14em; color:#6b7476; margin:0 0 20px; }
+
+.buehne { display:flex; height:620px; background:#FBFAF6; }
+.rail { flex:none; width:252px; border-right:1px solid #EDEAE1; position:relative; background:#FBFAF6; z-index:6; }
+.rail.zu { width:64px; }
+.marke { font:400 21px/1 'Tropi',cursive,sans-serif; padding:22px 20px 0; color:#0D1821; white-space:nowrap; }
+.marke em { font-style:normal; color:#BFCC94; }
+.rail.zu .marke { opacity:0; }
+.mini { position:absolute; top:23px; left:0; width:64px; text-align:center; opacity:0;
+   font:400 22px/1 'Tropi',cursive,sans-serif; color:#0D1821; }
+.rail.zu .mini { opacity:1; }
+
+.gleis { position:absolute; left:28px; top:74px; bottom:82px; width:8px; border-radius:99px;
+         background:#E9E6DC; overflow:hidden; }
+.seg { position:absolute; left:0; width:8px; cursor:pointer; }
+.seg:after { content:''; position:absolute; left:-10px; right:-10px; top:0; bottom:0; }
+
+.etiketten { position:absolute; inset:0; pointer-events:none; }
+.et { position:absolute; left:52px; padding:5px 9px; border-radius:6px; display:flex; gap:8px;
+   align-items:flex-start; pointer-events:auto; cursor:pointer; transition:background .16s, transform .16s; }
+.et .pkt { width:6px; height:6px; border-radius:50%; margin-top:5.5px; flex:none; }
+.et b { font:500 12.5px/1.32 'Space Grotesk',sans-serif; color:#5b625f; }
+.et:hover { background:#F2EFE6; transform:translateX(2px); }
+.et:hover b { color:#0D1821; }
+.et.jetzt { background:#EFEDE2; }
+.et.jetzt b { color:#0D1821; font-weight:600; }
+.fuehrung, .stummel { position:absolute; background:#CCC6B4; }
+.fuehrung { width:1px; } .stummel { height:1px; }
+
+.kopf { position:absolute; left:22.5px; width:19px; height:19px; margin-top:-9.5px; z-index:5; pointer-events:none; }
+.kopf .rund { position:absolute; left:5px; top:5px; width:9px; height:9px; border-radius:50%;
+   background:#0D1821; box-shadow:0 0 0 4.5px #FBFAF6, 0 0 0 6px rgba(13,24,33,.22); }
+.kopf .zeit { position:absolute; left:196px; top:2.5px; width:44px; text-align:right;
+   font:400 9px/1 'Space Mono',monospace; color:#B3AFA2; font-variant-numeric:tabular-nums; }
+.kopf .faden { position:absolute; left:20px; top:9px; right:48px; height:1px; opacity:0; }
+.sicht { position:absolute; left:26.5px; width:11px; background:rgba(13,24,33,.055);
+   border-radius:99px; z-index:3; pointer-events:none; }
+.fuss { position:absolute; bottom:24px; left:28px; }
+.fuss div { display:flex; align-items:center; gap:7px; font:400 9.5px/1.4 'Space Grotesk',sans-serif;
+   color:#A8A398; margin-bottom:5px; }
+.fuss span { width:8px; height:8px; border-radius:99px; }
+.klammer { position:absolute; bottom:22px; right:11px; width:23px; height:23px; border-radius:7px;
+   background:#F2EFE6; color:#9A9689; font:400 11px/1 'Space Mono',monospace; cursor:pointer; z-index:9;
+   display:flex; align-items:center; justify-content:center; }
+.klammer:hover { background:#BFCC94; color:#0D1821; }
+.rail.zu .et, .rail.zu .fuehrung, .rail.zu .stummel, .rail.zu .fuss,
+.rail.zu .kopf .zeit, .rail.zu .kopf .faden { opacity:0; pointer-events:none; }
+.rail.zu .klammer { right:-11.5px; }
+
+/* ── VORHER: Lücken, blasse Linien, breites Feld, freier Timecode ── */
+.alt .seg { border-radius:99px; }
+.alt .fuehrung, .alt .stummel { background:#DAD6CA; }
+.alt .stummel { display:none; }
+.alt .et { width:172px; }
+.alt .kopf .faden { display:none; }
+
+/* ── JETZT ── */
+.neu .seg { border-radius:0; box-shadow:0 -1.5px 0 #FBFAF6; }
+.neu .seg:first-child { box-shadow:none; }
+.neu .et { width:max-content; max-width:180px; }
+.neu .kopf .faden { opacity:1;
+  background:repeating-linear-gradient(to right,#D8D3C4 0 2px,transparent 2px 5px); }
+
+.scroller { flex:1; overflow-y:auto; scroll-behavior:smooth; }
+.sp { max-width:520px; margin:0 auto; padding:56px 26px 210px; }
+.sp h4 { font:400 42px/1.05 'Tropi',cursive,sans-serif; margin:0 0 6px; color:#0D1821; }
+.sp .unter { font:400 10.5px/1 'Space Mono',monospace; letter-spacing:.16em; color:#A8A79C; margin-bottom:30px; }
+.sp p { font:400 16.5px/1.8 'Space Grotesk',sans-serif; color:#232c31; margin:0 0 20px; }
+
+.punkte { margin-top:24px; font:400 14px/1.7 'Space Grotesk',sans-serif; color:#9aa1a5; max-width:820px; }
+.punkte li { margin-bottom:8px; }
+.punkte b { color:#BFCC94; font-weight:500; }
+</style>
+
+<h2>Die drei Punkte, eingebaut</h2>
+<p class="subtitle">Umschalten und vergleichen. Das Pacing steht in beiden auf „sehr weich" — es geht hier nur ums Aussehen.</p>
+
+<div class="mm neu" id="mm">
+
+<div class="schalter">
+  <button id="bAlt">VORHER</button>
+  <button id="bNeu" class="an">JETZT</button>
+</div>
+<div class="tempo">PACING: HALTEN 760 MS · DAUER 860 MS · KURVE .50 / .12 · MAUS 1100 MS · SCHWELLE 120 PX</div>
+
+<div class="fenster">
+  <div class="leiste"><i class="u"></i><i class="g"></i><i class="n"></i><b>mausemaus.com</b></div>
+  <div class="buehne">
+    <div class="rail" id="rail">
+      <div class="marke tropi">mausemaus<em>.</em></div>
+      <div class="mini tropi">m</div>
+      <div class="gleis" id="gleis"></div>
+      <div class="sicht" id="sicht"></div>
+      <div class="etiketten" id="etiketten"></div>
+      <div class="kopf" id="kopf"><div class="rund"></div><div class="faden"></div><div class="zeit mono">00:00</div></div>
+      <div class="fuss">
+        <div><span style="background:#3E5A78"></span>berufliche Projekte</div>
+        <div><span style="background:#D6D3C4"></span>persönliches</div>
+      </div>
+      <div class="klammer" id="klammer" title="offen halten">‹</div>
+    </div>
+
+    <div class="scroller" id="scroller">
+      <div class="sp" id="sp">
+        <section data-t="Hallo" data-art="p">
+          <h4 class="tropi">Hallo, ich bin Lucas.</h4>
+          <div class="unter mono">KÖLN-EHRENFELD · FREELANCE</div>
+          <p>Ich schneide Videos. Beruflich, seit ich neunzehn bin — und ich mag es immer noch, was ich nicht von allem behaupten kann.</p>
+          <p>Wenn du wenig Zeit hast: Links siehst du, wo die Arbeit steht. Die farbigen Abschnitte sind berufliche Projekte, die blassen bin ich.</p>
+        </section>
+        <section data-t="Wie ich angefangen hab" data-art="p">
+          <p>Angefangen hat es mit Mediendesign, dann Mediengestalter Bild und Ton. Ich bin ziemlich schnell an dem Punkt gelandet, an dem ich lieber selbst schneide, als über Schnitt zu reden.</p>
+        </section>
+        <section data-t="The Race — Staffel 3" data-art="a" data-farbe="#3E5A78">
+          <p>Am liebsten erzähle ich dir von The Race. Adventure-Serie für Joyn und ProSieben, dritte Staffel, bei 33minutes. Schnitt und Motion.</p>
+        </section>
+        <section data-t="Das Werkzeug, das ich mir gebaut habe" data-art="a" data-farbe="#6E6E7A">
+          <p>Irgendwann ist mir aufgefallen, dass ich jede einzelne Geldeinblendung von Hand baue. Hunderte davon. Also habe ich aufgehört zu schneiden und angefangen zu bauen.</p>
+          <p>Zwei Tage später lief es von allein — und ich habe für den Rest der Staffel keine Einblendung mehr angefasst.</p>
+        </section>
+        <section data-t="Bastian Keller" data-art="a" data-farbe="#8E4E9B">
+          <p>Gerade läuft Bastian Keller. Social Media, also Reels und Thumbnails, und zwischendurch was Großes.</p>
+        </section>
+        <section data-t="Simplicissimus" data-art="a" data-farbe="#A8913F">
+          <p>Für Simplicissimus mache ich Feinschnitt und Animation. Da habe ich mir 3D beigebracht, weil es gebraucht wurde — und bin hängen geblieben.</p>
+        </section>
+        <section data-t="Blender" data-art="p">
+          <p>Was mich gerade wirklich beschäftigt, ist Blender. Angefangen für einen Kunden, geblieben, weil ich abends freiwillig weitermache.</p>
+        </section>
+        <section data-t="Woher der Name kommt" data-art="p">
+          <p>Der Name kommt von Celine. Wir haben uns beide Maus genannt, und irgendwann bin ich mausemaus geworden.</p>
+        </section>
+        <section data-t="Schreib mir" data-art="k" data-farbe="#BFCC94">
+          <p>Wenn du willst, dass ich was für dich schneide — schreib mir einfach. Ich antworte meistens noch am selben Tag.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ul class="punkte">
+  <li><b>Lückenlos.</b> Die Abschnitte stoßen jetzt direkt aneinander, getrennt nur durch eine Haarlinie — so wie Schnitte in einer echten Zeitleiste. Aus einer Perlenkette wird eine Spur.</li>
+  <li><b>Führungslinien sichtbar,</b> mit kleinem Haken zum Etikett hin. Wenn sie ihre Arbeit tun sollen, müssen sie zu sehen sein.</li>
+  <li><b>Das aktive Feld schmiegt sich an den Titel</b> statt über die ganze Spalte zu laufen.</li>
+  <li><b>Der Timecode hängt am Kopf</b> — eine gepunktete Linie verbindet beide. Er schwebt nicht mehr allein rechts im Raum.</li>
+  <li><b>Persönliche Abschnitte etwas kräftiger,</b> damit man merkt, dass da überhaupt einer ist.</li>
+</ul>
+</div>
+
+<script>
+(function(){
+  const mm=document.getElementById('mm'), rail=document.getElementById('rail'),
+        gleis=document.getElementById('gleis'), kopf=document.getElementById('kopf'),
+        sicht=document.getElementById('sicht'), lay=document.getElementById('etiketten'),
+        sc=document.getElementById('scroller'), klammer=document.getElementById('klammer');
+  const abschnitte=[...document.querySelectorAll('#sp section')];
+  const P={halten:760,dauer:860,x1:.50,x2:.12,maus:1100,schwelle:120};
+  const BLASS='#D6D3C4';
+  let etiketten=[], angepinnt=false, zuTimer=null, letzterStand=0;
+
+  function stil(){
+    [rail,...rail.querySelectorAll('.marke,.mini,.et,.fuehrung,.stummel,.fuss,.kopf .zeit,.kopf .faden,.klammer')]
+      .forEach(e=>{ e.style.transitionProperty='width,opacity,right,max-width';
+        e.style.transitionDuration=P.dauer+'ms';
+        e.style.transitionTimingFunction='cubic-bezier('+P.x1+',0,'+P.x2+',1)'; });
+  }
+
+  const gh=()=>gleis.getBoundingClientRect().height, gtop=()=>gleis.offsetTop;
+
+  function bauen(){
+    gleis.querySelectorAll('.seg').forEach(s=>s.remove()); lay.innerHTML=''; etiketten=[];
+    const ganz=sc.scrollHeight, H=gh(), T=gtop(), mitten=[];
+    const neu=mm.classList.contains('neu');
+
+    abschnitte.forEach((ab,i)=>{
+      const s=document.createElement('div'); s.className='seg';
+      let o, h;
+      if(neu){
+        // lückenlos: jeder Abschnitt reicht bis zum Anfang des nächsten
+        const start = i===0 ? 0 : ab.offsetTop/ganz*100;
+        const ende  = i===abschnitte.length-1 ? 100 : abschnitte[i+1].offsetTop/ganz*100;
+        o=start; h=Math.max(1.2, ende-start);
+      } else {
+        o=ab.offsetTop/ganz*100; h=Math.max(2.2, ab.offsetHeight/ganz*100);
+      }
+      s.style.top=o+'%'; s.style.height=h+'%';
+      s.style.background=ab.dataset.farbe||BLASS;
+      s.onclick=()=>sc.scrollTo({top:ab.offsetTop-16,behavior:'smooth'});
+      gleis.appendChild(s);
+      mitten.push(T+(o+h/2)/100*H);
+    });
+
+    abschnitte.forEach(ab=>{
+      const e=document.createElement('div'); e.className='et';
+      e.innerHTML='<span class="pkt" style="background:'+(ab.dataset.farbe||BLASS)+'"></span><b>'+ab.dataset.t+'</b>';
+      e.onclick=()=>sc.scrollTo({top:ab.offsetTop-16,behavior:'smooth'});
+      lay.appendChild(e); etiketten.push(e);
+    });
+
+    const hh=etiketten.map(e=>e.getBoundingClientRect().height);
+    let z=mitten.map((m,i)=>m-hh[i]/2);
+    const LUFT=8, OBEN=T-4, UNTEN=T+H+4;
+    for(let i=1;i<z.length;i++){ const min=z[i-1]+hh[i-1]+LUFT; if(z[i]<min) z[i]=min; }
+    if(z.at(-1)+hh.at(-1)>UNTEN){ z[z.length-1]=UNTEN-hh.at(-1);
+      for(let i=z.length-2;i>=0;i--){ const max=z[i+1]-hh[i]-LUFT; if(z[i]>max) z[i]=max; } }
+    if(z[0]<OBEN) z[0]=OBEN;
+
+    etiketten.forEach((e,i)=>{
+      e.style.top=z[i]+'px';
+      const eig=z[i]+hh[i]/2, weg=eig-mitten[i];
+      if(Math.abs(weg)>7){
+        const f=document.createElement('div'); f.className='fuehrung';
+        f.style.left='40px'; f.style.top=Math.min(eig,mitten[i])+'px'; f.style.height=Math.abs(weg)+'px';
+        lay.appendChild(f);
+        const st=document.createElement('div'); st.className='stummel';
+        st.style.left='40px'; st.style.width='11px'; st.style.top=eig+'px';
+        lay.appendChild(st);
+      }
+    });
+    stil();
+  }
+
+  const mmss=f=>{const s=Math.round(f*214);
+    return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+
+  function zumachen(){ if(!angepinnt) rail.classList.add('zu'); }
+  function aufmachen(){ rail.classList.remove('zu'); }
+  const stopUhr=()=>{ clearTimeout(zuTimer); zuTimer=null; };
+
+  function aktualisieren(){
+    const max=sc.scrollHeight-sc.clientHeight, f=max>0?Math.min(1,sc.scrollTop/max):0;
+    const an=sc.scrollTop/sc.scrollHeight, si=sc.clientHeight/sc.scrollHeight;
+    kopf.style.top=(gtop()+an*gh())+'px'; sicht.style.top=(gtop()+an*gh())+'px';
+    sicht.style.height=(si*gh())+'px'; kopf.querySelector('.zeit').textContent=mmss(f);
+    const mitte=sc.scrollTop+sc.clientHeight*0.45;
+    let akt=0; abschnitte.forEach((ab,i)=>{ if(ab.offsetTop<=mitte) akt=i; });
+    if(max>0&&sc.scrollTop>=max-4) akt=abschnitte.length-1;
+    etiketten.forEach((e,i)=>e.classList.toggle('jetzt',i===akt));
+
+    const runter=sc.scrollTop>letzterStand; letzterStand=sc.scrollTop;
+    if(angepinnt) return;
+    if(sc.scrollTop<=P.schwelle){ stopUhr(); aufmachen(); return; }
+    if(runter){ if(!rail.classList.contains('zu') && !zuTimer)
+        zuTimer=setTimeout(()=>{zuTimer=null; zumachen();}, P.halten); }
+    else { stopUhr(); aufmachen(); }
+  }
+
+  rail.addEventListener('mouseenter',()=>{ stopUhr(); aufmachen(); });
+  rail.addEventListener('mouseleave',()=>{ stopUhr();
+    if(!angepinnt && sc.scrollTop>P.schwelle)
+      zuTimer=setTimeout(()=>{zuTimer=null; zumachen();}, P.maus); });
+  klammer.onclick=()=>{ angepinnt=!angepinnt; klammer.textContent=angepinnt?'›':'‹';
+    stopUhr(); if(angepinnt) aufmachen(); };
+  sc.addEventListener('scroll',aktualisieren,{passive:true});
+
+  function modus(n){
+    mm.classList.toggle('neu',n); mm.classList.toggle('alt',!n);
+    document.getElementById('bNeu').classList.toggle('an',n);
+    document.getElementById('bAlt').classList.toggle('an',!n);
+    setTimeout(()=>{bauen();aktualisieren();},30);
+  }
+  document.getElementById('bAlt').onclick=()=>modus(false);
+  document.getElementById('bNeu').onclick=()=>modus(true);
+
+  setTimeout(()=>{bauen();aktualisieren();},80);
+  window.addEventListener('resize',()=>{bauen();aktualisieren();});
+})();
+</script>
