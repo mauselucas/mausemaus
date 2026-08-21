@@ -56,7 +56,7 @@
 
   /* ---------- Blog-Beiträge ---------- */
 
-  const CACHE_B = 'mm.posts.v1';
+  const CACHE_B = 'mm.posts.v2';
 
   window.mmLoadPosts = async function (slug) {
     if (!eingerichtet) return [];
