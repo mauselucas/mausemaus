@@ -129,7 +129,8 @@ Seite bewiesen, bevor irgendetwas verändert wird.
 
 **Schnittstellen:**
 - Liefert: `starteChrome({port}) → {beenden()}` · `oeffne(url, {breite, hoehe}) → Seite` mit
-  `seite.werte(ausdruck)`, `seite.warte(ms)`, `seite.bild(pfad)`, `seite.zu()` ·
+  `seite.werte(ausdruck)`, `seite.warte(ms)`, `seite.bild(pfad)`,
+  `seite.fehlerAufSeite() → string[]` (Ausnahmen und fehlgeschlagene Ladevorgänge), `seite.zu()` ·
   `starteServer({wurzel, port}) → {beenden()}` · `pruefe(name, bedingung, zusatz)` und
   `bericht()` aus `tests/chrome.mjs`.
 
@@ -165,12 +166,23 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
   const ws = new WebSocket(ziel.webSocketDebuggerUrl);
   await new Promise(r => (ws.onopen = r));
 
-  let n = 0; const offen = new Map();
-  ws.onmessage = e => { const m = JSON.parse(e.data); if (offen.has(m.id)) { offen.get(m.id)(m); offen.delete(m.id); } };
+  let n = 0; const offen = new Map(); const fehler = [];
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.id && offen.has(m.id)) { offen.get(m.id)(m); offen.delete(m.id); return; }
+    /* Fehler der Seite mitschreiben. Log.entryAdded meldet auch Dateien, die
+       nicht geladen werden konnten — genau der Fehler, der die Blog-Seiten
+       schon einmal ohne CSS ausgeliefert hat. */
+    if (m.method === 'Runtime.exceptionThrown')
+      fehler.push(m.params?.exceptionDetails?.exception?.description
+               || m.params?.exceptionDetails?.text || 'Ausnahme');
+    if (m.method === 'Log.entryAdded' && m.params?.entry?.level === 'error')
+      fehler.push(m.params.entry.text + (m.params.entry.url ? ' — ' + m.params.entry.url : ''));
+  };
   const ruf = (method, params = {}) => new Promise(res => {
     const id = ++n; offen.set(id, res); ws.send(JSON.stringify({ id, method, params })); });
 
-  await ruf('Page.enable'); await ruf('Runtime.enable');
+  await ruf('Page.enable'); await ruf('Runtime.enable'); await ruf('Log.enable');
   /* Feste Fenstergröße — sonst misst jeder Rechner etwas anderes.
      Unter 520 px liefert Chrome nur einen Ausschnitt, nie schmaler prüfen. */
   await ruf('Emulation.setDeviceMetricsOverride',
@@ -190,9 +202,8 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
       writeFileSync(pfad, Buffer.from(r.result.data, 'base64'));
       return pfad;
     },
-    async fehlerAufSeite() {
-      return this.werte(`JSON.stringify(window.__fehler || [])`);
-    },
+    /* Alles, was die Seite an Fehlern gemeldet hat, seit sie geöffnet wurde. */
+    fehlerAufSeite() { return fehler.slice(); },
     async zu() { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${ziel.id}`); },
   };
 }
@@ -283,15 +294,23 @@ const s = await oeffne('http://127.0.0.1:8901/');
 await s.warte(2500);
 const d = JSON.parse(await s.werte(`JSON.stringify({
   titel: document.title,
-  schrift: document.fonts.check('16px Tropi'),
+  /* NICHT document.fonts.check() benutzen: das findet auch Schriften, die
+     auf dem Rechner installiert sind. Auf Lucas' Mac liegt eine Schrift
+     namens "Tropi Land" — die Prüfung meldete deshalb auch dann Erfolg,
+     wenn fonts.css gar nicht geladen war. Stattdessen nachsehen, ob die
+     Schrift wirklich aus einer @font-face-Regel der Seite stammt. */
+  schrift: [...document.fonts].some(f => f.family === 'Tropi'),
+  schriftQuelle: [...document.fonts].length + ' Schriftschnitte aus CSS',
   css: getComputedStyle(document.body).backgroundColor,
   hoehe: document.body.scrollHeight
 })`));
 
 pruefe('Seite lädt', d.titel.includes('mausemaus'), d.titel);
-pruefe('Schrift Tropi geladen', d.schrift);
+pruefe('Schrift Tropi kommt aus fonts.css', d.schrift, d.schriftQuelle);
 pruefe('CSS greift (Untergrund nicht weiß)', d.css !== 'rgba(0, 0, 0, 0)' && d.css !== 'rgb(255, 255, 255)', d.css);
 pruefe('Seite hat Höhe', d.hoehe > 1000, d.hoehe + ' px');
+const f = s.fehlerAufSeite();
+pruefe('keine Fehler auf der Seite', f.length === 0, f.join(' | ').slice(0, 200));
 
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();
@@ -303,7 +322,7 @@ bericht();
 node tests/pruefe-bestand.mjs
 ```
 
-Erwartet: vier Zeilen `ok`, dann `4 von 4 bestanden`.
+Erwartet: fünf Zeilen `ok`, dann `5 von 5 bestanden`.
 Falls „CSS greift" fehlschlägt: Die Datei wurde als `file://` geöffnet statt über den Server,
 oder `_redirects` fängt Anfragen ab, die es nicht sollte.
 
