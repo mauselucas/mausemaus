@@ -665,8 +665,19 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
         letzterStand = 0, zeigerDrin = false, springtGerade = 0;
 
     const gh = () => gleis.getBoundingClientRect().height;
-    const gt = () => gleis.offsetTop;
+    const gt = () => gleis.offsetTop;   // gleis liegt in .mml (position:relative) — hier stimmt offsetTop
     const stopUhr = () => { clearTimeout(uhr); uhr = null; };
+
+    /* ACHTUNG: element.offsetTop zählt ab dem nächsten POSITIONIERTEN Vorfahren,
+       nicht ab dem Scroll-Bereich. Auf dem Handy scrollt das Fenster statt des
+       Kastens, und dann stimmt offsetTop nicht mehr. Deshalb immer über die
+       tatsächliche Lage rechnen — das gilt in beiden Fällen. */
+    const amFenster = () => scroller === document.scrollingElement;
+    const obenVon = el => amFenster()
+      ? el.getBoundingClientRect().top + window.scrollY
+      : el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+    const hoeheVon = el => el.getBoundingClientRect().height;
+    const standVon = () => amFenster() ? window.scrollY : scroller.scrollTop;
 
     function zumachen() { if (!angepinnt && !zeigerDrin) wurzel.classList.add('mml-zu'); }
     function aufmachen() { wurzel.classList.remove('mml-zu'); }
@@ -675,7 +686,9 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
        als Nutzer-Scrollen gewertet wird — sonst klappt die Leiste zu. */
     function springe(el) {
       springtGerade = Date.now();
-      scroller.scrollTo({ top: el.offsetTop - 16, behavior: 'smooth' });
+      const ziel = Math.max(0, obenVon(el) - 16);
+      if (amFenster()) window.scrollTo({ top: ziel, behavior: 'smooth' });
+      else scroller.scrollTo({ top: ziel, behavior: 'smooth' });
     }
 
     function bauen() {
@@ -686,8 +699,8 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
       abschnitte.forEach(ab => {
         const s = document.createElement('div');
         s.className = 'mml-seg';
-        const o = ab.element.offsetTop / ganz * 100;
-        const h = Math.max(2.2, ab.element.offsetHeight / ganz * 100);
+        const o = obenVon(ab.element) / ganz * 100;
+        const h = Math.max(2.2, hoeheVon(ab.element) / ganz * 100);
         s.style.top = o + '%'; s.style.height = h + '%';
         s.style.background = ab.farbe || BLASS;
         s.onclick = () => springe(ab.element);
@@ -743,9 +756,10 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
     };
 
     function aktualisieren() {
+      const stand = standVon();
       const max = scroller.scrollHeight - scroller.clientHeight;
-      const f = max > 0 ? Math.min(1, scroller.scrollTop / max) : 0;
-      const anteil = scroller.scrollTop / scroller.scrollHeight;
+      const f = max > 0 ? Math.min(1, stand / max) : 0;
+      const anteil = stand / scroller.scrollHeight;
       const sichtbar = scroller.clientHeight / scroller.scrollHeight;
 
       kopf.style.top = (gt() + anteil * gh()) + 'px';
@@ -753,16 +767,16 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
       sicht.style.height = (sichtbar * gh()) + 'px';
       zeit.textContent = mmss(f);
 
-      const mitte = scroller.scrollTop + scroller.clientHeight * 0.45;
+      const mitte = stand + scroller.clientHeight * 0.45;
       let akt = 0;
-      abschnitte.forEach((ab, i) => { if (ab.element.offsetTop <= mitte) akt = i; });
+      abschnitte.forEach((ab, i) => { if (obenVon(ab.element) <= mitte) akt = i; });
       /* Der letzte Abschnitt kann nie bis zur Schwelle hochscrollen,
          weil darunter kein Text mehr kommt — also ganz unten immer er. */
-      if (max > 0 && scroller.scrollTop >= max - 4) akt = abschnitte.length - 1;
+      if (max > 0 && stand >= max - 4) akt = abschnitte.length - 1;
       etiketten.forEach((e, i) => e.classList.toggle('mml-jetzt', i === akt));
 
-      const runter = scroller.scrollTop > letzterStand;
-      letzterStand = scroller.scrollTop;
+      const runter = stand > letzterStand;
+      letzterStand = stand;
 
       if (angepinnt) return;
       /* Zeiger in der Leiste -> niemals von selbst zuklappen.
@@ -772,7 +786,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
       /* Ein durch Klick ausgelöster Sprung ist kein Nutzer-Scrollen. */
       if (Date.now() - springtGerade < 900) return;
 
-      if (scroller.scrollTop <= SCHWELLE) { stopUhr(); aufmachen(); return; }
+      if (stand <= SCHWELLE) { stopUhr(); aufmachen(); return; }
       if (runter) {
         if (!wurzel.classList.contains('mml-zu') && !uhr)
           uhr = setTimeout(() => { uhr = null; zumachen(); }, HALTEN);
@@ -782,7 +796,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
     const rein  = () => { zeigerDrin = true;  stopUhr(); aufmachen(); };
     const raus  = () => {
       zeigerDrin = false; stopUhr();
-      if (!angepinnt && scroller.scrollTop > SCHWELLE)
+      if (!angepinnt && standVon() > SCHWELLE)
         uhr = setTimeout(() => { uhr = null; zumachen(); }, NACH_MAUS);
     };
     wurzel.addEventListener('mouseenter', rein);
@@ -791,7 +805,9 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
       angepinnt = !angepinnt; griff.textContent = angepinnt ? '›' : '‹';
       stopUhr(); if (angepinnt) aufmachen();
     };
-    scroller.addEventListener('scroll', aktualisieren, { passive: true });
+    /* Scrollt das Fenster, hängt das Ereignis am Fenster — nicht am Element. */
+    const wo = amFenster() ? window : scroller;
+    wo.addEventListener('scroll', aktualisieren, { passive: true });
     const beiGroesse = () => { bauen(); aktualisieren(); };
     window.addEventListener('resize', beiGroesse);
 
@@ -803,7 +819,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
         stopUhr();
         wurzel.removeEventListener('mouseenter', rein);
         wurzel.removeEventListener('mouseleave', raus);
-        scroller.removeEventListener('scroll', aktualisieren);
+        wo.removeEventListener('scroll', aktualisieren);
         window.removeEventListener('resize', beiGroesse);
         wurzel.innerHTML = '';
       },
@@ -1638,16 +1654,11 @@ in `index.html` je nach Breite gewählt — im Startskript vor `mmLeiste`:
 ```
 
 und `{ scroller }` statt `{ scroller: document.getElementById('scroller') }` übergeben.
-In `leiste.js` müssen die Ereignisse dann am richtigen Ort hängen — `aktualisieren` wird
-zusätzlich an `window` gebunden:
 
-```js
-    const wo = scroller === document.scrollingElement ? window : scroller;
-    wo.addEventListener('scroll', aktualisieren, { passive: true });
-```
-
-(die bestehende Zeile `scroller.addEventListener('scroll', …)` dadurch ersetzen, ebenso im
-`zerstoeren`-Teil `wo.removeEventListener`).
+**In `leiste.js` ist dafür nichts zu tun** — die Helfer `amFenster`, `obenVon` und `standVon`
+aus Aufgabe 3 decken beide Fälle bereits ab, und das Scroll-Ereignis hängt schon am richtigen
+Ort. Das war Absicht: Beide Fälle von Anfang an zu behandeln ist billiger, als `offsetTop`
+später überall herauszuoperieren.
 
 - [ ] **Schritt 4: Beide Prüfungen laufen lassen**
 
