@@ -1,0 +1,73 @@
+/* Chrome fernsteuern — ohne eine einzige fremde Abhängigkeit.
+   Node bringt WebSocket seit v22 mit, Chrome spricht das DevTools-Protokoll. */
+import { spawn } from 'node:child_process';
+import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+
+const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const PROFIL = new URL('./.profil/', import.meta.url).pathname;
+
+export async function starteChrome({ port = 9333 } = {}) {
+  rmSync(PROFIL, { recursive: true, force: true });
+  mkdirSync(PROFIL, { recursive: true });
+  const p = spawn(CHROME, [
+    '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${PROFIL}`,
+    '--no-first-run', '--no-default-browser-check', '--disable-gpu', 'about:blank',
+  ], { stdio: 'ignore' });
+
+  for (let i = 0; i < 50; i++) {
+    try { await fetch(`http://127.0.0.1:${port}/json/version`); return { port, beenden(){ p.kill(); } }; }
+    catch { await new Promise(r => setTimeout(r, 200)); }
+  }
+  throw new Error('Chrome ist nicht hochgekommen');
+}
+
+export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = {}) {
+  const ziel = await (await fetch(
+    `http://127.0.0.1:${port}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' })).json();
+  const ws = new WebSocket(ziel.webSocketDebuggerUrl);
+  await new Promise(r => (ws.onopen = r));
+
+  let n = 0; const offen = new Map();
+  ws.onmessage = e => { const m = JSON.parse(e.data); if (offen.has(m.id)) { offen.get(m.id)(m); offen.delete(m.id); } };
+  const ruf = (method, params = {}) => new Promise(res => {
+    const id = ++n; offen.set(id, res); ws.send(JSON.stringify({ id, method, params })); });
+
+  await ruf('Page.enable'); await ruf('Runtime.enable');
+  /* Feste Fenstergröße — sonst misst jeder Rechner etwas anderes.
+     Unter 520 px liefert Chrome nur einen Ausschnitt, nie schmaler prüfen. */
+  await ruf('Emulation.setDeviceMetricsOverride',
+    { width: breite, height: hoehe, deviceScaleFactor: 1, mobile: breite < 768 });
+
+  return {
+    async werte(ausdruck) {
+      const r = await ruf('Runtime.evaluate',
+        { expression: ausdruck, returnByValue: true, awaitPromise: true });
+      if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description
+        || r.result.exceptionDetails.text);
+      return r.result.result.value;
+    },
+    warte: ms => new Promise(r => setTimeout(r, ms)),
+    async bild(pfad) {
+      const r = await ruf('Page.captureScreenshot', { format: 'png' });
+      writeFileSync(pfad, Buffer.from(r.result.data, 'base64'));
+      return pfad;
+    },
+    async fehlerAufSeite() {
+      return this.werte(`JSON.stringify(window.__fehler || [])`);
+    },
+    async zu() { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${ziel.id}`); },
+  };
+}
+
+/* ---- kleine Behauptungssammlung ---- */
+const ergebnisse = [];
+export function pruefe(name, bedingung, zusatz = '') {
+  ergebnisse.push({ name, ok: !!bedingung, zusatz });
+  console.log(`${bedingung ? '  ok  ' : ' FEHL '} ${name}${zusatz ? '  — ' + zusatz : ''}`);
+}
+export function bericht() {
+  const schlecht = ergebnisse.filter(e => !e.ok);
+  console.log(`\n${ergebnisse.length - schlecht.length} von ${ergebnisse.length} bestanden`);
+  if (schlecht.length) { process.exitCode = 1; }
+  return schlecht.length === 0;
+}
