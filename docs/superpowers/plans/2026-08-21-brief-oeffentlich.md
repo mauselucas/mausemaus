@@ -587,12 +587,10 @@ await s.warte(1700);                      // deutlich länger als 760 ms Halten
 pruefe('Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
-/* Gegenprobe: mit Zeiger AUSSERHALB muss dasselbe Wegscrollen sie zuklappen —
-   sonst würde die Prüfung oben auch dann bestehen, wenn die Leiste nie zugeht. */
-await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
-await s.warte(1400);                      // 1100 ms nach Mausaustritt + Puffer
-pruefe('nach Mausaustritt geht sie zu (die Prüfung oben ist damit aussagekräftig)',
-  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+/* Die Leiste ist jetzt offen, der Zeiger drin, weit unten gescrollt.
+   Genau der Zustand, den der folgende Block als Ausgangslage braucht —
+   und er ist zugleich die Gegenprobe zur Zeile oben: Wenn die Leiste sich
+   gleich nach Mausaustritt schließt, war „bleibt offen" eine echte Aussage. */
 
 /* --- Maus raus: 1100 ms warten, dann zu --- */
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
@@ -626,6 +624,22 @@ Und in `.gitignore` ergänzen:
 ```
 HOCHLADEN/tests-feste
 ```
+
+**Die Reihenfolge der Prüfblöcke ist tragend**, weil jeder Block den Zustand
+hinterlässt, den der nächste voraussetzt. Sie muss am Ende genau so lauten:
+
+1. Aufbau — Segmente, Etiketten, Breiten, Kurve, Dauer, Belegung des Gleises
+2. Pacing — 760 ms halten, dann zu
+3. Hochscrollen öffnet sofort *(Leiste danach: offen, oben)*
+4. Klick auf Etikett springt nach unten und klappt nicht zu *(springtGerade)*
+5. Klick auf Balken, dasselbe
+6. Wegscrollen bei Zeiger in der Leiste *(zeigerDrin)* — *(Leiste danach: offen, Zeiger drin, unten)*
+7. Maus raus: nach 400 ms noch offen, nach 1400 ms zu — dies ist zugleich die
+   Gegenprobe zu 6.
+8. Handy bei 520 px *(kommt in Aufgabe 8 dazu)*
+
+Wer hier einen Block einschiebt, muss prüfen, welchen Zustand der folgende erwartet.
+Ein Block, der die Leiste schließt, darf nicht vor einem stehen, der sie offen braucht.
 
 - [ ] **Schritt 4: Ausführen — muss fehlschlagen**
 
@@ -923,7 +937,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 node tests/pruefe-leiste.mjs
 ```
 
-Erwartet: `20 von 20 bestanden`.
+Erwartet: `19 von 19 bestanden`.
 
 **Zwei getrennte Gegenbeweise führen, jeweils in einer Kopie außerhalb des Projektordners.
 Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**

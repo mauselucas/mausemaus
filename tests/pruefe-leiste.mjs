@@ -103,6 +103,31 @@ await s.warte(1700);
 pruefe('auch ein Klick auf den Balken klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
+/* --- Die zweite Sperre, für sich allein geprüft ---
+   Die beiden Sperren decken verschiedene Fälle ab:
+     springtGerade  — ein durch Klick ausgelöster Sprung ist kein Wegscrollen.
+                      Auf Berührungsgeräten ohne Mauszeiger die einzige Sperre.
+     zeigerDrin     — wer den Zeiger in der Leiste hat, will sie benutzen;
+                      dann darf sie auch bei echtem Wegscrollen nicht zugehen.
+   Die Klickprüfung oben trifft nur die erste: Das sanfte Scrollen ist
+   innerhalb der 900-ms-Schonfrist beendet, weiter kommt der Code nie.
+   Hier also OHNE Klick, mit Abstand zu jeder Schonfrist. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
+await s.warte(200);
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+await s.warte(1000);                      // sicher jenseits der 900-ms-Schonfrist
+await s.werte(`document.getElementById('scroller').scrollTo({top:900,behavior:'instant'})`);
+await s.warte(1700);                      // deutlich länger als 760 ms Halten
+pruefe('Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu',
+  !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+
+/* Gegenprobe: mit Zeiger AUSSERHALB muss dasselbe Wegscrollen sie zuklappen —
+   sonst würde die Prüfung oben auch dann bestehen, wenn die Leiste nie zugeht. */
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
+await s.warte(1400);                      // 1100 ms nach Mausaustritt + Puffer
+pruefe('nach Mausaustritt geht sie zu (die Prüfung oben ist damit aussagekräftig)',
+  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+
 /* --- Maus raus: 1100 ms warten, dann zu --- */
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
 await s.warte(400);
