@@ -72,8 +72,8 @@ pruefe('Hochscrollen öffnet ohne Warten',
    ohnehin vom Zweig "hochscrollen = navigieren" aufgefangen und beweist
    über die Sperren gar nichts. Erst ein Sprung nach unten löst dieselbe
    Bedingung aus wie echtes Wegscrollen. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(200);
+await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
+await s.warte(300);                       // ganz oben, Leiste offen
 const zielIndex = JSON.parse(await s.werte(`(() => {
   const sc = document.getElementById('scroller');
   const ab = [...document.querySelectorAll('#sp section')];
@@ -83,24 +83,23 @@ const zielIndex = JSON.parse(await s.werte(`(() => {
 })()`));
 pruefe('es gibt einen Abschnitt weiter unten zum Anspringen', zielIndex > 0, 'Index ' + zielIndex);
 
-await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
-await s.warte(150);
+/* KEIN mouseenter — so verhält sich ein Berührungsgerät. Damit hängt diese
+   Prüfung allein an springtGerade und lässt sich einzeln widerlegen. */
 await s.werte(`document.querySelectorAll('.mml-et')[${zielIndex}].click()`);
 await s.warte(1700);
 const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
   zu: document.querySelector('.mml').classList.contains('mml-zu'),
   stand: document.getElementById('scroller').scrollTop
 })`));
-pruefe('der Klick ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
-pruefe('Klick in der Leiste klappt sie NICHT zu (Zeiger ist noch drin)', !nachKlick.zu);
+pruefe('der Tipp ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
+pruefe('Tippen auf ein Projekt klappt die Leiste nicht zu (ohne Mauszeiger)', !nachKlick.zu);
 
-/* Dasselbe über einen Klick auf den Balken statt auf das Etikett. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(200);
-await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+/* Dasselbe über einen Tipp auf den Balken statt auf das Etikett. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
+await s.warte(300);
 await s.werte(`document.querySelectorAll('.mml-seg')[${zielIndex}].click()`);
 await s.warte(1700);
-pruefe('auch ein Klick auf den Balken klappt sie nicht zu',
+pruefe('auch ein Tipp auf den Balken klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
 /* --- Die zweite Sperre, für sich allein geprüft ---

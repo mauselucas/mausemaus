@@ -49,6 +49,12 @@
     const hoeheVon = el => el.getBoundingClientRect().height;
     const standVon = () => amFenster() ? window.scrollY : scroller.scrollTop;
 
+    /* Zeiger in der Leiste -> niemals von selbst zuklappen. Das wird hier
+       geprüft, nicht schon in aktualisieren(): der Zeitgeber darf ruhig
+       anlaufen, wenn wer wegscrollt, während der Zeiger drin ist — er
+       verfängt nur nicht. Zwei Prüfstellen für dieselbe Sperre wären von
+       außen nicht unterscheidbar (keine Prüfung könnte zeigen, ob eine
+       davon fehlt) und sind darum bewusst auf eine einzige reduziert. */
     function zumachen() { if (!angepinnt && !zeigerDrin) wurzel.classList.add('mml-zu'); }
     function aufmachen() { wurzel.classList.remove('mml-zu'); }
 
@@ -162,11 +168,8 @@
       letzterStand = stand;
 
       if (angepinnt) return;
-      /* Zeiger in der Leiste -> niemals von selbst zuklappen.
-         Ohne diese Sperre klappte die Leiste zu, sobald man in ihr ein
-         Projekt anklickte: das ausgelöste Scrollen zählte als "runter". */
-      if (zeigerDrin) { stopUhr(); return; }
-      /* Ein durch Klick ausgelöster Sprung ist kein Nutzer-Scrollen. */
+      /* Ein durch Klick (oder Tipp, auf Berührungsgeräten ohne Mauszeiger)
+         ausgelöster Sprung ist kein Nutzer-Scrollen. */
       if (Date.now() - springtGerade < 900) return;
 
       if (stand <= SCHWELLE) { stopUhr(); aufmachen(); return; }
