@@ -429,6 +429,9 @@ Feste Abschnitte, keine Datenbank, keine Netzabfragen.
   .scroller { flex:1; overflow-y:auto; background:#FBFAF6; }
   .sp { max-width:520px; margin:0 auto; padding:56px 26px 210px; }
   .sp p { font-size:16.5px; line-height:1.8; margin:0 0 20px; }
+  /* Der Scroll-Spielraum kommt aus Text, NICHT aus einem großen
+     padding-bottom: Leerraum hinter dem letzten Abschnitt bläht
+     scroller.scrollHeight auf, und dann bleibt das halbe Gleis leer. */
 </style>
 <div class="buehne">
   <div id="leiste"></div>
@@ -440,9 +443,16 @@ Feste Abschnitte, keine Datenbank, keine Netzabfragen.
       <section data-titel="Das Werkzeug, das ich mir gebaut habe" data-art="beruflich" data-farbe="#6E6E7A"><p>Vier. Ein sehr langer Titel, der umbrechen muss und nicht abgeschnitten werden darf.</p><p>Zweiter Absatz.</p></section>
       <section data-titel="Bastian Keller" data-art="beruflich" data-farbe="#8E4E9B"><p>Fünf. Kurz.</p></section>
       <section data-titel="Simplicissimus" data-art="beruflich" data-farbe="#A8913F"><p>Sechs. Auch kurz.</p></section>
-      <section data-titel="Blender" data-art="persoenlich"><p>Sieben.</p></section>
-      <section data-titel="Woher der Name kommt" data-art="persoenlich"><p>Acht.</p></section>
-      <section data-titel="Schreib mir" data-art="kontakt" data-farbe="#BFCC94"><p>Neun. Der Schluss.</p></section>
+      <section data-titel="Blender" data-art="persoenlich"><p>Sieben. Ein mittellanger Abschnitt, damit die Balken unterschiedlich hoch werden und die Etiketten etwas zu verteilen haben.</p></section>
+      <section data-titel="Woher der Name kommt" data-art="persoenlich"><p>Acht. Auch dieser Abschnitt hat mehrere Zeilen, damit die Prüfseite den echten Seitenverhältnissen ähnelt.</p><p>Zweiter Absatz dazu.</p></section>
+      <section data-titel="Schreib mir" data-art="kontakt" data-farbe="#BFCC94">
+        <p>Neun. Der Schluss.</p>
+        <p>Dieser letzte Abschnitt ist bewusst lang, damit die Seite genug Scroll-Spielraum hat, ohne dass hinter dem letzten Abschnitt leerer Raum steht.</p>
+        <p>Stünde dort nur Leerraum, bliebe ein großer Teil des Gleises ungefüllt — die Balken werden gegen die gesamte scrollbare Höhe gerechnet, und Leerraum zählt dabei mit.</p>
+        <p>Deshalb steht hier Text statt Polsterung. So bildet die Prüfseite ab, wie die echte Seite aussieht, auf der hinter dem Kontaktteil ebenfalls kaum Leerraum steht.</p>
+        <p>Noch ein Absatz, damit der Spielraum sicher reicht.</p>
+        <p>Und noch einer.</p>
+      </section>
     </div>
   </div>
 </div>
@@ -498,6 +508,16 @@ pruefe('Etiketten haben feste Breite', a.etBreiten.length === 1 && a.etBreiten[0
 pruefe('Kurve wie festgelegt', a.kurve.replace(/\s/g,'') === 'cubic-bezier(0.5,0,0.12,1)', a.kurve);
 pruefe('Dauer 860 ms', a.dauer === '0.86s', a.dauer);
 
+/* Das Gleis muss weitgehend belegt sein. Steht hinter dem letzten Abschnitt
+   viel Leerraum, bleibt ein großer Teil der Leiste ungenutzt. */
+const fuellung = JSON.parse(await s.werte(`(() => {
+  const g = document.querySelector('.mml-gleis').getBoundingClientRect();
+  const belegt = [...document.querySelectorAll('.mml-seg')]
+    .reduce((n, x) => n + x.getBoundingClientRect().height, 0);
+  return JSON.stringify({ anteil: Math.round(belegt / g.height * 100) });
+})()`));
+pruefe('das Gleis ist zu mindestens 85 % belegt', fuellung.anteil >= 85, fuellung.anteil + ' %');
+
 /* --- Pacing: 760 ms halten, dann zu --- */
 await s.werte(`document.getElementById('scroller').scrollTo({top:600,behavior:'instant'})`);
 await s.warte(300);
@@ -513,14 +533,40 @@ await s.warte(120);
 pruefe('Hochscrollen öffnet ohne Warten',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
-/* --- DER FEHLER: Klick in der Leiste darf sie nicht zuklappen --- */
-await s.werte(`document.getElementById('scroller').scrollTo({top:600,behavior:'instant'})`);
-await s.warte(1100);                      // zu
+/* --- DER FEHLER, den der Auftraggeber gemeldet hat ---
+   Wichtig: Der Klick muss NACH UNTEN springen. Ein Sprung nach oben wird
+   ohnehin vom Zweig "hochscrollen = navigieren" aufgefangen und beweist
+   über die Sperren gar nichts. Erst ein Sprung nach unten löst dieselbe
+   Bedingung aus wie echtes Wegscrollen. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
+await s.warte(200);
+const zielIndex = JSON.parse(await s.werte(`(() => {
+  const sc = document.getElementById('scroller');
+  const ab = [...document.querySelectorAll('#sp section')];
+  for (let i = ab.length - 1; i >= 0; i--)
+    if (ab[i].offsetTop > sc.scrollTop + 400) return i;
+  return -1;
+})()`));
+pruefe('es gibt einen Abschnitt weiter unten zum Anspringen', zielIndex > 0, 'Index ' + zielIndex);
+
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
-await s.warte(200);                       // offen, Zeiger drin
-await s.werte(`document.querySelectorAll('.mml-et')[7].click()`);
-await s.warte(1600);                      // deutlich länger als 760 ms halten
-pruefe('Klick in der Leiste klappt sie NICHT zu (Zeiger ist noch drin)',
+await s.warte(150);
+await s.werte(`document.querySelectorAll('.mml-et')[${zielIndex}].click()`);
+await s.warte(1700);
+const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
+  zu: document.querySelector('.mml').classList.contains('mml-zu'),
+  stand: document.getElementById('scroller').scrollTop
+})`));
+pruefe('der Klick ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
+pruefe('Klick in der Leiste klappt sie NICHT zu (Zeiger ist noch drin)', !nachKlick.zu);
+
+/* Dasselbe über einen Klick auf den Balken statt auf das Etikett. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
+await s.warte(200);
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+await s.werte(`document.querySelectorAll('.mml-seg')[${zielIndex}].click()`);
+await s.warte(1700);
+pruefe('auch ein Klick auf den Balken klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
 /* --- Maus raus: 1100 ms warten, dann zu --- */
@@ -573,7 +619,6 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 .mml {
   --mml-dauer: 860ms;
   --mml-kurve: cubic-bezier(.50, 0, .12, 1);
-  --mml-blass: #D6D3C4;
   flex: none; width: 252px; position: relative; background: #FBFAF6;
   border-right: 1px solid #EDEAE1; z-index: 6;
   transition: width var(--mml-dauer) var(--mml-kurve);
@@ -853,8 +898,16 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 node tests/pruefe-leiste.mjs
 ```
 
-Erwartet: `14 von 14 bestanden`. Besonders die Zeile
-*„Klick in der Leiste klappt sie NICHT zu"* — das ist der gemeldete Fehler.
+Erwartet: `18 von 18 bestanden`. Besonders die Zeilen
+*„Klick in der Leiste klappt sie NICHT zu"* und *„auch ein Klick auf den Balken klappt sie
+nicht zu"* — das ist der gemeldete Fehler.
+
+**Beweise, dass diese Prüfung wirklich anschlägt:** Entferne in einer Kopie außerhalb des
+Projektordners die Sperre `if (zeigerDrin) { stopUhr(); return; }` aus `leiste.js` und lass
+die Prüfung erneut laufen. Sie **muss** dann fehlschlagen. Tut sie es nicht, prüft sie den
+Fehler nicht — genau das war bei einer früheren Fassung dieser Prüfung der Fall: Sie klickte
+ein Etikett an, das **oberhalb** der aktuellen Stelle lag, sprang also nach oben und wurde vom
+Zweig „hochscrollen = navigieren" aufgefangen, ganz ohne die Sperren.
 
 - [ ] **Schritt 8: Festschreiben**
 
