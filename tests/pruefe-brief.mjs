@@ -1,0 +1,75 @@
+import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
+import { starteServer } from './server.mjs';
+
+const wurzel = new URL('../HOCHLADEN/', import.meta.url).pathname;
+const server = await starteServer({ wurzel, port: 8903 });
+const chrome = await starteChrome({ port: 9335 });
+const s = await oeffne('http://127.0.0.1:8903/', { port: 9335 });
+await s.warte(3000);
+
+const d = JSON.parse(await s.werte(`(async () => {
+  const projekte = (await window.mmLoadProjects()).filter(p => p.status === 'published');
+  const abschnitte = [...document.querySelectorAll('#brief section')];
+  const text = document.body.innerText;
+  return JSON.stringify({
+    projekte: projekte.length,
+    abschnitte: abschnitte.length,
+    /* jeder Projekttext muss WÖRTLICH auf der Seite stehen */
+    fehlendeTexte: projekte.filter(p => p.summary && !text.includes(p.summary.trim()))
+                           .map(p => p.slug),
+    fehlendeTitel: projekte.filter(p => !text.includes(p.title)).map(p => p.slug),
+    /* jedes Coverbild muss vorkommen */
+    fehlendeBilder: projekte.filter(p => p.cover_url &&
+        !document.querySelector('img[src="'+p.cover_url+'"]')).map(p => p.slug),
+    leiste: document.querySelectorAll('.mml-seg').length,
+    beruflich: document.querySelectorAll('.mml-seg').length -
+               [...document.querySelectorAll('.mml-punkt')]
+                 .filter(x => getComputedStyle(x).backgroundColor === 'rgb(214, 211, 196)').length
+  });
+})()`));
+
+pruefe('fünf veröffentlichte Projekte gefunden', d.projekte === 5, String(d.projekte));
+pruefe('Abschnitte = Einstieg + Profil + Projekte + Kontakt', d.abschnitte === d.projekte + 3, String(d.abschnitte));
+pruefe('KEIN Projekttext wurde verändert', d.fehlendeTexte.length === 0, d.fehlendeTexte.join(','));
+pruefe('KEIN Projekttitel wurde verändert', d.fehlendeTitel.length === 0, d.fehlendeTitel.join(','));
+pruefe('KEIN Coverbild fehlt', d.fehlendeBilder.length === 0, d.fehlendeBilder.join(','));
+
+/* Alles, was auf der alten Startseite stand, muss auch im Brief stehen.
+   Ohne diese Prüfung verschwinden Eckdaten, Werkzeugliste und Kundenliste
+   still — sie hängen nicht an den Projekten, sondern an den Einstellungen. */
+const alt = JSON.parse(await s.werte(`(async () => {
+  const e = await window.mmLoadSettings();
+  const text = document.body.innerText;
+  const fehlt = [];
+  (e.infos || []).forEach(i => { if (i.zeile1 && !text.includes(i.zeile1)) fehlt.push('info:' + i.titel); });
+  (e.werkzeuge || []).forEach(w => { if (!text.includes(w.name)) fehlt.push('werkzeug:' + w.name); });
+  (e.kunden || []).forEach(k => { if (!text.includes(k)) fehlt.push('kunde:' + k); });
+  if (e.profil_text && !text.includes(e.profil_text.slice(0, 40))) fehlt.push('profil_text');
+  if (e.hero_intro && !text.includes(e.hero_intro.slice(0, 40))) fehlt.push('hero_intro');
+  if (e.email && !text.includes(e.email)) fehlt.push('email');
+  if (e.telefon && !text.includes(e.telefon)) fehlt.push('telefon');
+  return JSON.stringify({ fehlt });
+})()`));
+pruefe('KEIN Inhalt der alten Startseite fehlt', alt.fehlt.length === 0, alt.fehlt.join(','));
+
+/* Verweise von Projekten auf Beiträge dürfen nicht verschwinden. */
+const verweise = JSON.parse(await s.werte(`(async () => {
+  const ps = (await window.mmLoadProjects()).filter(p => p.status === 'published' && p.more_url);
+  return JSON.stringify({ soll: ps.map(p => p.more_url),
+    ist: [...document.querySelectorAll('.br-mehr a')].map(a => a.getAttribute('href')) });
+})()`));
+pruefe('Verweise auf Beiträge bleiben erhalten',
+  verweise.soll.every(u => verweise.ist.includes(u)),
+  'soll ' + verweise.soll.join(',') + ' / ist ' + verweise.ist.join(','));
+pruefe('Leiste hat für jeden Abschnitt ein Segment', d.leiste === d.abschnitte, String(d.leiste));
+
+/* Jedes Projekt braucht eine EIGENE Farbe — sonst sind Balken nicht unterscheidbar.
+   Aus `accent` abgeleitet wären "The Race" und "Rockstar Selfish" beide sky. */
+const farben = JSON.parse(await s.werte(`JSON.stringify(
+  [...document.querySelectorAll('.mml-seg')].map(x => getComputedStyle(x).backgroundColor))`));
+const beruflich = farben.slice(1, -1);   // ohne Einstieg und Kontakt
+pruefe('jedes Projekt hat eine eigene Farbe',
+  new Set(beruflich).size === beruflich.length, beruflich.join(' '));
+
+await s.zu(); chrome.beenden(); server.beenden();
+bericht();
