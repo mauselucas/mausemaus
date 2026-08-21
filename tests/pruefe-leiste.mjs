@@ -42,6 +42,16 @@ pruefe('Etiketten haben feste Breite', a.etBreiten.length === 1 && a.etBreiten[0
 pruefe('Kurve wie festgelegt', a.kurve.replace(/\s/g,'') === 'cubic-bezier(0.5,0,0.12,1)', a.kurve);
 pruefe('Dauer 860 ms', a.dauer === '0.86s', a.dauer);
 
+/* Das Gleis muss weitgehend belegt sein. Steht hinter dem letzten Abschnitt
+   viel Leerraum, bleibt ein großer Teil der Leiste ungenutzt. */
+const fuellung = JSON.parse(await s.werte(`(() => {
+  const g = document.querySelector('.mml-gleis').getBoundingClientRect();
+  const belegt = [...document.querySelectorAll('.mml-seg')]
+    .reduce((n, x) => n + x.getBoundingClientRect().height, 0);
+  return JSON.stringify({ anteil: Math.round(belegt / g.height * 100) });
+})()`));
+pruefe('das Gleis ist zu mindestens 85 % belegt', fuellung.anteil >= 85, fuellung.anteil + ' %');
+
 /* --- Pacing: 760 ms halten, dann zu --- */
 await s.werte(`document.getElementById('scroller').scrollTo({top:600,behavior:'instant'})`);
 await s.warte(300);
@@ -57,14 +67,40 @@ await s.warte(120);
 pruefe('Hochscrollen öffnet ohne Warten',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
-/* --- DER FEHLER: Klick in der Leiste darf sie nicht zuklappen --- */
-await s.werte(`document.getElementById('scroller').scrollTo({top:600,behavior:'instant'})`);
-await s.warte(1100);                      // zu
+/* --- DER FEHLER, den der Auftraggeber gemeldet hat ---
+   Wichtig: Der Klick muss NACH UNTEN springen. Ein Sprung nach oben wird
+   ohnehin vom Zweig "hochscrollen = navigieren" aufgefangen und beweist
+   über die Sperren gar nichts. Erst ein Sprung nach unten löst dieselbe
+   Bedingung aus wie echtes Wegscrollen. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
+await s.warte(200);
+const zielIndex = JSON.parse(await s.werte(`(() => {
+  const sc = document.getElementById('scroller');
+  const ab = [...document.querySelectorAll('#sp section')];
+  for (let i = ab.length - 1; i >= 0; i--)
+    if (ab[i].offsetTop > sc.scrollTop + 400) return i;
+  return -1;
+})()`));
+pruefe('es gibt einen Abschnitt weiter unten zum Anspringen', zielIndex > 0, 'Index ' + zielIndex);
+
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
-await s.warte(200);                       // offen, Zeiger drin
-await s.werte(`document.querySelectorAll('.mml-et')[7].click()`);
-await s.warte(1600);                      // deutlich länger als 760 ms halten
-pruefe('Klick in der Leiste klappt sie NICHT zu (Zeiger ist noch drin)',
+await s.warte(150);
+await s.werte(`document.querySelectorAll('.mml-et')[${zielIndex}].click()`);
+await s.warte(1700);
+const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
+  zu: document.querySelector('.mml').classList.contains('mml-zu'),
+  stand: document.getElementById('scroller').scrollTop
+})`));
+pruefe('der Klick ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
+pruefe('Klick in der Leiste klappt sie NICHT zu (Zeiger ist noch drin)', !nachKlick.zu);
+
+/* Dasselbe über einen Klick auf den Balken statt auf das Etikett. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
+await s.warte(200);
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+await s.werte(`document.querySelectorAll('.mml-seg')[${zielIndex}].click()`);
+await s.warte(1700);
+pruefe('auch ein Klick auf den Balken klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
 /* --- Maus raus: 1100 ms warten, dann zu --- */

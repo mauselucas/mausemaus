@@ -7,8 +7,11 @@
   body { margin:0; font-family:'Space Grotesk',sans-serif; }
   .buehne { display:flex; height:100vh; }
   .scroller { flex:1; overflow-y:auto; background:#FBFAF6; }
-  .sp { max-width:520px; margin:0 auto; padding:56px 26px 1000px; }
+  .sp { max-width:520px; margin:0 auto; padding:56px 26px 210px; }
   .sp p { font-size:16.5px; line-height:1.8; margin:0 0 20px; }
+  /* Der Scroll-Spielraum kommt aus Text, NICHT aus einem großen
+     padding-bottom: Leerraum hinter dem letzten Abschnitt bläht
+     scroller.scrollHeight auf, und dann bleibt das halbe Gleis leer. */
 </style>
 <div class="buehne">
   <div id="leiste"></div>
@@ -20,9 +23,16 @@
       <section data-titel="Das Werkzeug, das ich mir gebaut habe" data-art="beruflich" data-farbe="#6E6E7A"><p>Vier. Ein sehr langer Titel, der umbrechen muss und nicht abgeschnitten werden darf.</p><p>Zweiter Absatz.</p></section>
       <section data-titel="Bastian Keller" data-art="beruflich" data-farbe="#8E4E9B"><p>Fünf. Kurz.</p></section>
       <section data-titel="Simplicissimus" data-art="beruflich" data-farbe="#A8913F"><p>Sechs. Auch kurz.</p></section>
-      <section data-titel="Blender" data-art="persoenlich"><p>Sieben.</p></section>
-      <section data-titel="Woher der Name kommt" data-art="persoenlich"><p>Acht.</p></section>
-      <section data-titel="Schreib mir" data-art="kontakt" data-farbe="#BFCC94"><p>Neun. Der Schluss.</p></section>
+      <section data-titel="Blender" data-art="persoenlich"><p>Sieben. Ein mittellanger Abschnitt, damit die Balken unterschiedlich hoch werden und die Etiketten etwas zu verteilen haben.</p></section>
+      <section data-titel="Woher der Name kommt" data-art="persoenlich"><p>Acht. Auch dieser Abschnitt hat mehrere Zeilen, damit die Prüfseite den echten Seitenverhältnissen ähnelt.</p><p>Zweiter Absatz dazu.</p></section>
+      <section data-titel="Schreib mir" data-art="kontakt" data-farbe="#BFCC94">
+        <p>Neun. Der Schluss.</p>
+        <p>Dieser letzte Abschnitt ist bewusst lang, damit die Seite genug Scroll-Spielraum hat, ohne dass hinter dem letzten Abschnitt leerer Raum steht.</p>
+        <p>Stünde dort nur Leerraum, bliebe ein großer Teil des Gleises ungefüllt — die Balken werden gegen die gesamte scrollbare Höhe gerechnet, und Leerraum zählt dabei mit.</p>
+        <p>Deshalb steht hier Text statt Polsterung. So bildet die Prüfseite ab, wie die echte Seite aussieht, auf der hinter dem Kontaktteil ebenfalls kaum Leerraum steht.</p>
+        <p>Noch ein Absatz, damit der Spielraum sicher reicht.</p>
+        <p>Und noch einer.</p>
+      </section>
     </div>
   </div>
 </div>

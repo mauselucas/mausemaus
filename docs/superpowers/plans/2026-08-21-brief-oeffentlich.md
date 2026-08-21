@@ -569,6 +569,31 @@ await s.warte(1700);
 pruefe('auch ein Klick auf den Balken klappt sie nicht zu',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
+/* --- Die zweite Sperre, für sich allein geprüft ---
+   Die beiden Sperren decken verschiedene Fälle ab:
+     springtGerade  — ein durch Klick ausgelöster Sprung ist kein Wegscrollen.
+                      Auf Berührungsgeräten ohne Mauszeiger die einzige Sperre.
+     zeigerDrin     — wer den Zeiger in der Leiste hat, will sie benutzen;
+                      dann darf sie auch bei echtem Wegscrollen nicht zugehen.
+   Die Klickprüfung oben trifft nur die erste: Das sanfte Scrollen ist
+   innerhalb der 900-ms-Schonfrist beendet, weiter kommt der Code nie.
+   Hier also OHNE Klick, mit Abstand zu jeder Schonfrist. */
+await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
+await s.warte(200);
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+await s.warte(1000);                      // sicher jenseits der 900-ms-Schonfrist
+await s.werte(`document.getElementById('scroller').scrollTo({top:900,behavior:'instant'})`);
+await s.warte(1700);                      // deutlich länger als 760 ms Halten
+pruefe('Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu',
+  !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+
+/* Gegenprobe: mit Zeiger AUSSERHALB muss dasselbe Wegscrollen sie zuklappen —
+   sonst würde die Prüfung oben auch dann bestehen, wenn die Leiste nie zugeht. */
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
+await s.warte(1400);                      // 1100 ms nach Mausaustritt + Puffer
+pruefe('nach Mausaustritt geht sie zu (die Prüfung oben ist damit aussagekräftig)',
+  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+
 /* --- Maus raus: 1100 ms warten, dann zu --- */
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
 await s.warte(400);
@@ -898,16 +923,20 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 node tests/pruefe-leiste.mjs
 ```
 
-Erwartet: `18 von 18 bestanden`. Besonders die Zeilen
-*„Klick in der Leiste klappt sie NICHT zu"* und *„auch ein Klick auf den Balken klappt sie
-nicht zu"* — das ist der gemeldete Fehler.
+Erwartet: `20 von 20 bestanden`.
 
-**Beweise, dass diese Prüfung wirklich anschlägt:** Entferne in einer Kopie außerhalb des
-Projektordners die Sperre `if (zeigerDrin) { stopUhr(); return; }` aus `leiste.js` und lass
-die Prüfung erneut laufen. Sie **muss** dann fehlschlagen. Tut sie es nicht, prüft sie den
-Fehler nicht — genau das war bei einer früheren Fassung dieser Prüfung der Fall: Sie klickte
-ein Etikett an, das **oberhalb** der aktuellen Stelle lag, sprang also nach oben und wurde vom
-Zweig „hochscrollen = navigieren" aufgefangen, ganz ohne die Sperren.
+**Zwei getrennte Gegenbeweise führen, jeweils in einer Kopie außerhalb des Projektordners.
+Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**
+
+| Entfernte Zeile in `leiste.js` | Muss fehlschlagen |
+|---|---|
+| `if (Date.now() - springtGerade < 900) return;` | „Klick in der Leiste klappt sie NICHT zu" |
+| `if (zeigerDrin) { stopUhr(); return; }` | „Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu" |
+
+Warum getrennt: Die beiden Sperren decken **verschiedene** Fälle ab. Beim Klick ist das sanfte
+Scrollen innerhalb der 900-ms-Schonfrist beendet, `zeigerDrin` wird dabei nie erreicht. Wer
+nur eine der beiden entfernt und die Prüfung weiterhin bestehen sieht, hat nichts bewiesen —
+genau das ist bei zwei früheren Fassungen dieser Prüfung passiert.
 
 - [ ] **Schritt 8: Festschreiben**
 

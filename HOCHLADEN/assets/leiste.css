@@ -5,7 +5,6 @@
 .mml {
   --mml-dauer: 860ms;
   --mml-kurve: cubic-bezier(.50, 0, .12, 1);
-  --mml-blass: #D6D3C4;
   flex: none; width: 252px; position: relative; background: #FBFAF6;
   border-right: 1px solid #EDEAE1; z-index: 6;
   transition: width var(--mml-dauer) var(--mml-kurve);

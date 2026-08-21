@@ -70,11 +70,14 @@
       /* Jedes Segment reicht bis zum Beginn des nächsten Abschnitts — nicht
          nur bis zum Ende des eigenen Textblocks. Sonst richtet sich die
          Lücke zwischen zwei Segmenten nach zufälligem Weißraum im Fließtext
-         (z. B. dem Absatzabstand) statt nach einem festen, sichtbaren Maß. */
-      const anfang = abschnitte.map(ab => obenVon(ab.element) / ganz * 100);
-      const ende = abschnitte.map((ab, i) => i < abschnitte.length - 1
-        ? anfang[i + 1]
-        : anfang[i] + Math.max(2.2, hoeheVon(ab.element) / ganz * 100));
+         (z. B. dem Absatzabstand) statt nach einem festen, sichtbaren Maß.
+         Das erste Segment beginnt am Anfang des Gleises, das letzte reicht
+         bis zu dessen Ende — wie bei einer echten Schnittzeitleiste beginnt
+         der erste Clip am Bandanfang und der letzte endet am Bandende, egal
+         wie viel Polsterung (z. B. padding-top/-bottom) davor oder danach
+         im Text steht. Sonst bleibt das Gleis oben und unten ungefüllt. */
+      const anfang = abschnitte.map((ab, i) => i === 0 ? 0 : obenVon(ab.element) / ganz * 100);
+      const ende = abschnitte.map((ab, i) => i < abschnitte.length - 1 ? anfang[i + 1] : 100);
 
       abschnitte.forEach((ab, i) => {
         const s = document.createElement('div');
