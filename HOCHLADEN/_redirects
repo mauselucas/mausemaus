@@ -1,5 +1,4 @@
 # Schöne Adressen ohne Bauwerkzeug — Netlify schreibt intern um (Status 200),
 # in der Adressleiste bleibt die schöne Fassung stehen.
-/blog              /blog.html      200
 /welt/:slug        /welt.html      200
 /blog/:slug        /welt.html      200

@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt aus der Datenbank — Stand: 16.08.2026. */
+   Automatisch erzeugt aus der Datenbank — Stand: 22.08.2026. */
 
 window.SEED_SETTINGS = {
   "id": 1,
@@ -212,6 +212,27 @@ window.SEED_PROJECTS = [
     "accent": "sky",
     "status": "published",
     "sort_order": 5,
+    "more_url": null,
+    "more_label": "Mehr dazu"
+  },
+  {
+    "slug": "test",
+    "title": "test",
+    "role": "",
+    "summary": "",
+    "body": "test",
+    "cover_url": null,
+    "cover_pos": "50% 50%",
+    "tags": [],
+    "link_url": null,
+    "link_label": "Ansehen",
+    "embed_ok": true,
+    "ig_handle": null,
+    "ig_followers": null,
+    "is_live": false,
+    "accent": "sky",
+    "status": "archived",
+    "sort_order": 15,
     "more_url": null,
     "more_label": "Mehr dazu"
   }

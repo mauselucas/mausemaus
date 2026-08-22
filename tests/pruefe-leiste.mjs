@@ -191,6 +191,22 @@ const auf = JSON.parse(await h.werte(`(() => {
 })()`));
 pruefe('die aufgeklappte Liste schmiegt sich an ihren Inhalt',
   auf.leiste - auf.liste < 90, auf.leiste + ' px hoch bei ' + auf.liste + ' px Liste');
+
+/* Auf dem Handy darf der Griff die Leiste NICHT festklemmen. Sonst bliebe sie
+   nach dem Wechsel zurück auf Spaltenbreite dauerhaft offen — und die Regel
+   "einmal zu, bleibt zu" wäre still ausgehebelt. */
+const klemme = JSON.parse(await h.werte(`(() => {
+  const griff = document.querySelector('.mml-griff');
+  const vorher = griff.textContent.trim();
+  griff.click();                                   // Liste auf
+  const ersterEintrag = document.querySelector('.mml-et');
+  if (ersterEintrag) ersterEintrag.click();        // und wieder zu
+  return JSON.stringify({ vorher, nachher: griff.textContent.trim() });
+})()`));
+pruefe('der Griff klemmt auf dem Handy nichts fest',
+  klemme.nachher === klemme.vorher && klemme.nachher === '‹',
+  klemme.vorher + ' -> ' + klemme.nachher);
+
 await h.zu();
 
 await s.zu(); chrome.beenden(); server.beenden();
