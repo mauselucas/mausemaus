@@ -85,5 +85,33 @@ pruefe('kein waagerechtes Scrollen auf dem Handy',
   !ueber.waagerecht, ueber.breite + ' px breit');
 await h.zu();
 
+/* Die Farbstimmung, ohne die Datenbank anzufassen: die Farbe wird direkt
+   am fertigen Dokument angewendet, so wie das Startskript es täte. */
+const fp = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung', { port: 9337 });
+await fp.warte(2500);
+const farben = JSON.parse(await fp.werte(`(() => {
+  const welt = document.getElementById('welt');
+  const messe = (hex) => {
+    welt.classList.remove('dunkel');
+    welt.style.setProperty('--welt', hex);
+    const h = hex.replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+    if (0.2126 * r + 0.7152 * g + 0.0722 * b < 110) welt.classList.add('dunkel');
+    const st = getComputedStyle(welt);
+    return { dunkel: welt.classList.contains('dunkel'),
+             grund: st.backgroundColor, schrift: st.color };
+  };
+  return JSON.stringify({ hell: messe('#E8863B'), dunkel: messe('#1B1B20') });
+})()`));
+pruefe('eine helle Farbe lässt die Welt hell', !farben.hell.dunkel, farben.hell.grund);
+pruefe('eine dunkle Farbe schaltet die Welt dunkel', farben.dunkel.dunkel, farben.dunkel.grund);
+pruefe('bei dunkler Stimmung ändert sich wirklich der Untergrund',
+  farben.dunkel.grund !== farben.hell.grund,
+  farben.hell.grund + ' -> ' + farben.dunkel.grund);
+pruefe('bei dunkler Stimmung ändert sich auch die Schriftfarbe',
+  farben.dunkel.schrift !== farben.hell.schrift,
+  farben.hell.schrift + ' -> ' + farben.dunkel.schrift);
+await fp.zu();
+
 await s.zu(); await f.zu(); chrome.beenden(); server.beenden();
 bericht();

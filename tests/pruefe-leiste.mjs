@@ -154,5 +154,21 @@ await s.warte(1000);
 pruefe('nach 1400 ms zugeklappt',
   JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
+/* --- Handy: 520 px ist die schmalste Breite, die Chrome ehrlich abbildet --- */
+const h = await oeffne('http://127.0.0.1:8902/tests-feste/leiste-probe.html',
+  { port: 9334, breite: 520, hoehe: 900 });
+await h.warte(1200);
+const m = JSON.parse(await h.werte(`JSON.stringify({
+  waagerecht: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  leisteBreite: Math.round(document.querySelector('.mml').getBoundingClientRect().width),
+  leisteHoehe: Math.round(document.querySelector('.mml').getBoundingClientRect().height),
+  textBreite: Math.round(document.querySelector('.sp').getBoundingClientRect().width)
+})`));
+pruefe('kein waagerechtes Scrollen auf dem Handy', !m.waagerecht);
+pruefe('Leiste ist ein Streifen oben, keine Spalte', m.leisteHoehe < 90, m.leisteHoehe + ' px hoch');
+pruefe('Leiste nimmt die volle Breite', m.leisteBreite >= 500, m.leisteBreite + ' px');
+pruefe('Text bekommt Platz', m.textBreite > 400, m.textBreite + ' px');
+await h.zu();
+
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();

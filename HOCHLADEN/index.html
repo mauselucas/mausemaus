@@ -53,8 +53,10 @@
                                .sort((a, b) => a.sort_order - b.sort_order);
   const abschnitte = window.mmBrief(document.getElementById('brief'), { settings, projekte });
 
+  const scroller = window.matchMedia('(max-width: 760px)').matches
+    ? document.scrollingElement : document.getElementById('scroller');
   const leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte,
-    { scroller: document.getElementById('scroller') });
+    { scroller });
 
   /* Die Höhe der Seite ändert sich noch, nachdem sie steht: Schriften laden nach,
      und Bilder mit loading="lazy" laden ERST, wenn man zu ihnen scrollt.

@@ -1,5 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leiste — Prüfseite</title>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/leiste.css">
@@ -13,9 +14,9 @@
      padding-bottom: Leerraum hinter dem letzten Abschnitt bläht
      scroller.scrollHeight auf, und dann bleibt das halbe Gleis leer. */
 </style>
-<div class="buehne">
+<div class="buehne br-buehne">
   <div id="leiste"></div>
-  <div class="scroller" id="scroller">
+  <div class="scroller br-scroller" id="scroller">
     <div class="sp" id="sp">
       <section data-titel="Hallo" data-art="persoenlich"><p>Eins. Ein kurzer Abschnitt zum Anfang.</p></section>
       <section data-titel="Wie ich angefangen hab" data-art="persoenlich"><p>Zwei. Etwas mehr Text, damit dieser Abschnitt länger wird als der erste und die Leiste etwas zu tun bekommt beim Verteilen der Etiketten.</p><p>Noch ein Absatz dazu.</p></section>
@@ -44,4 +45,15 @@
   }));
   window.__leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte,
     { scroller: document.getElementById('scroller') });
+  /* Wie im echten Startskript: Schriften laden nach, und auch die
+     Emulation setzt die Fenstergröße erst NACH dem Laden — beides
+     verschiebt die Höhen der Abschnitte noch, nachdem der erste Aufbau
+     längst gelaufen ist. Deshalb wie in index.html auf die tatsächliche
+     Größe des Inhalts schauen, statt auf ein einzelnes Ereignis zu wetten. */
+  document.fonts.ready.then(() => window.__leiste.neuBerechnen()).catch(() => {});
+  let ruhe = null;
+  new ResizeObserver(() => {
+    clearTimeout(ruhe);
+    ruhe = setTimeout(() => window.__leiste.neuBerechnen(), 120);
+  }).observe(document.getElementById('sp'));
 </script>

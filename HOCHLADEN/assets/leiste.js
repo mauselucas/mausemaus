@@ -64,6 +64,7 @@
     /* Klick auf Etikett oder Segment: springen, ohne dass das Scrollen
        als Nutzer-Scrollen gewertet wird — sonst klappt die Leiste zu. */
     function springe(el) {
+      wurzel.classList.remove('mml-offen');
       springtGerade = Date.now();
       const ziel = Math.max(0, obenVon(el) - 16);
       if (amFenster()) window.scrollTo({ top: ziel, behavior: 'smooth' });
@@ -212,6 +213,15 @@
     wo.addEventListener('scroll', aktualisieren, { passive: true });
     const beiGroesse = () => { bauen(); aktualisieren(); };
     window.addEventListener('resize', beiGroesse);
+
+    /* Auf dem Handy gibt es kein Überfahren — dort klappt der Griff die Liste auf. */
+    const schmal = () => window.matchMedia('(max-width: 760px)').matches;
+    griff.addEventListener('click', () => {
+      if (schmal()) wurzel.classList.toggle('mml-offen');
+    });
+    lage.addEventListener('click', () => {
+      if (schmal()) wurzel.classList.remove('mml-offen');
+    });
 
     bauen(); aktualisieren();
 
