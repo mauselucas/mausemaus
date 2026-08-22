@@ -2399,6 +2399,41 @@ git commit -m "Zeitleiste auf dem Handy: Streifen oben statt Spalte"
   `HOCHLADEN/beitrag.html`, `HOCHLADEN/blog.html`, `HOCHLADEN/assets/blog.js`
 - Ändern: `HOCHLADEN/assets/seed.js`
 
+- [ ] **Schritt 0: Die letzte offene Lücke schließen — Festklemmen auf dem Handy**
+
+Beim Bauen der Handy-Ansicht fiel auf, dass der Griff **zwei** Klick-Zuhörer trug: den alten
+vom Bildschirm („dauerhaft offen halten") und den neuen vom Handy („Liste auf- und zuklappen").
+Auf dem Handy feuerten beide, `angepinnt` wurde auf wahr gesetzt, und nichts nahm das je
+zurück. Sichtbar wurde es dort nicht — aber sobald das Fenster wieder breit wird (Fenster
+vergrößert, Tablet gedreht), wäre die Leiste dauerhaft offen geblieben. Genau die Regel, auf
+der der Auftraggeber bestanden hat, wäre lautlos ausgehebelt gewesen.
+
+Der Zuhörer ist bereits berichtigt (er bricht bei schmaler Ansicht ab). **Es fehlt nur die
+Prüfung dagegen.** Ans Ende von `tests/pruefe-leiste.mjs`, im Handy-Teil:
+
+```js
+/* Auf dem Handy darf der Griff die Leiste NICHT festklemmen. Sonst bliebe sie
+   nach dem Wechsel zurück auf Spaltenbreite dauerhaft offen — und die Regel
+   "einmal zu, bleibt zu" wäre still ausgehebelt. */
+const klemme = JSON.parse(await h.werte(`(() => {
+  const griff = document.querySelector('.mml-griff');
+  const vorher = griff.textContent.trim();
+  griff.click();                                   // Liste auf
+  const ersterEintrag = document.querySelector('.mml-et');
+  if (ersterEintrag) ersterEintrag.click();        // und wieder zu
+  return JSON.stringify({ vorher, nachher: griff.textContent.trim() });
+})()`));
+pruefe('der Griff klemmt auf dem Handy nichts fest',
+  klemme.nachher === klemme.vorher && klemme.nachher === '‹',
+  klemme.vorher + ' -> ' + klemme.nachher);
+```
+
+Danach: `node tests/pruefe-leiste.mjs` → **28 von 28**.
+
+**Beweise, dass sie anschlägt:** Nimm in einer Kopie außerhalb des Projektordners die
+Abbruchbedingung aus dem Festklemm-Zuhörer wieder heraus, sodass er auch auf dem Handy
+feuert. Die Prüfung **muss** dann fallen.
+
 - [ ] **Schritt 1: Prüfen, dass die alten Dateien wirklich niemand mehr braucht**
 
 ```bash
@@ -2421,7 +2456,7 @@ node tests/pruefe-bestand.mjs && node tests/pruefe-leiste.mjs && \
 node tests/pruefe-brief.mjs && node tests/pruefe-welten.mjs
 ```
 
-Erwartet: alles bestanden. `pruefe-bestand.mjs` prüft jetzt den Brief statt der alten Seite —
+Erwartet: **5/5 · 28/28 · 23/23 · 17/17.** `pruefe-bestand.mjs` prüft jetzt den Brief statt der alten Seite —
 das ist richtig so.
 
 - [ ] **Schritt 4: `seed.js` aus der laufenden Datenbank neu erzeugen**
