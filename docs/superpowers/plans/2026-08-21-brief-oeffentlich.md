@@ -2288,10 +2288,73 @@ Erwartet: alle drei vollständig bestanden.
 node -e "import('./tests/chrome.mjs').then(async m=>{const s=await import('./tests/server.mjs');const srv=await s.starteServer({wurzel:'./HOCHLADEN',port:8906});const c=await m.starteChrome({port:9338});const p=await m.oeffne('http://127.0.0.1:8906/',{port:9338,breite:520,hoehe:900});await p.warte(3000);await p.bild('tests/bilder/handy.png');await p.zu();c.beenden();srv.beenden();console.log('tests/bilder/handy.png')})"
 ```
 
-- [ ] **Schritt 6: Festschreiben**
+- [ ] **Schritt 6: Die Farbstimmung der Welten prüfen**
+
+Beide vorhandenen Welten haben `farbe = null`, zeigen also die Standardstimmung. Der Code für
+die dunkle Variante — `welt.classList.add('dunkel')`, wenn die Farbe dunkel genug ist — wurde
+deshalb noch **nie ausgeführt**. Ungeprüfter Code ist unfertiger Code, und er fällt erst auf,
+wenn Lucas seiner ersten Welt eine Farbe gibt.
+
+Die Datenbank dafür **nicht** anfassen. Stattdessen die Antwort in der Prüfung selbst
+austauschen und die Seite mit einer gesetzten Farbe rendern lassen. Ans Ende von
+`tests/pruefe-welten.mjs`:
+
+```js
+/* Die Farbstimmung, ohne die Datenbank anzufassen: mmLoadPosts wird für
+   diesen einen Aufruf ersetzt, damit die Seite eine Farbe zu sehen bekommt. */
+for (const [farbe, erwartetDunkel] of [['#E8863B', false], ['#1B1B20', true]]) {
+  const f = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung', { port: 9337 });
+  await f.werte(`(() => {
+    const echt = window.mmLoadPosts;
+    window.mmLoadPosts = async (slug) => {
+      const l = await echt(slug);
+      return l.map(p => ({ ...p, farbe: '${farbe}' }));
+    };
+  })()`);
+  await f.werte(`location.reload()`);
+  await f.warte(2500);
+  /* Nach dem Neuladen ist die Ersetzung weg — deshalb vor dem Laden setzen. */
+  await f.zu();
+}
+
+/* Zuverlässiger: die Farbe direkt am fertigen Dokument anwenden lassen,
+   so wie das Startskript es täte. */
+const fp = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung', { port: 9337 });
+await fp.warte(2500);
+const farben = JSON.parse(await fp.werte(`(() => {
+  const welt = document.getElementById('welt');
+  const messe = (hex) => {
+    welt.classList.remove('dunkel');
+    welt.style.setProperty('--welt', hex);
+    const h = hex.replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+    if (0.2126 * r + 0.7152 * g + 0.0722 * b < 110) welt.classList.add('dunkel');
+    const st = getComputedStyle(welt);
+    return { dunkel: welt.classList.contains('dunkel'),
+             grund: st.backgroundColor, schrift: st.color };
+  };
+  return JSON.stringify({ hell: messe('#E8863B'), dunkel: messe('#1B1B20') });
+})()`));
+pruefe('eine helle Farbe lässt die Welt hell', !farben.hell.dunkel, farben.hell.grund);
+pruefe('eine dunkle Farbe schaltet die Welt dunkel', farben.dunkel.dunkel, farben.dunkel.grund);
+pruefe('bei dunkler Stimmung ändert sich wirklich der Untergrund',
+  farben.dunkel.grund !== farben.hell.grund,
+  farben.hell.grund + ' -> ' + farben.dunkel.grund);
+pruefe('bei dunkler Stimmung ändert sich auch die Schriftfarbe',
+  farben.dunkel.schrift !== farben.hell.schrift,
+  farben.hell.schrift + ' -> ' + farben.dunkel.schrift);
+await fp.zu();
+```
+
+Die erste Schleife oben ist **absichtlich wirkungslos** und gehört nicht in die Datei — sie
+steht hier nur, um den naheliegenden, aber falschen Weg zu benennen: Eine Ersetzung vor
+`location.reload()` überlebt das Neuladen nicht. Nimm nur den zweiten Block.
+
+- [ ] **Schritt 7: Festschreiben**
 
 ```bash
-git add HOCHLADEN/assets/leiste.css HOCHLADEN/assets/leiste.js HOCHLADEN/index.html tests/pruefe-leiste.mjs
+git add HOCHLADEN/assets/leiste.css HOCHLADEN/assets/leiste.js HOCHLADEN/index.html \
+        tests/pruefe-leiste.mjs tests/pruefe-welten.mjs
 git commit -m "Zeitleiste auf dem Handy: Streifen oben statt Spalte"
 ```
 
