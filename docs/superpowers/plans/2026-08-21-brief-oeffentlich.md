@@ -1050,6 +1050,35 @@ const verweise = JSON.parse(await s.werte(`(async () => {
 pruefe('Verweise auf Beiträge bleiben erhalten',
   verweise.soll.every(u => verweise.ist.includes(u)),
   'soll ' + verweise.soll.join(',') + ' / ist ' + verweise.ist.join(','));
+
+/* Bilder im Fließtext laden erst, wenn man zu ihnen scrollt. Dabei wächst die
+   Seite — und die Zeitleiste muss nachrechnen. Tut sie es nicht, zeigen die
+   Balken dauerhaft falsche Verhältnisse und Klicks landen an der falschen
+   Stelle. Genau dieser Fehler wurde einmal übersehen. */
+await s.werte(`(async () => {
+  const sc = document.getElementById('scroller');
+  for (let y = 0; y <= sc.scrollHeight; y += 500) {
+    sc.scrollTo({ top: y, behavior: 'instant' });
+    await new Promise(r => setTimeout(r, 60));
+  }
+  sc.scrollTo({ top: 0, behavior: 'instant' });
+})()`);
+await s.warte(1200);                       // dem Beobachter Zeit zum Nachrechnen geben
+const treue = JSON.parse(await s.werte(`(() => {
+  const sc = document.getElementById('scroller');
+  const oben = el => el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+  const ab = [...document.querySelectorAll('#brief section')];
+  const segs = [...document.querySelectorAll('.mml-seg')];
+  let groesste = 0;
+  ab.forEach((el, i) => {
+    const soll = oben(el) / sc.scrollHeight * 100;
+    const ist = parseFloat(segs[i].style.top);
+    groesste = Math.max(groesste, Math.abs(soll - ist));
+  });
+  return JSON.stringify({ abweichung: +groesste.toFixed(2), hoehe: sc.scrollHeight });
+})()`));
+pruefe('Zeitleiste stimmt noch, nachdem alle Bilder geladen sind',
+  treue.abweichung < 2, 'größte Abweichung ' + treue.abweichung + ' % bei ' + treue.hoehe + ' px');
 pruefe('Leiste hat für jeden Abschnitt ein Segment', d.leiste === d.abschnitte, String(d.leiste));
 
 /* Jedes Projekt braucht eine EIGENE Farbe — sonst sind Balken nicht unterscheidbar.
@@ -1242,6 +1271,13 @@ git commit -m "Brief setzt seine Abschnitte aus den vorhandenen Projekten zusamm
 
 .br-text { font-family:'Space Grotesk',sans-serif; font-size:16.5px; line-height:1.8; color:#232c31; }
 .br-text p { margin:0 0 20px; }
+/* Bilder im Fließtext: Breite begrenzen, damit nichts seitlich überläuft.
+   Die Höhe darf NICHT auf 0 einklappen, solange das Bild noch lädt —
+   sonst springt der Text beim Nachladen und die Zeitleiste rechnet mit
+   falschen Höhen. min-height hält den Platz frei, bis die echten Maße da sind. */
+.br-text img { max-width:100%; height:auto; min-height:120px; border-radius:8px;
+  background:#F2EFE6; display:block; margin:20px 0; }
+.br-text img[src] { min-height:0; }
 .br-rolle { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.16em;
   text-transform:uppercase; color:#A8A79C; margin:44px 0 6px; }
 .br-titel { font-family:'Tropi',cursive,sans-serif; font-weight:400; font-size:30px; line-height:1.1;
@@ -1373,13 +1409,21 @@ Alle Pfade absolut. Das Formular steht **fest** im HTML, nicht per JavaScript er
                                .sort((a, b) => a.sort_order - b.sort_order);
   const abschnitte = window.mmBrief(document.getElementById('brief'), { settings, projekte });
 
-  /* Bilder können die Höhen verschieben — erst danach die Leiste rechnen lassen. */
-  const leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte,
-    { scroller: document.getElementById('scroller') });
-  await Promise.all([...document.images]
-    .filter(i => !i.complete)
-    .map(i => new Promise(r => { i.onload = i.onerror = r; })));
+  const leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte, { scroller });
+
+  /* Die Höhe der Seite ändert sich noch, nachdem sie steht: Schriften laden nach,
+     und Bilder mit loading="lazy" laden ERST, wenn man zu ihnen scrollt.
+     Nicht auf sie warten — sie laden vielleicht nie. Stattdessen zusehen und
+     neu rechnen, sooft sich etwas ändert. Das deckt Schriften, Bilder,
+     Videofenster und alles Spätere ab. */
+  await document.fonts.ready.catch(() => {});
   leiste.neuBerechnen();
+
+  let ruhe = null;
+  new ResizeObserver(() => {
+    clearTimeout(ruhe);
+    ruhe = setTimeout(() => leiste.neuBerechnen(), 120);
+  }).observe(document.getElementById('brief'));
 
   if (new URLSearchParams(location.search).has('danke')) {
     const f = document.getElementById('anfragen');
