@@ -6,7 +6,6 @@
   const SCHWELLE = 120;    // ab wie viel Scrollen sie überhaupt zugeht
   const LUFT = 8;          // Mindestabstand zwischen zwei Etiketten
   const LUFT_SEG = 6;      // sichtbarer Abstand zwischen zwei Segmenten (~6 px, s. Vorgaben)
-  const BLASS = '#D6D3C4';
   const LAENGE = 214;      // Sekunden, auf die der Timecode abgebildet wird
 
   window.mmLeiste = function (wurzel, abschnitte, { scroller }) {
@@ -20,7 +19,7 @@
       '<div class="mml-kopf"><div class="mml-rund"></div><div class="mml-zeit">00:00</div></div>' +
       '<div class="mml-fuss">' +
         '<div><span style="background:#3E5A78"></span>berufliche Projekte</div>' +
-        '<div><span style="background:' + BLASS + '"></span>persönliches</div>' +
+        '<div><span></span>persönliches</div>' +
       '</div>' +
       '<div class="mml-griff" title="offen halten">‹</div>';
 
@@ -103,7 +102,7 @@
            So kann ein Segment auf dem Handy nie mangels width auf 0 px
            zusammenfallen — das Maß existiert immer, nur die Achse wechselt. */
         s.style.setProperty('--von', o + '%'); s.style.setProperty('--dicke', h + '%');
-        s.style.background = ab.farbe || BLASS;
+        if (ab.farbe) s.style.background = ab.farbe;
         s.onclick = () => springe(ab.element);
         gleis.appendChild(s);
         mitten.push(T + (o + h / 2) / 100 * H);
@@ -112,7 +111,7 @@
       abschnitte.forEach(ab => {
         const e = document.createElement('div');
         e.className = 'mml-et';
-        e.innerHTML = '<span class="mml-punkt" style="background:' + (ab.farbe || BLASS) + '"></span>' +
+        e.innerHTML = '<span class="mml-punkt"' + (ab.farbe ? ' style="background:' + ab.farbe + '"' : '') + '></span>' +
                       '<span class="mml-titel"></span>';
         e.querySelector('.mml-titel').textContent = ab.titel;
         e.onclick = () => springe(ab.element);

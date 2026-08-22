@@ -7,6 +7,9 @@
   --sage:  #BFCC94;
   --line:  #D5D9D2;
   --muted: #6E7873;
+  /* Vom Auftraggeber festgelegte Bewegungskurve — einmal hier, referenziert
+     von leiste.css, brief.css und welt.css. Darf nicht auseinanderlaufen. */
+  --mm-kurve: cubic-bezier(.50, 0, .12, 1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 /* [hidden] muss gewinnen: eigene display-Regeln (z.B. display:inline-flex)

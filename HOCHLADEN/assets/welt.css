@@ -24,5 +24,5 @@
 
 /* Der Farbwechsel schwappt herein, statt hart umzuschalten. */
 @keyframes welt-rein { from { opacity:0; } to { opacity:1; } }
-.welt { animation: welt-rein .5s cubic-bezier(.50,0,.12,1) both; }
+.welt { animation: welt-rein .5s var(--mm-kurve) both; }
 @media (prefers-reduced-motion: reduce) { .welt { animation:none; } }

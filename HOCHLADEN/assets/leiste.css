@@ -4,7 +4,11 @@
 .mml, .mml *, .mml *::before, .mml *::after { box-sizing: border-box; }
 .mml {
   --mml-dauer: 860ms;
-  --mml-kurve: cubic-bezier(.50, 0, .12, 1);
+  --mml-kurve: var(--mm-kurve);
+  /* Grundfarbe für Abschnitte ohne eigene Farbe — einmal hier, sonst
+     nirgends: leiste.js setzt style.background nur noch, wenn ein
+     Abschnitt wirklich eine eigene Farbe hat. */
+  --mml-blass: #D6D3C4;
   flex: none; width: 252px; position: relative; background: #FBFAF6;
   border-right: 1px solid #EDEAE1; z-index: 6;
   transition: width var(--mml-dauer) var(--mml-kurve);
@@ -25,14 +29,15 @@
   border-radius:99px; background:#E9E6DC; }
 /* Segmente mit Abstand und abgerundet — lückenlos wurde geprüft und abgelehnt. */
 .mml-seg { position:absolute; left:0; width:8px; top:var(--von); height:var(--dicke);
-  border-radius:99px; cursor:pointer; }
+  border-radius:99px; cursor:pointer; background: var(--mml-blass); }
 .mml-seg:after { content:''; position:absolute; left:-10px; right:-10px; top:0; bottom:0; }
 
 .mml-etiketten { position:absolute; inset:0; pointer-events:none; }
 .mml-et { position:absolute; left:52px; width:172px; padding:5px 9px; border-radius:6px;
   display:flex; gap:8px; align-items:flex-start; pointer-events:auto; cursor:pointer;
   transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve); }
-.mml-punkt { width:6px; height:6px; border-radius:50%; margin-top:5.5px; flex:none; }
+.mml-punkt { width:6px; height:6px; border-radius:50%; margin-top:5.5px; flex:none;
+  background: var(--mml-blass); }
 .mml-titel { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:12.5px;
   line-height:1.32; color:#5b625f; min-width:0; }
 .mml-et:hover { background:#F2EFE6; transform:translateX(2px); }
@@ -58,7 +63,7 @@
   transition: opacity var(--mml-dauer) var(--mml-kurve); }
 .mml-fuss div { display:flex; align-items:center; gap:7px; margin-bottom:5px;
   font-family:'Space Grotesk',sans-serif; font-size:9.5px; line-height:1.4; color:#A8A398; }
-.mml-fuss span { width:8px; height:8px; border-radius:99px; }
+.mml-fuss span { width:8px; height:8px; border-radius:99px; background: var(--mml-blass); }
 
 .mml-griff { position:absolute; bottom:22px; right:11px; width:23px; height:23px;
   border-radius:7px; background:#F2EFE6; color:#9A9689; cursor:pointer; z-index:9;

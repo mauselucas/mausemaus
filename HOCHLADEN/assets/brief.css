@@ -48,7 +48,7 @@
 /* Einbettbare Videos: Coverbild als Vorschau, Abspieler erst beim Klick.
    Sonst holt die Startseite fünf fremde Abspieler auf einmal. */
 .br-spielbar { cursor:pointer; }
-.br-spielbar img { transition:transform .5s cubic-bezier(.50,0,.12,1); }
+.br-spielbar img { transition:transform .5s var(--mm-kurve); }
 .br-spielbar:hover img { transform:scale(1.02); }
 .br-play { position:absolute; inset:0; margin:0; width:100%; height:100%;
   display:flex; align-items:center; justify-content:center;

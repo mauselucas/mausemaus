@@ -40,7 +40,7 @@
   const CACHE_E = 'mm.settings.v1';
 
   window.mmLoadSettings = async function () {
-    if (!eingerichtet) return null;
+    if (!eingerichtet) return window.SEED_SETTINGS || null;
     try {
       const r = await fetch(`${CFG.url}/rest/v1/settings?id=eq.1&select=*`,
         { headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` } });
