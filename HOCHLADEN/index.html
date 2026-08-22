@@ -52,13 +52,22 @@
                                .sort((a, b) => a.sort_order - b.sort_order);
   const abschnitte = window.mmBrief(document.getElementById('brief'), { settings, projekte });
 
-  /* Bilder können die Höhen verschieben — erst danach die Leiste rechnen lassen. */
   const leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte,
     { scroller: document.getElementById('scroller') });
-  await Promise.all([...document.images]
-    .filter(i => !i.complete)
-    .map(i => new Promise(r => { i.onload = i.onerror = r; })));
+
+  /* Die Höhe der Seite ändert sich noch, nachdem sie steht: Schriften laden nach,
+     und Bilder mit loading="lazy" laden ERST, wenn man zu ihnen scrollt.
+     Nicht auf sie warten — sie laden vielleicht nie. Stattdessen zusehen und
+     neu rechnen, sooft sich etwas ändert. Das deckt Schriften, Bilder,
+     Videofenster und alles Spätere ab. */
+  await document.fonts.ready.catch(() => {});
   leiste.neuBerechnen();
+
+  let ruhe = null;
+  new ResizeObserver(() => {
+    clearTimeout(ruhe);
+    ruhe = setTimeout(() => leiste.neuBerechnen(), 120);
+  }).observe(document.getElementById('brief'));
 
   if (new URLSearchParams(location.search).has('danke')) {
     const f = document.getElementById('anfragen');

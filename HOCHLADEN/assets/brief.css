@@ -35,7 +35,11 @@
    Bilder in Originalgröße über den Seitenrand hinaus. */
 .br-text figure { margin:24px 0; border-radius:8px; overflow:hidden;
   box-shadow:0 9px 26px rgba(13,24,33,.14); }
-.br-text img { display:block; width:100%; border-radius:8px; }
+/* loading="lazy" bleibt richtig — Bilder sollen erst beim Hinscrollen laden.
+   min-height hält den Platz frei, solange das noch nicht passiert ist, sonst
+   springt der Text beim Nachladen und die Zeitleiste rechnet mit falschen Höhen. */
+.br-text img { display:block; width:100%; border-radius:8px;
+  min-height:120px; background:#F2EFE6; }
 .br-text figcaption { font-family:'Space Mono',monospace; font-size:10.5px;
   letter-spacing:.05em; color:#6E7873; margin-top:7px; text-align:center; }
 .br-text figure.mm-klein  { max-width:260px; margin-inline:auto; }

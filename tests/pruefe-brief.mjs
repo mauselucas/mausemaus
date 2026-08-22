@@ -61,6 +61,35 @@ const verweise = JSON.parse(await s.werte(`(async () => {
 pruefe('Verweise auf Beiträge bleiben erhalten',
   verweise.soll.every(u => verweise.ist.includes(u)),
   'soll ' + verweise.soll.join(',') + ' / ist ' + verweise.ist.join(','));
+
+/* Bilder im Fließtext laden erst, wenn man zu ihnen scrollt. Dabei wächst die
+   Seite — und die Zeitleiste muss nachrechnen. Tut sie es nicht, zeigen die
+   Balken dauerhaft falsche Verhältnisse und Klicks landen an der falschen
+   Stelle. Genau dieser Fehler wurde einmal übersehen. */
+await s.werte(`(async () => {
+  const sc = document.getElementById('scroller');
+  for (let y = 0; y <= sc.scrollHeight; y += 500) {
+    sc.scrollTo({ top: y, behavior: 'instant' });
+    await new Promise(r => setTimeout(r, 60));
+  }
+  sc.scrollTo({ top: 0, behavior: 'instant' });
+})()`);
+await s.warte(1200);                       // dem Beobachter Zeit zum Nachrechnen geben
+const treue = JSON.parse(await s.werte(`(() => {
+  const sc = document.getElementById('scroller');
+  const oben = el => el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+  const ab = [...document.querySelectorAll('#brief section')];
+  const segs = [...document.querySelectorAll('.mml-seg')];
+  let groesste = 0;
+  ab.forEach((el, i) => {
+    const soll = oben(el) / sc.scrollHeight * 100;
+    const ist = parseFloat(segs[i].style.top);
+    groesste = Math.max(groesste, Math.abs(soll - ist));
+  });
+  return JSON.stringify({ abweichung: +groesste.toFixed(2), hoehe: sc.scrollHeight });
+})()`));
+pruefe('Zeitleiste stimmt noch, nachdem alle Bilder geladen sind',
+  treue.abweichung < 2, 'größte Abweichung ' + treue.abweichung + ' % bei ' + treue.hoehe + ' px');
 pruefe('Leiste hat für jeden Abschnitt ein Segment', d.leiste === d.abschnitte, String(d.leiste));
 
 /* Jedes Projekt braucht eine EIGENE Farbe — sonst sind Balken nicht unterscheidbar.
