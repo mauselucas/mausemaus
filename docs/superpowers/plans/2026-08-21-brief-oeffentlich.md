@@ -2484,6 +2484,68 @@ console.log('veröffentlicht:', d.filter(p=>p.status==='published').length);
 
 Erwartet: dieselbe Anzahl wie in der Datenbank, fünf veröffentlicht.
 
+- [ ] **Schritt 4b: Die Notfalldaten für die Startseiten-Texte anschließen**
+
+`seed.js` enthält `SEED_SETTINGS`, aber `db.js` liest es nirgends. `mmLoadSettings()` gibt
+bei einem Ausfall ohne Zwischenspeicher `null` zurück — und dann fehlen im Brief **Einstieg,
+Eckdaten, Profilabschnitt und Kontaktteil**. Übrig bliebe eine Seite mit fünf Projekten und
+ohne Anfang und Ende. Die Projekte selbst sind abgesichert, die Texte drumherum nicht.
+
+In `HOCHLADEN/assets/db.js`, im Ausweichzweig von `mmLoadSettings`:
+
+```js
+    } catch (e) {
+      console.warn('[mausemaus] Einstellungen nicht erreichbar:', e.message);
+      try {
+        const c = JSON.parse(localStorage.getItem(CACHE_E) || 'null');
+        if (c) return c;
+      } catch {}
+      /* Dritte Stufe: die mitgelieferten Notfalldaten. Ohne sie verlöre der
+         Brief bei einem Ausfall Anfang und Ende — die Projekte allein
+         abzusichern reicht nicht. */
+      console.info('[mausemaus] Einstellungen aus seed.js');
+      return window.SEED_SETTINGS || null;
+    }
+```
+
+Prüfung dazu, ans Ende von `tests/pruefe-brief.mjs`:
+
+```js
+/* Dritte Stufe des Rückfalls: Ohne Datenbank UND ohne Zwischenspeicher muss
+   der Brief trotzdem vollständig sein — mit Einstieg, Profil und Kontakt. */
+const notfall = JSON.parse(await s.werte(`(async () => {
+  const e = await (async () => {
+    const echt = window.MM_CONFIG.url;
+    window.MM_CONFIG.url = 'https://gibtsnicht.invalid';
+    localStorage.removeItem('mm.settings.v1');
+    const r = await window.mmLoadSettings();
+    window.MM_CONFIG.url = echt;
+    return r;
+  })();
+  return JSON.stringify({ da: !!e, intro: !!(e && e.hero_intro),
+                          werkzeuge: !!(e && e.werkzeuge && e.werkzeuge.length) });
+})()`));
+pruefe('ohne Datenbank kommen die Einstellungen aus seed.js', notfall.da);
+pruefe('und sie sind vollständig', notfall.intro && notfall.werkzeuge,
+  'intro=' + notfall.intro + ' werkzeuge=' + notfall.werkzeuge);
+```
+
+**Beweise, dass sie anschlägt:** In einer Kopie außerhalb des Projektordners die neue
+Rückfallzeile wieder entfernen — die Prüfung muss dann fallen.
+
+- [ ] **Schritt 4c: `blog.css` löschen**
+
+Nach dem Umzug nach `inhalt.css` verweist keine Seite mehr darauf. Eine Datei, die nur noch
+mitgeladen wird, weil niemand sie weggeräumt hat, gehört weg.
+
+```bash
+git rm HOCHLADEN/assets/blog.css
+grep -rn "blog\.css" HOCHLADEN/ --include=*.html --include=*.js --include=*.css
+```
+
+Erwartet: keine Treffer außer einem erklärenden Kommentar in `inhalt.css` — der darf bleiben,
+er sagt, woher die Regeln stammen.
+
 - [ ] **Schritt 5: Prüfen, dass kein geheimer Schlüssel mit hochgeht**
 
 ```bash
