@@ -118,7 +118,8 @@ Diese gelten für **jede** Aufgabe, auch wenn sie dort nicht wiederholt werden.
 
 **Entfällt** (erst in Aufgabe 9, wenn der Brief nachweislich läuft):
 `HOCHLADEN/assets/start.js`, `HOCHLADEN/assets/start.css`, `HOCHLADEN/beitrag.html`,
-`HOCHLADEN/blog.html`, `HOCHLADEN/assets/blog.js`
+`HOCHLADEN/blog.html`, `HOCHLADEN/assets/blog.js`, `HOCHLADEN/assets/blog.css`
+(die weiterhin gebrauchten Teile ziehen in Aufgabe 7 nach `inhalt.css` / `inhalt.js` um)
 
 ---
 
@@ -2038,14 +2039,130 @@ bericht();
 node tests/pruefe-welten.mjs
 ```
 
-Erwartet: `8 von 8 bestanden`. Schlagen die CSS-Zeilen fehl, ist irgendwo ein relativer
+Erwartet: `13 von 13 bestanden`. Schlagen die CSS-Zeilen fehl, ist irgendwo ein relativer
 Pfad stehen geblieben — oder die Umschreibungsregel benutzt wieder `*` statt `:slug` und
 verschluckt die Dateianfrage.
 
-- [ ] **Schritt 5: Festschreiben**
+- [ ] **Schritt 5: Codeblöcke und die Werkzeug-Nachbildung mitnehmen**
+
+Ein Beitrag der Welt `the-race-automatisierung` enthält Codeblöcke und `::demo the-race-pipeline`
+— die Nachbildung des After-Effects-Werkzeugs, das Lucas gebaut hat. Die Gestaltung dafür lag
+in `blog.css`, das Einsetzen in `blog.js`. **`welt.html` lädt beides nicht**, also erscheint die
+Nachbildung gar nicht, Codeblöcke sind ungestaltet und laufen auf dem Handy seitlich über.
+
+Beide Dateien gehören zum alten Blog-System, das in Aufgabe 9 verschwindet. Also wandert das,
+was weiterhin gebraucht wird, in eigene Dateien — und der Rest bleibt liegen.
+
+**Neu: `HOCHLADEN/assets/inhalt.css`** — aus `blog.css` übernehmen: die Regeln für
+`.code-block`, `.code-kopf`, `.code-sprache`, `.code-kopieren`, die `.hljs-*`-Farben,
+`.mm-demo` und `.mm-block`. **Nicht** übernehmen: `.blog-liste`, `.eintrag*`, `.beitrag*` —
+die gehören zur Übersichtsseite und zum alten Beitragsaufbau, die es beide nicht mehr gibt.
+
+**Neu: `HOCHLADEN/assets/inhalt.js`**
+
+```js
+/* Nachbereitung für Seiteninhalt: Einlagen einsetzen, Code einfärben, Kopieren.
+   Kommt aus dem alten blog.js und wird jetzt von den Welt-Seiten benutzt. */
+(() => {
+  const HLJS = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js';
+
+  function einfaerben(wurzel) {
+    const bloecke = wurzel.querySelectorAll('.code-block code');
+    if (!bloecke.length) return;                 // ohne Code kein Nachladen
+    const anwenden = () => bloecke.forEach(el => window.hljs && window.hljs.highlightElement(el));
+    if (window.hljs) return anwenden();
+    const s = document.createElement('script');
+    s.src = HLJS; s.onload = anwenden; s.onerror = () => {};   // ohne Netz eben ungefärbt
+    document.head.appendChild(s);
+  }
+
+  window.mmInhalt = function (wurzel) {
+    wurzel.querySelectorAll('.mm-demo').forEach(el => {
+      const bauen = (window.MM_DEMOS || {})[el.dataset.demo];
+      if (bauen) bauen(el);
+      else el.innerHTML = '<p class="leer">Diese Einlage ist nicht hinterlegt.</p>';
+    });
+
+    wurzel.querySelectorAll('.code-kopieren').forEach(knopf => {
+      if (knopf.dataset.mmBereit) return;        // nicht zweimal verdrahten
+      knopf.dataset.mmBereit = '1';
+      knopf.addEventListener('click', async () => {
+        const code = knopf.closest('.code-block').querySelector('code').textContent;
+        try {
+          await navigator.clipboard.writeText(code);
+          knopf.textContent = 'Kopiert!'; knopf.classList.add('fertig');
+        } catch { knopf.textContent = 'Ging nicht'; }
+        setTimeout(() => { knopf.textContent = 'Kopieren'; knopf.classList.remove('fertig'); }, 1800);
+      });
+    });
+
+    einfaerben(wurzel);
+  };
+})();
+```
+
+**In `welt.html`** die Gestaltung ergänzen (absolute Pfade):
+
+```html
+<link rel="stylesheet" href="/assets/inhalt.css">
+```
+
+und vor dem Startskript:
+
+```html
+<script src="/assets/demo-race.js"></script>
+<script src="/assets/inhalt.js"></script>
+```
+
+sowie im Startskript direkt nach `window.mmTueren(ziel);`:
+
+```js
+  window.mmInhalt(ziel);
+```
+
+**Prüfungen dazu**, ans Ende von `tests/pruefe-welten.mjs` — gegen die Welt
+`the-race-automatisierung`, die als einzige Codeblöcke und die Nachbildung enthält:
+
+```js
+const w = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung', { port: 9337 });
+await w.warte(3000);
+const inhalt = JSON.parse(await w.werte(`(() => {
+  const cb = document.querySelector('.code-block');
+  const demo = document.querySelector('.mm-demo');
+  return JSON.stringify({
+    codeblock: !!cb,
+    codeGestaltet: cb ? getComputedStyle(cb).backgroundColor !== 'rgba(0, 0, 0, 0)' : false,
+    demoDa: !!demo,
+    demoGefuellt: demo ? demo.children.length > 0 : false,
+    kopierknopf: !!document.querySelector('.code-kopieren')
+  });
+})()`));
+pruefe('die Welt enthält einen Codeblock', inhalt.codeblock);
+pruefe('Codeblöcke sind gestaltet', inhalt.codeGestaltet);
+pruefe('die Werkzeug-Nachbildung ist eingesetzt', inhalt.demoDa && inhalt.demoGefuellt,
+  'da=' + inhalt.demoDa + ' gefüllt=' + inhalt.demoGefuellt);
+pruefe('der Kopieren-Knopf ist da', inhalt.kopierknopf);
+await w.zu();
+
+/* Auf dem Handy darf nichts seitlich überlaufen — Codeblöcke sind der
+   häufigste Grund dafür. */
+const h = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung',
+  { port: 9337, breite: 520, hoehe: 900 });
+await h.warte(3000);
+const ueber = JSON.parse(await h.werte(`JSON.stringify({
+  waagerecht: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  breite: document.documentElement.scrollWidth
+})`));
+pruefe('kein waagerechtes Scrollen auf dem Handy',
+  !ueber.waagerecht, ueber.breite + ' px breit');
+await h.zu();
+```
+
+- [ ] **Schritt 6: Festschreiben**
 
 ```bash
-git add HOCHLADEN/welt.html HOCHLADEN/assets/welt.css HOCHLADEN/_redirects tests/pruefe-welten.mjs
+git add HOCHLADEN/welt.html HOCHLADEN/assets/welt.css HOCHLADEN/assets/inhalt.css \
+        HOCHLADEN/assets/inhalt.js HOCHLADEN/_redirects tests/pruefe-welten.mjs
 git commit -m "Welten unter /welt/:slug mit eigener Farbstimmung"
 ```
 
