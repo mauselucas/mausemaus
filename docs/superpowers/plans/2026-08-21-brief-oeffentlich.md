@@ -1584,18 +1584,27 @@ Anführungszeichen müssen raus, damit sie die Attribute nicht sprengen (`esc` w
 bereits in `&quot;` um, deshalb genügt hier eine Sicherung gegen rohe Zeichen).
 
 ```js
-  /* Hintertürchen: [[Wort|slug|Titel|Text]] — führt in eine Welt.
-     Muss vor allen anderen Regeln stehen: sonst frisst die Link-Regel
-     die inneren Klammern. s ist hier bereits durch esc() gelaufen. */
+  /* Hintertürchen. Zwei Schreibweisen:
+       [[Wort|slug|Titel|Text]]   sichtbare Tür, mit Blümchen
+       ((Wort|slug|Titel|Text))   Geheimtür, ohne Kennzeichen — leuchtet nur
+                                  auf, wenn jemand zufällig darüberfährt
+     Müssen vor allen anderen Regeln stehen, sonst frisst die Link-Regel die
+     inneren Klammern. s ist hier bereits durch esc() gelaufen — nicht noch
+     einmal maskieren. */
+  const tuer = (wort, slug, titel, text, geheim) => {
+    const rein = x => String(x || '').trim().replace(/"/g, '&quot;');
+    /* slugify() beherrscht Umlaute: aus "Grün" wird "gruen", nicht "Grn". */
+    const ziel = slugify(rein(slug));
+    if (!ziel) return wort;
+    return '<a class="mm-tuer' + (geheim ? ' mm-tuer-geheim' : '') +
+           '" href="/welt/' + ziel + '"' +
+           ' data-titel="' + rein(titel) + '"' +
+           ' data-text="' + rein(text) + '">' + wort.trim() + '</a>';
+  };
   s = s.replace(/\[\[([^\]|]+)\|([^\]|]+)(?:\|([^\]|]*))?(?:\|([^\]|]*))?\]\]/g,
-    (_, wort, slug, titel, text) => {
-      const rein = x => String(x || '').trim().replace(/"/g, '&quot;');
-      const ziel = rein(slug).replace(/[^a-z0-9-]/gi, '');
-      if (!ziel) return wort;
-      return '<a class="mm-tuer" href="/welt/' + ziel + '"' +
-             ' data-titel="' + rein(titel) + '"' +
-             ' data-text="' + rein(text) + '">' + wort.trim() + '</a>';
-    });
+    (_, w, sl, t, x) => tuer(w, sl, t, x, false));
+  s = s.replace(/\(\(([^)|]+)\|([^)|]+)(?:\|([^)|]*))?(?:\|([^)|]*))?\)\)/g,
+    (_, w, sl, t, x) => tuer(w, sl, t, x, true));
 ```
 
 - [ ] **Schritt 2: `HOCHLADEN/assets/tueren.js` schreiben**
@@ -1632,11 +1641,20 @@ bereits in `&quot;` um, deshalb genügt hier eine Sicherung gegen rohe Zeichen).
         if (t) kasten.querySelector('b').textContent = t;
         if (x) kasten.querySelector('span').textContent = x;
         kasten.hidden = false;
+        kasten.classList.remove('mm-vorschau-unten');
         const r = a.getBoundingClientRect();
         const breite = 214;
         kasten.style.left = Math.max(10,
           Math.min(window.innerWidth - breite - 10, r.left + r.width / 2 - breite / 2)) + 'px';
-        kasten.style.top = (r.top - kasten.offsetHeight - 11) + 'px';
+        /* Oben zu wenig Platz? Dann klappt die Vorschau unter das Wort,
+           statt am Bildschirmrand abgeschnitten zu werden. */
+        const oben = r.top - kasten.offsetHeight - 11;
+        if (oben < 8) {
+          kasten.style.top = (r.bottom + 11) + 'px';
+          kasten.classList.add('mm-vorschau-unten');
+        } else {
+          kasten.style.top = oben + 'px';
+        }
       });
       a.addEventListener('mouseleave', () => { kasten.hidden = true; });
     });
@@ -1667,6 +1685,9 @@ bereits in `&quot;` um, deshalb genügt hier eine Sicherung gegen rohe Zeichen).
   letter-spacing:.16em; text-transform:uppercase; color:#BFCC94; font-style:normal; }
 .mm-vorschau b { display:block; font-family:'Tropi',cursive,sans-serif; font-weight:400;
   font-size:16px; line-height:1.15; margin:6px 0 4px; }
+/* Kippt sie nach unten, gehört der Schatten nach oben — sonst sieht sie
+   aus, als schwebe sie über dem Wort statt darunter zu hängen. */
+.mm-vorschau-unten { box-shadow:0 -10px 28px rgba(13,24,33,.34); }
 .mm-vorschau span { font-family:'Space Grotesk',sans-serif; font-size:10.5px;
   line-height:1.45; color:#AEB6B2; }
 ```
@@ -1703,6 +1724,43 @@ pruefe('Türchen-Schreibweise wird umgesetzt', t.gefunden);
 pruefe('Türchen zeigt auf /welt/…', t.ziel === '/welt/blender', String(t.ziel));
 pruefe('nur das Wort steht im Text', t.wort === 'Blender', String(t.wort));
 pruefe('Vorschautitel kommt mit', t.titel === 'Was ich in 3D anstelle', String(t.titel));
+
+/* Die Geheimtür: gleiche Wirkung, aber ohne Kennzeichen im Text. */
+const g = JSON.parse(await s.werte(`(() => {
+  const d = document.createElement('div');
+  d.innerHTML = window.mm.renderMarkdown('Irgendwo steht ((ein Wort|blender|Überraschung|Hier geht es weiter)).');
+  const a = d.querySelector('a.mm-tuer');
+  return JSON.stringify({ geheim: a && a.classList.contains('mm-tuer-geheim'),
+                          ziel: a && a.getAttribute('href'), wort: a && a.textContent });
+})()`));
+pruefe('die Geheimtür lässt sich überhaupt anlegen', g.geheim === true);
+pruefe('sie führt an dasselbe Ziel', g.ziel === '/welt/blender', String(g.ziel));
+
+/* Umlaute im Ziel dürfen nicht verstümmelt werden. */
+const u = JSON.parse(await s.werte(`(() => {
+  const d = document.createElement('div');
+  d.innerHTML = window.mm.renderMarkdown('Zu [[grünen Sachen|Grün]].');
+  const a = d.querySelector('a.mm-tuer');
+  return JSON.stringify({ ziel: a && a.getAttribute('href') });
+})()`));
+pruefe('Umlaute im Ziel werden richtig umgeschrieben', u.ziel === '/welt/gruen', String(u.ziel));
+
+/* Die Vorschau darf am oberen Bildschirmrand nicht abgeschnitten werden. */
+const v = JSON.parse(await s.werte(`(async () => {
+  const sc = document.getElementById('scroller');
+  const t = document.querySelector('#brief a.mm-tuer');
+  if (!t) return JSON.stringify({ keine: true });
+  /* Das Türchen ganz nach oben an den Rand scrollen. */
+  const oben = t.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+  sc.scrollTo({ top: oben - 12, behavior: 'instant' });
+  await new Promise(r => setTimeout(r, 400));
+  t.dispatchEvent(new MouseEvent('mouseenter'));
+  await new Promise(r => setTimeout(r, 120));
+  const k = document.querySelector('.mm-vorschau').getBoundingClientRect();
+  return JSON.stringify({ keine: false, top: Math.round(k.top), hoehe: Math.round(k.height) });
+})()`));
+pruefe('die Vorschau wird oben nicht abgeschnitten',
+  v.keine || v.top >= 0, 'oberer Rand bei ' + v.top + ' px');
 ```
 
 - [ ] **Schritt 6: Ausführen — muss bestehen**
