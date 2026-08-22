@@ -83,7 +83,7 @@ const treue = JSON.parse(await s.werte(`(() => {
   let groesste = 0;
   ab.forEach((el, i) => {
     const soll = oben(el) / sc.scrollHeight * 100;
-    const ist = parseFloat(segs[i].style.top);
+    const ist = parseFloat(segs[i].style.getPropertyValue('--von'));
     groesste = Math.max(groesste, Math.abs(soll - ist));
   });
   return JSON.stringify({ abweichung: +groesste.toFixed(2), hoehe: sc.scrollHeight });

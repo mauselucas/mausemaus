@@ -34,7 +34,11 @@
     let etiketten = [], angepinnt = false, uhr = null,
         letzterStand = 0, zeigerDrin = false, springtGerade = 0;
 
-    const gh = () => gleis.getBoundingClientRect().height;
+    /* Länge des Gleises entlang seiner LAUFrichtung — hochkant ist das die
+       Höhe, quer (Handy) die Breite. Ohne diese Unterscheidung würde LUECKE
+       unten aus der 4-px-Bandstärke statt aus der tatsächlichen Länge
+       berechnet und jedes Segment auf die Mindestgröße zusammenschrumpfen. */
+    const gh = () => { const r = gleis.getBoundingClientRect(); return Math.max(r.width, r.height); };
     const gt = () => gleis.offsetTop;   // gleis liegt in .mml (position:relative) — hier stimmt offsetTop
     const stopUhr = () => { clearTimeout(uhr); uhr = null; };
 
@@ -94,7 +98,11 @@
         s.className = 'mml-seg';
         const o = anfang[i];
         const h = Math.max(2.2, ende[i] - o - LUECKE);
-        s.style.top = o + '%'; s.style.height = h + '%';
+        /* --von/--dicke statt top/height direkt: welche Achse gemeint ist,
+           entscheidet allein das CSS (hochkant top/height, quer left/width).
+           So kann ein Segment auf dem Handy nie mangels width auf 0 px
+           zusammenfallen — das Maß existiert immer, nur die Achse wechselt. */
+        s.style.setProperty('--von', o + '%'); s.style.setProperty('--dicke', h + '%');
         s.style.background = ab.farbe || BLASS;
         s.onclick = () => springe(ab.element);
         gleis.appendChild(s);
@@ -204,7 +212,15 @@
     };
     wurzel.addEventListener('mouseenter', rein);
     wurzel.addEventListener('mouseleave', raus);
+    /* Auf dem Handy gibt es kein Überfahren — dort klappt der Griff die Liste auf. */
+    const schmal = () => window.matchMedia('(max-width: 760px)').matches;
     griff.onclick = () => {
+      /* Festklemmen ist ein Konzept der Spalte, nicht des Handy-Streifens.
+         Ohne diese Sperre setzt jeder Griff-Tipp auf dem Handy nebenbei
+         "angepinnt" — und weil das Schließen per Eintrag-Tipp diesen
+         Zustand nie zurücknimmt, bliebe die Leiste dauerhaft angepinnt,
+         sobald die Seite später wieder auf Spaltenbreite kommt. */
+      if (schmal()) return;
       angepinnt = !angepinnt; griff.textContent = angepinnt ? '›' : '‹';
       stopUhr(); if (angepinnt) aufmachen();
     };
@@ -214,8 +230,6 @@
     const beiGroesse = () => { bauen(); aktualisieren(); };
     window.addEventListener('resize', beiGroesse);
 
-    /* Auf dem Handy gibt es kein Überfahren — dort klappt der Griff die Liste auf. */
-    const schmal = () => window.matchMedia('(max-width: 760px)').matches;
     griff.addEventListener('click', () => {
       if (schmal()) wurzel.classList.toggle('mml-offen');
     });

@@ -168,6 +168,29 @@ pruefe('kein waagerechtes Scrollen auf dem Handy', !m.waagerecht);
 pruefe('Leiste ist ein Streifen oben, keine Spalte', m.leisteHoehe < 90, m.leisteHoehe + ' px hoch');
 pruefe('Leiste nimmt die volle Breite', m.leisteBreite >= 500, m.leisteBreite + ' px');
 pruefe('Text bekommt Platz', m.textBreite > 400, m.textBreite + ' px');
+
+/* Das Fortschrittsband muss auf dem Handy wirklich farbige Abschnitte zeigen.
+   Ohne left/width wären alle Segmente 0 px breit — das Band wäre da, aber leer. */
+const band = JSON.parse(await h.werte(`(() => {
+  const g = document.querySelector('.mml-gleis').getBoundingClientRect();
+  const b = [...document.querySelectorAll('.mml-seg')].map(x => x.getBoundingClientRect().width);
+  return JSON.stringify({ belegt: Math.round(b.reduce((n, x) => n + x, 0)),
+                          gleis: Math.round(g.width), schmalste: Math.round(Math.min(...b)) });
+})()`));
+pruefe('das Fortschrittsband zeigt farbige Abschnitte',
+  band.schmalste > 2 && band.belegt > band.gleis * 0.8,
+  band.belegt + ' von ' + band.gleis + ' px belegt, schmalste ' + band.schmalste + ' px');
+
+/* Aufgeklappt darf unter der Liste keine große Leere stehen. */
+await h.werte(`document.querySelector('.mml-griff').click()`);
+await h.warte(1200);
+const auf = JSON.parse(await h.werte(`(() => {
+  const r = document.querySelector('.mml').getBoundingClientRect();
+  const l = document.querySelector('.mml-etiketten').getBoundingClientRect();
+  return JSON.stringify({ leiste: Math.round(r.height), liste: Math.round(l.height) });
+})()`));
+pruefe('die aufgeklappte Liste schmiegt sich an ihren Inhalt',
+  auf.leiste - auf.liste < 90, auf.leiste + ' px hoch bei ' + auf.liste + ' px Liste');
 await h.zu();
 
 await s.zu(); chrome.beenden(); server.beenden();
