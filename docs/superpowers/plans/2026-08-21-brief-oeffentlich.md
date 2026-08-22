@@ -704,7 +704,8 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 .mml-gleis { position:absolute; left:28px; top:74px; bottom:82px; width:8px;
   border-radius:99px; background:#E9E6DC; }
 /* Segmente mit Abstand und abgerundet — lückenlos wurde geprüft und abgelehnt. */
-.mml-seg { position:absolute; left:0; width:8px; border-radius:99px; cursor:pointer; }
+.mml-seg { position:absolute; left:0; width:8px; border-radius:99px; cursor:pointer;
+  top: var(--von); height: var(--dicke); }
 .mml-seg:after { content:''; position:absolute; left:-10px; right:-10px; top:0; bottom:0; }
 
 .mml-etiketten { position:absolute; inset:0; pointer-events:none; }
@@ -834,7 +835,11 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
         s.className = 'mml-seg';
         const o = obenVon(ab.element) / ganz * 100;
         const h = Math.max(2.2, hoeheVon(ab.element) / ganz * 100);
-        s.style.top = o + '%'; s.style.height = h + '%';
+        /* NICHT top/height direkt setzen: Auf dem Handy liegt das Gleis quer,
+           dort müssen dieselben Werte auf left/width wirken. Also nur die
+           Werte hinterlegen — welche Achse gemeint ist, entscheidet das CSS. */
+        s.style.setProperty('--von', o + '%');
+        s.style.setProperty('--dicke', h + '%');
         s.style.background = ab.farbe || BLASS;
         s.onclick = () => springe(ab.element);
         gleis.appendChild(s);
@@ -1115,7 +1120,7 @@ const treue = JSON.parse(await s.werte(`(() => {
   let groesste = 0;
   ab.forEach((el, i) => {
     const soll = oben(el) / sc.scrollHeight * 100;
-    const ist = parseFloat(segs[i].style.top);
+    const ist = parseFloat(segs[i].style.getPropertyValue('--von'));
     groesste = Math.max(groesste, Math.abs(soll - ist));
   });
   return JSON.stringify({ abweichung: +groesste.toFixed(2), hoehe: sc.scrollHeight });
@@ -2196,6 +2201,29 @@ pruefe('kein waagerechtes Scrollen auf dem Handy', !m.waagerecht);
 pruefe('Leiste ist ein Streifen oben, keine Spalte', m.leisteHoehe < 90, m.leisteHoehe + ' px hoch');
 pruefe('Leiste nimmt die volle Breite', m.leisteBreite >= 500, m.leisteBreite + ' px');
 pruefe('Text bekommt Platz', m.textBreite > 400, m.textBreite + ' px');
+
+/* Das Fortschrittsband muss auf dem Handy wirklich farbige Abschnitte zeigen.
+   Ohne left/width wären alle Segmente 0 px breit — das Band wäre da, aber leer. */
+const band = JSON.parse(await h.werte(`(() => {
+  const g = document.querySelector('.mml-gleis').getBoundingClientRect();
+  const b = [...document.querySelectorAll('.mml-seg')].map(x => x.getBoundingClientRect().width);
+  return JSON.stringify({ belegt: Math.round(b.reduce((n, x) => n + x, 0)),
+                          gleis: Math.round(g.width), schmalste: Math.round(Math.min(...b)) });
+})()`));
+pruefe('das Fortschrittsband zeigt farbige Abschnitte',
+  band.schmalste > 2 && band.belegt > band.gleis * 0.8,
+  band.belegt + ' von ' + band.gleis + ' px belegt, schmalste ' + band.schmalste + ' px');
+
+/* Aufgeklappt darf unter der Liste keine große Leere stehen. */
+await h.werte(`document.querySelector('.mml-griff').click()`);
+await h.warte(1200);
+const auf = JSON.parse(await h.werte(`(() => {
+  const r = document.querySelector('.mml').getBoundingClientRect();
+  const l = document.querySelector('.mml-etiketten').getBoundingClientRect();
+  return JSON.stringify({ leiste: Math.round(r.height), liste: Math.round(l.height) });
+})()`));
+pruefe('die aufgeklappte Liste schmiegt sich an ihren Inhalt',
+  auf.leiste - auf.liste < 90, auf.leiste + ' px hoch bei ' + auf.liste + ' px Liste');
 await h.zu();
 ```
 
@@ -2216,7 +2244,9 @@ Erwartet: die vier neuen Zeilen schlagen fehl.
   .mml, .mml-zu { width: 100%; height: 62px; border-right: 0;
     border-bottom: 1px solid #EDEAE1; position: sticky; top: 0; overflow: hidden;
     transition: height var(--mml-dauer) var(--mml-kurve); }
-  .mml-offen { height: 62vh; overflow-y: auto; }
+  /* An den Inhalt anschmiegen, nicht auf feste Höhe aufblasen: Bei neun
+     Abschnitten stünden sonst 300 px Leere unter der Liste. */
+  .mml-offen { height: auto; max-height: 62vh; overflow-y: auto; }
 
   .mml-marke { opacity: 1 !important; padding: 20px 18px 0; font-size: 19px; }
   .mml-mini { display: none; }
@@ -2224,7 +2254,9 @@ Erwartet: die vier neuen Zeilen schlagen fehl.
   /* Das Gleis legt sich quer und wird zum dünnen Fortschrittsband. */
   .mml-gleis { left: 0; right: 0; top: auto; bottom: 0; width: auto; height: 4px;
     border-radius: 0; }
-  .mml-seg { top: auto !important; bottom: 0; height: 4px !important; width: auto;
+  /* Quer statt hochkant: dieselben Werte, andere Achse. Ohne left/width
+     bliebe jedes Segment 0 px breit und das Fortschrittsband unsichtbar. */
+  .mml-seg { top: auto; bottom: 0; height: 4px; left: var(--von); width: var(--dicke);
     border-radius: 0; }
   .mml-kopf, .mml-sicht, .mml-fuehrung, .mml-zeit { display: none; }
 
