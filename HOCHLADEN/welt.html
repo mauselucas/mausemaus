@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="stylesheet" href="/assets/brief.css">
 <link rel="stylesheet" href="/assets/welt.css">
+<link rel="stylesheet" href="/assets/inhalt.css">
 </head>
 <body>
 <div class="welt" id="welt">
@@ -22,6 +23,8 @@
 <script src="/assets/shared.js"></script>
 <script src="/assets/db.js"></script>
 <script src="/assets/tueren.js"></script>
+<script src="/assets/demo-race.js"></script>
+<script src="/assets/inhalt.js"></script>
 <script>
 (async () => {
   /* Netlify schreibt /welt/xy auf diese Datei um — der Name steht in der Adresse. */
@@ -56,6 +59,7 @@
     '<div class="welt-text">' + window.mm.renderMarkdown(seite.body || '') + '</div>';
 
   window.mmTueren(ziel);
+  window.mmInhalt(ziel);
 })();
 </script>
 </body>

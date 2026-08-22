@@ -50,5 +50,40 @@ await f.warte(2000);
 pruefe('unbekannte Welt zeigt eine freundliche Seite',
   (await f.werte(`document.body.innerText`)).includes('Hier ist nichts'));
 
+/* Codeblöcke und die Werkzeug-Nachbildung — nur die Welt the-race-automatisierung
+   enthält beides. */
+const w = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung', { port: 9337 });
+await w.warte(3000);
+const inhalt = JSON.parse(await w.werte(`(() => {
+  const cb = document.querySelector('.code-block');
+  const demo = document.querySelector('.mm-demo');
+  return JSON.stringify({
+    codeblock: !!cb,
+    codeGestaltet: cb ? getComputedStyle(cb).backgroundColor !== 'rgba(0, 0, 0, 0)' : false,
+    demoDa: !!demo,
+    demoGefuellt: demo ? demo.children.length > 0 : false,
+    kopierknopf: !!document.querySelector('.code-kopieren')
+  });
+})()`));
+pruefe('die Welt enthält einen Codeblock', inhalt.codeblock);
+pruefe('Codeblöcke sind gestaltet', inhalt.codeGestaltet);
+pruefe('die Werkzeug-Nachbildung ist eingesetzt', inhalt.demoDa && inhalt.demoGefuellt,
+  'da=' + inhalt.demoDa + ' gefüllt=' + inhalt.demoGefuellt);
+pruefe('der Kopieren-Knopf ist da', inhalt.kopierknopf);
+await w.zu();
+
+/* Auf dem Handy darf nichts seitlich überlaufen — Codeblöcke sind der
+   häufigste Grund dafür. */
+const h = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung',
+  { port: 9337, breite: 520, hoehe: 900 });
+await h.warte(3000);
+const ueber = JSON.parse(await h.werte(`JSON.stringify({
+  waagerecht: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  breite: document.documentElement.scrollWidth
+})`));
+pruefe('kein waagerechtes Scrollen auf dem Handy',
+  !ueber.waagerecht, ueber.breite + ' px breit');
+await h.zu();
+
 await s.zu(); await f.zu(); chrome.beenden(); server.beenden();
 bericht();
