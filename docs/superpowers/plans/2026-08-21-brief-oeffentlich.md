@@ -1745,22 +1745,42 @@ const u = JSON.parse(await s.werte(`(() => {
 })()`));
 pruefe('Umlaute im Ziel werden richtig umgeschrieben', u.ziel === '/welt/gruen', String(u.ziel));
 
-/* Die Vorschau darf am oberen Bildschirmrand nicht abgeschnitten werden. */
+/* Die Vorschau darf am oberen Bildschirmrand nicht abgeschnitten werden.
+   Diese Prüfung baut sich ihr Türchen SELBST und hängt es an den oberen
+   Rand — sie darf sich nicht darauf verlassen, dass im Seiteninhalt gerade
+   eine Tür mit Vorschautext steht. Eine frühere Fassung tat genau das: Die
+   einzige echte Tür trug keinen Vorschautext, es öffnete sich nie eine
+   Vorschau, und die Prüfung maß die Randlage eines unsichtbaren Elements —
+   sie bestand auch mit zurückgebauter Kipp-Logik. */
 const v = JSON.parse(await s.werte(`(async () => {
-  const sc = document.getElementById('scroller');
-  const t = document.querySelector('#brief a.mm-tuer');
-  if (!t) return JSON.stringify({ keine: true });
-  /* Das Türchen ganz nach oben an den Rand scrollen. */
-  const oben = t.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
-  sc.scrollTo({ top: oben - 12, behavior: 'instant' });
-  await new Promise(r => setTimeout(r, 400));
-  t.dispatchEvent(new MouseEvent('mouseenter'));
-  await new Promise(r => setTimeout(r, 120));
-  const k = document.querySelector('.mm-vorschau').getBoundingClientRect();
-  return JSON.stringify({ keine: false, top: Math.round(k.top), hoehe: Math.round(k.height) });
+  const halter = document.createElement('div');
+  halter.id = 'pruef-tuer';
+  halter.style.cssText = 'position:fixed;top:6px;left:40%;z-index:99';
+  halter.innerHTML = window.mm.renderMarkdown(
+    'Ein [[Prüfwort|blender|Vorschautitel|Ein Satz zur Vorschau]] am Rand.');
+  document.body.appendChild(halter);
+  window.mmTueren(halter);
+  const a = halter.querySelector('a.mm-tuer');
+  a.dispatchEvent(new MouseEvent('mouseenter'));
+  await new Promise(r => setTimeout(r, 150));
+  const k = document.querySelector('.mm-vorschau');
+  const kr = k.getBoundingClientRect();
+  const ar = a.getBoundingClientRect();
+  const erg = {
+    sichtbar: !k.hidden && kr.height > 20,
+    top: Math.round(kr.top),
+    unterhalb: kr.top > ar.bottom - 1,
+    gekippt: k.classList.contains('mm-vorschau-unten')
+  };
+  a.dispatchEvent(new MouseEvent('mouseleave'));
+  halter.remove();
+  return JSON.stringify(erg);
 })()`));
-pruefe('die Vorschau wird oben nicht abgeschnitten',
-  v.keine || v.top >= 0, 'oberer Rand bei ' + v.top + ' px');
+pruefe('die Vorschau ist überhaupt sichtbar', v.sichtbar,
+  'Höhe/Zustand — sonst prüft die nächste Zeile nichts');
+pruefe('die Vorschau wird oben nicht abgeschnitten', v.top >= 0, 'oberer Rand bei ' + v.top + ' px');
+pruefe('am oberen Rand kippt sie unter das Wort', v.unterhalb && v.gekippt,
+  'unterhalb=' + v.unterhalb + ' gekippt=' + v.gekippt);
 ```
 
 - [ ] **Schritt 6: Ausführen — muss bestehen**
