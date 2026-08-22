@@ -791,8 +791,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
           griff = wurzel.querySelector('.mml-griff');
 
     let etiketten = [], angepinnt = false, uhr = null,
-        letzterStand = 0, zeigerDrin = false, springtGerade = 0,
-        schonZu = false;   /* war sie einmal zu, öffnet sie sich nicht mehr von selbst */
+        letzterStand = 0, zeigerDrin = false, springtGerade = 0;
 
     const gh = () => gleis.getBoundingClientRect().height;
     const gt = () => gleis.offsetTop;   // gleis liegt in .mml (position:relative) — hier stimmt offsetTop
@@ -812,7 +811,6 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
     function zumachen() {
       if (angepinnt || zeigerDrin) return;
       wurzel.classList.add('mml-zu');
-      schonZu = true;   /* ab jetzt nur noch auf Zuruf */
     }
     function aufmachen() { wurzel.classList.remove('mml-zu'); }
 
@@ -923,11 +921,15 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
          lassen sich einzeln nicht widerlegen — nimmt man eine weg,
          ändert sich nichts Sichtbares, und keine Prüfung merkt es. */
 
-      /* Vor dem ersten Zuklappen: ganz oben bleibt sie offen.
-         Danach nie wieder von selbst — weder oben noch beim Hochscrollen.
-         Ein Kippschalter, der bei jedem Abschnittswechsel wieder aufspringt,
-         ist lästiger als eine Leiste, die man einmal selbst aufmacht. */
-      if (schonZu) return;
+      /* Hier gibt es KEINEN Zweig, der die Leiste wieder aufmacht — das ist
+         die ganze Regel. Ist sie zu, bleibt sie zu: `!contains('mml-zu')`
+         verhindert, dass überhaupt noch ein Zeitgeber anläuft, und geöffnet
+         wird nur noch über die Maus oder den Griff. Ein Kippschalter, der bei
+         jedem Abschnittswechsel aufspringt, ist lästiger als eine Leiste, die
+         man einmal selbst aufmacht.
+         Ein zusätzlicher Merker dafür wäre totes Gewicht: Man könnte ihn
+         entfernen, ohne dass sich etwas ändert — und genau solche Sperren
+         lassen sich nicht widerlegen. */
       if (stand <= SCHWELLE) { stopUhr(); return; }
       if (runter && !wurzel.classList.contains('mml-zu') && !uhr)
         uhr = setTimeout(() => { uhr = null; zumachen(); }, HALTEN);
@@ -974,7 +976,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 node tests/pruefe-leiste.mjs
 ```
 
-Erwartet: `22 von 22 bestanden`.
+Erwartet: `21 von 21 bestanden`.
 
 **Zwei getrennte Gegenbeweise führen, jeweils in einer Kopie außerhalb des Projektordners.
 Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**
@@ -983,7 +985,11 @@ Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**
 |---|---|
 | `if (Date.now() - springtGerade < 900) return;` | „Tippen auf ein Projekt klappt die Leiste nicht zu" |
 | `zeigerDrin` aus der Bedingung in `zumachen()` | „Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu" |
-| `schonZu = true;` aus `zumachen()` | „Hochscrollen öffnet sie NICHT wieder" |
+| **Wieder eingesetzt:** `else { stopUhr(); aufmachen(); }` am Ende von `aktualisieren()` | „Hochscrollen öffnet sie NICHT wieder" und „auch ganz oben bleibt sie zu" |
+
+Der dritte Gegenbeweis läuft andersherum als die beiden ersten: Es gibt keine Zeile zum
+Entfernen, weil die Regel im **Fehlen** eines Zweigs besteht. Man setzt also den alten
+Zweig wieder ein und zeigt, dass die Prüfung dann fällt.
 
 Jede Sperre deckt genau einen Fall ab und ist einzeln widerlegbar:
 
