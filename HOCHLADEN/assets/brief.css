@@ -2,7 +2,12 @@
 .br-buehne { display:flex; min-height:100vh; }
 .br-scroller { flex:1; min-width:0; overflow-y:auto; height:100vh;
   background:#FBFAF6; scroll-behavior:smooth; }
-.br-spalte { max-width:560px; margin:0 auto; padding:64px 26px 220px; }
+.br-spalte { max-width:560px; margin:0 auto; padding:64px 26px 96px; }
+
+/* Der Ueberzieh-Bereich beim Weiterscrollen an den Enden zeigt den Untergrund
+   des DOKUMENTS, nicht den des Scroll-Kastens. Ohne diese Zeile blitzt dort
+   das gruenlichere --paper auf, obwohl der Brief auf #FBFAF6 steht. */
+html, body { background:#FBFAF6; }
 
 .br-abschnitt { scroll-margin-top:20px; }
 .br-gruss { font-family:'Tropi',cursive,sans-serif; font-weight:400; font-size:clamp(38px,6vw,52px);
