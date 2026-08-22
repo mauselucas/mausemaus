@@ -61,19 +61,37 @@ await s.warte(900);
 pruefe('nach 1200 ms zugeklappt',
   JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
-/* --- Hochscrollen öffnet sofort --- */
+/* --- Einmal zu, bleibt zu ---
+   Ausdrücklicher Wunsch des Auftraggebers: Eine Leiste, die bei jedem
+   Abschnittswechsel wieder aufspringt, ist lästig. Sie zeigt sich einmal
+   beim Laden, danach nur noch auf Zuruf. */
 await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(120);
-pruefe('Hochscrollen öffnet ohne Warten',
+await s.warte(400);
+pruefe('Hochscrollen öffnet sie NICHT wieder',
+  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
+await s.warte(400);
+pruefe('auch ganz oben bleibt sie zu',
+  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+await s.warte(200);
+pruefe('mit der Maus lässt sie sich jederzeit wieder öffnen',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
+await s.warte(1400);
+
+/* ═══ Ab hier eine FRISCH geladene Seite ═══
+   Die folgenden Prüfungen brauchen den Zustand "noch nie zugeklappt":
+   Die Leiste öffnet sich nach dem ersten Zuklappen nicht mehr von selbst,
+   und beide Sperren greifen nur, solange der Zeitgeber überhaupt läuft. */
+await s.werte(`location.reload()`);
+await s.warte(1400);
 
 /* --- DER FEHLER, den der Auftraggeber gemeldet hat ---
-   Wichtig: Der Klick muss NACH UNTEN springen. Ein Sprung nach oben wird
-   ohnehin vom Zweig "hochscrollen = navigieren" aufgefangen und beweist
-   über die Sperren gar nichts. Erst ein Sprung nach unten löst dieselbe
-   Bedingung aus wie echtes Wegscrollen. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
-await s.warte(300);                       // ganz oben, Leiste offen
+   Der Tipp muss NACH UNTEN springen: Ein Sprung nach oben löst gar keinen
+   Zuklapp-Vorgang aus und beweist über die Sperren nichts.
+   KEIN mouseenter — so verhält sich ein Berührungsgerät. Damit hängt diese
+   Prüfung allein an springtGerade und lässt sich einzeln widerlegen. */
 const zielIndex = JSON.parse(await s.werte(`(() => {
   const sc = document.getElementById('scroller');
   const ab = [...document.querySelectorAll('#sp section')];
@@ -83,8 +101,6 @@ const zielIndex = JSON.parse(await s.werte(`(() => {
 })()`));
 pruefe('es gibt einen Abschnitt weiter unten zum Anspringen', zielIndex > 0, 'Index ' + zielIndex);
 
-/* KEIN mouseenter — so verhält sich ein Berührungsgerät. Damit hängt diese
-   Prüfung allein an springtGerade und lässt sich einzeln widerlegen. */
 await s.werte(`document.querySelectorAll('.mml-et')[${zielIndex}].click()`);
 await s.warte(1700);
 const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
@@ -94,9 +110,11 @@ const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
 pruefe('der Tipp ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
 pruefe('Tippen auf ein Projekt klappt die Leiste nicht zu (ohne Mauszeiger)', !nachKlick.zu);
 
-/* Dasselbe über einen Tipp auf den Balken statt auf das Etikett. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
-await s.warte(300);
+/* Dasselbe über einen Tipp auf den Balken. Wieder frisch laden, weil der
+   vorige Tipp die Leiste zwar offen gelassen hat, der Zeitgeber aber
+   bereits gelaufen ist. */
+await s.werte(`location.reload()`);
+await s.warte(1400);
 await s.werte(`document.querySelectorAll('.mml-seg')[${zielIndex}].click()`);
 await s.warte(1700);
 pruefe('auch ein Tipp auf den Balken klappt sie nicht zu',
@@ -110,9 +128,11 @@ pruefe('auch ein Tipp auf den Balken klappt sie nicht zu',
                       dann darf sie auch bei echtem Wegscrollen nicht zugehen.
    Die Klickprüfung oben trifft nur die erste: Das sanfte Scrollen ist
    innerhalb der 900-ms-Schonfrist beendet, weiter kommt der Code nie.
-   Hier also OHNE Klick, mit Abstand zu jeder Schonfrist. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(200);
+   Hier also OHNE Klick, mit Abstand zu jeder Schonfrist — und auf einer
+   frisch geladenen Seite, weil der Zeitgeber nach dem ersten Zuklappen
+   gar nicht mehr anläuft und die Sperre dann unerreichbar wäre. */
+await s.werte(`location.reload()`);        // wieder "noch nie zugeklappt"
+await s.warte(1400);
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
 await s.warte(1000);                      // sicher jenseits der 900-ms-Schonfrist
 await s.werte(`document.getElementById('scroller').scrollTo({top:900,behavior:'instant'})`);

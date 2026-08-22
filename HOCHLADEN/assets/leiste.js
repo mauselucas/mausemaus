@@ -55,7 +55,10 @@
        verfängt nur nicht. Zwei Prüfstellen für dieselbe Sperre wären von
        außen nicht unterscheidbar (keine Prüfung könnte zeigen, ob eine
        davon fehlt) und sind darum bewusst auf eine einzige reduziert. */
-    function zumachen() { if (!angepinnt && !zeigerDrin) wurzel.classList.add('mml-zu'); }
+    function zumachen() {
+      if (angepinnt || zeigerDrin) return;
+      wurzel.classList.add('mml-zu');
+    }
     function aufmachen() { wurzel.classList.remove('mml-zu'); }
 
     /* Klick auf Etikett oder Segment: springen, ohne dass das Scrollen
@@ -168,15 +171,28 @@
       letzterStand = stand;
 
       if (angepinnt) return;
-      /* Ein durch Klick (oder Tipp, auf Berührungsgeräten ohne Mauszeiger)
-         ausgelöster Sprung ist kein Nutzer-Scrollen. */
+      /* Ein durch Klick oder Tipp ausgelöster Sprung ist kein Wegscrollen.
+         Auf Berührungsgeräten gibt es kein mouseenter — dort ist das die
+         EINZIGE Sperre, die das Zuklappen beim Antippen eines Projekts
+         verhindert. Genau dieser Fehler wurde gemeldet. */
       if (Date.now() - springtGerade < 900) return;
+      /* Hinweis: "Zeiger ist in der Leiste" wird NICHT hier abgefangen,
+         sondern allein in zumachen(). Zwei Sperren für dieselbe Sache
+         lassen sich einzeln nicht widerlegen — nimmt man eine weg,
+         ändert sich nichts Sichtbares, und keine Prüfung merkt es. */
 
-      if (stand <= SCHWELLE) { stopUhr(); aufmachen(); return; }
-      if (runter) {
-        if (!wurzel.classList.contains('mml-zu') && !uhr)
-          uhr = setTimeout(() => { uhr = null; zumachen(); }, HALTEN);
-      } else { stopUhr(); aufmachen(); }   // hochscrollen = navigieren
+      /* Hier gibt es KEINEN Zweig, der die Leiste wieder aufmacht — das ist
+         die ganze Regel. Ist sie zu, bleibt sie zu: `!contains('mml-zu')`
+         verhindert, dass überhaupt noch ein Zeitgeber anläuft, und geöffnet
+         wird nur noch über die Maus oder den Griff. Ein Kippschalter, der bei
+         jedem Abschnittswechsel aufspringt, ist lästiger als eine Leiste, die
+         man einmal selbst aufmacht.
+         Ein zusätzlicher Merker dafür wäre totes Gewicht: Man könnte ihn
+         entfernen, ohne dass sich etwas ändert — und genau solche Sperren
+         lassen sich nicht widerlegen. */
+      if (stand <= SCHWELLE) { stopUhr(); return; }
+      if (runter && !wurzel.classList.contains('mml-zu') && !uhr)
+        uhr = setTimeout(() => { uhr = null; zumachen(); }, HALTEN);
     }
 
     const rein  = () => { zeigerDrin = true;  stopUhr(); aufmachen(); };

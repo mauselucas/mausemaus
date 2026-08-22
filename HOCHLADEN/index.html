@@ -43,6 +43,7 @@
 <script src="/assets/db.js"></script>
 <script src="/assets/leiste.js"></script>
 <script src="/assets/brief.js"></script>
+<script src="/assets/tueren.js"></script>
 <script>
 (async () => {
   const [settings, alle] = await Promise.all([
@@ -62,6 +63,7 @@
      Videofenster und alles Spätere ab. */
   await document.fonts.ready.catch(() => {});
   leiste.neuBerechnen();
+  window.mmTueren(document.getElementById('brief'));
 
   let ruhe = null;
   new ResizeObserver(() => {

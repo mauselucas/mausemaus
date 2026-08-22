@@ -100,5 +100,33 @@ const beruflich = farben.slice(1, -1);   // ohne Einstieg und Kontakt
 pruefe('jedes Projekt hat eine eigene Farbe',
   new Set(beruflich).size === beruflich.length, beruflich.join(' '));
 
+/* --- Blumenformen (Rückfall aus Aufgabe 5) --- */
+const blume = JSON.parse(await s.werte(`(() => {
+  const def = document.querySelector('#mm-blumen #bl-a');
+  const benutzt = [...document.querySelectorAll('.md-rule use')];
+  const sichtbar = benutzt.filter(u => u.getBoundingClientRect().width > 4).length;
+  return JSON.stringify({ def: !!def, benutzt: benutzt.length, sichtbar });
+})()`));
+pruefe('die Blumenform ist definiert', blume.def);
+pruefe('jeder Trenner zeigt wirklich eine Blume',
+  blume.benutzt > 0 && blume.sichtbar === blume.benutzt,
+  blume.sichtbar + ' von ' + blume.benutzt + ' sichtbar');
+
+/* --- Türchen --- */
+const t = JSON.parse(await s.werte(`(() => {
+  const d = document.createElement('div');
+  d.innerHTML = window.mm.renderMarkdown(
+    'Ich sitze viel in [[Blender|blender|Was ich in 3D anstelle|Eigene Welt, dunkel und orange]].');
+  const a = d.querySelector('a.mm-tuer');
+  return JSON.stringify({
+    gefunden: !!a, ziel: a && a.getAttribute('href'),
+    wort: a && a.textContent, titel: a && a.dataset.titel
+  });
+})()`));
+pruefe('Türchen-Schreibweise wird umgesetzt', t.gefunden);
+pruefe('Türchen zeigt auf /welt/…', t.ziel === '/welt/blender', String(t.ziel));
+pruefe('nur das Wort steht im Text', t.wort === 'Blender', String(t.wort));
+pruefe('Vorschautitel kommt mit', t.titel === 'Was ich in 3D anstelle', String(t.titel));
+
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();
