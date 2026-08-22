@@ -1475,6 +1475,62 @@ git commit -m "Startseite ist der Brief"
 - Liefert: `window.mmTueren(wurzel)` — hängt Vorschau, Merkung besuchter Türen und
   die Geheimtür an.
 
+- [ ] **Schritt 0: Die Gänseblümchen zurückholen — Rückfall aus Aufgabe 5**
+
+`shared.js` gibt für `---` einen Trenner aus:
+`<div class="md-rule"><svg viewBox="0 0 303.13 275.3"><use href="#bl-a"/></svg></div>`.
+Die Formen `bl-a`, `bl-b`, `bl-c` standen als `<defs>` in der **alten** `index.html`. Die neue
+enthält sie nicht mehr — der Verweis zeigt ins Leere, und statt einer Blume klafft eine Lücke
+zwischen zwei Strichen. `.md-rule` ist in `site.css:276` weiterhin gestaltet, es fehlen nur
+die Formen.
+
+Damit das nicht wieder passiert, kommen die Formen **dorthin, wo sie gebraucht werden**:
+`shared.js` gibt den Verweis aus, also sorgt `shared.js` auch für die Definition. Dann gilt
+das auf jeder Seite, die den Umsetzer lädt, ohne dass man daran denken muss.
+
+Die Formen wörtlich aus der alten Fassung übernehmen:
+
+```bash
+git show 933bf41:HOCHLADEN/index.html | python3 -c "import re,sys; print(re.search(r'<svg width="0".*?</svg>', sys.stdin.read(), re.S).group(0))"
+```
+
+Ans Ende von `HOCHLADEN/assets/shared.js` anfügen:
+
+```js
+/* Die Blumenformen, auf die der Trenner (---) verweist. Sie gehören hierher und
+   nicht in eine einzelne HTML-Datei: Wer diesen Umsetzer lädt, bekommt sie mit.
+   Beim Umbau auf den Brief sind sie genau deshalb einmal verlorengegangen. */
+(() => {
+  if (document.getElementById('mm-blumen')) return;
+  const anlegen = () => {
+    if (document.getElementById('mm-blumen')) return;
+    const h = document.createElement('div');
+    h.id = 'mm-blumen';
+    h.setAttribute('aria-hidden', 'true');
+    h.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    h.innerHTML = '<svg><defs>…HIER DIE DREI <g>-BLÖCKE AUS DER ALTEN FASSUNG…</defs></svg>';
+    document.body.prepend(h);
+  };
+  if (document.body) anlegen();
+  else document.addEventListener('DOMContentLoaded', anlegen);
+})();
+```
+
+Prüfung dazu, ans Ende von `tests/pruefe-brief.mjs`:
+
+```js
+const blume = JSON.parse(await s.werte(`(() => {
+  const def = document.querySelector('#mm-blumen #bl-a');
+  const benutzt = [...document.querySelectorAll('.md-rule use')];
+  const sichtbar = benutzt.filter(u => u.getBoundingClientRect().width > 4).length;
+  return JSON.stringify({ def: !!def, benutzt: benutzt.length, sichtbar });
+})()`));
+pruefe('die Blumenform ist definiert', blume.def);
+pruefe('jeder Trenner zeigt wirklich eine Blume',
+  blume.benutzt > 0 && blume.sichtbar === blume.benutzt,
+  blume.sichtbar + ' von ' + blume.benutzt + ' sichtbar');
+```
+
 - [ ] **Schritt 1: Umsetzer in `shared.js` erweitern**
 
 In `HOCHLADEN/assets/shared.js`, Funktion `inline`, **direkt nach `let s = esc(t);`** und
