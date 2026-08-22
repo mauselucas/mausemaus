@@ -1808,6 +1808,52 @@ git commit -m "Hintertürchen mit Vorschau, besuchten Türen und Geheimtür"
 - Ändern: `HOCHLADEN/_redirects`
 - Neu: `tests/pruefe-welten.mjs`
 
+- [ ] **Schritt 0: `mmTueren()` darf nur einen Vorschaukasten anlegen**
+
+Bisher legt `mmTueren()` bei **jedem** Aufruf einen neuen `.mm-vorschau`-Kasten an und hängt
+ihn an `document.body`. Ab dieser Aufgabe wird die Funktion auf den Welt-Seiten ein zweites
+Mal aufgerufen — dann sammeln sich Kästen an, und beim Überfahren können zwei gleichzeitig
+sichtbar werden. Dasselbe Muster hat in diesem Projekt schon zweimal zugeschlagen: kein
+Wächter, keine Wiederholfestigkeit.
+
+Für die Blumenformen im selben Umsetzer gibt es das Muster bereits — hier genauso:
+
+```js
+    /* Nur EIN Vorschaukasten je Seite. Ohne diesen Wächter legt jeder weitere
+       Aufruf einen zweiten an; beim Überfahren würden dann zwei gleichzeitig
+       aufgehen, und Prüfungen greifen mit querySelector den falschen. */
+    let kasten = document.getElementById('mm-vorschau-kasten');
+    if (!kasten) {
+      kasten = document.createElement('div');
+      kasten.id = 'mm-vorschau-kasten';
+      kasten.className = 'mm-vorschau';
+      kasten.hidden = true;
+      document.body.appendChild(kasten);
+    }
+```
+
+Außerdem darf ein Türchen nicht zweimal denselben Zuhörer bekommen, wenn `mmTueren()` über
+denselben Bereich erneut läuft. In der Schleife über die Türchen ganz vorn:
+
+```js
+      if (a.dataset.mmBereit) return;
+      a.dataset.mmBereit = '1';
+```
+
+Prüfung dazu, ans Ende von `tests/pruefe-brief.mjs`:
+
+```js
+const doppelt = JSON.parse(await s.werte(`(() => {
+  const vorher = document.querySelectorAll('.mm-vorschau').length;
+  window.mmTueren(document.getElementById('brief'));
+  window.mmTueren(document.getElementById('brief'));
+  return JSON.stringify({ vorher, nachher: document.querySelectorAll('.mm-vorschau').length });
+})()`));
+pruefe('mehrfaches Aufrufen legt keine weiteren Vorschaukästen an',
+  doppelt.nachher === doppelt.vorher && doppelt.vorher === 1,
+  doppelt.vorher + ' -> ' + doppelt.nachher);
+```
+
 - [ ] **Schritt 1: `_redirects` ergänzen**
 
 Die vorhandenen Zeilen bleiben, damit alte Blog-Adressen weiter funktionieren.
