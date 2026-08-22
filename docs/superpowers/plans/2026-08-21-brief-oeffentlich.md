@@ -54,8 +54,14 @@ Diese gelten für **jede** Aufgabe, auch wenn sie dort nicht wiederholt werden.
 - **Der geheime Schlüssel** (`service_role` / `sb_secret_…`) darf in keiner Datei unter
   `HOCHLADEN/` vorkommen. Nur `sb_publishable_FUb6TXV9cV1eKF5MG0RuCg_ZGFy1UN4` gehört dorthin.
 - **Pacing der Zeitleiste, unveränderlich:** Halten 760 ms · Dauer 860 ms ·
-  `cubic-bezier(.50, 0, .12, 1)` · nach Mausaustritt 1100 ms · Schwelle 120 px ·
-  Hochscrollen öffnet sofort.
+  `cubic-bezier(.50, 0, .12, 1)` · nach Mausaustritt 1100 ms · Schwelle 120 px.
+- **Die Leiste öffnet sich nach dem ersten Zuklappen NIE wieder von selbst.**
+  Beim Laden ist sie offen, damit man sie einmal gesehen hat. Sobald man über die
+  Schwelle hinaus scrollt, klappt sie zu — und bleibt zu. Auch beim Hochscrollen,
+  auch ganz oben. Wer sie wieder braucht, fährt mit der Maus darüber oder klemmt
+  sie fest. Ausdrückliche Entscheidung des Auftraggebers:
+  *„das ist bisschen nervig wenn sich das immer neu öffnet … Leute checken schon
+  das Prinzip und können es selbst öffnen wenn sie wollen."*
 - **Zeitleiste optisch:** Segmente **mit ~6 px Abstand und abgerundet** (nicht lückenlos),
   Etiketten **feste Breite 172 px** mit Umbruch, Führungslinien blass `#DAD6CA` ohne Haken,
   Timecode freistehend. Die lückenlose Variante wurde geprüft und abgelehnt — nicht erneut bauen.
@@ -527,19 +533,37 @@ await s.warte(900);
 pruefe('nach 1200 ms zugeklappt',
   JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
 
-/* --- Hochscrollen öffnet sofort --- */
+/* --- Einmal zu, bleibt zu ---
+   Ausdrücklicher Wunsch des Auftraggebers: Eine Leiste, die bei jedem
+   Abschnittswechsel wieder aufspringt, ist lästig. Sie zeigt sich einmal
+   beim Laden, danach nur noch auf Zuruf. */
 await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(120);
-pruefe('Hochscrollen öffnet ohne Warten',
+await s.warte(400);
+pruefe('Hochscrollen öffnet sie NICHT wieder',
+  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
+await s.warte(400);
+pruefe('auch ganz oben bleibt sie zu',
+  JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
+await s.warte(200);
+pruefe('mit der Maus lässt sie sich jederzeit wieder öffnen',
   !JSON.parse(await s.werte(`document.querySelector('.mml').classList.contains('mml-zu')`)));
+await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseleave'))`);
+await s.warte(1400);
+
+/* ═══ Ab hier eine FRISCH geladene Seite ═══
+   Die folgenden Prüfungen brauchen den Zustand "noch nie zugeklappt":
+   Die Leiste öffnet sich nach dem ersten Zuklappen nicht mehr von selbst,
+   und beide Sperren greifen nur, solange der Zeitgeber überhaupt läuft. */
+await s.werte(`location.reload()`);
+await s.warte(1400);
 
 /* --- DER FEHLER, den der Auftraggeber gemeldet hat ---
-   Wichtig: Der Klick muss NACH UNTEN springen. Ein Sprung nach oben wird
-   ohnehin vom Zweig "hochscrollen = navigieren" aufgefangen und beweist
-   über die Sperren gar nichts. Erst ein Sprung nach unten löst dieselbe
-   Bedingung aus wie echtes Wegscrollen. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
-await s.warte(300);                       // ganz oben, Leiste offen
+   Der Tipp muss NACH UNTEN springen: Ein Sprung nach oben löst gar keinen
+   Zuklapp-Vorgang aus und beweist über die Sperren nichts.
+   KEIN mouseenter — so verhält sich ein Berührungsgerät. Damit hängt diese
+   Prüfung allein an springtGerade und lässt sich einzeln widerlegen. */
 const zielIndex = JSON.parse(await s.werte(`(() => {
   const sc = document.getElementById('scroller');
   const ab = [...document.querySelectorAll('#sp section')];
@@ -549,8 +573,6 @@ const zielIndex = JSON.parse(await s.werte(`(() => {
 })()`));
 pruefe('es gibt einen Abschnitt weiter unten zum Anspringen', zielIndex > 0, 'Index ' + zielIndex);
 
-/* KEIN mouseenter — so verhält sich ein Berührungsgerät. Damit hängt diese
-   Prüfung allein an springtGerade und lässt sich einzeln widerlegen. */
 await s.werte(`document.querySelectorAll('.mml-et')[${zielIndex}].click()`);
 await s.warte(1700);
 const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
@@ -560,9 +582,11 @@ const nachKlick = JSON.parse(await s.werte(`JSON.stringify({
 pruefe('der Tipp ist wirklich nach unten gesprungen', nachKlick.stand > 400, 'bei ' + nachKlick.stand + ' px');
 pruefe('Tippen auf ein Projekt klappt die Leiste nicht zu (ohne Mauszeiger)', !nachKlick.zu);
 
-/* Dasselbe über einen Tipp auf den Balken statt auf das Etikett. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:0,behavior:'instant'})`);
-await s.warte(300);
+/* Dasselbe über einen Tipp auf den Balken. Wieder frisch laden, weil der
+   vorige Tipp die Leiste zwar offen gelassen hat, der Zeitgeber aber
+   bereits gelaufen ist. */
+await s.werte(`location.reload()`);
+await s.warte(1400);
 await s.werte(`document.querySelectorAll('.mml-seg')[${zielIndex}].click()`);
 await s.warte(1700);
 pruefe('auch ein Tipp auf den Balken klappt sie nicht zu',
@@ -576,9 +600,11 @@ pruefe('auch ein Tipp auf den Balken klappt sie nicht zu',
                       dann darf sie auch bei echtem Wegscrollen nicht zugehen.
    Die Klickprüfung oben trifft nur die erste: Das sanfte Scrollen ist
    innerhalb der 900-ms-Schonfrist beendet, weiter kommt der Code nie.
-   Hier also OHNE Klick, mit Abstand zu jeder Schonfrist. */
-await s.werte(`document.getElementById('scroller').scrollTo({top:200,behavior:'instant'})`);
-await s.warte(200);
+   Hier also OHNE Klick, mit Abstand zu jeder Schonfrist — und auf einer
+   frisch geladenen Seite, weil der Zeitgeber nach dem ersten Zuklappen
+   gar nicht mehr anläuft und die Sperre dann unerreichbar wäre. */
+await s.werte(`location.reload()`);        // wieder "noch nie zugeklappt"
+await s.warte(1400);
 await s.werte(`document.querySelector('.mml').dispatchEvent(new MouseEvent('mouseenter'))`);
 await s.warte(1000);                      // sicher jenseits der 900-ms-Schonfrist
 await s.werte(`document.getElementById('scroller').scrollTo({top:900,behavior:'instant'})`);
@@ -628,10 +654,11 @@ HOCHLADEN/tests-feste
 hinterlässt, den der nächste voraussetzt. Sie muss am Ende genau so lauten:
 
 1. Aufbau — Segmente, Etiketten, Breiten, Kurve, Dauer, Belegung des Gleises
-2. Pacing — 760 ms halten, dann zu
-3. Hochscrollen öffnet sofort *(Leiste danach: offen, oben)*
-4. Tipp auf Etikett springt nach unten und klappt nicht zu *(springtGerade, ohne Mauszeiger)*
-5. Tipp auf Balken, dasselbe
+2. Tipp auf Etikett springt nach unten und klappt nicht zu *(springtGerade, ohne Mauszeiger)* —
+   **muss vor allem Scrollen stehen**, weil die Leiste nur beim Laden von selbst offen ist
+3. Tipp auf Balken, dasselbe
+4. Pacing — 760 ms halten, dann zu
+5. Hochscrollen öffnet sie **nicht** wieder, ganz oben ebenfalls nicht
 6. Wegscrollen bei Zeiger in der Leiste *(zeigerDrin)* — *(Leiste danach: offen, Zeiger drin, unten)*
 7. Maus raus: nach 400 ms noch offen, nach 1400 ms zu — dies ist zugleich die
    Gegenprobe zu 6.
@@ -764,7 +791,8 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
           griff = wurzel.querySelector('.mml-griff');
 
     let etiketten = [], angepinnt = false, uhr = null,
-        letzterStand = 0, zeigerDrin = false, springtGerade = 0;
+        letzterStand = 0, zeigerDrin = false, springtGerade = 0,
+        schonZu = false;   /* war sie einmal zu, öffnet sie sich nicht mehr von selbst */
 
     const gh = () => gleis.getBoundingClientRect().height;
     const gt = () => gleis.offsetTop;   // gleis liegt in .mml (position:relative) — hier stimmt offsetTop
@@ -781,7 +809,11 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
     const hoeheVon = el => el.getBoundingClientRect().height;
     const standVon = () => amFenster() ? window.scrollY : scroller.scrollTop;
 
-    function zumachen() { if (!angepinnt && !zeigerDrin) wurzel.classList.add('mml-zu'); }
+    function zumachen() {
+      if (angepinnt || zeigerDrin) return;
+      wurzel.classList.add('mml-zu');
+      schonZu = true;   /* ab jetzt nur noch auf Zuruf */
+    }
     function aufmachen() { wurzel.classList.remove('mml-zu'); }
 
     /* Klick auf Etikett oder Segment: springen, ohne dass das Scrollen
@@ -891,11 +923,14 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
          lassen sich einzeln nicht widerlegen — nimmt man eine weg,
          ändert sich nichts Sichtbares, und keine Prüfung merkt es. */
 
-      if (stand <= SCHWELLE) { stopUhr(); aufmachen(); return; }
-      if (runter) {
-        if (!wurzel.classList.contains('mml-zu') && !uhr)
-          uhr = setTimeout(() => { uhr = null; zumachen(); }, HALTEN);
-      } else { stopUhr(); aufmachen(); }   // hochscrollen = navigieren
+      /* Vor dem ersten Zuklappen: ganz oben bleibt sie offen.
+         Danach nie wieder von selbst — weder oben noch beim Hochscrollen.
+         Ein Kippschalter, der bei jedem Abschnittswechsel wieder aufspringt,
+         ist lästiger als eine Leiste, die man einmal selbst aufmacht. */
+      if (schonZu) return;
+      if (stand <= SCHWELLE) { stopUhr(); return; }
+      if (runter && !wurzel.classList.contains('mml-zu') && !uhr)
+        uhr = setTimeout(() => { uhr = null; zumachen(); }, HALTEN);
     }
 
     const rein  = () => { zeigerDrin = true;  stopUhr(); aufmachen(); };
@@ -939,7 +974,7 @@ Alle Namen mit `mml-` vorangestellt, damit nichts mit `site.css` kollidiert.
 node tests/pruefe-leiste.mjs
 ```
 
-Erwartet: `19 von 19 bestanden`.
+Erwartet: `22 von 22 bestanden`.
 
 **Zwei getrennte Gegenbeweise führen, jeweils in einer Kopie außerhalb des Projektordners.
 Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**
@@ -947,7 +982,8 @@ Beide müssen fehlschlagen — sonst prüft die jeweilige Zeile nichts:**
 | Entfernte Zeile in `leiste.js` | Muss fehlschlagen |
 |---|---|
 | `if (Date.now() - springtGerade < 900) return;` | „Tippen auf ein Projekt klappt die Leiste nicht zu" |
-| `!zeigerDrin` aus `function zumachen()` | „Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu" |
+| `zeigerDrin` aus der Bedingung in `zumachen()` | „Wegscrollen bei Zeiger IN der Leiste klappt sie nicht zu" |
+| `schonZu = true;` aus `zumachen()` | „Hochscrollen öffnet sie NICHT wieder" |
 
 Jede Sperre deckt genau einen Fall ab und ist einzeln widerlegbar:
 
