@@ -10,12 +10,25 @@
 
   window.mmTueren = function (wurzel) {
     const besucht = gelesen();
-    const kasten = document.createElement('div');
-    kasten.className = 'mm-vorschau';
-    kasten.hidden = true;
-    document.body.appendChild(kasten);
+
+    /* Nur EIN Vorschaukasten je Seite. Ohne diesen Wächter legt jeder weitere
+       Aufruf einen zweiten an; beim Überfahren würden dann zwei gleichzeitig
+       aufgehen, und Prüfungen greifen mit querySelector den falschen. */
+    let kasten = document.getElementById('mm-vorschau-kasten');
+    if (!kasten) {
+      kasten = document.createElement('div');
+      kasten.id = 'mm-vorschau-kasten';
+      kasten.className = 'mm-vorschau';
+      kasten.hidden = true;
+      document.body.appendChild(kasten);
+    }
 
     wurzel.querySelectorAll('a.mm-tuer').forEach(a => {
+      /* Läuft mmTueren() über denselben Bereich erneut, darf ein Türchen
+         nicht einen zweiten Satz Zuhörer bekommen. */
+      if (a.dataset.mmBereit) return;
+      a.dataset.mmBereit = '1';
+
       const slug = (a.getAttribute('href') || '').split('/').pop();
       if (besucht.has(slug)) a.classList.add('mm-tuer-besucht');
       a.addEventListener('click', () => merken(slug));

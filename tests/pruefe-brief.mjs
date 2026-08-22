@@ -166,14 +166,12 @@ const v = JSON.parse(await s.werte(`(async () => {
   const a = halter.querySelector('a.mm-tuer');
   a.dispatchEvent(new MouseEvent('mouseenter'));
   await new Promise(r => setTimeout(r, 150));
-  /* window.mmTueren() legt bei JEDEM Aufruf einen NEUEN .mm-vorschau-Kasten an
-     und hängt ihn ans Ende von <body>. Die Seite selbst hat beim Laden schon
-     einen (für #brief) — der hier per mmTueren(halter) erzeugte ist also nicht
-     der einzige. document.querySelector('.mm-vorschau') griffe den ERSTEN,
-     unberührten Kasten der Seite — genau der falsche. Der eigene, gerade
-     geöffnete Kasten ist immer der zuletzt angehängte. */
-  const kaesten = [...document.querySelectorAll('.mm-vorschau')];
-  const k = kaesten[kaesten.length - 1];
+  /* Seit dem Wächter in mmTueren() (Aufgabe 7, Schritt 0) gibt es je Seite nur
+     noch EINEN .mm-vorschau-Kasten (id="mm-vorschau-kasten") — auch der hier
+     per mmTueren(halter) ausgelöste ist derselbe wie der der Seite selbst.
+     Er darf darum am Ende nur geleert/versteckt, nicht aus dem DOM entfernt
+     werden: Er gehört der ganzen Seite, nicht dieser Prüfung allein. */
+  const k = document.getElementById('mm-vorschau-kasten');
   const kr = k.getBoundingClientRect();
   const ar = a.getBoundingClientRect();
   const erg = {
@@ -184,7 +182,6 @@ const v = JSON.parse(await s.werte(`(async () => {
   };
   a.dispatchEvent(new MouseEvent('mouseleave'));
   halter.remove();
-  k.remove();
   return JSON.stringify(erg);
 })()`));
 pruefe('die Vorschau ist überhaupt sichtbar', v.sichtbar,
@@ -192,6 +189,18 @@ pruefe('die Vorschau ist überhaupt sichtbar', v.sichtbar,
 pruefe('die Vorschau wird oben nicht abgeschnitten', v.top >= 0, 'oberer Rand bei ' + v.top + ' px');
 pruefe('am oberen Rand kippt sie unter das Wort', v.unterhalb && v.gekippt,
   'unterhalb=' + v.unterhalb + ' gekippt=' + v.gekippt);
+
+/* mmTueren() darf bei erneutem Aufruf keinen zweiten Vorschaukasten anlegen —
+   sonst können beim Überfahren zwei Kästen gleichzeitig aufgehen. */
+const doppelt = JSON.parse(await s.werte(`(() => {
+  const vorher = document.querySelectorAll('.mm-vorschau').length;
+  window.mmTueren(document.getElementById('brief'));
+  window.mmTueren(document.getElementById('brief'));
+  return JSON.stringify({ vorher, nachher: document.querySelectorAll('.mm-vorschau').length });
+})()`));
+pruefe('mehrfaches Aufrufen legt keine weiteren Vorschaukästen an',
+  doppelt.nachher === doppelt.vorher && doppelt.vorher === 1,
+  doppelt.vorher + ' -> ' + doppelt.nachher);
 
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();

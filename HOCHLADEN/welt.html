@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mausemaus</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/brief.css">
+<link rel="stylesheet" href="/assets/welt.css">
+</head>
+<body>
+<div class="welt" id="welt">
+  <div class="welt-spalte">
+    <a class="welt-zurueck" href="/">← zurück in den Brief</a>
+    <div id="inhalt"></div>
+  </div>
+</div>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/shared.js"></script>
+<script src="/assets/db.js"></script>
+<script src="/assets/tueren.js"></script>
+<script>
+(async () => {
+  /* Netlify schreibt /welt/xy auf diese Datei um — der Name steht in der Adresse. */
+  const slug = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+  const ziel = document.getElementById('inhalt');
+  const welt = document.getElementById('welt');
+
+  const [seite] = await window.mmLoadPosts(slug);
+  if (!seite) {
+    document.title = 'Nicht gefunden — mausemaus';
+    ziel.innerHTML = '<h1 class="welt-titel">Hier ist nichts.</h1>' +
+      '<p class="welt-text">Diese Tür führt ins Leere. Zurück in den Brief?</p>';
+    return;
+  }
+
+  document.title = seite.title + ' — mausemaus';
+  if (seite.farbe) {
+    welt.style.setProperty('--welt', seite.farbe);
+    /* Dunkle Farbstimmung, wenn die Farbe dunkel ist. */
+    const h = seite.farbe.replace('#', '');
+    if (h.length === 6) {
+      const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+      if (0.2126 * r + 0.7152 * g + 0.0722 * b < 110) welt.classList.add('dunkel');
+    }
+  }
+
+  ziel.innerHTML =
+    (seite.subtitle ? '<p class="welt-kicker">' + window.mm.esc(seite.subtitle) + '</p>' : '') +
+    '<h1 class="welt-titel">' + window.mm.esc(seite.title) + '</h1>' +
+    (seite.cover_url ? '<img class="welt-cover" src="' + window.mm.esc(seite.cover_url) +
+      '" alt="" style="object-position:' + window.mm.esc(seite.cover_pos || '50% 50%') + '">' : '') +
+    '<div class="welt-text">' + window.mm.renderMarkdown(seite.body || '') + '</div>';
+
+  window.mmTueren(ziel);
+})();
+</script>
+</body>
+</html>
