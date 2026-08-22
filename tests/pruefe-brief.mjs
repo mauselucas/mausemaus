@@ -128,5 +128,42 @@ pruefe('Türchen zeigt auf /welt/…', t.ziel === '/welt/blender', String(t.ziel
 pruefe('nur das Wort steht im Text', t.wort === 'Blender', String(t.wort));
 pruefe('Vorschautitel kommt mit', t.titel === 'Was ich in 3D anstelle', String(t.titel));
 
+/* Die Geheimtür: gleiche Wirkung, aber ohne Kennzeichen im Text. */
+const g = JSON.parse(await s.werte(`(() => {
+  const d = document.createElement('div');
+  d.innerHTML = window.mm.renderMarkdown('Irgendwo steht ((ein Wort|blender|Überraschung|Hier geht es weiter)).');
+  const a = d.querySelector('a.mm-tuer');
+  return JSON.stringify({ geheim: a && a.classList.contains('mm-tuer-geheim'),
+                          ziel: a && a.getAttribute('href'), wort: a && a.textContent });
+})()`));
+pruefe('die Geheimtür lässt sich überhaupt anlegen', g.geheim === true);
+pruefe('sie führt an dasselbe Ziel', g.ziel === '/welt/blender', String(g.ziel));
+
+/* Umlaute im Ziel dürfen nicht verstümmelt werden. */
+const u = JSON.parse(await s.werte(`(() => {
+  const d = document.createElement('div');
+  d.innerHTML = window.mm.renderMarkdown('Zu [[grünen Sachen|Grün]].');
+  const a = d.querySelector('a.mm-tuer');
+  return JSON.stringify({ ziel: a && a.getAttribute('href') });
+})()`));
+pruefe('Umlaute im Ziel werden richtig umgeschrieben', u.ziel === '/welt/gruen', String(u.ziel));
+
+/* Die Vorschau darf am oberen Bildschirmrand nicht abgeschnitten werden. */
+const v = JSON.parse(await s.werte(`(async () => {
+  const sc = document.getElementById('scroller');
+  const t = document.querySelector('#brief a.mm-tuer');
+  if (!t) return JSON.stringify({ keine: true });
+  /* Das Türchen ganz nach oben an den Rand scrollen. */
+  const oben = t.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+  sc.scrollTo({ top: oben - 12, behavior: 'instant' });
+  await new Promise(r => setTimeout(r, 400));
+  t.dispatchEvent(new MouseEvent('mouseenter'));
+  await new Promise(r => setTimeout(r, 120));
+  const k = document.querySelector('.mm-vorschau').getBoundingClientRect();
+  return JSON.stringify({ keine: false, top: Math.round(k.top), hoehe: Math.round(k.height) });
+})()`));
+pruefe('die Vorschau wird oben nicht abgeschnitten',
+  v.keine || v.top >= 0, 'oberer Rand bei ' + v.top + ' px');
+
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();

@@ -29,18 +29,27 @@ function coverFromVideoUrl(url) {
 /* Fett/kursiv/Links innerhalb einer Zeile. Alles andere wird escaped. */
 function inline(t) {
   let s = esc(t);
-  /* Hintertürchen: [[Wort|slug|Titel|Text]] — führt in eine Welt.
-     Muss vor allen anderen Regeln stehen: sonst frisst die Link-Regel
-     die inneren Klammern. s ist hier bereits durch esc() gelaufen. */
+  /* Hintertürchen. Zwei Schreibweisen:
+       [[Wort|slug|Titel|Text]]   sichtbare Tür, mit Blümchen
+       ((Wort|slug|Titel|Text))   Geheimtür, ohne Kennzeichen — leuchtet nur
+                                  auf, wenn jemand zufällig darüberfährt
+     Müssen vor allen anderen Regeln stehen, sonst frisst die Link-Regel die
+     inneren Klammern. s ist hier bereits durch esc() gelaufen — nicht noch
+     einmal maskieren. */
+  const tuer = (wort, slug, titel, text, geheim) => {
+    const rein = x => String(x || '').trim().replace(/"/g, '&quot;');
+    /* slugify() beherrscht Umlaute: aus "Grün" wird "gruen", nicht "Grn". */
+    const ziel = slugify(rein(slug));
+    if (!ziel) return wort;
+    return '<a class="mm-tuer' + (geheim ? ' mm-tuer-geheim' : '') +
+           '" href="/welt/' + ziel + '"' +
+           ' data-titel="' + rein(titel) + '"' +
+           ' data-text="' + rein(text) + '">' + wort.trim() + '</a>';
+  };
   s = s.replace(/\[\[([^\]|]+)\|([^\]|]+)(?:\|([^\]|]*))?(?:\|([^\]|]*))?\]\]/g,
-    (_, wort, slug, titel, text) => {
-      const rein = x => String(x || '').trim().replace(/"/g, '&quot;');
-      const ziel = rein(slug).replace(/[^a-z0-9-]/gi, '');
-      if (!ziel) return wort;
-      return '<a class="mm-tuer" href="/welt/' + ziel + '"' +
-             ' data-titel="' + rein(titel) + '"' +
-             ' data-text="' + rein(text) + '">' + wort.trim() + '</a>';
-    });
+    (_, w, sl, t, x) => tuer(w, sl, t, x, false));
+  s = s.replace(/\(\(([^)|]+)\|([^)|]+)(?:\|([^)|]*))?(?:\|([^)|]*))?\)\)/g,
+    (_, w, sl, t, x) => tuer(w, sl, t, x, true));
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (ganz, text, ziel) => {

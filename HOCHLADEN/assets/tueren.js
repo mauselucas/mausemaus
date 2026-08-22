@@ -29,11 +29,20 @@
         if (t) kasten.querySelector('b').textContent = t;
         if (x) kasten.querySelector('span').textContent = x;
         kasten.hidden = false;
+        kasten.classList.remove('mm-vorschau-unten');
         const r = a.getBoundingClientRect();
         const breite = 214;
         kasten.style.left = Math.max(10,
           Math.min(window.innerWidth - breite - 10, r.left + r.width / 2 - breite / 2)) + 'px';
-        kasten.style.top = (r.top - kasten.offsetHeight - 11) + 'px';
+        /* Oben zu wenig Platz? Dann klappt die Vorschau unter das Wort,
+           statt am Bildschirmrand abgeschnitten zu werden. */
+        const oben = r.top - kasten.offsetHeight - 11;
+        if (oben < 8) {
+          kasten.style.top = (r.bottom + 11) + 'px';
+          kasten.classList.add('mm-vorschau-unten');
+        } else {
+          kasten.style.top = oben + 'px';
+        }
       });
       a.addEventListener('mouseleave', () => { kasten.hidden = true; });
     });
