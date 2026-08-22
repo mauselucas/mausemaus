@@ -50,7 +50,15 @@
       return e || null;
     } catch (e) {
       console.warn('[mausemaus] Einstellungen nicht erreichbar:', e.message);
-      try { return JSON.parse(localStorage.getItem(CACHE_E) || 'null'); } catch { return null; }
+      try {
+        const c = JSON.parse(localStorage.getItem(CACHE_E) || 'null');
+        if (c) return c;
+      } catch {}
+      /* Dritte Stufe: die mitgelieferten Notfalldaten. Ohne sie verlöre der
+         Brief bei einem Ausfall Anfang und Ende — die Projekte allein
+         abzusichern reicht nicht. */
+      console.info('[mausemaus] Einstellungen aus seed.js');
+      return window.SEED_SETTINGS || null;
     }
   };
 

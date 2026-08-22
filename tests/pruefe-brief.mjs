@@ -202,5 +202,23 @@ pruefe('mehrfaches Aufrufen legt keine weiteren Vorschaukästen an',
   doppelt.nachher === doppelt.vorher && doppelt.vorher === 1,
   doppelt.vorher + ' -> ' + doppelt.nachher);
 
+/* Dritte Stufe des Rückfalls: Ohne Datenbank UND ohne Zwischenspeicher muss
+   der Brief trotzdem vollständig sein — mit Einstieg, Profil und Kontakt. */
+const notfall = JSON.parse(await s.werte(`(async () => {
+  const e = await (async () => {
+    const echt = window.MM_CONFIG.url;
+    window.MM_CONFIG.url = 'https://gibtsnicht.invalid';
+    localStorage.removeItem('mm.settings.v1');
+    const r = await window.mmLoadSettings();
+    window.MM_CONFIG.url = echt;
+    return r;
+  })();
+  return JSON.stringify({ da: !!e, intro: !!(e && e.hero_intro),
+                          werkzeuge: !!(e && e.werkzeuge && e.werkzeuge.length) });
+})()`));
+pruefe('ohne Datenbank kommen die Einstellungen aus seed.js', notfall.da);
+pruefe('und sie sind vollständig', notfall.intro && notfall.werkzeuge,
+  'intro=' + notfall.intro + ' werkzeuge=' + notfall.werkzeuge);
+
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();
