@@ -57,6 +57,59 @@
         <button class="btn primary" id="btn-neu">+ Neu</button>
       </div>
     </div>
+
+    <!-- Anleitung: nur hier im Admin, kein Inhalt für Besucher. Auf-/zuklappbar,
+         merkt sich den Zustand (assets/anleitung.js). -->
+    <details class="anleitung" id="anleitung-panel">
+      <summary>Anleitung — wie der Editor funktioniert</summary>
+      <div class="anleitung-inhalt">
+        <h3 class="tropi">Blockarten</h3>
+        <p>Tipp <code>/</code> in ein leeres Textfeld — die Liste aller Blockarten öffnet sich,
+          Weitertippen filtert sie. Jeder Block lässt sich über „⋯" duplizieren oder löschen,
+          am Griff <b>⠿</b> links ziehst du ihn an eine andere Stelle.</p>
+        <ul>
+          <li><b>Text</b> — ein normaler Absatz. <code>*kursiv*</code>, <code>**fett**</code>,
+            <code>[Linktext](https://…)</code>.</li>
+          <li><b>Überschrift</b> — groß oder klein wählbar.</li>
+          <li><b>Randnotiz</b> — ein kleiner Kasten mit Titel und ein bis zwei Zeilen, z. B. für Eckdaten.</li>
+          <li><b>Bild</b> — ein Bild oder eine ganze Galerie.</li>
+          <li><b>GIF</b> — bewegtes Bild; wird beim Hochladen NICHT verkleinert, sonst wäre die Animation weg.</li>
+          <li><b>Video</b> — ein YouTube- oder Vimeo-Link.</li>
+          <li><b>Text mit Bild daneben</b> — Text und Bild(er) nebeneinander in zwei Spalten.</li>
+          <li><b>Code</b> — ein Codeausschnitt mit Sprache und einem Kopieren-Knopf.</li>
+          <li><b>Werkzeug / Einlage</b> — eine fest eingebaute interaktive Demo (z. B. die
+            The-Race-Pipeline). Nur für Kennungen sinnvoll, die es wirklich gibt.</li>
+          <li><b>Trennstrich</b> — eine kleine Blume als Absatz-Trenner.</li>
+          <li><b>Türchen / Knopf</b> — ein Knopf, der zu einer Welt führt.</li>
+          <li><b>Abschnitt (Zeitleiste)</b> — nur auf der Brief-Seite wichtig: startet einen neuen
+            Eintrag in der Zeitleiste links. Alles, was danach kommt, gehört zu diesem Abschnitt —
+            bis der nächste Abschnitt-Block einen neuen beginnt.</li>
+        </ul>
+        <h3 class="tropi">Ein Türchen setzen</h3>
+        <p>Am einfachsten: Text markieren, in der kleinen Leiste, die dann erscheint, auf 🚪 klicken,
+          Ziel-Welt eintragen.</p>
+        <p>Von Hand geht es auch, mitten in einem Textblock:</p>
+        <ul>
+          <li><code>[[Wort|ziel|Titel|Vorschautext]]</code> — sichtbares Türchen, mit einer kleinen Blume markiert.</li>
+          <li><code>((Wort|ziel|Titel|Vorschautext))</code> — geheimes Türchen, ganz ohne Kennzeichen im Text,
+            leuchtet nur kurz auf, wenn jemand zufällig mit der Maus darüberfährt.</li>
+        </ul>
+        <p><b>Wort</b> ist der Text, auf den man klickt. <b>ziel</b> ist die Kennung der Welt — der Teil
+          in der Adresse hinter <code>/welt/…</code>. Titel und Vorschautext sind beide freiwillig und
+          erscheinen in einer kleinen Vorschau beim Drüberfahren.</p>
+        <p class="klein grau">Beispiel: <code>[[hier|the-race-automatisierung]]</code> führt zur Welt
+          unter <code>/welt/the-race-automatisierung</code>. Titel und Vorschautext weggelassen — beide
+          sind optional.</p>
+        <h3 class="tropi">Breite und Bewegung</h3>
+        <p>Über „⋯" an jedem Block einstellbar. <b>Breite:</b> schmal, normal, Randnotiz (am Rand,
+          wie eine Spalte) oder volle Breite. <b>Bewegung:</b> blendet den Block beim Scrollen ins
+          Bild ein. Wer in seinem Gerät Bewegung reduziert eingestellt hat, sieht nie eine Animation —
+          der Inhalt bleibt trotzdem immer sichtbar, nur ohne das Einblenden.</p>
+        <p class="klein grau">Alles wird laufend automatisch gespeichert, oben rechts steht „speichert…"
+          bzw. „gespeichert HH:MM:SS" — kein Speichern-Knopf nötig.</p>
+      </div>
+    </details>
+
     <p class="hinweis" id="hinweis-sortieren">Zum Umsortieren die Zeilen am Griff <b>⠿</b> ziehen. Die Reihenfolge wird sofort gespeichert.</p>
     <ul class="liste" id="liste"></ul>
   </main>

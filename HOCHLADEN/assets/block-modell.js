@@ -57,6 +57,37 @@ export function leererInhalt(typ) {
   }
 }
 
+/* ---------- Vorlagen: Startblöcke für "+ Neu" ----------
+   Liefert eine Liste von {typ, inhalt} für eine frisch angelegte Seite --
+   OHNE seite_id/breite/bewegung/sort_order, das ergänzt der Aufrufer (siehe
+   admin.js), weil dort erst die echte seite_id feststeht und die Reihenfolge
+   Sache des Aufrufers ist. Reine Logik, ohne Netzwerk -- deshalb direkt
+   testbar wie der Rest dieser Datei (siehe tests/pruefe-vorlagen.mjs).
+   Eine leere Seite wirkt für jemanden, der nicht programmiert, schnell
+   einschüchternd ("was soll ich hier reinschreiben?") -- die Vorlage zeigt
+   stattdessen sofort eine sinnvolle Struktur zum Überschreiben. */
+export function vorlageBloecke(typ) {
+  switch (typ) {
+    case 'projekt':
+      return [
+        { typ: 'text', inhalt: { roh: 'PLATZHALTER — ein bis zwei Sätze, worum es bei diesem Projekt geht.' } },
+        { typ: 'bild', inhalt: leererInhalt('bild') },
+        { typ: 'trenner', inhalt: leererInhalt('trenner') },
+        { typ: 'text', inhalt: { roh: 'PLATZHALTER — Stichworte, z. B. Schnitt · Motion Design' } },
+      ];
+    case 'welt':
+      return [
+        { typ: 'text', inhalt: { roh: 'PLATZHALTER — hier schreibt Lucas seinen eigenen Text.' } },
+        { typ: 'bild', inhalt: leererInhalt('bild') },
+      ];
+    /* 'brief' entsteht nie über "+ Neu" (es gibt nur die eine feste
+       Brief-Seite) -- und jede unbekannte Art bekommt lieber gar keine
+       Vorlage als eine falsche. */
+    default:
+      return [];
+  }
+}
+
 /* ---------- Blockauswahl ("/") ---------- */
 
 /* Filtert BLOCKARTEN nach einem Suchtext. Leerer Suchtext liefert alle,

@@ -8,8 +8,9 @@
    was Besucher sehen. */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { erzeugeSpeicherWarteschlange, naechsteSortierung } from '/assets/block-modell.js';
+import { erzeugeSpeicherWarteschlange, naechsteSortierung, vorlageBloecke } from '/assets/block-modell.js';
 import { mountBlockEditor } from '/assets/blockeditor.js';
+import { richteAnleitungEin } from '/assets/anleitung.js';
 
 const CFG = window.MM_CONFIG || {};
 const { coverFromVideoUrl, slugify, esc } = window.mm;
@@ -36,6 +37,11 @@ function toast(text, schlecht = false) {
   toastTimer = setTimeout(() => { t.hidden = true; }, schlecht ? 6000 : 2600);
 }
 const laden = (an) => { $('#ladebalken').hidden = !an; };
+
+/* Anleitung: auf-/zuklappbar, merkt sich den Zustand über die Anmeldung
+   hinweg. Unabhängig vom Login verdrahtet -- das Element existiert im DOM,
+   auch wenn #app noch versteckt ist. */
+richteAnleitungEin($('#anleitung-panel'));
 
 /* ---------- Anmeldung ---------- */
 
@@ -260,9 +266,23 @@ $('#btn-neu').addEventListener('click', async () => {
   const entwurf = leereSeite(ART);
   entwurf.slug = await freierSlug(slugify(entwurf.titel) || ART);
   const { data, error } = await sb.from('seiten').insert(entwurf).select().single();
-  laden(false);
-  if (error) return toast('Anlegen fehlgeschlagen: ' + error.message, true);
+  if (error) { laden(false); return toast('Anlegen fehlgeschlagen: ' + error.message, true); }
   SEITEN.push(data);
+
+  /* Vorlage: passende Startblöcke gleich mit anlegen (siehe block-modell.js,
+     vorlageBloecke) -- eine leere Seite wirkt sonst schnell einschüchternd.
+     Schlägt das fehl, bleibt die Seite trotzdem nutzbar (nur ohne Vorlage) --
+     kein Grund, das Anlegen selbst scheitern zu lassen. */
+  const vorlage = vorlageBloecke(ART);
+  if (vorlage.length) {
+    const zeilen = vorlage.map((v, i) => ({
+      seite_id: data.id, typ: v.typ, inhalt: v.inhalt,
+      breite: 'normal', bewegung: 'keine', sort_order: (i + 1) * 10,
+    }));
+    const { error: vFehler } = await sb.from('bloecke').insert(zeilen);
+    if (vFehler) toast('Vorlage konnte nicht angelegt werden: ' + vFehler.message, true);
+  }
+  laden(false);
   oeffneEditor(data);
 });
 
