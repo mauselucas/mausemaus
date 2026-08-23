@@ -13,6 +13,26 @@
     'text_mit_bild', 'code', 'werkzeug', 'trenner',
   ]);
 
+  /* Breite/Bewegung als Hülle um einen Block legen -- aber NUR, wenn sie vom
+     Standard abweichen ('normal'/'keine'). Im Standardfall bleibt html exakt
+     unverändert: sämtlicher schon vorhandener Inhalt hat diese Werte, die
+     vier bestehenden Prüfungen (pruefe-bestand/leiste/brief/welten) dürfen
+     sich also nicht ändern -- und tun es dadurch auch nicht.
+     randnotiz/abschnitt bewusst ausgenommen: randnotiz hängt als direktes
+     Kind in einer <dl class="br-infos"> (siehe brief.js), eine zusätzliche
+     Hülle würde deren Gitter durcheinanderbringen; abschnitt liefert ohnehin
+     nie eigenes HTML. */
+  function einhuellen(html, block) {
+    if (!html || block.typ === 'randnotiz' || block.typ === 'abschnitt') return html;
+    const breite = block.breite && block.breite !== 'normal' ? block.breite : null;
+    const bewegung = block.bewegung && block.bewegung !== 'keine' ? block.bewegung : null;
+    if (!breite && !bewegung) return html;
+    const klassen = ['mm-baustein'];
+    if (breite) klassen.push('mm-breite-' + breite);
+    if (bewegung) klassen.push('mm-bewegung-' + bewegung);
+    return '<div class="' + klassen.join(' ') + '">' + html + '</div>';
+  }
+
   /* Ein einzelner Block -> HTML-Schnipsel.
      textKlasse (optional) umschließt Markdown-Inhalt mit einer Textklasse
      der aufrufenden Seite (Brief: "br-text", Welt: "welt-text") -- das
@@ -22,7 +42,8 @@
     const typ = block.typ, inh = block.inhalt || {};
     if (ROH_TYPEN.has(typ)) {
       const html = window.mm.renderMarkdown(inh.roh || '');
-      return textKlasse ? '<div class="' + textKlasse + '">' + html + '</div>' : html;
+      const inhalt = textKlasse ? '<div class="' + textKlasse + '">' + html + '</div>' : html;
+      return einhuellen(inhalt, block);
     }
     switch (typ) {
       case 'randnotiz':
@@ -31,13 +52,42 @@
           '<dd>' + window.mm.esc(inh.zeile1 || '') +
           (inh.zeile2 ? '<span>' + window.mm.esc(inh.zeile2) + '</span>' : '') + '</dd></div>';
       case 'tuer':
-        return '<p class="br-mehr"><a class="mm-tuer" href="' + window.mm.esc(inh.ziel || '#') + '">' +
-          window.mm.esc(inh.text || 'Mehr dazu') + '</a></p>';
+        return einhuellen('<p class="br-mehr"><a class="mm-tuer" href="' + window.mm.esc(inh.ziel || '#') + '">' +
+          window.mm.esc(inh.text || 'Mehr dazu') + '</a></p>', block);
       case 'abschnitt':
         return '';   // reiner Marker für gruppieren(), kein eigener Inhalt
       default:
         return '';
     }
+  }
+
+  /* Baustein-Elemente mit einer mm-bewegung-*-Klasse starten in ihrem ganz
+     normalen, sichtbaren Zustand -- läuft dieses Skript aus irgendeinem
+     Grund nicht (Fehler, alter Browser, `prefers-reduced-motion`), geht
+     dadurch NIE Inhalt verloren, nur das Einblenden entfällt. Erst wenn der
+     Beobachter wirklich bereitsteht, werden sie kurz unsichtbar gemacht und
+     beim Erscheinen im Bild wieder eingeblendet. */
+  function bewegungEinrichten(wurzel) {
+    if (!wurzel) return;
+    const bausteine = [...wurzel.querySelectorAll('[class*="mm-bewegung-"]')];
+    if (!bausteine.length) return;
+    if (!('IntersectionObserver' in window) ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    bausteine.forEach(el => {
+      el.classList.add('mm-bereit');
+      if (el.classList.contains('mm-bewegung-zeilenweise')) {
+        [...el.children].forEach((kind, i) => kind.style.setProperty('--mm-verzoegerung', (i * 60) + 'ms'));
+      }
+    });
+    const beobachter = new IntersectionObserver((eintraege) => {
+      eintraege.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('mm-sichtbar');
+        beobachter.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    bausteine.forEach(el => beobachter.observe(el));
   }
 
   /* Reiht die Blöcke einer Seite aneinander, sortiert nach sort_order --
@@ -68,5 +118,5 @@
     return gruppen;
   }
 
-  window.mmBloecke = { render, seite, gruppieren };
+  window.mmBloecke = { render, seite, gruppieren, bewegungEinrichten };
 })();

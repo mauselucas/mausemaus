@@ -21,7 +21,13 @@ const ergebnis = JSON.parse(await s.werte(`(async () => {
 
   const projekte = await hol('projects?status=eq.published&select=*&order=sort_order.asc');
   const beitraege = await hol('posts?status=eq.published&select=*');
-  const seiten = await hol('seiten?select=*,bloecke(*)&order=sort_order.asc');
+  /* Ausdrückliche Spaltenliste statt "*": "notiz" gehört NICHT hinein --
+     sie ist für "anon" (diesen Schlüssel benutzt diese ganze Prüfung)
+     inzwischen absichtlich gesperrt, ein "*" würde deshalb mit einem
+     Rechte-Fehler scheitern. Diese Liste ist alles, was der Vergleich
+     unten wirklich braucht. */
+  const BLOCK_SPALTEN = 'id,typ,inhalt,sort_order,breite,bewegung';
+  const seiten = await hol('seiten?select=*,bloecke(' + BLOCK_SPALTEN + ')&order=sort_order.asc');
 
   /* Sichtbaren Text aus gerendertem Markdown ziehen, Leerraum vereinheitlichen. */
   const alsText = (md) => {
@@ -66,7 +72,14 @@ const ergebnis = JSON.parse(await s.werte(`(async () => {
     return !seite || seite.titel !== p.title;
   }).map(p => p.slug);
 
-  /* Die private Notiz darf nirgends im ausgelieferten HTML stehen. */
+  /* Die private Notiz darf nirgends im ausgelieferten HTML stehen. Seit die
+     Spalte für "anon" gesperrt ist (siehe oben), liefert diese Abfrage gar
+     keine notiz-Werte mehr -- notizen bleibt dadurch immer leer. Das ist
+     kein Blindgänger, sondern die logische Folgerung aus der Prüfung
+     weiter unten ("private Notizen sind für Fremde nicht abfragbar"): kann
+     "anon" die Spalte gar nicht erst lesen, kann auch db.js (das genau
+     denselben Schlüssel benutzt) sie nie ins HTML bringen. Die Zeile bleibt
+     trotzdem stehen, als zweite, unabhängige Absicherung. */
   const notizen = seiten.flatMap(x => (x.bloecke || []).map(b => b.notiz)).filter(Boolean);
   const notizSichtbar = notizen.filter(n => document.documentElement.innerHTML.includes(n));
 
@@ -93,6 +106,27 @@ pruefe('es gibt überhaupt Blöcke zu prüfen',
 pruefe('private Notizen erscheinen NICHT im ausgelieferten HTML',
   ergebnis.notizSichtbar.length === 0,
   ergebnis.notizen + ' Notizen vorhanden, ' + ergebnis.notizSichtbar.length + ' davon sichtbar');
+
+/* Der eigentliche Gewinn: nicht nur, dass die Notiz nicht ANGEZEIGT wird,
+   sondern dass ein Fremder sie über die Datenbank-Schnittstelle gar nicht
+   erst ERREICHEN kann -- unabhängig davon, was diese oder irgendeine
+   andere Seite überhaupt abfragt. Direkter, gezielter Versuch mit dem
+   öffentlichen Schlüssel, genau die Spalte zu lesen. */
+const notizZugriff = JSON.parse(await s.werte(`(async () => {
+  const CFG = window.MM_CONFIG;
+  const kopf = { apikey: CFG.key, Authorization: 'Bearer ' + CFG.key };
+  const r = await fetch(CFG.url + '/rest/v1/bloecke?select=notiz&limit=5', { headers: kopf });
+  const daten = await r.json().catch(() => null);
+  return JSON.stringify({
+    status: r.status,
+    /* Erfolgreich UND mit echten Werten wäre der Ernstfall: Zeilen, in
+       denen "notiz" tatsächlich als Schlüssel auftaucht. */
+    spalteGeliefert: Array.isArray(daten) && daten.some(z => z && Object.prototype.hasOwnProperty.call(z, 'notiz')),
+  });
+})()`));
+pruefe('private Notizen sind für Fremde nicht abfragbar (auch nicht gezielt per select=notiz)',
+  notizZugriff.status === 401 || notizZugriff.status === 403 || notizZugriff.spalteGeliefert === false,
+  'HTTP ' + notizZugriff.status + ', Spalte geliefert: ' + notizZugriff.spalteGeliefert);
 
 /* Entwürfe dürfen für Fremde unsichtbar bleiben. */
 const anonym = JSON.parse(await s.werte(`(async () => {

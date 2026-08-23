@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baustein-Breiten/Bewegungen — Prüfseite</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/brief.css">
+<style>
+  /* Reichlich Leerraum vor dem Bewegungs-Block, damit er beim Laden
+     nachweislich AUSSERHALB des Bildschirms steht und erst durch Scrollen
+     ins Bild kommt -- nur so lässt sich der Beobachter echt prüfen. */
+  #abstand { height: 1400px; }
+</style>
+<body>
+<div class="br-spalte" id="ziel"></div>
+<script src="/assets/config.js"></script>
+<script src="/assets/shared.js"></script>
+<script src="/assets/bloecke.js"></script>
+<script>
+  /* Zeichnet eine gegebene Blockliste neu -- damit die Prüfung mit
+     unterschiedlichen Bausteinen (Standard, eigene Breite, eigene
+     Bewegung) arbeiten kann, ohne die Seite neu zu laden. */
+  window.__zeichne = function (bloecke, textKlasse) {
+    document.getElementById('ziel').innerHTML =
+      '<div id="abstand"></div>' + window.mmBloecke.seite(bloecke, textKlasse);
+  };
+  window.__einrichten = function () {
+    window.mmBloecke.bewegungEinrichten(document.getElementById('ziel'));
+  };
+</script>
+</body>
+</html>

@@ -356,3 +356,57 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
 .panel-knoepfe .panel-link { margin-top: 0; }
 .panel-link.zweitrangig { background: transparent; color: var(--ink); }
 .panel-link.zweitrangig:hover { background: var(--sage); }
+
+/* ===== Baustein-Breiten und -Bewegungen (Blockeditor) =====
+   Wird von assets/bloecke.js um Blöcke gelegt, deren Breite/Bewegung vom
+   Standard ("normal"/"keine") abweicht -- im Standardfall (aller bisherige
+   Inhalt) entsteht gar keine Hülle, siehe dort. Farben bewusst NICHT fest
+   verdrahtet (Welten können dunkel sein, siehe welt.css): nur Ausmaß und
+   Deckkraft, keine eigenen Hintergrund-/Randfarben. */
+.mm-baustein { }
+
+/* schmal: eine schlankere, zentrierte Spalte innerhalb des Fließtexts. */
+.mm-breite-schmal { max-width: min(420px, 82%); margin-inline: auto; }
+
+/* randnotiz: kleiner und etwas leiser gesetzt -- deckt ab, wofür man in
+   Notion sonst eine Spalte anlegen würde, ohne dass echte Seitenränder
+   gebraucht werden (die gibt es in diesem einspaltigen Layout nicht). */
+.mm-breite-randnotiz { max-width: min(340px, 78%); font-size: .92em; opacity: .85; }
+
+/* voll: bricht bis an den Rand der Lesespalte aus (deren Innenabstand ist in
+   brief.css/welt.css fest 26px -- ändert sich das dort, muss es hier
+   nachgezogen werden). */
+.mm-breite-voll { max-width: none; margin-inline: -26px; }
+@media (max-width: 620px) { .mm-breite-voll { margin-inline: -20px; } }
+
+/* Bewegungen: erst nach dem Einrichten durch bewegungEinrichten() (in
+   bloecke.js) unsichtbar, und auch dann nur, wenn IntersectionObserver da
+   ist und prefers-reduced-motion nicht "reduce" verlangt -- siehe Kommentar
+   dort. Ohne Skript bleibt jeder Baustein normal sichtbar. */
+.mm-bewegung-einblenden.mm-bereit,
+.mm-bewegung-hochschieben.mm-bereit,
+.mm-bewegung-wachsen.mm-bereit { opacity: 0; }
+.mm-bewegung-zeilenweise.mm-bereit > * { opacity: 0; }
+
+.mm-bewegung-einblenden.mm-sichtbar { animation: mm-einblenden .6s var(--mm-kurve) both; }
+.mm-bewegung-hochschieben.mm-sichtbar { animation: mm-hochschieben .6s var(--mm-kurve) both; }
+.mm-bewegung-wachsen.mm-sichtbar { animation: mm-wachsen .5s var(--mm-kurve) both; }
+.mm-bewegung-zeilenweise.mm-sichtbar > * {
+  animation: mm-einblenden .5s var(--mm-kurve) both;
+  animation-delay: var(--mm-verzoegerung, 0ms);
+}
+
+@keyframes mm-einblenden { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mm-hochschieben { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mm-wachsen { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-bewegung-einblenden.mm-bereit,
+  .mm-bewegung-hochschieben.mm-bereit,
+  .mm-bewegung-wachsen.mm-bereit,
+  .mm-bewegung-zeilenweise.mm-bereit > * { opacity: 1; }
+  .mm-bewegung-einblenden.mm-sichtbar,
+  .mm-bewegung-hochschieben.mm-sichtbar,
+  .mm-bewegung-wachsen.mm-sichtbar,
+  .mm-bewegung-zeilenweise.mm-sichtbar > * { animation: none; }
+}
