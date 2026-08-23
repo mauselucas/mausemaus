@@ -37,11 +37,10 @@
     <div class="reiter" id="reiter">
       <button data-art="projekt" aria-pressed="true">Projekte</button>
       <button data-art="welt" aria-pressed="false">Welten</button>
-      <button data-art="settings" aria-pressed="false">Startseite</button>
     </div>
     <div class="admin-top-actions">
       <span class="wer" id="wer"></span>
-      <button class="btn ghost" id="btn-brief">Der Brief</button>
+      <button class="btn ghost" id="btn-brief" title="Begrüßung, Profil und Kontakt — alles, was auf der Startseite steht">Startseite (Brief)</button>
       <button class="btn ghost" id="btn-backup">Sicherung laden</button>
       <a class="btn ghost" href="index.html" target="_blank" rel="noopener">Seite ansehen ↗</a>
       <button class="btn ghost" id="btn-logout">Abmelden</button>
@@ -112,78 +111,6 @@
 
     <p class="hinweis" id="hinweis-sortieren">Zum Umsortieren die Zeilen am Griff <b>⠿</b> ziehen. Die Reihenfolge wird sofort gespeichert.</p>
     <ul class="liste" id="liste"></ul>
-  </main>
-
-  <!-- Startseite -->
-  <main id="view-settings" hidden>
-    <div class="leiste">
-      <h1 class="tropi">Startseite</h1>
-      <div class="leiste-rechts">
-        <span class="status" id="set-status"></span>
-        <button class="btn primary" id="btn-set-speichern">Speichern</button>
-      </div>
-    </div>
-    <p class="hinweis">Alles, was oberhalb und unterhalb deiner Projekte steht.</p>
-
-    <div class="set-gitter">
-      <section class="felder">
-        <h3 class="tropi">Kopfbereich</h3>
-        <label>Kleine Zeile darüber<input id="s-eyebrow"></label>
-        <label>Schlagzeile, erste Zeile<input id="s-line1"></label>
-        <label>Schlagzeile, zweite Zeile <span class="klein">(grün)</span><input id="s-line2"></label>
-        <label>Einleitung<textarea id="s-intro" rows="3"></textarea></label>
-        <label>Showreel-Adresse <span class="klein">(leer = Knopf wird ausgeblendet)</span>
-          <input id="s-showreel" placeholder="https://youtu.be/…"></label>
-
-        <hr>
-        <h3 class="tropi">Infozeile</h3>
-        <p class="klein grau">Die vier Kästchen unter der Schlagzeile.</p>
-        <div id="s-infos"></div>
-        <button class="btn ghost" id="btn-info-neu">+ Eintrag</button>
-
-        <hr>
-        <h3 class="tropi">Laufband</h3>
-        <label>Auftraggeber <span class="klein">(Komma getrennt)</span>
-          <textarea id="s-kunden" rows="2"></textarea></label>
-      </section>
-
-      <section class="felder">
-        <h3 class="tropi">Profil</h3>
-        <label>Kleine Zeile darüber<input id="s-pkicker"></label>
-        <label>Überschrift <span class="klein">(Zeilenumbruch erlaubt)</span>
-          <textarea id="s-ptitel" rows="2"></textarea></label>
-        <label>Text über dich<textarea id="s-ptext" rows="7"></textarea></label>
-
-        <h3 class="tropi" style="margin-top:8px">Porträt</h3>
-        <div class="cover-werkzeug">
-          <div class="cover-rahmen" id="p-rahmen" title="Bild ziehen, um den Ausschnitt zu wählen">
-            <img id="p-bild" alt="">
-            <span class="cover-leer" id="p-leer">Bild hierher ziehen<br><span class="klein">oder unten auswählen</span></span>
-          </div>
-          <div class="cover-knoepfe">
-            <button class="btn ghost" id="btn-p-datei">Bild wählen</button>
-            <button class="btn ghost" id="btn-p-weg">Entfernen</button>
-            <input type="file" id="p-datei" accept="image/*,image/gif" hidden>
-          </div>
-          <p class="klein grau">Ohne Bild wird die ganze Fläche ausgeblendet.</p>
-        </div>
-      </section>
-
-      <section class="felder">
-        <h3 class="tropi">Werkzeuge</h3>
-        <p class="klein grau">Name und Stufe, z.B. „täglich" oder „vertiefe ich".</p>
-        <div id="s-werkzeuge"></div>
-        <button class="btn ghost" id="btn-wz-neu">+ Werkzeug</button>
-
-        <hr>
-        <h3 class="tropi">Kontakt</h3>
-        <label>Überschrift <span class="klein">(Zeilenumbruch erlaubt)</span>
-          <textarea id="s-ktitel" rows="3"></textarea></label>
-        <label>Zusatzzeile<input id="s-kzusatz" placeholder="Antwort meist am selben Tag"></label>
-        <label>E-Mail<input id="s-email"></label>
-        <label>Telefon<input id="s-telefon"></label>
-      </section>
-    </div>
   </main>
 
   <!-- Editor -->

@@ -1,8 +1,11 @@
 /* mausemaus — Verwaltung.
    Arbeitet ausschließlich auf den Tabellen `seiten`/`bloecke` -- die alten
-   Tabellen `projects`/`posts`/`settings` bleiben unangetastet (settings
-   ausgenommen: die Startseiten-Einstellungen sind von diesem Umbau nicht
-   betroffen und laufen unverändert weiter).
+   Tabellen `projects`/`posts`/`settings` bleiben unangetastet stehen (siehe
+   Sicherung weiter unten, die sie mit sichert), werden aber von hier aus
+   NICHT mehr bearbeitet: der frühere "Startseite"-Reiter ist entfernt, weil
+   er eine Tabelle beschrieb, die keine ausgelieferte Seite mehr liest --
+   Begrüßung, Profil und Kontakt kommen inzwischen aus den `abschnitt`-
+   Blöcken des Briefs (Knopf "Startseite (Brief)" oben rechts).
    Die Vorschau nutzt denselben Umsetzer wie die öffentliche Seite
    (bloecke.js + shared.js), deshalb ist sie garantiert identisch mit dem,
    was Besucher sehen. */
@@ -13,7 +16,7 @@ import { mountBlockEditor } from '/assets/blockeditor.js';
 import { richteAnleitungEin } from '/assets/anleitung.js';
 
 const CFG = window.MM_CONFIG || {};
-const { coverFromVideoUrl, slugify, esc } = window.mm;
+const { coverFromVideoUrl, slugify } = window.mm;
 
 if (!CFG.url || CFG.url.startsWith('HIER_')) {
   document.body.innerHTML = '<div class="login-wrap"><div class="login-box">'
@@ -177,14 +180,13 @@ $('#reiter').addEventListener('click', async (e) => {
   ART = b.dataset.art;
   wurzelReiter();
   editorSchliessen({ zurZurListe: false });
-  if (ART === 'settings') { $('#view-list').hidden = true; await einstellungenLaden(); }
-  else { $('#view-settings').hidden = true; $('#view-list').hidden = false; await listeLaden(); }
+  $('#view-list').hidden = false;
+  await listeLaden();
 });
 
 function wurzelReiter() {
   document.querySelectorAll('#reiter button').forEach(x =>
     x.setAttribute('aria-pressed', x.dataset.art === ART));
-  if (ART === 'settings') return;
   $('#listen-titel').textContent = istWelt() ? 'Welten' : 'Projekte';
 }
 
@@ -293,10 +295,7 @@ async function editorSchliessen({ zurZurListe }) {
   EDITOR = null;
   SEITEN_WARTESCHLANGE = null;
   $('#view-edit').hidden = true;
-  if (zurZurListe) {
-    if (ART === 'settings') { /* nichts zu tun, Einstellungen sind eigenständig */ }
-    else { $('#view-list').hidden = false; await listeLaden(); }
-  }
+  if (zurZurListe) { $('#view-list').hidden = false; await listeLaden(); }
 }
 
 async function freierSlug(basis) {
@@ -332,7 +331,7 @@ async function oeffneEditor(seite) {
   $('#btn-archiv').textContent = AKTUELL.status === 'archived' ? 'Zurückholen' : 'Archivieren';
   $('#btn-veroeffentlichen').textContent = AKTUELL.status === 'published' ? 'Ist veröffentlicht' : 'Veröffentlichen';
 
-  $('#view-list').hidden = true; $('#view-settings').hidden = true; $('#view-edit').hidden = false;
+  $('#view-list').hidden = true; $('#view-edit').hidden = false;
   $('#speicher-status').textContent = '';
   $('#f-titel').focus();
 
@@ -432,7 +431,7 @@ $('#btn-brief').addEventListener('click', async () => {
   const { data, error } = await sb.from('seiten').select('*').eq('typ', 'brief').eq('slug', 'brief').single();
   laden(false);
   if (error) return toast('Der Brief konnte nicht geladen werden: ' + error.message, true);
-  $('#view-list').hidden = true; $('#view-settings').hidden = true;
+  $('#view-list').hidden = true;
   oeffneEditor(data);
 });
 
@@ -496,154 +495,6 @@ $('#btn-cover-youtube').addEventListener('click', () => {
   });
 })();
 
-/* ---------- Startseite: Einstellungen (unverändert -- betrifft `settings`) ---------- */
-
-let EINST = null;
-
-async function einstellungenLaden() {
-  laden(true);
-  const { data, error } = await sb.from('settings').select('*').eq('id', 1).single();
-  laden(false);
-  if (error) return toast('Laden fehlgeschlagen: ' + error.message, true);
-  EINST = data;
-  einstellungenZeichnen();
-  $('#view-settings').hidden = false;
-}
-
-function einstellungenZeichnen() {
-  const e = EINST;
-  const setz = (id, wert) => { $(id).value = wert ?? ''; };
-  setz('#s-eyebrow', e.hero_eyebrow); setz('#s-line1', e.hero_line1);
-  setz('#s-line2', e.hero_line2);     setz('#s-intro', e.hero_intro);
-  setz('#s-showreel', e.showreel_url);
-  setz('#s-pkicker', e.profil_kicker); setz('#s-ptitel', e.profil_titel);
-  setz('#s-ptext', e.profil_text);
-  setz('#s-ktitel', e.kontakt_titel);  setz('#s-kzusatz', e.kontakt_zusatz);
-  setz('#s-email', e.email);           setz('#s-telefon', e.telefon);
-  setz('#s-kunden', (e.kunden || []).join(', '));
-  infosZeichnen(); werkzeugeZeichnen(); portraetZeichnen();
-}
-
-function infosZeichnen() {
-  $('#s-infos').innerHTML = (EINST.infos || []).map((i, n) => `
-    <div class="set-zeile dreispaltig">
-      <input data-inf="titel"  data-n="${n}" value="${esc(i.titel || '')}"  placeholder="Titel">
-      <input data-inf="zeile1" data-n="${n}" value="${esc(i.zeile1 || '')}" placeholder="Zeile 1">
-      <input data-inf="zeile2" data-n="${n}" value="${esc(i.zeile2 || '')}" placeholder="Zeile 2">
-      <button class="set-weg" data-inf-weg="${n}" title="Entfernen">×</button>
-    </div>
-    <label class="set-punkt" style="margin:-3px 0 9px 4px">
-      <input type="checkbox" data-inf="punkt" data-n="${n}" ${i.punkt ? 'checked' : ''}
-        style="width:auto"> grüner Punkt davor</label>`).join('');
-}
-
-function werkzeugeZeichnen() {
-  $('#s-werkzeuge').innerHTML = (EINST.werkzeuge || []).map((w, n) => `
-    <div class="set-zeile">
-      <input data-wz="name"  data-n="${n}" value="${esc(w.name || '')}"  placeholder="Name">
-      <input data-wz="stufe" data-n="${n}" value="${esc(w.stufe || '')}" placeholder="Stufe">
-      <button class="set-weg" data-wz-weg="${n}" title="Entfernen">×</button>
-    </div>`).join('');
-}
-
-function portraetZeichnen() {
-  const img = $('#p-bild');
-  if (EINST.portrait_url) {
-    img.src = EINST.portrait_url; img.style.display = ''; $('#p-leer').hidden = true;
-  } else { img.removeAttribute('src'); img.style.display = 'none'; $('#p-leer').hidden = false; }
-  $('#p-rahmen').style.setProperty('--pos', EINST.portrait_pos || '50% 50%');
-}
-
-$('#view-settings').addEventListener('input', (e) => {
-  const t = e.target;
-  if (t.dataset.inf) {
-    const i = EINST.infos[+t.dataset.n];
-    i[t.dataset.inf] = t.type === 'checkbox' ? t.checked : t.value;
-  }
-  if (t.dataset.wz) EINST.werkzeuge[+t.dataset.n][t.dataset.wz] = t.value;
-});
-
-$('#view-settings').addEventListener('click', (e) => {
-  const iw = e.target.closest('[data-inf-weg]');
-  if (iw) { EINST.infos.splice(+iw.dataset.infWeg, 1); return infosZeichnen(); }
-  const ww = e.target.closest('[data-wz-weg]');
-  if (ww) { EINST.werkzeuge.splice(+ww.dataset.wzWeg, 1); return werkzeugeZeichnen(); }
-});
-
-$('#btn-info-neu').addEventListener('click', () => {
-  (EINST.infos ||= []).push({ titel: '', zeile1: '', zeile2: '', punkt: false });
-  infosZeichnen();
-});
-$('#btn-wz-neu').addEventListener('click', () => {
-  (EINST.werkzeuge ||= []).push({ name: '', stufe: '' });
-  werkzeugeZeichnen();
-});
-
-$('#btn-p-datei').addEventListener('click', () => $('#p-datei').click());
-$('#p-datei').addEventListener('change', async (e) => {
-  const r = await hochladen(e.target.files[0]);
-  if (r) { EINST.portrait_url = r.url; EINST.portrait_pos = '50% 50%'; portraetZeichnen(); }
-  e.target.value = '';
-});
-$('#btn-p-weg').addEventListener('click', () => { EINST.portrait_url = null; portraetZeichnen(); });
-
-(() => {
-  const rahmen = $('#p-rahmen');
-  let zieht = false, startX, startY, startPos;
-  rahmen.addEventListener('pointerdown', (e) => {
-    if (!EINST?.portrait_url) return;
-    zieht = true; startX = e.clientX; startY = e.clientY;
-    startPos = (EINST.portrait_pos || '50% 50%').split(' ').map(v => parseFloat(v));
-    rahmen.classList.add('zieht'); rahmen.setPointerCapture(e.pointerId);
-  });
-  rahmen.addEventListener('pointermove', (e) => {
-    if (!zieht) return;
-    const r = rahmen.getBoundingClientRect();
-    const x = Math.min(100, Math.max(0, startPos[0] - (e.clientX - startX) / r.width * 100));
-    const y = Math.min(100, Math.max(0, startPos[1] - (e.clientY - startY) / r.height * 100));
-    EINST.portrait_pos = `${Math.round(x)}% ${Math.round(y)}%`;
-    rahmen.style.setProperty('--pos', EINST.portrait_pos);
-  });
-  const stop = () => { zieht = false; rahmen.classList.remove('zieht'); };
-  rahmen.addEventListener('pointerup', stop);
-  rahmen.addEventListener('pointercancel', stop);
-  rahmen.addEventListener('dragover', (ev) => { ev.preventDefault(); rahmen.classList.add('ziel-aktiv'); });
-  rahmen.addEventListener('dragleave', () => rahmen.classList.remove('ziel-aktiv'));
-  rahmen.addEventListener('drop', async (ev) => {
-    ev.preventDefault(); rahmen.classList.remove('ziel-aktiv');
-    const r = await hochladen(ev.dataTransfer.files[0]);
-    if (r) { EINST.portrait_url = r.url; EINST.portrait_pos = '50% 50%'; portraetZeichnen(); }
-  });
-})();
-
-$('#btn-set-speichern').addEventListener('click', async () => {
-  const felder = {
-    hero_eyebrow: $('#s-eyebrow').value.trim(),
-    hero_line1:   $('#s-line1').value.trim(),
-    hero_line2:   $('#s-line2').value.trim(),
-    hero_intro:   $('#s-intro').value.trim(),
-    showreel_url: $('#s-showreel').value.trim() || null,
-    portrait_url: EINST.portrait_url,
-    portrait_pos: EINST.portrait_pos || '50% 50%',
-    profil_kicker: $('#s-pkicker').value.trim(),
-    profil_titel:  $('#s-ptitel').value,
-    profil_text:   $('#s-ptext').value.trim(),
-    kontakt_titel: $('#s-ktitel').value,
-    kontakt_zusatz: $('#s-kzusatz').value.trim(),
-    email:   $('#s-email').value.trim(),
-    telefon: $('#s-telefon').value.trim(),
-    infos:   EINST.infos || [],
-    kunden:  $('#s-kunden').value.split(',').map(s => s.trim()).filter(Boolean),
-    werkzeuge: EINST.werkzeuge || [],
-  };
-  laden(true);
-  const { error } = await sb.from('settings').update(felder).eq('id', 1);
-  laden(false);
-  if (error) return toast('Speichern fehlgeschlagen: ' + error.message, true);
-  EINST = { ...EINST, ...felder };
-  $('#set-status').textContent = 'gespeichert ' + new Date().toLocaleTimeString('de-DE');
-  toast('Startseite gespeichert.');
-});
 
 /* ---------- Sicherung: alle Tabellen ---------- */
 
