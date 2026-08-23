@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockeditor — Prüfseite</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/admin.css">
+<style>
+  /* Bewusst OHNE Anmeldung: diese Seite hängt den Blockeditor direkt an
+     einen erfundenen Datenspeicher (window.__api), der sich wie Supabase
+     verhält (async, mit künstlicher Verzögerung), aber komplett im
+     Arbeitsspeicher lebt. Genau das macht den Editor prüfbar, ohne ein
+     Passwort zu kennen -- siehe tests/pruefe-editor.mjs. */
+  body.admin { padding: 0; }
+</style>
+<body class="admin">
+<header class="admin-top">
+  <div class="brand tropi">mausemaus<span class="dot">.</span></div>
+  <div class="admin-top-actions"><span class="status" id="speicher-status"></span></div>
+</header>
+<main id="view-edit">
+  <div class="leiste">
+    <button class="btn ghost">← Übersicht</button>
+    <div class="leiste-rechts">
+      <span class="klein grau">Prüfseite — nicht echt, keine Anmeldung nötig</span>
+      <button class="btn ghost">Archivieren</button>
+      <button class="btn primary">Veröffentlichen</button>
+    </div>
+  </div>
+  <!-- Dieselbe Struktur wie im echten Editor (admin.html), nur mit
+       erfundenen Werten -- damit Bildschirmfotos dieser Prüfseite zeigen,
+       wie der Editor wirklich aussieht. Die Felder hier sind bewusst nicht
+       verdrahtet: geprüft wird der Blockeditor rechts, nicht diese Seiten-
+       Eigenschaften (die sind unverändert aus dem alten Admin). -->
+  <div class="editor">
+    <section class="felder">
+      <label>Titel<input value="The Race — Staffel 3"></label>
+      <div>
+        <label>Untertitel <span class="klein">(Rolle/Auftraggeber bzw. Anrisstext)</span>
+          <textarea rows="2">Mediengestalter Bild &amp; Ton · für Joyn/ProSieben</textarea></label>
+      </div>
+      <div>
+        <label>Video-Adresse <span class="klein">(YouTube, Vimeo)</span>
+          <input value="https://www.youtube.com/watch?v=a852kZ4VCgk"></label>
+        <div class="reihe">
+          <label class="schalter"><input type="checkbox"> Läuft aktuell</label>
+          <label class="schalter"><input type="checkbox" checked> Video darf eingebettet werden</label>
+        </div>
+      </div>
+      <details>
+        <summary>Mehr</summary>
+        <label>Kunde<input></label>
+        <label>Jahr<input placeholder="2026"></label>
+      </details>
+      <hr>
+      <h3 class="tropi">Kachelbild</h3>
+      <div class="cover-werkzeug">
+        <div class="cover-rahmen"><span class="cover-leer">Bild hierher ziehen<br><span class="klein">oder unten auswählen</span></span></div>
+        <div class="cover-knoepfe">
+          <button class="btn ghost">Bild wählen</button>
+          <button class="btn ghost">Aus Link holen</button>
+          <button class="btn ghost">Entfernen</button>
+        </div>
+      </div>
+    </section>
+    <div class="be-gitter">
+      <section class="be-spalte">
+        <div id="block-editor"></div>
+      </section>
+      <section class="be-spalte vorschau" style="display:flex;flex-direction:column">
+        <div class="vorschau-kopf">Vorschau <span class="klein grau">— so sehen Besucher es</span></div>
+        <div class="be-vorschau-flaeche"><div class="prose" id="vorschau"></div></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/shared.js"></script>
+<script src="/assets/bloecke.js"></script>
+<script type="module">
+  import { mountBlockEditor } from '/assets/blockeditor.js';
+
+  /* ---- erfundener Datenspeicher, verhält sich wie Supabase (async) ---- */
+  const VERZOEGERUNG = 40;
+  const warte = (ms) => new Promise(r => setTimeout(r, ms));
+  const zeilen = new Map();   // id -> Zeile, wie eine echte Tabelle
+  let naechsteId = 1;
+  const aufrufe = { neu: 0, aktualisieren: 0, loeschen: 0 };
+
+  window.__api_zeilen = zeilen;   // für die Prüfung von außen einsehbar
+  window.__aufrufe = aufrufe;
+
+  const api = {
+    async neu(entwurf) {
+      aufrufe.neu++;
+      await warte(VERZOEGERUNG);
+      const id = 'blk-' + (naechsteId++);
+      zeilen.set(id, { id, ...structuredClone(entwurf) });
+      return { id };
+    },
+    async aktualisieren(id, felder) {
+      aufrufe.aktualisieren++;
+      await warte(VERZOEGERUNG);
+      const bisher = zeilen.get(id) || { id };
+      zeilen.set(id, { ...bisher, ...structuredClone(felder) });
+    },
+    async loeschen(id) {
+      aufrufe.loeschen++;
+      await warte(VERZOEGERUNG);
+      zeilen.delete(id);
+    },
+    async bildHochladen(datei) {
+      await warte(VERZOEGERUNG);
+      return { url: '/favicon.svg' };
+    },
+  };
+  window.__api = api;             // damit die Prüfung einzelne Methoden zeitweise ersetzen kann
+
+  /* Startzustand: ein Block jeder Art, damit die Prüfung alle zwölf sehen kann. */
+  const anfangsBloecke = [
+    { id: 'blk-text', seite_id: 's1', typ: 'text', inhalt: { roh: 'Ein normaler Absatz mit **fett** und *kursiv*.' }, breite: 'normal', bewegung: 'keine', notiz: 'Geheime Notiz — darf nie öffentlich zu sehen sein.', sort_order: 1 },
+    { id: 'blk-ueb',  seite_id: 's1', typ: 'ueberschrift', inhalt: { roh: '## Eine Überschrift' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 2 },
+    { id: 'blk-rn',   seite_id: 's1', typ: 'randnotiz', inhalt: { titel: 'Kunde', zeile1: 'Beispiel GmbH', zeile2: '2026', punkt: true }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 3 },
+    { id: 'blk-bild', seite_id: 's1', typ: 'bild', inhalt: { roh: '![Ein Foto](/favicon.svg)' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 4 },
+    { id: 'blk-gif',  seite_id: 's1', typ: 'gif', inhalt: { roh: '![](/favicon.svg)' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 5 },
+    { id: 'blk-vid',  seite_id: 's1', typ: 'video', inhalt: { roh: 'https://youtu.be/dQw4w9WgXcQ' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 6 },
+    { id: 'blk-tmb',  seite_id: 's1', typ: 'text_mit_bild', inhalt: { roh: ':::\nEin Absatz neben dem Bild.\n![](/favicon.svg)\n:::' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 7 },
+    { id: 'blk-code', seite_id: 's1', typ: 'code', inhalt: { roh: '```js\nconst x = 1;\n```' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 8 },
+    { id: 'blk-wz',   seite_id: 's1', typ: 'werkzeug', inhalt: { roh: '::demo the-race' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 9 },
+    { id: 'blk-tr',   seite_id: 's1', typ: 'trenner', inhalt: { roh: '---' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 10 },
+    { id: 'blk-tuer', seite_id: 's1', typ: 'tuer', inhalt: { ziel: 'https://example.com', text: 'Mehr dazu' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 11 },
+    { id: 'blk-ab',   seite_id: 's1', typ: 'abschnitt', inhalt: { titel: 'Ein Abschnitt', art: 'beruflich', farbe: '#8E4E9B' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 12 },
+  ];
+  anfangsBloecke.forEach(b => zeilen.set(b.id, structuredClone(b)));
+
+  window.__editor = mountBlockEditor(document.getElementById('block-editor'), {
+    seiteId: 's1', anfangsBloecke,
+    api, vorschauEl: document.getElementById('vorschau'), statusEl: document.getElementById('speicher-status'),
+  });
+</script>
+</body>
+</html>

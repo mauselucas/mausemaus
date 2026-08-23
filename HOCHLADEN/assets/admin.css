@@ -86,7 +86,7 @@ main { padding: 22px; max-width: 1500px; margin: 0 auto; }
 .marke.archiv { background: var(--line); }
 
 /* ===== Editor: drei Spalten ===== */
-.editor { display: grid; grid-template-columns: 330px minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-top: 16px; }
+.editor { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; margin-top: 16px; align-items: start; }
 .felder, .schreiben, .vorschau {
   background: #fff; border: 1.5px solid var(--ink); border-radius: 16px; padding: 16px;
 }
@@ -202,3 +202,140 @@ details > label { margin-top: 10px; }
 .set-weg:hover { border-color: #a33; color: #a33; }
 .set-punkt { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
 @media (max-width: 1100px) { .set-gitter { grid-template-columns: 1fr; } }
+
+/* ===== Blockeditor ===== */
+
+/* Zwei Spalten: links die Blockliste, rechts die Vorschau (dieselbe
+   Darstellung wie öffentlich, per bloecke.js gezeichnet). */
+.be-gitter { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; margin-top: 16px; }
+.be-spalte { background: #fff; border: 1.5px solid var(--ink); border-radius: 16px; padding: 16px; }
+/* Die Vorschau bleibt beim Scrollen durch die (oft längere) Blockliste
+   sichtbar stehen, statt nach oben wegzurutschen. */
+.be-spalte.vorschau { position: sticky; top: 74px; align-self: start; max-height: calc(100vh - 90px); }
+.be-vorschau-flaeche { flex: 1; overflow-y: auto; max-height: 74vh; background: var(--paper);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 18px; }
+@media (max-width: 1150px) { .be-spalte.vorschau { position: static; max-height: none; } }
+@media (max-width: 1150px) { .be-gitter { grid-template-columns: 1fr; } }
+
+.be-liste { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.be-zeile {
+  position: relative; border: 1.5px solid transparent; border-radius: 12px;
+  padding: 6px 8px 6px 4px; transition: border-color .12s ease, background .12s ease;
+}
+.be-zeile:hover, .be-zeile:focus-within { border-color: var(--line); background: var(--paper); }
+.be-zeile.wird-gezogen { opacity: .35; }
+.be-zeile.ziel { box-shadow: 0 -3px 0 var(--sky); }
+
+.be-kopf { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.be-griff { cursor: grab; background: none; border: 0; font-size: 15px; color: var(--muted);
+  padding: 2px 4px; line-height: 1; flex-shrink: 0; }
+.be-griff:active { cursor: grabbing; }
+.be-typ { display: inline-flex; align-items: center; gap: 5px; font-family: 'Space Mono', monospace;
+  font-size: 10px; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+.be-typ-icon { font-size: 12px; }
+.be-kopf-fuell { flex: 1; }
+.be-menu-knopf { background: none; border: 1.5px solid transparent; border-radius: 8px;
+  color: var(--muted); font-size: 16px; line-height: 1; cursor: pointer; padding: 3px 8px; }
+.be-menu-knopf:hover { border-color: var(--ink); color: var(--ink); }
+
+.be-inhalt { position: relative; padding-left: 24px; }
+.be-text {
+  width: 100%; border: 0; background: transparent; resize: none; overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif; font-size: 15px; line-height: 1.55; color: var(--ink);
+  padding: 3px 2px;
+}
+.be-text:focus { outline: none; background: #fff; border-radius: 8px; box-shadow: 0 0 0 2px var(--sky); }
+.be-ueberschrift-wrap { display: flex; align-items: flex-start; gap: 8px; }
+/* flex:1 + min-width:0 -- ohne beides schrumpft ein Textfeld mit width:100%
+   in einem Flex-Container auf seine Mindestbreite (ein Zeichen), und der
+   Text bricht senkrecht Buchstabe für Buchstabe um. */
+.be-ueberschrift { font-family: 'Tropi', sans-serif; font-size: 22px; flex: 1; min-width: 0; }
+/* Zwei Klassen in jedem Selektor unten -- nötig, um die Grund-Regel
+   ".admin select { width: 100% }" zu schlagen (dieselbe Spezifität würde
+   sonst gewinnen, das Auswahlfeld schluckt die ganze Zeile und der
+   Nachbar wird auf Buchstabenbreite zusammengedrückt). */
+.be-ueberschrift-wrap .be-ebene { font-size: 11px; padding: 4px 6px; width: auto; flex-shrink: 0; }
+
+.be-menu {
+  margin: 8px 0 4px 24px; padding: 12px; background: var(--paper); border: 1.5px solid var(--line);
+  border-radius: 12px; display: flex; flex-direction: column; gap: 10px;
+}
+.be-menu label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; }
+.be-menu select, .be-menu textarea { font-size: 13px; }
+.be-menu-knoepfe { display: flex; gap: 8px; }
+.be-menu-knoepfe .btn { padding: 6px 12px; font-size: 11px; }
+
+/* Format-Leiste bei markiertem Text -- schwebt über dem Textfeld. */
+.be-format {
+  position: absolute; top: -38px; left: 24px; z-index: 30; display: flex; gap: 3px;
+  background: var(--ink); border-radius: 10px; padding: 4px; box-shadow: 3px 4px 0 rgba(0,0,0,.2);
+}
+.be-format button {
+  width: 28px; height: 26px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--paper); cursor: pointer; font-size: 13px;
+}
+.be-format button:hover { background: rgba(255,255,255,.18); }
+
+/* Blockauswahl ("/") */
+.be-slash {
+  position: absolute; z-index: 30; top: 100%; left: 24px; margin-top: 2px; min-width: 240px;
+  max-height: 280px; overflow-y: auto; background: #fff; border: 1.5px solid var(--ink);
+  border-radius: 12px; box-shadow: 4px 5px 0 var(--ink); padding: 6px;
+}
+.be-slash-eintrag {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  border: 0; background: transparent; border-radius: 8px; padding: 8px 10px; cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; color: var(--ink);
+}
+.be-slash-icon { width: 20px; text-align: center; }
+.be-slash-eintrag:hover, .be-slash-aktiv { background: var(--sage); }
+.be-slash-leer { font-size: 12.5px; color: var(--muted); padding: 8px 10px; }
+
+.be-unten { margin-top: 8px; }
+
+/* Bild-Listen (im 'bild'-Block und in 'text mit Bild daneben') */
+.be-bilder { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.be-bild-zeile { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.be-bild-vorschau { width: 56px; height: 40px; object-fit: cover; border-radius: 7px;
+  border: 1.5px solid var(--ink); flex-shrink: 0; }
+.be-bild-leer { display: flex; align-items: center; justify-content: center; font-size: 9px;
+  color: var(--muted); background: var(--paper); text-align: center; }
+.be-bild-alt { flex: 1; min-width: 120px; font-size: 12.5px; padding: 6px 9px; }
+.be-bild-zeile .be-bild-groesse { width: auto; font-size: 12px; padding: 6px 8px; }
+.be-bild-zeile .btn { padding: 6px 10px; font-size: 10.5px; }
+.be-bild-neu { align-self: flex-start; }
+
+.be-gif { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.be-gif .be-gif-alt { flex: 1; min-width: 120px; font-size: 12.5px; padding: 6px 9px; }
+.be-gif p.klein { flex-basis: 100%; margin: 2px 0 0; }
+
+.be-video-url, .be-werkzeug { font-size: 13.5px; padding: 7px 10px; width: 100%; }
+.be-video-hinweis { margin: 4px 0 0; }
+
+.be-textmitbild { display: flex; flex-direction: column; gap: 8px; }
+
+.be-code { display: flex; flex-direction: column; gap: 6px; }
+.be-code .be-code-sprache { width: auto; font-size: 11px; align-self: flex-start; padding: 4px 8px; }
+.be-code-text { font-family: 'Space Mono', monospace; font-size: 12.5px; width: 100%;
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; resize: none; overflow: hidden; }
+
+.be-trenner-hinweis { margin: 6px 0; }
+
+.be-tuer, .be-randnotiz, .be-abschnitt { display: flex; gap: 8px; flex-wrap: wrap; }
+.be-tuer input, .be-randnotiz input, .be-abschnitt input, .be-abschnitt select {
+  flex: 1; min-width: 110px; font-size: 13px; padding: 7px 10px;
+}
+.be-ab-farbe { max-width: 130px; }
+
+/* Ab 520 px bedienbar: Kopfzeile darf umbrechen, Bild-Zeilen stapeln sich. */
+@media (max-width: 640px) {
+  .be-gitter { gap: 12px; }
+  .be-spalte { padding: 11px; }
+  .be-inhalt { padding-left: 4px; }
+  .be-kopf { flex-wrap: wrap; }
+  .be-menu { margin-left: 4px; }
+  .be-bild-zeile { flex-direction: column; align-items: stretch; }
+  .be-bild-vorschau { width: 100%; height: 90px; }
+  .be-format { left: 4px; }
+  .be-slash { left: 4px; right: 4px; min-width: 0; }
+}
