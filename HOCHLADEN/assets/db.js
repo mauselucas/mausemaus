@@ -95,4 +95,74 @@
       .filter(p => p.status === 'published')
       .sort((a, b) => a.sort_order - b.sort_order);
   }
+
+  /* ---------- Blockeditor: seiten/bloecke ----------
+     `notiz` wird bewusst nirgends mit abgefragt -- die Spalte ist für
+     "anon" ohnehin per REVOKE gesperrt (siehe Migration), select=* auf den
+     eingebetteten Blöcken würde also mit einem Rechte-Fehler scheitern.
+     Die Spaltenliste hier ist deshalb Teil des Vertrags, nicht nur Zierde. */
+  const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,breite,bewegung,sort_order,created_at,updated_at';
+  const eingebettet = `select=*,bloecke(${BLOCK_SPALTEN})`;
+
+  const sortiereBloecke = (seite) => {
+    if (seite && Array.isArray(seite.bloecke)) seite.bloecke.sort((a, b) => a.sort_order - b.sort_order);
+    return seite;
+  };
+
+  /* Eine einzelne Seite mit ihren Blöcken -- für den Brief (typ=brief,
+     slug=brief) und für eine Welt (typ=welt, slug=<der Türchen-Slug>). */
+  const CACHE_S = 'mm.seite.v1.';
+
+  window.mmLoadSeite = async function (typ, slug) {
+    const cacheKey = CACHE_S + typ + '.' + slug;
+    if (!eingerichtet) return ausSeedSeite(typ, slug);
+    try {
+      const r = await fetch(
+        `${CFG.url}/rest/v1/seiten?typ=eq.${encodeURIComponent(typ)}&slug=eq.${encodeURIComponent(slug)}` +
+        `&status=eq.published&${eingebettet}`,
+        { headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const [seite] = await r.json();
+      if (seite) { try { localStorage.setItem(cacheKey, JSON.stringify(seite)); } catch {} }
+      return sortiereBloecke(seite || null);
+    } catch (e) {
+      console.warn('[mausemaus] Seite nicht erreichbar:', e.message);
+      try {
+        const c = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+        if (c) return sortiereBloecke(c);
+      } catch {}
+      return ausSeedSeite(typ, slug);
+    }
+  };
+
+  /* Alle veröffentlichten Projekt-Seiten, samt Blöcken, in Reihenfolge --
+     für den Brief (ein Zeitleisten-Abschnitt je Projekt). */
+  const CACHE_P = 'mm.projekte.v1';
+
+  window.mmLoadProjektSeiten = async function () {
+    if (!eingerichtet) return (window.SEED_SEITEN && window.SEED_SEITEN.projekte) || [];
+    try {
+      const r = await fetch(
+        `${CFG.url}/rest/v1/seiten?typ=eq.projekt&status=eq.published&order=sort_order.asc&${eingebettet}`,
+        { headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const daten = (await r.json()).map(sortiereBloecke);
+      try { localStorage.setItem(CACHE_P, JSON.stringify({ zeit: Date.now(), daten })); } catch {}
+      return daten;
+    } catch (e) {
+      console.warn('[mausemaus] Projekt-Seiten nicht erreichbar:', e.message);
+      try {
+        const c = JSON.parse(localStorage.getItem(CACHE_P) || 'null');
+        if (c && c.daten) return c.daten;
+      } catch {}
+      return (window.SEED_SEITEN && window.SEED_SEITEN.projekte) || [];
+    }
+  };
+
+  function ausSeedSeite(typ, slug) {
+    console.info('[mausemaus] Notfall-Daten aus seed.js —', typ, slug);
+    const s = window.SEED_SEITEN || {};
+    if (typ === 'brief') return s.brief || null;
+    return (s.welten || []).find(w => w.slug === slug) || null;
+  }
 })();

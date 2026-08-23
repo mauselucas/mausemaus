@@ -21,6 +21,7 @@
 
 <script src="/assets/config.js"></script>
 <script src="/assets/shared.js"></script>
+<script src="/assets/bloecke.js"></script>
 <script src="/assets/db.js"></script>
 <script src="/assets/tueren.js"></script>
 <script src="/assets/demo-race.js"></script>
@@ -32,7 +33,7 @@
   const ziel = document.getElementById('inhalt');
   const welt = document.getElementById('welt');
 
-  const [seite] = await window.mmLoadPosts(slug);
+  const seite = await window.mmLoadSeite('welt', slug);
   if (!seite) {
     document.title = 'Nicht gefunden — mausemaus';
     ziel.innerHTML = '<h1 class="welt-titel">Hier ist nichts.</h1>' +
@@ -40,7 +41,7 @@
     return;
   }
 
-  document.title = seite.title + ' — mausemaus';
+  document.title = seite.titel + ' — mausemaus';
   if (seite.farbe) {
     welt.style.setProperty('--welt', seite.farbe);
     /* Dunkle Farbstimmung, wenn die Farbe dunkel ist. */
@@ -52,11 +53,11 @@
   }
 
   ziel.innerHTML =
-    (seite.subtitle ? '<p class="welt-kicker">' + window.mm.esc(seite.subtitle) + '</p>' : '') +
-    '<h1 class="welt-titel">' + window.mm.esc(seite.title) + '</h1>' +
+    (seite.untertitel ? '<p class="welt-kicker">' + window.mm.esc(seite.untertitel) + '</p>' : '') +
+    '<h1 class="welt-titel">' + window.mm.esc(seite.titel) + '</h1>' +
     (seite.cover_url ? '<img class="welt-cover" src="' + window.mm.esc(seite.cover_url) +
       '" alt="" style="object-position:' + window.mm.esc(seite.cover_pos || '50% 50%') + '">' : '') +
-    '<div class="welt-text">' + window.mm.renderMarkdown(seite.body || '') + '</div>';
+    '<div class="welt-text">' + window.mmBloecke.seite(seite.bloecke) + '</div>';
 
   window.mmTueren(ziel);
   window.mmInhalt(ziel);

@@ -1,16 +1,9 @@
-/* mausemaus — setzt den Brief aus dem zusammen, was schon in der Datenbank steht.
-   Es wird NICHTS umformuliert: Titel, Texte, Bilder und Videos kommen wörtlich
-   aus den Projekten. Verbindende Sätze schreibt Lucas später selbst dazu. */
+/* mausemaus — setzt den Brief aus Seiten und Blöcken zusammen (Tabellen
+   `seiten`/`bloecke`). Es wird NICHTS umformuliert: Titel, Texte, Bilder und
+   Videos kommen wörtlich aus den Blöcken -- siehe assets/bloecke.js für die
+   Regel, wie ein Block zu HTML wird, und tests/umzug.mjs für die Regel, wie
+   die alten Tabellen (projects/posts/settings) zu Blöcken wurden. */
 (() => {
-  /* Jedes Projekt bekommt eine eigene Farbe, der Reihe nach.
-     NICHT aus `accent` ableiten: dort gibt es nur vier Werte, und
-     "The Race" und "Rockstar Selfish" teilen sich beide `sky` — zwei
-     gleichfarbige Balken in der Zeitleiste wären unbrauchbar.
-     Die Reihenfolge kommt aus `sort_order`, ist also stabil. */
-  const FARBEN = ['#3E5A78', '#8E4E9B', '#A8913F', '#6E6E7A', '#7F8F55',
-                  '#B5654A', '#4E7F7A', '#8A5A8E'];
-  const farbeVon = (p, i) => FARBEN[i % FARBEN.length];
-
   /* window.mm.videoEmbed() liefert nur den Bauplan ({kind, id, src}), keine
      fertige Einbettung — genauso, wie renderMarkdown() ihn intern selbst
      zu einem <iframe> zusammensetzt. Hier dasselbe für den Brief. */
@@ -22,8 +15,12 @@
       'referrerpolicy="strict-origin-when-cross-origin" title="Video"></iframe>';
   };
 
-  window.mmBrief = function (ziel, { settings, projekte }) {
-    const e = settings || {};
+  /* briefBloecke: alle Blöcke der EINEN Seite vom Typ "brief" (Hallo, Profil,
+     Kontakt -- markiert durch abschnitt-Blöcke).
+     projekte: die veröffentlichten Seiten vom Typ "projekt", je mit ihren
+     eigenen Blöcken, schon nach sort_order sortiert. */
+  window.mmBrief = function (ziel, { briefBloecke, projekte }) {
+    const gruppen = window.mmBloecke.gruppieren(briefBloecke);
     const abschnitte = [];
     ziel.innerHTML = '';
 
@@ -35,94 +32,90 @@
       return s;
     };
 
-    /* ---- Einstieg: aus den vorhandenen Startseiten-Texten ---- */
-    const eins = neuerAbschnitt('Hallo', 'persoenlich', null);
-    eins.innerHTML =
-      '<h1 class="br-gruss">' + window.mm.esc(e.hero_line1 || 'Hallo ich bin') +
-        '<em>' + window.mm.esc(e.hero_line2 || 'Lucas :)') + '</em></h1>' +
-      '<p class="br-kicker">' + window.mm.esc(e.hero_eyebrow || '') + '</p>' +
-      '<div class="br-text">' + window.mm.renderMarkdown(e.hero_intro || '') + '</div>' +
-      /* Die vier Eckdaten (Basis, Status, Schwerpunkt, Ausbildung) standen auf der
-         alten Startseite und dürfen nicht verschwinden. */
-      (Array.isArray(e.infos) && e.infos.length
-        ? '<dl class="br-infos">' + e.infos.map(i =>
-            '<div' + (i.punkt ? ' class="br-punkt"' : '') + '>' +
-            '<dt>' + window.mm.esc(i.titel || '') + '</dt>' +
-            '<dd>' + window.mm.esc(i.zeile1 || '') +
-            (i.zeile2 ? '<span>' + window.mm.esc(i.zeile2) + '</span>' : '') + '</dd></div>').join('') +
-          '</dl>'
-        : '');
+    /* Eine Brief-eigene Gruppe (Hallo/Profil/Kontakt oder eine spätere,
+       von Lucas selbst angelegte) rendern. `rolle` ist ein optionales Feld
+       im abschnitt-Block und steuert nur die VORSPANN-Gestaltung (großer
+       Gruß, Kontaktzeilen) -- ohne bekannte Rolle gibt es einen normalen
+       Titel, die Seite bricht dadurch nie. */
+    const renderGruppe = (g) => {
+      const s = neuerAbschnitt(g.titel, g.art, g.farbe);
+      const i = g.inhalt || {};
+      let vorspann = '';
+      if (i.rolle === 'hallo') {
+        vorspann = '<h1 class="br-gruss">' + window.mm.esc(i.titel || '') +
+          '<em>' + window.mm.esc(i.zusatz || '') + '</em></h1>' +
+          (i.kicker ? '<p class="br-kicker">' + window.mm.esc(i.kicker) + '</p>' : '');
+      } else if (i.rolle === 'profil') {
+        vorspann = (i.kicker ? '<p class="br-rolle">' + window.mm.esc(i.kicker) + '</p>' : '') +
+          (i.titel ? '<h2 class="br-titel">' + window.mm.esc(i.titel).replace(/\n/g, '<br>') + '</h2>' : '');
+      } else {
+        vorspann = i.titel ? '<h2 class="br-titel">' + window.mm.esc(i.titel) + '</h2>' : '';
+      }
 
-    /* ---- Wer schneidet da: der vorhandene Profiltext samt Werkzeugliste ---- */
-    if (e.profil_text || e.profil_titel) {
-      const pr = neuerAbschnitt(e.profil_kicker || 'Über mich', 'persoenlich', null);
-      pr.innerHTML =
-        (e.profil_kicker ? '<p class="br-rolle">' + window.mm.esc(e.profil_kicker) + '</p>' : '') +
-        (e.profil_titel
-          ? '<h2 class="br-titel">' + window.mm.esc(e.profil_titel).replace(/\n/g, '<br>') + '</h2>'
-          : '') +
-        (e.profil_text ? '<div class="br-text">' + window.mm.renderMarkdown(e.profil_text) + '</div>' : '') +
-        (Array.isArray(e.werkzeuge) && e.werkzeuge.length
-          ? '<dl class="br-werkzeuge">' + e.werkzeuge.map(w =>
-              '<div><dt>' + window.mm.esc(w.name || '') + '</dt>' +
-              '<dd>' + window.mm.esc(w.stufe || '') + '</dd></div>').join('') + '</dl>'
-          : '') +
-        (Array.isArray(e.kunden) && e.kunden.length
-          ? '<p class="br-kunden">' + e.kunden.map(k =>
-              '<span>' + window.mm.esc(k) + '</span>').join('') + '</p>'
-          : '');
-    }
+      /* Eckdaten (randnotiz-Blöcke) gehören als Gruppe in eine <dl>, damit
+         das vorhandene Raster-CSS (.br-infos) greift. */
+      const eckdaten = g.blocks.filter(b => b.typ === 'randnotiz');
+      const rest = g.blocks.filter(b => b.typ !== 'randnotiz');
 
-    /* ---- Ein Abschnitt je Projekt, Inhalt unverändert ---- */
-    projekte.forEach((p, i) => {
-      const s = neuerAbschnitt(p.title, 'beruflich', farbeVon(p, i));
+      const nachspann = i.rolle === 'kontakt'
+        ? '<p class="br-kontakt">' +
+            (i.email ? '<a href="mailto:' + window.mm.esc(i.email) + '">' + window.mm.esc(i.email) + '</a>' : '') +
+            (i.telefon ? '<a href="tel:' + window.mm.esc(i.telefon.replace(/\s/g, '')) + '">' +
+              window.mm.esc(i.telefon) + '</a>' : '') +
+          '</p>'
+        : '';
+
+      s.innerHTML = vorspann +
+        rest.map(b => window.mmBloecke.render(b, 'br-text')).join('\n') +
+        (eckdaten.length ? '<dl class="br-infos">' + eckdaten.map(b => window.mmBloecke.render(b)).join('') + '</dl>' : '') +
+        nachspann;
+    };
+
+    /* Reihenfolge: Brief-eigene Abschnitte bis (ausschließlich) zum ersten
+       Kontakt-Abschnitt, dann die Projekte, dann der Rest (üblicherweise:
+       Kontakt). So bleibt Einstieg -> Profil -> Projekte -> Kontakt
+       erhalten, ohne dass Zahl oder Art der Brief-eigenen Abschnitte fest
+       verdrahtet sind -- Lucas kann im Editor weitere persönliche
+       Abschnitte einfügen, sie landen automatisch vor den Projekten. */
+    const kontaktAb = gruppen.findIndex(g => g.art === 'kontakt');
+    const vorProjekten = kontaktAb === -1 ? gruppen : gruppen.slice(0, kontaktAb);
+    const nachProjekten = kontaktAb === -1 ? [] : gruppen.slice(kontaktAb);
+
+    vorProjekten.forEach(renderGruppe);
+
+    /* ---- Ein Abschnitt je veröffentlichtem Projekt ---- */
+    projekte.forEach((p) => {
+      const seite = p.seite;
+      const s = neuerAbschnitt(seite.titel, 'beruflich', seite.farbe);
       let h = '';
-      if (p.role) h += '<p class="br-rolle">' + window.mm.esc(p.role) + '</p>';
-      h += '<h2 class="br-titel">' + window.mm.esc(p.title) +
-           (p.is_live ? '<span class="br-laeuft">läuft aktuell</span>' : '') + '</h2>';
-      if (p.summary) h += '<div class="br-text">' + window.mm.renderMarkdown(p.summary) + '</div>';
+      if (seite.untertitel) h += '<p class="br-rolle">' + window.mm.esc(seite.untertitel) + '</p>';
+      h += '<h2 class="br-titel">' + window.mm.esc(seite.titel) +
+           (seite.ist_aktuell ? '<span class="br-laeuft">läuft aktuell</span>' : '') + '</h2>';
 
       /* Das Coverbild ist immer sichtbar und dient als Vorschaubild.
          Einbettbare Videos laden erst beim Klick — sonst holt die Startseite
          fünf fremde Abspieler auf einmal. Nicht einbettbare (z. B. "The Race"
-         bei Joyn, `embed_ok = false`) führen nach außen. */
-      if (p.cover_url) {
-        const einbettbar = p.link_url && p.embed_ok !== false;
+         bei Joyn, embed_ok = false) verweisen stattdessen über einen eigenen
+         tuer-Block in den Blöcken selbst nach außen. */
+      if (seite.cover_url) {
+        const einbettbar = seite.video_url && seite.embed_ok !== false;
         h += '<figure class="br-bild' + (einbettbar ? ' br-spielbar' : '') + '"' +
-             (einbettbar ? ' data-video="' + window.mm.esc(p.link_url) + '"' : '') + '>' +
-             '<img src="' + window.mm.esc(p.cover_url) + '" alt="' + window.mm.esc(p.title) +
+             (einbettbar ? ' data-video="' + window.mm.esc(seite.video_url) + '"' : '') + '>' +
+             '<img src="' + window.mm.esc(seite.cover_url) + '" alt="' + window.mm.esc(seite.titel) +
              '" loading="lazy" style="object-position:' +
-             window.mm.esc(p.cover_pos || '50% 50%') + '">' +
-             (einbettbar
-               ? '<button class="br-play" type="button" aria-label="Video abspielen">▶</button>'
-               : (p.link_url ? '<a class="br-raus" href="' + window.mm.esc(p.link_url) +
-                   '" target="_blank" rel="noopener">' + window.mm.esc(p.link_label || 'Ansehen') +
-                   ' →</a>' : '')) +
+             window.mm.esc(seite.cover_pos || '50% 50%') + '">' +
+             (einbettbar ? '<button class="br-play" type="button" aria-label="Video abspielen">▶</button>' : '') +
              '</figure>';
-      } else if (p.link_url && p.embed_ok !== false) {
-        h += '<div class="br-film">' + einbettung(p.link_url) + '</div>';
+      } else if (seite.video_url && seite.embed_ok !== false) {
+        h += '<div class="br-film">' + einbettung(seite.video_url) + '</div>';
       }
-      if (p.body) h += '<div class="br-text">' + window.mm.renderMarkdown(p.body) + '</div>';
-      if (p.tags && p.tags.length)
-        h += '<p class="br-marken">' + p.tags.map(t => '<span>' + window.mm.esc(t) + '</span>').join('') + '</p>';
-      /* "The Race" verweist über more_url auf die Werkzeug-Seite. Ohne diese
-         Zeile ginge der Verweis beim Umbau still verloren. */
-      if (p.more_url)
-        h += '<p class="br-mehr"><a class="mm-tuer" href="' + window.mm.esc(p.more_url) + '">' +
-             window.mm.esc(p.more_label || 'Mehr dazu') + '</a></p>';
+
+      h += p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order)
+        .map(b => window.mmBloecke.render(b, 'br-text')).join('\n');
       s.innerHTML = h;
     });
 
-    /* ---- Schluss: der vorhandene Kontaktteil ---- */
-    const k = neuerAbschnitt(e.kontakt_titel || 'Schreib mir', 'kontakt', '#BFCC94');
-    k.innerHTML =
-      '<h2 class="br-titel">' + window.mm.esc(e.kontakt_titel || 'Schreib mir') + '</h2>' +
-      (e.kontakt_zusatz ? '<div class="br-text">' + window.mm.renderMarkdown(e.kontakt_zusatz) + '</div>' : '') +
-      '<p class="br-kontakt">' +
-        (e.email ? '<a href="mailto:' + window.mm.esc(e.email) + '">' + window.mm.esc(e.email) + '</a>' : '') +
-        (e.telefon ? '<a href="tel:' + window.mm.esc(e.telefon.replace(/\s/g, '')) + '">' +
-          window.mm.esc(e.telefon) + '</a>' : '') +
-      '</p>';
+    nachProjekten.forEach(renderGruppe);
 
     /* Erst auf Klick den fremden Abspieler holen. */
     ziel.querySelectorAll('.br-spielbar').forEach(f => {

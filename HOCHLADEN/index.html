@@ -40,18 +40,19 @@
 <script src="/assets/config.js"></script>
 <script src="/assets/seed.js"></script>
 <script src="/assets/shared.js"></script>
+<script src="/assets/bloecke.js"></script>
 <script src="/assets/db.js"></script>
 <script src="/assets/leiste.js"></script>
 <script src="/assets/brief.js"></script>
 <script src="/assets/tueren.js"></script>
 <script>
 (async () => {
-  const [settings, alle] = await Promise.all([
-    window.mmLoadSettings(), window.mmLoadProjects(),
+  const [brief, projekte] = await Promise.all([
+    window.mmLoadSeite('brief', 'brief'), window.mmLoadProjektSeiten(),
   ]);
-  const projekte = (alle || []).filter(p => p.status === 'published')
-                               .sort((a, b) => a.sort_order - b.sort_order);
-  const abschnitte = window.mmBrief(document.getElementById('brief'), { settings, projekte });
+  const briefBloecke = (brief && brief.bloecke) || [];
+  const abschnitte = window.mmBrief(document.getElementById('brief'),
+    { briefBloecke, projekte: projekte.map(seite => ({ seite, bloecke: seite.bloecke || [] })) });
 
   const scroller = window.matchMedia('(max-width: 760px)').matches
     ? document.scrollingElement : document.getElementById('scroller');

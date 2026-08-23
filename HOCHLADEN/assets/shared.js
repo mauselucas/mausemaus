@@ -221,6 +221,119 @@ function renderMarkdown(src) {
   return html.join('\n');
 }
 
+/* ---------- Blöcke (für den Umzug nach seiten/bloecke) ---------- */
+
+/* Zerlegt einen Markdown-Rohtext in eine Folge von Blöcken, an genau den
+   Stellen, an denen renderMarkdown() auch eine neue Auszeichnung erkennt
+   (Überschrift, Bild(er), Video, Code, ::demo, :::-Block, --- Trenner).
+   Alles andere (Absätze, Listen, Zitate) bleibt als roher Text in einem
+   'text'-Block zusammen -- beim Anzeigen läuft er GENAU durch dieselbe
+   renderMarkdown()-Funktion wie früher, nur eben einzeln pro Block. Damit
+   kann die Zerlegung selbst nie einen Unterschied im Ergebnis erzeugen:
+   jeder Block ist wörtlich ein Ausschnitt aus dem Original.
+   Gibt eine Liste { typ, roh } zurück -- 'roh' ist das arg für renderMarkdown(). */
+function splitBlocks(src) {
+  const lines = String(src ?? '').replace(/\r\n?/g, '\n').split('\n');
+  const bloecke = [];
+  let sammel = [];
+
+  const flushText = () => {
+    while (sammel.length && sammel[0].trim() === '') sammel.shift();
+    while (sammel.length && sammel[sammel.length - 1].trim() === '') sammel.pop();
+    if (sammel.length) bloecke.push({ typ: 'text', roh: sammel.join('\n') });
+    sammel = [];
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const roh0 = lines[i];
+    const line = roh0.trim();
+
+    if (!line) {
+      /* Eine Leerzeile beendet einen zusammenhängenden Textabschnitt --
+         mehrere Leerzeilen hintereinander werden dabei zu einer Grenze
+         zusammengefasst, genau wie renderMarkdown() es beim Aufsammeln tut. */
+      if (sammel.some(z => z.trim() !== '')) flushText();
+      continue;
+    }
+
+    /* Textblock mit Bildern daneben: ::: … ::: -- als Ganzes ein Block,
+       damit renderMarkdown() ihn beim Anzeigen wieder als Einheit erkennt. */
+    if (/^:::/.test(line)) {
+      flushText();
+      const start = i;
+      i++;
+      while (i < lines.length && !/^:::\s*$/.test(lines[i].trim())) i++;
+      bloecke.push({ typ: 'text_mit_bild', roh: lines.slice(start, i + 1).join('\n') });
+      continue;
+    }
+
+    /* Code-Block: ```sprache … ``` */
+    if (line.startsWith('```')) {
+      flushText();
+      const start = i;
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith('```')) i++;
+      bloecke.push({ typ: 'code', roh: lines.slice(start, i + 1).join('\n') });
+      continue;
+    }
+
+    /* Einlage: ::demo kennung -> eigener Block, Blockart "werkzeug" */
+    if (/^::demo\s+[\w-]+$/.test(line)) {
+      flushText();
+      bloecke.push({ typ: 'werkzeug', roh: line });
+      continue;
+    }
+
+    /* Trennstrich */
+    if (/^-{3,}$/.test(line)) {
+      flushText();
+      bloecke.push({ typ: 'trenner', roh: line });
+      continue;
+    }
+
+    /* Überschrift */
+    if (/^#{2,3}\s+.*$/.test(line)) {
+      flushText();
+      bloecke.push({ typ: 'ueberschrift', roh: line });
+      continue;
+    }
+
+    /* Bild(er). Ein Bild mit eigener Größe oder ein GIF steht immer für
+       sich; unbenannte Bilder direkt hintereinander bilden einen Block
+       (aus dem renderMarkdown() beim Anzeigen wieder eine Galerie macht). */
+    if (IMG_LINE.test(line)) {
+      flushText();
+      const istGif = z => /\.gif(\?|#|$)/i.test(z.match(IMG_LINE)[2]);
+      const eigeneGroesse = z => !!z.match(IMG_LINE)[3];
+      if (eigeneGroesse(line) || istGif(line)) {
+        bloecke.push({ typ: istGif(line) ? 'gif' : 'bild', roh: line });
+        continue;
+      }
+      const gruppe = [];
+      while (i < lines.length && IMG_LINE.test(lines[i].trim()) &&
+             !eigeneGroesse(lines[i].trim()) && !istGif(lines[i].trim())) {
+        gruppe.push(lines[i].trim());
+        i++;
+      }
+      i--;
+      bloecke.push({ typ: 'bild', roh: gruppe.join('\n') });
+      continue;
+    }
+
+    /* Video allein auf einer Zeile -- nur, wenn es wirklich eins ist.
+       Sonst (wie in renderMarkdown()) als normale Textzeile weiterlaufen. */
+    if (VIDEO_LINE.test(line) && videoEmbed(line)) {
+      flushText();
+      bloecke.push({ typ: 'video', roh: line });
+      continue;
+    }
+
+    sammel.push(roh0);
+  }
+  flushText();
+  return bloecke;
+}
+
 /* Kurzfassung für die Kachel, falls keine eigene Zusammenfassung gepflegt ist. */
 function excerpt(md, max = 150) {
   const plain = String(md ?? '')
@@ -234,7 +347,7 @@ const slugify = (s) => String(s).toLowerCase()
   .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-window.mm = { esc, inline, renderMarkdown, excerpt, videoEmbed, coverFromVideoUrl, slugify, linkZiel };
+window.mm = { esc, inline, renderMarkdown, excerpt, videoEmbed, coverFromVideoUrl, slugify, linkZiel, splitBlocks };
 
 /* Die Blumenformen, auf die der Trenner (---) verweist. Sie gehören hierher und
    nicht in eine einzelne HTML-Datei: Wer diesen Umsetzer lädt, bekommt sie mit.
