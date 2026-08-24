@@ -11,12 +11,16 @@
    was Besucher sehen. */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { erzeugeSpeicherWarteschlange, naechsteSortierung, vorlageBloecke } from '/assets/block-modell.js';
+import {
+  erzeugeSpeicherWarteschlange, naechsteSortierung, vorlageBloecke,
+  naechsterFreierSlug, ersterFehler, erzeugeEntprellung,
+  darfDurchsCanvas, endungFuerMime, endungUndArtFuerBlob,
+} from '/assets/block-modell.js';
 import { mountBlockEditor } from '/assets/blockeditor.js';
 import { richteAnleitungEin } from '/assets/anleitung.js';
 
 const CFG = window.MM_CONFIG || {};
-const { coverFromVideoUrl, slugify } = window.mm;
+const { coverFromVideoUrl, slugify, esc } = window.mm;
 
 if (!CFG.url || CFG.url.startsWith('HIER_')) {
   document.body.innerHTML = '<div class="login-wrap"><div class="login-box">'
@@ -50,16 +54,24 @@ richteAnleitungEin($('#anleitung-panel'));
 
 $('#login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  /* Knopf sperren, solange die Anfrage läuft -- sonst schickt ein
+     ungeduldiger Doppelklick zwei Anmeldeversuche gleichzeitig los. */
+  const knopf = $('#login-form button[type="submit"]');
+  knopf.disabled = true;
   laden(true); $('#login-fehler').hidden = true;
-  const { error } = await sb.auth.signInWithPassword({
-    email: $('#email').value.trim(), password: $('#pw').value });
-  laden(false);
-  if (error) {
-    $('#login-fehler').textContent = 'Anmeldung fehlgeschlagen: ' + error.message;
-    $('#login-fehler').hidden = false;
-    return;
+  try {
+    const { error } = await sb.auth.signInWithPassword({
+      email: $('#email').value.trim(), password: $('#pw').value });
+    if (error) {
+      $('#login-fehler').textContent = 'Anmeldung fehlgeschlagen: ' + error.message;
+      $('#login-fehler').hidden = false;
+      return;
+    }
+    starten();
+  } finally {
+    laden(false);
+    knopf.disabled = false;
   }
-  starten();
 });
 
 $('#btn-logout').addEventListener('click', async () => {
@@ -94,26 +106,42 @@ async function verkleinern(datei, maxKante = 1600, guete = 0.85) {
 }
 
 async function hochladen(datei) {
-  if (!datei.type.startsWith('image/')) { toast('Das ist kein Bild.', true); return null; }
+  /* datei fehlt oder ist gar keine Datei (z.B. markierter Text übers
+     Coverfeld gezogen) -- ohne diese Prüfung wirft `.type` ungefangen,
+     denn sie steht VOR jedem try-Block. */
+  if (!datei || !datei.type || !datei.type.startsWith('image/')) {
+    toast('Das ist kein Bild.', true); return null;
+  }
   laden(true);
   try {
     /* Bewegte Bilder NICHT durch das Canvas schicken — dabei bliebe nur das
-       erste Einzelbild übrig und die Animation wäre weg. */
-    const bewegt = datei.type === 'image/gif' || datei.type === 'image/apng';
+       erste Einzelbild übrig und die Animation wäre weg. darfDurchsCanvas()
+       ist eine POSITIVLISTE ("garantiert immer ein Einzelbild") statt einer
+       Liste bekannter bewegter Formate -- eine animierte WebP zum Beispiel
+       wäre einer Negativliste, die nur GIF/APNG kennt, unbemerkt
+       durchgerutscht. */
+    const bewegt = !darfDurchsCanvas(datei.type);
     let blob, endung, art, hinweis;
 
     if (bewegt) {
       blob = datei;
-      endung = datei.type === 'image/gif' ? 'gif' : 'png';
+      endung = endungFuerMime(datei.type, 'bild');
       art = datei.type;
       const mb = datei.size / 1024 / 1024;
-      hinweis = `GIF hochgeladen — ${Math.round(datei.size / 1024)} kB, Animation bleibt erhalten`;
+      hinweis = `Bild hochgeladen — ${Math.round(datei.size / 1024)} kB, unverändert `
+        + `(Animation/Originalqualität bleibt erhalten)`;
       if (mb > 5) hinweis += ' · ziemlich groß, das lädt auf dem Handy langsam';
     } else {
       const k = await verkleinern(datei);
-      blob = k.blob; endung = 'webp'; art = 'image/webp';
+      /* Der wirklich gelieferte Blob-Typ entscheidet, NICHT der angeforderte:
+         Safari kann laut Spezifikation kein WebP aus dem Canvas schreiben und
+         liefert dann still ein PNG -- ohne diese Prüfung läge ein PNG mit der
+         Endung .webp und der Typangabe image/webp im Speicher. */
+      ({ endung, art } = endungUndArtFuerBlob(k.blob.type));
+      blob = k.blob;
       hinweis = `Bild hochgeladen — ${k.b}×${k.h}, `
-        + `${Math.round(datei.size / 1024)} kB → ${Math.round(k.blob.size / 1024)} kB`;
+        + `${Math.round(datei.size / 1024)} kB → ${Math.round(k.blob.size / 1024)} kB`
+        + (art !== 'image/webp' ? ` (als ${endung.toUpperCase()} — WebP hat der Browser hier nicht geschrieben)` : '');
     }
 
     const name = `${Date.now()}-${slugify(datei.name.replace(/\.[^.]+$/, '')) || 'bild'}.${endung}`;
@@ -152,11 +180,11 @@ function listeZeichnen() {
   $('#liste').innerHTML = liste.map(p => `
     <li class="zeile ${p.status === 'archived' ? 'archiviert' : ''}" draggable="true" data-id="${p.id}">
       <span class="griff" title="Zum Umsortieren ziehen">⠿</span>
-      ${p.cover_url ? `<img class="zeile-bild" src="${p.cover_url}" alt=""
-           style="object-position:${p.cover_pos || '50% 50%'}">`
+      ${p.cover_url ? `<img class="zeile-bild" src="${esc(p.cover_url)}" alt="" loading="lazy"
+           style="object-position:${esc(p.cover_pos || '50% 50%')}">`
         : '<div class="zeile-bild"></div>'}
       <div class="zeile-text">
-        <div class="zeile-titel">${p.titel || '(ohne Titel)'}</div>
+        <div class="zeile-titel">${esc(p.titel) || '(ohne Titel)'}</div>
         <div class="zeile-meta">
           <span class="marke ${p.status === 'published' ? 'veroeffentlicht'
             : p.status === 'archived' ? 'archiv' : 'entwurf'}">
@@ -179,7 +207,7 @@ $('#reiter').addEventListener('click', async (e) => {
   const b = e.target.closest('button'); if (!b || b.dataset.art === ART) return;
   ART = b.dataset.art;
   wurzelReiter();
-  editorSchliessen({ zurZurListe: false });
+  await editorSchliessen({ zurZurListe: false });
   $('#view-list').hidden = false;
   await listeLaden();
 });
@@ -266,7 +294,10 @@ function leereSeite(typ) {
 $('#btn-neu').addEventListener('click', async () => {
   laden(true);
   const entwurf = leereSeite(ART);
-  entwurf.slug = await freierSlug(slugify(entwurf.titel) || ART);
+  /* KEIN Rückfall auf ART: sonst bekäme die allererste Welt ohne Titel die
+     Kennung "welt" -- also /welt/welt. freierSlug() fällt bei leerem Titel
+     selbst auf "seite" zurück. */
+  entwurf.slug = await freierSlug(slugify(entwurf.titel));
   const { data, error } = await sb.from('seiten').insert(entwurf).select().single();
   if (error) { laden(false); return toast('Anlegen fehlgeschlagen: ' + error.message, true); }
   SEITEN.push(data);
@@ -291,6 +322,18 @@ $('#btn-neu').addEventListener('click', async () => {
 $('#btn-zurueck').addEventListener('click', () => editorSchliessen({ zurZurListe: true }));
 
 async function editorSchliessen({ zurZurListe }) {
+  /* Eine noch nicht geschriebene Änderung an den Seiten-Feldern (Titel,
+     Video-Adresse, …) darf beim Schließen nicht verlorengehen: der
+     Entprellungs-Zeitgeber wartet noch bis zu 500 ms nach dem letzten
+     Tastendruck. seitenEntprellung.sofort() kappt ihn UND löst eine
+     wartende Änderung sofort aus -- einen danach feuernden Zeitgeber (der
+     möglicherweise auf eine inzwischen andere geöffnete Seite zeigen
+     würde) gibt es dadurch gar nicht mehr. Erst wenn die Warteschlange den
+     ausgelösten Schreibvorgang wirklich abgeschlossen hat, wird der Editor
+     -- und mit ihm die Warteschlange -- zerstört. */
+  seitenEntprellung.sofort();
+  while (SEITEN_WARTESCHLANGE?.beschaeftigt()) await new Promise(r => setTimeout(r, 30));
+
   EDITOR?.zerstoeren();
   EDITOR = null;
   SEITEN_WARTESCHLANGE = null;
@@ -299,11 +342,8 @@ async function editorSchliessen({ zurZurListe }) {
 }
 
 async function freierSlug(basis) {
-  let s = basis || 'seite', n = 1;
   const { data } = await sb.from('seiten').select('slug');
-  const belegt = new Set((data || []).map(x => x.slug));
-  while (belegt.has(s)) s = `${basis}-${++n}`;
-  return s;
+  return naechsterFreierSlug(basis, (data || []).map(x => x.slug));
 }
 
 function feldSichtbarkeit(typ) {
@@ -384,15 +424,18 @@ function seiteSpeichernAnstossen() {
     ist_aktuell: AKTUELL.ist_aktuell, status: AKTUELL.status, sort_order: AKTUELL.sort_order,
   });
 }
-let seitenEntprellung;
+/* erzeugeEntprellung() statt eines rohen setTimeout: die weiß, OB gerade
+   eine Änderung aussteht -- das macht editorSchliessen() weiter unten
+   möglich (sofort() beim Schließen), ohne das eine ausstehende Änderung
+   dabei verlorengeht (siehe block-modell.js). */
+const seitenEntprellung = erzeugeEntprellung(seiteSpeichernAnstossen, 500);
 function seiteFeldGeaendert(patch, { sofort = false } = {}) {
   Object.assign(AKTUELL, patch);
-  if (sofort) { clearTimeout(seitenEntprellung); seiteSpeichernAnstossen(); return; }
+  if (sofort) { seitenEntprellung.verwerfen(); seiteSpeichernAnstossen(); return; }
   /* Wie beim Blockeditor entprellt: die Warteschlange wäre auch ohne das
      korrekt, aber ohne Entprellung würde bei jedem Tastendruck ein Aufruf
      losgeschickt und die "gespeichert"-Anzeige würde flackern. */
-  clearTimeout(seitenEntprellung);
-  seitenEntprellung = setTimeout(seiteSpeichernAnstossen, 500);
+  seitenEntprellung.anstossen();
 }
 
 $('#f-titel').addEventListener('input', (e) => seiteFeldGeaendert({ titel: e.target.value }));
@@ -503,21 +546,36 @@ $('#btn-backup').addEventListener('click', async () => {
   const [pr, po, se, sei] = await Promise.all([
     sb.from('projects').select('*').order('sort_order'),
     sb.from('posts').select('*').order('published_at'),
-    sb.from('settings').select('*').eq('id', 1).single(),
+    /* .maybeSingle() statt .single(): fehlt die settings-Zeile ganz (0
+       statt 1 Treffer), liefert .single() einen Fehler -- und die Sicherung
+       bräche komplett ab, obwohl projects/posts/seiten längst geladen sind.
+       .maybeSingle() liefert in diesem Fall einfach `data: null`. */
+    sb.from('settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('seiten').select('*,bloecke(*)').order('typ').order('sort_order'),
   ]);
   laden(false);
-  const fehler = pr.error || po.error || sei.error;
+  /* ersterFehler() statt einer von Hand aufgezählten Kette: die vergisst
+     bei vier Abfragen leicht eine (hier fehlte bisher se.error) -- eine
+     Sicherung, die dann still unvollständig bleibt, ist schlimmer als gar
+     keine, weil man sich auf sie verlässt. */
+  const fehler = ersterFehler(pr, po, se, sei);
   if (fehler) return toast('Fehler: ' + fehler.message, true);
   const alles = {
     projekte_alt: pr.data, seiten_alt: po.data, startseite: se.data,
     seiten: sei.data, stand: new Date().toISOString(),
+    hinweis: 'Enthält nur Datenbank-Inhalte. Hochgeladene Bilder liegen separat '
+      + 'im Supabase-Storage-Bucket "media" und sind NICHT Teil dieser Datei.',
   };
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(alles, null, 2)], { type: 'application/json' }));
   a.download = `mausemaus-sicherung-${new Date().toISOString().slice(0, 10)}.json`;
-  a.click(); URL.revokeObjectURL(a.href);
-  toast(`Sicherung: ${sei.data.length} Seiten mit Blöcken, ${pr.data.length} alte Projekte.`);
+  a.click();
+  /* Nicht sofort widerrufen: manche Browser starten den Download erst
+     asynchron nach click(), ein sofortiges revokeObjectURL() kann ihn dann
+     abbrechen. Kurz warten, dann aufräumen. */
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast(`Sicherung: ${sei.data.length} Seiten mit Blöcken, ${pr.data.length} alte Projekte. `
+    + `Enthält nur die Datenbank — hochgeladene Bilder sind NICHT mit dabei.`);
 });
 
 /* ---------- Start ---------- */

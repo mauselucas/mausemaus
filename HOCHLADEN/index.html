@@ -8,8 +8,11 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:title" content="mausemaus — Lucas Schönwald">
-<meta property="og:image" content="/og-bild.jpg">
+<meta property="og:description" content="Lucas Schönwald — Video Editor und Motion Designer in Köln.">
+<meta property="og:image" content="https://mausemaus.com/og-bild.jpg">
+<meta property="og:url" content="https://mausemaus.com/">
 <meta property="og:type" content="website">
+<link rel="canonical" href="https://mausemaus.com/">
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="stylesheet" href="/assets/leiste.css">
@@ -54,10 +57,22 @@
   const abschnitte = window.mmBrief(document.getElementById('brief'),
     { briefBloecke, projekte: projekte.map(seite => ({ seite, bloecke: seite.bloecke || [] })) });
 
-  const scroller = window.matchMedia('(max-width: 760px)').matches
-    ? document.scrollingElement : document.getElementById('scroller');
-  const leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte,
-    { scroller });
+  /* Die Bildschirmbreite NICHT nur einmal beim Start lesen: dreht jemand
+     ein Tablet oder zieht das Fenster über die 760px-Grenze, muss die
+     Leiste ihren Scroll-Bereich wechseln (Fenster <-> Spalte) -- sonst
+     spricht sie danach dauerhaft den falschen Bereich an. mmLeiste()
+     bindet ihren Scroll-Beobachter beim Aufbau fest an einen Bereich, also
+     bei jedem Überschreiten der Grenze die Leiste komplett neu aufbauen,
+     statt zu versuchen, ihr Scroll-Ziel nachträglich auszutauschen. */
+  const bruch = window.matchMedia('(max-width: 760px)');
+  let leiste = null;
+  function leisteAufbauen() {
+    leiste?.zerstoeren();
+    const scroller = bruch.matches ? document.scrollingElement : document.getElementById('scroller');
+    leiste = window.mmLeiste(document.getElementById('leiste'), abschnitte, { scroller });
+  }
+  leisteAufbauen();
+  bruch.addEventListener('change', leisteAufbauen);
 
   /* Die Höhe der Seite ändert sich noch, nachdem sie steht: Schriften laden nach,
      und Bilder mit loading="lazy" laden ERST, wenn man zu ihnen scrollt.

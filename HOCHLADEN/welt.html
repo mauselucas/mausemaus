@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mausemaus</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:site_name" content="mausemaus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mausemaus" id="og-title">
+<meta property="og:description" content="Video Editor und Motion Designer in Köln." id="og-description">
+<meta property="og:image" content="https://mausemaus.com/og-bild.jpg" id="og-image">
+<meta property="og:url" content="https://mausemaus.com/welt/" id="og-url">
+<link rel="canonical" href="https://mausemaus.com/welt/" id="og-canonical">
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="stylesheet" href="/assets/brief.css">
@@ -29,8 +36,17 @@
 <script src="/assets/inhalt.js"></script>
 <script>
 (async () => {
-  /* Netlify schreibt /welt/xy auf diese Datei um — der Name steht in der Adresse. */
-  const slug = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+  /* Netlify schreibt /welt/xy auf diese Datei um — der Name steht in der Adresse.
+     Eine kaputte Adresse (z.B. ein einzelnes "%" gefolgt von etwas, das keine
+     gültige Prozent-Kodierung ist, wie /welt/100%zz) lässt decodeURIComponent
+     mit einem URIError abbrechen -- ungefangen bliebe die ganze Seite leer.
+     Dann einfach den rohen (nicht dekodierten) Text nehmen: der findet sowieso
+     keine Welt, und mmLoadSeite zeigt in dem Fall die freundliche
+     "Hier ist nichts"-Seite weiter unten. */
+  const roherSlug = location.pathname.split('/').filter(Boolean).pop() || '';
+  let slug;
+  try { slug = decodeURIComponent(roherSlug); }
+  catch { slug = roherSlug; }
   const ziel = document.getElementById('inhalt');
   const welt = document.getElementById('welt');
 
@@ -43,6 +59,21 @@
   }
 
   document.title = seite.titel + ' — mausemaus';
+
+  /* Teilen-Vorschau (WhatsApp, Twitter/X, …) aus den echten Daten der Welt
+     nachtragen -- die feststehenden Werte im <head> sind nur der
+     Grundstock für den kurzen Moment, bevor diese Zeilen laufen, und für
+     den Fall, dass etwas davon fehlt. */
+  const setzeMeta = (id, attr, wert) => {
+    const el = document.getElementById(id);
+    if (el && wert) el.setAttribute(attr, wert);
+  };
+  setzeMeta('og-title', 'content', seite.titel + ' — mausemaus');
+  if (seite.untertitel) setzeMeta('og-description', 'content', seite.untertitel);
+  if (seite.cover_url) setzeMeta('og-image', 'content', seite.cover_url);
+  const kanonisch = location.origin + location.pathname;
+  setzeMeta('og-url', 'content', kanonisch);
+  setzeMeta('og-canonical', 'href', kanonisch);
   if (seite.farbe) {
     welt.style.setProperty('--welt', seite.farbe);
     /* Dunkle Farbstimmung, wenn die Farbe dunkel ist. */

@@ -123,6 +123,111 @@ export function naechsteSortierung(davor, danach) {
   return (davor + danach) / 2;
 }
 
+/* ---------- Nächster freier Slug ----------
+   Reine Logik ohne Netzwerk: bekommt die Menge der bereits belegten Slugs
+   und liefert den ersten freien, ausgehend von `basis`. Wichtig: die
+   Schleife zählt IMMER vom selben Stamm aus hoch -- ein leeres `basis`
+   fällt einmal auf 'seite' zurück, und jeder weitere Versuch baut auf
+   'seite' auf ('seite-2', 'seite-3', …), nicht auf dem ursprünglichen
+   (leeren) `basis`. Sonst entstehen bei jedem erneuten Versuch Kennungen
+   wie "-2", "-3" -- ein führender Bindestrich ohne Namen davor. */
+export function naechsterFreierSlug(basis, belegteSlugs) {
+  const stamm = (basis || '').trim() || 'seite';
+  const belegt = new Set(belegteSlugs || []);
+  let s = stamm, n = 1;
+  while (belegt.has(s)) s = `${stamm}-${++n}`;
+  return s;
+}
+
+/* ---------- Mehrere Abfrage-Ergebnisse zu einem Fehler zusammenfassen ----------
+   Für Aufrufe wie die Sicherung, die mehrere Abfragen parallel losschickt
+   (Promise.all) und danach EINEN gemeinsamen Fehler braucht: den ersten,
+   der wirklich einen trägt. Von Hand aufgezählt (`a.error || b.error || …`)
+   vergisst man beim Hinzufügen einer weiteren Abfrage leicht genau das
+   Feld, das den Unterschied macht -- eine Sicherung, die dann still
+   unvollständig bleibt, ist schlimmer als gar keine, weil man sich auf
+   sie verlässt. Diese Funktion nimmt beliebig viele Ergebnisse entgegen,
+   dadurch kann an der Aufrufstelle keins mehr klanglos wegfallen. */
+export function ersterFehler(...ergebnisse) {
+  for (const e of ergebnisse) if (e && e.error) return e.error;
+  return null;
+}
+
+/* ---------- Entprellter Auslöser mit Sofort-Auslösen beim Verlassen ----------
+   Bündelt schnelle Änderungen (z. B. Tastendrücke in einem Feld) zu einem
+   einzigen Aufruf von `ausloesen`, der erst nach `verzoegerungMs` Ruhe
+   passiert. Anders als ein bloßer setTimeout+clearTimeout WEISS dieser
+   Auslöser, ob gerade eine Änderung aussteht -- das macht `sofort()`
+   möglich: beim Schließen eines Editors den Zeitgeber kappen (er darf
+   NICHT irgendwann später -- möglicherweise für eine inzwischen ganz
+   andere Seite -- feuern) und eine noch wartende Änderung stattdessen
+   SOFORT auslösen, statt sie stillschweigend zu verwerfen. Ohne das geht
+   jede Änderung verloren, die innerhalb der Wartezeit vor dem Schließen
+   gemacht wurde. */
+export function erzeugeEntprellung(ausloesen, verzoegerungMs = 500) {
+  let zeitgeber = null;
+  let wartet = false;
+  const abbrechen = () => { if (zeitgeber != null) clearTimeout(zeitgeber); zeitgeber = null; };
+
+  return {
+    anstossen() {
+      wartet = true;
+      abbrechen();
+      zeitgeber = setTimeout(() => { zeitgeber = null; wartet = false; ausloesen(); }, verzoegerungMs);
+    },
+    /* Zeitgeber kappen und, falls etwas aussteht, SOFORT auslösen.
+       Liefert zurück, ob wirklich etwas ausgelöst wurde. */
+    sofort() {
+      abbrechen();
+      if (!wartet) return false;
+      wartet = false;
+      ausloesen();
+      return true;
+    },
+    /* Zeitgeber kappen, OHNE auszulösen -- für den Fall, dass der Aufrufer
+       die ausstehende Änderung längst auf anderem Weg gespeichert hat. */
+    verwerfen() { abbrechen(); wartet = false; },
+    ausstehend() { return wartet; },
+  };
+}
+
+/* ---------- Bild-Hochladen: welche MIME-Typen dürfen durchs Canvas? ----------
+   Absichtlich eine POSITIVLISTE ("diese Formate sind garantiert immer ein
+   einzelnes Bild"), keine Negativliste bewegter Formate: Eine Verneinung
+   ("alles außer GIF/APNG ist sicher") übersieht jedes neue bewegte Format
+   von selbst -- eine animierte WebP zum Beispiel lief bisher unbemerkt
+   durchs Canvas und verlor dabei ihre Bewegung, weil createImageBitmap()/
+   canvas.toBlob() immer nur das erste Einzelbild sehen. Mit der Positiv-
+   liste fällt ein unbekanntes oder potenziell bewegtes Format automatisch
+   auf "nicht verkleinern, unverändert hochladen" zurück, statt
+   automatisch als sicher zu gelten. */
+export const IMMER_EINZELBILD = ['image/jpeg', 'image/png', 'image/bmp'];
+export function darfDurchsCanvas(mimeType) {
+  return IMMER_EINZELBILD.includes(mimeType);
+}
+
+/* ---------- Dateiendung aus dem tatsächlichen MIME-Typ ---------- */
+const ENDUNG_NACH_MIME = {
+  'image/gif': 'gif', 'image/png': 'png', 'image/apng': 'png',
+  'image/webp': 'webp', 'image/avif': 'avif', 'image/jpeg': 'jpg',
+  'image/svg+xml': 'svg', 'image/bmp': 'bmp', 'image/tiff': 'tiff',
+};
+export function endungFuerMime(mimeType, ersatz = 'bild') {
+  return ENDUNG_NACH_MIME[mimeType] || ersatz;
+}
+
+/* ---------- Nach dem Verkleinern: Endung und Typ am WIRKLICHEN Blob ausrichten ----------
+   `cv.toBlob(cb, 'image/webp', güte)` ist ein WUNSCH, kein Versprechen:
+   Safari kann laut Spezifikation still ein anderes Format liefern (bisher
+   PNG), wenn es WebP nicht schreiben kann -- ohne diese Prüfung läge ein
+   PNG mit der Endung .webp und der Typangabe image/webp im Speicher,
+   falsch in beidem. Immer den wirklich gelieferten `blob.type` nehmen,
+   nie den angeforderten Typ blind übernehmen. */
+export function endungUndArtFuerBlob(blobType, gewuenschterTyp = 'image/webp') {
+  const art = blobType || gewuenschterTyp;
+  return { endung: endungFuerMime(art, 'png'), art };
+}
+
 /* ---------- Markdown-Auswahlwerkzeuge (fett/kursiv/Link/Türchen) ----------
    Arbeiten rein auf Text + Cursorposition, genau wie die Werkzeugleiste, die
    es im alten Editor schon gab -- nur diesmal wiederverwendbar und ohne DOM. */

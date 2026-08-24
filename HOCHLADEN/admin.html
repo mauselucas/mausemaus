@@ -26,7 +26,7 @@
     <label>E-Mail<input type="email" id="email" autocomplete="username" required></label>
     <label>Passwort<input type="password" id="pw" autocomplete="current-password" required></label>
     <button class="btn primary" type="submit">Anmelden</button>
-    <p class="fehler" id="login-fehler" hidden></p>
+    <p class="fehler" id="login-fehler" role="alert" hidden></p>
   </form>
 </div>
 
@@ -41,7 +41,7 @@
     <div class="admin-top-actions">
       <span class="wer" id="wer"></span>
       <button class="btn ghost" id="btn-brief" title="Begrüßung, Profil und Kontakt — alles, was auf der Startseite steht">Startseite (Brief)</button>
-      <button class="btn ghost" id="btn-backup">Sicherung laden</button>
+      <button class="btn ghost" id="btn-backup" title="Sichert nur die Datenbank -- hochgeladene Bilder sind NICHT enthalten">Sicherung laden</button>
       <a class="btn ghost" href="index.html" target="_blank" rel="noopener">Seite ansehen ↗</a>
       <button class="btn ghost" id="btn-logout">Abmelden</button>
     </div>
@@ -118,7 +118,7 @@
     <div class="leiste">
       <button class="btn ghost" id="btn-zurueck">← Übersicht</button>
       <div class="leiste-rechts">
-        <span class="status" id="speicher-status"></span>
+        <span class="status" id="speicher-status" aria-live="polite"></span>
         <button class="btn ghost" id="btn-archiv">Archivieren</button>
         <button class="btn primary" id="btn-veroeffentlichen">Veröffentlichen</button>
       </div>
@@ -190,7 +190,7 @@
 </div>
 
 <div class="ladebalken" id="ladebalken" hidden><div></div></div>
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" aria-live="polite" hidden></div>
 
 <script src="/assets/config.js?v=1786833901"></script>
 <script src="/assets/shared.js?v=1786833901"></script>

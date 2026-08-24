@@ -2,12 +2,19 @@
    Node bringt WebSocket seit v22 mit, Chrome spricht das DevTools-Protokoll. */
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const PROFIL = new URL('./.profil/', import.meta.url).pathname;
+/* Das Chrome-Profil gehört NICHT unter tests/: Dieser Projektordner liegt
+   auf dem Schreibtisch und wird mit iCloud abgeglichen. Die Ablage hält
+   Dateien offen, das Aufräumen scheitert dann mit ENOTEMPTY und reißt den
+   ganzen Prüflauf mit. Jeder Lauf bekommt deshalb ein eigenes Profil im
+   Systemtemp — dort mischt sich niemand ein. */
+const PROFIL = join(tmpdir(), 'mm-chrome-' + process.pid);
 
 export async function starteChrome({ port = 9333 } = {}) {
-  rmSync(PROFIL, { recursive: true, force: true });
+  try { rmSync(PROFIL, { recursive: true, force: true }); } catch {}
   mkdirSync(PROFIL, { recursive: true });
   const p = spawn(CHROME, [
     '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${PROFIL}`,
@@ -15,7 +22,12 @@ export async function starteChrome({ port = 9333 } = {}) {
   ], { stdio: 'ignore' });
 
   for (let i = 0; i < 50; i++) {
-    try { await fetch(`http://127.0.0.1:${port}/json/version`); return { port, beenden(){ p.kill(); } }; }
+    try { await fetch(`http://127.0.0.1:${port}/json/version`); return { port, beenden() {
+        p.kill();
+        /* Best effort: Ein liegengebliebener Temp-Ordner ist harmlos,
+           ein abgebrochener Prüflauf nicht. */
+        setTimeout(() => { try { rmSync(PROFIL, { recursive: true, force: true }); } catch {} }, 300);
+      } }; }
     catch { await new Promise(r => setTimeout(r, 200)); }
   }
   throw new Error('Chrome ist nicht hochgekommen');
@@ -50,6 +62,13 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
     { width: breite, height: hoehe, deviceScaleFactor: 1, mobile: breite < 768 });
 
   return {
+    /* Fenstergröße MITTEN in einer laufenden Sitzung ändern (ohne neu zu
+       laden) -- für Prüfungen, die einen Bildschirmwechsel (z.B. über die
+       760px-Grenze) simulieren müssen, während die Seite offen bleibt. */
+    async groesse(breiteNeu, hoeheNeu = hoehe) {
+      await ruf('Emulation.setDeviceMetricsOverride',
+        { width: breiteNeu, height: hoeheNeu, deviceScaleFactor: 1, mobile: breiteNeu < 768 });
+    },
     async werte(ausdruck) {
       const r = await ruf('Runtime.evaluate',
         { expression: ausdruck, returnByValue: true, awaitPromise: true });

@@ -107,9 +107,24 @@ const block = (typ, inhalt, breite = 'normal', bewegung = 'keine') =>
   pruefe('nach dem Einrichten, außerhalb des Bildschirms, ist der Block unsichtbar',
     Number(vorher) === 0, vorher);
 
-  await s.werte(`document.querySelector('.mm-bewegung-hochschieben').scrollIntoView({ block: 'center' })`);
-  await s.warte(750);   // länger als die 0.6s-Animation, sonst wird mitten in ihr gemessen
-  const nachher = await s.werte(`getComputedStyle(document.querySelector('.mm-bewegung-hochschieben')).opacity`);
+  /* Nicht blind eine Dauer abwarten: Die Seite scrollt sanft, der Block
+     kommt also erst verzögert ins Bild, und die Animation startet
+     entsprechend später. Eine feste Wartezeit misst dann mitten in der
+     Bewegung (beobachtet: 0.52). Stattdessen warten, bis sich die Deckkraft
+     nicht mehr ändert -- das ist zugleich strenger, weil es den ECHTEN
+     Endzustand prüft statt einen Zwischenwert nach Zufall. */
+  const nachher = await s.werte(`(async () => {
+    const el = document.querySelector('.mm-bewegung-hochschieben');
+    el.scrollIntoView({ block: 'center' });
+    let vorher = -1, gleich = 0;
+    for (let i = 0; i < 40; i++) {                 // höchstens 4 Sekunden
+      await new Promise(r => setTimeout(r, 100));
+      const jetzt = Number(getComputedStyle(el).opacity);
+      if (jetzt === vorher) { if (++gleich >= 3) break; } else { gleich = 0; }
+      vorher = jetzt;
+    }
+    return String(vorher);
+  })()`);
   /* Nicht exakt 1 verlangen -- Chrome rundet die Deckkraft am Ende einer
      Animation manchmal minimal ab (z.B. 0.9977), ohne dass optisch noch
      etwas zu sehen wäre. */
