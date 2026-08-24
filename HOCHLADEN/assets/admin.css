@@ -162,12 +162,12 @@ body.admin {
 .dok-titel {
   font-family:'Tropi','Space Grotesk',sans-serif; font-size:clamp(30px,5vw,42px);
   line-height:1.15; color:var(--ink); background:transparent; border:0; width:100%;
-  padding:0; margin:0 0 6px; border-radius:6px;
+  padding:0 0 0 var(--leiste); margin:0 0 6px; border-radius:6px;
 }
 .dok-untertitel {
   font-family:'Space Grotesk',sans-serif; font-size:17px; line-height:1.55;
   color:var(--muted); background:transparent; border:0; width:100%; resize:none;
-  padding:0; margin:0 0 28px;
+  padding:0 0 0 var(--leiste); margin:0 0 28px;
 }
 .admin .dok-titel:focus, .admin .dok-untertitel:focus {
   outline:none; box-shadow:0 0 0 2px var(--akzent-schwach);
@@ -176,14 +176,27 @@ body.admin {
 
 /* ===== Blockzeilen ===== */
 .be-liste { list-style:none; display:flex; flex-direction:column; gap:2px; }
-.be-zeile { position:relative; padding-left:44px; border-radius:8px; }
+/* Die Einrückung MUSS breiter sein als die Leiste links -- sonst schiebt
+   sich der "⋯"-Knopf über den Anfang des Textes. Genau das war der Fall:
+   Leiste 59px, Einrückung 44px, also 15px Überlappung. Beide Maße stehen
+   deshalb jetzt in EINER Variablen, statt zweimal geraten zu werden. */
+.dok-bereich { --leiste: 56px; }
+.be-zeile { position:relative; padding-left:var(--leiste); border-radius:8px; }
 .be-zeile.wird-gezogen { opacity:.35; }
 .be-zeile.ziel { box-shadow:0 -2px 0 var(--akzent); }
 
-.be-rail { position:absolute; left:0; top:2px; height:30px; display:flex; align-items:center; gap:2px; }
+.be-rail {
+  position:absolute; left:0; top:2px; height:30px; width:calc(var(--leiste) - 4px);
+  display:flex; align-items:center; justify-content:flex-end; gap:2px;
+}
 .be-griff, .be-menu-knopf {
   background:none; border:0; cursor:pointer; color:var(--grau-stark);
-  font-size:15px; line-height:1; padding:4px 5px; border-radius:6px;
+  font-size:15px; line-height:1; border-radius:6px;
+  /* Feste Maße statt inhaltsabhängiger Breite: nur so ist vorher bekannt,
+     wie breit die Leiste wird, und nur so passt sie verlässlich in die
+     Einrückung. */
+  width:20px; height:22px; padding:0; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center;
   opacity:0; transition:opacity .12s ease, color .12s ease;
 }
 .be-zeile:hover .be-griff, .be-zeile:focus-within .be-griff,
@@ -385,7 +398,7 @@ body.admin {
 .be-slash-icon { width:20px; text-align:center; }
 .be-slash-eintrag:hover, .be-slash-aktiv { background:var(--akzent-schwach); }
 .be-slash-leer { font-size:12.5px; color:var(--grau); padding:8px 10px; }
-.be-unten { padding-left:44px; margin-top:8px; }
+.be-unten { padding-left:var(--leiste); margin-top:8px; }
 
 /* ===== Auswahl-Leiste bei markiertem Text ===== */
 .be-format {
@@ -500,8 +513,7 @@ body.admin {
 @media (max-width:640px) {
   .admin main { padding:16px 12px 60px; }
   .dok-bereich { padding:28px 14px 120px; }
-  .be-zeile { padding-left:36px; }
-  .be-unten { padding-left:36px; }
+  .dok-bereich { --leiste: 48px; }
   .be-bild-zeile { flex-direction:column; align-items:stretch; }
   .be-bild-vorschau { width:100%; height:80px; }
   .admin-top { padding:8px 12px; }

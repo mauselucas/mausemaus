@@ -486,12 +486,28 @@ pruefe('GEGENBEWEIS: die alte, zu lasche Prüfung hätte "gespeichert 00:00:00" 
    Flex-Element VOR dem Textfeld und schob es dauerhaft um ihre Breite ein
    -- auch unsichtbar, denn opacity:0 nimmt weiterhin Platz. Genau eine
    Zeile stand dadurch eingerückt, was man erst auf dem Bild sieht. */
+/* Was "Spaltenrand" heißt, hängt vom Element ab, und beides einfach gleich
+   zu messen war mein erster Fehlversuch:
+   - Bei den BLÖCKEN zählt die Außenkante ihres Schreibelements. Genau die
+     war beim Überschriften-Fehler verschoben (das unsichtbare Auswahlfeld
+     stand als Flex-Geschwister davor und schob das Textfeld beiseite).
+     Die Randnotiz ist ein Kasten mit eigener Polsterung -- dort IST die
+     Außenkante der Spaltenrand, ihr Innenabstand ist Gestaltung.
+   - Bei TITEL und UNTERTITEL trägt das Element die Spalteneinrückung selbst
+     als Polsterung. Dort zählt die Textkante; die Außenkante läge 56px
+     weiter links und sähe fälschlich nach Versatz aus. */
+const TEXTKANTE = `(el => { if (!el) return -1; const cs = getComputedStyle(el);
+  return Math.round(el.getBoundingClientRect().left
+    + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth)); })`;
+const AUSSENKANTE = `(el => el ? Math.round(el.getBoundingClientRect().left) : -1)`;
+
 {
   const raender = JSON.parse(await s.werte(`(() => {
+    const kante = ${AUSSENKANTE};
     const feld = (zeile) => zeile.querySelector(
       '.be-text, .be-ueberschrift, .be-randnotiz, .be-abschnitt, .be-code, .be-vorschau-html, .tm-gitter');
     return JSON.stringify([...document.querySelectorAll('.be-zeile')]
-      .map(z => ({ typ: z.dataset.typ, links: Math.round((feld(z)?.getBoundingClientRect().left) ?? -1) }))
+      .map(z => ({ typ: z.dataset.typ, links: kante(feld(z)) }))
       .filter(x => x.links >= 0));
   })()`));
   const werte = raender.map(x => x.links);
@@ -501,6 +517,34 @@ pruefe('GEGENBEWEIS: die alte, zu lasche Prüfung hätte "gespeichert 00:00:00" 
   pruefe('…und es sind wirklich alle zwölf Blockarten gemessen worden (sonst wäre die Prüfung hohl)',
     raender.length === (await s.werte(`document.querySelectorAll('.be-zeile').length`)),
     `${raender.length} gemessen`);
+
+  /* Titel und Untertitel gehören zum selben Dokument -- sie müssen auf
+     derselben Kante stehen wie die Blöcke, sonst ist es keine Spalte. */
+  const kopf = JSON.parse(await s.werte(`(() => { const kante = ${TEXTKANTE};
+    return JSON.stringify({
+      titel: kante(document.querySelector('.dok-titel')),
+      untertitel: kante(document.querySelector('.dok-untertitel')),
+    }); })()`));
+  const textLinks = werte[0];
+  pruefe('Titel und Untertitel stehen auf derselben Kante wie die Blöcke',
+    Math.abs(kopf.titel - textLinks) <= 1 && Math.abs(kopf.untertitel - textLinks) <= 1,
+    `Titel=${kopf.titel} Untertitel=${kopf.untertitel} Blöcke=${textLinks}`);
+
+  /* Und die Leiste mit Griff und "⋯" muss LINKS davon bleiben. Sie lag
+     15px zu weit rechts und schob den "⋯"-Knopf über den Textanfang --
+     im Bildschirmfoto sah man dort einen kleinen Strich vor dem ersten
+     Buchstaben, sonst nichts. Ein Maß, das man nur sieht, wenn man misst. */
+  const ueberlappungen = JSON.parse(await s.werte(`(() => {
+    return JSON.stringify([...document.querySelectorAll('.be-zeile')].map(z => {
+      const rail = z.querySelector('.be-rail');
+      const feld = z.querySelector('.be-text, .be-ueberschrift, .be-randnotiz, .be-abschnitt, .be-code, .be-vorschau-html, .tm-gitter');
+      if (!rail || !feld) return null;
+      const u = Math.round(rail.getBoundingClientRect().right - feld.getBoundingClientRect().left);
+      return u > 0 ? z.dataset.typ + ': ' + u + 'px' : null;
+    }).filter(Boolean));
+  })()`));
+  pruefe('die Leiste (Griff und „⋯“) überlappt NIRGENDS den Textanfang',
+    ueberlappungen.length === 0, ueberlappungen.join(' | '));
 }
 
 /* ---------- Screenshots für den Bericht ---------- */
