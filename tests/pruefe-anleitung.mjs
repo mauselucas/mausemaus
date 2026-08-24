@@ -145,10 +145,15 @@ await schmal.zu();
   const nachher = JSON.parse(await wieder.werte(`JSON.stringify({
     panelOffen: document.getElementById('panel-anleitung').classList.contains('offen'),
     detailsOffen: document.getElementById('anleitung-panel').open,
-    hoehe: Math.round(document.querySelector('#panel-anleitung .anleitung-inhalt').getBoundingClientRect().height),
+    /* checkVisibility() statt einer Höhenmessung: Der Kasten eines
+       zugeklappten <details> meldet weiterhin seine volle Höhe (hier 1764),
+       eine Höhenprüfung wäre also blind gewesen. Gefragt ist, ob der Text
+       tatsächlich GEZEIGT wird. */
+    sichtbar: document.querySelector('#panel-anleitung .anleitung-inhalt')
+      .checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
   })`));
   pruefe('trotz „zugeklappt" gemerkt: das Hilfe-Panel zeigt die Anleitung wirklich an',
-    nachher.panelOffen && nachher.detailsOffen && nachher.hoehe > 100, JSON.stringify(nachher));
+    nachher.panelOffen && nachher.detailsOffen && nachher.sichtbar === true, JSON.stringify(nachher));
 
   const fehlerEcht = wieder.fehlerAufSeite();
   pruefe('keine JavaScript-Fehler auf der echten admin.html', fehlerEcht.length === 0, fehlerEcht.join(' | '));
