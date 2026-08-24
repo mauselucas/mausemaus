@@ -1,162 +1,246 @@
-/* mausemaus — der Blockeditor selbst (DOM + Speichern).
-   Reine Logik steckt in block-modell.js und ist dort für sich getestet;
-   diese Datei bringt sie aufs Bildschirm. Erwartet, dass shared.js und
-   bloecke.js bereits als <script> geladen sind (window.mm, window.mmBloecke)
-   -- die Vorschau nutzt bewusst genau diesen Weg, nicht einen eigenen.
+/* mausemaus — der Blockeditor (DOM + Speichern).
 
-   Absichtlich UNABHÄNGIG von Supabase: alles, was das Netzwerk betrifft,
-   kommt über das injizierte `api`-Objekt herein. Dadurch lässt sich der
-   Editor in einer Testseite (tests/feste/blockeditor-probe.html) mit einem
-   Fake-Speicher prüfen, ganz ohne Anmeldung -- siehe tests/pruefe-editor.mjs. */
+   Grundgedanke nach der Neugestaltung: DIE SCHREIBFLÄCHE IST DIE VORSCHAU.
+   Es gibt keine zweite Spalte mehr, in der dasselbe noch einmal steht.
+   - Textblöcke sehen aus wie das Ergebnis: ein durchscheinendes Textfeld
+     liegt über einer eingefärbten Schicht (auszeichnungsHtml aus
+     block-modell.js). Beide sind zeichengleich, sonst steht die Schrift
+     versetzt zum Cursor.
+   - Medien (Bild, GIF, Video, Trenner, Türchen, Werkzeug) werden mit dem
+     ÖFFENTLICHEN Umsetzer (bloecke.js) fertig dargestellt; ihre Bedienung
+     erscheint erst bei Annäherung.
+   - Griff und "⋯" bleiben unsichtbar, bis die Maus nah ist.
+   - Alle Blockeinstellungen (Breite, Bewegung, Notiz) liegen im "⋯"-Menü.
+     Blöcke mit Notiz tragen dauerhaft einen kleinen Punkt am Rand.
+
+   Die private Notiz wird dem Umsetzer GAR NICHT ERST übergeben (siehe
+   oeffentlich()) -- sie kann deshalb nicht versehentlich im HTML landen. */
+
 import {
-  BLOCKARTEN, BLOCKARTEN_NACH_TYP, BREITEN, BEWEGUNGEN, leererInhalt, slashTreffer,
+  BLOCKARTEN_NACH_TYP, leererInhalt, slashTreffer,
   naechsteSortierung, umschliesseAuswahl, linkEinfuegen, tuerEinfuegen,
   bildZeilenLesen, bildZeilenBauen, textMitBildLesen, textMitBildBauen,
-  ueberschriftLesen, ueberschriftBauen, codeLesen, codeBauen, werkzeugLesen, werkzeugBauen,
-  erzeugeUndoStapel, erzeugeSpeicherWarteschlange,
+  ueberschriftLesen, ueberschriftBauen, codeLesen, codeBauen,
+  werkzeugLesen, werkzeugBauen,
+  erzeugeUndoStapel, erzeugeSpeicherWarteschlange, auszeichnungsHtml,
 } from '/assets/block-modell.js';
 
 const esc = (s) => (window.mm ? window.mm.esc(s) : String(s ?? ''));
 const neuerSchluessel = () => (crypto.randomUUID ? crypto.randomUUID()
   : 'k-' + Date.now() + '-' + Math.random().toString(36).slice(2));
 
-export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorschauEl, statusEl }) {
-  /* ---------- Zustand ---------- */
+export function mountBlockEditor(wurzel, {
+  seiteId, anfangsBloecke, api, statusEl, fremdWiederholen = null,
+}) {
   const zustand = {
     bloecke: (anfangsBloecke || []).slice()
       .sort((a, b) => a.sort_order - b.sort_order)
       .map(b => ({ clientKey: neuerSchluessel(), ...b })),
-    slash: null,        // { clientKey } wenn das Blockauswahl-Menü offen ist
-    auswahlLeiste: null, // { clientKey } wenn die Format-Leiste offen ist
+    slash: null,
   };
-  const warteschlangen = new Map();  // clientKey -> Speicher-Warteschlange
+  const warteschlangen = new Map();      // clientKey -> Speicher-Warteschlange
   const undo = erzeugeUndoStapel(30);
   let aktiveSchreibvorgaenge = 0;
+  let fremdeSchreibvorgaenge = 0;        // von admin.js gemeldet (Seiten-Felder)
+  let fremdFehler = false;
 
-  /* ---------- "gespeichert"-Anzeige ---------- */
+  /* ---------- "gespeichert"-Anzeige ----------
+     Ein einziger Ort, der die Anzeige beschreibt. Sonst überschreibt die
+     eine Quelle (Blöcke) die Meldung der anderen (Seiten-Felder) und ein
+     Fehlerhinweis verschwindet, kaum dass er dasteht. */
+  function fehlerOffen() {
+    if (fremdFehler) return true;
+    for (const q of warteschlangen.values()) if (q.hatFehler && q.hatFehler()) return true;
+    return false;
+  }
   function statusAktualisieren() {
     if (!statusEl) return;
-    statusEl.textContent = aktiveSchreibvorgaenge > 0
+    if (fehlerOffen()) {
+      statusEl.textContent = 'nicht gespeichert — klicken zum Wiederholen';
+      statusEl.classList.add('status-fehler');
+      statusEl.setAttribute('title', 'Der letzte Stand kam nicht an. Klicken schickt ihn erneut los.');
+      return;
+    }
+    statusEl.classList.remove('status-fehler');
+    statusEl.removeAttribute('title');
+    statusEl.textContent = (aktiveSchreibvorgaenge + fremdeSchreibvorgaenge) > 0
       ? 'speichert…'
       : 'gespeichert ' + new Date().toLocaleTimeString('de-DE');
   }
-  function mitStatus(fn) {
-    return async (...args) => {
-      aktiveSchreibvorgaenge++; statusAktualisieren();
-      try { return await fn(...args); }
-      finally { aktiveSchreibvorgaenge--; statusAktualisieren(); }
+  function allesWiederholen() {
+    let etwas = false;
+    for (const q of warteschlangen.values()) if (q.wiederholen && q.wiederholen()) etwas = true;
+    if (fremdWiederholen && fremdWiederholen()) etwas = true;
+    if (etwas) statusAktualisieren();
+    return etwas;
+  }
+  if (statusEl) statusEl.addEventListener('click', () => { if (fehlerOffen()) allesWiederholen(); });
+
+  /* ---------- Speichern je Block ---------- */
+  function basisEntwurf(b) {
+    return {
+      seite_id: seiteId, typ: b.typ, inhalt: b.inhalt, breite: b.breite,
+      bewegung: b.bewegung, notiz: b.notiz || null, sort_order: b.sort_order,
     };
   }
-
-  /* ---------- Speichern eines einzelnen Blocks ---------- */
-  function basisEntwurf(b) {
-    return { seite_id: seiteId, typ: b.typ, inhalt: b.inhalt, breite: b.breite,
-      bewegung: b.bewegung, notiz: b.notiz || null, sort_order: b.sort_order };
-  }
-
   function warteschlangeFuer(b) {
     if (warteschlangen.has(b.clientKey)) return warteschlangen.get(b.clientKey);
-    const schreiben = mitStatus(async (daten) => {
-      if (daten && daten.__geloescht) {
-        if (b.id) await api.loeschen(b.id);
-        return;
+    const schreiben = async (daten) => {
+      aktiveSchreibvorgaenge++; statusAktualisieren();
+      try {
+        if (daten && daten.__geloescht) {
+          if (b.id) await api.loeschen(b.id);
+          return;
+        }
+        if (b.id) await api.aktualisieren(b.id, daten);
+        else {
+          const erstellt = await api.neu({ ...basisEntwurf(b), ...daten });
+          b.id = erstellt.id;
+        }
+      } finally {
+        aktiveSchreibvorgaenge--; statusAktualisieren();
       }
-      if (b.id) {
-        await api.aktualisieren(b.id, daten);
-      } else {
-        const erstellt = await api.neu({ ...basisEntwurf(b), ...daten });
-        b.id = erstellt.id;
-      }
-    });
-    const q = erzeugeSpeicherWarteschlange(schreiben);
+    };
+    /* Mit Fehlerbehandlung: ein gescheiterter Stand bleibt liegen, statt
+       still zu verschwinden (siehe erzeugeSpeicherWarteschlange). */
+    const q = erzeugeSpeicherWarteschlange(schreiben, () => statusAktualisieren());
     warteschlangen.set(b.clientKey, q);
     return q;
   }
-
-  /* Schickt den KOMPLETTEN aktuellen Stand eines Blocks los -- immer den
-     ganzen Datensatz, nie nur ein einzelnes Feld. Dadurch kann ein
-     Umsortieren, das kurz nach einer Textänderung passiert, diese niemals
-     mit einem älteren Stand überschreiben: beide landen im selben, streng
-     nacheinander abgearbeiteten Zustand. */
   function blockSpeichern(b) {
     warteschlangeFuer(b).anstossen({
       inhalt: b.inhalt, breite: b.breite, bewegung: b.bewegung,
       notiz: b.notiz || null, sort_order: b.sort_order,
     });
   }
-  function blockLoeschenSpeichern(b) {
-    /* Eine noch wartende (entprellte) Textänderung darf das Löschen NICHT
-       nachträglich rückgängig machen, indem sie später doch noch feuert
-       und den Block damit wiederbelebt -- deshalb hier zuerst kappen. */
+
+  const entprellungen = new Map();   // clientKey -> Zeitgeber-id ODER null
+  function blockSpeichernEntprellt(b, verzoegerungMs = 500) {
     clearTimeout(entprellungen.get(b.clientKey));
+    entprellungen.set(b.clientKey, setTimeout(() => {
+      entprellungen.set(b.clientKey, null);
+      blockSpeichern(b);
+    }, verzoegerungMs));
+  }
+  function blockLoeschenSpeichern(b) {
+    clearTimeout(entprellungen.get(b.clientKey));
+    entprellungen.set(b.clientKey, null);
     warteschlangeFuer(b).anstossen({ __geloescht: true });
   }
 
-  /* Tippen soll nicht bei jedem Tastendruck einen Netzwerk-Aufruf auslösen
-     -- die Warteschlange wäre zwar auch dann korrekt (kein Datenverlust),
-     aber unnötig geschwätzig. Deshalb kurz entprellen; das Ergebnis ist am
-     Ende exakt dasselbe, nur mit weniger Aufrufen. */
-  const entprellungen = new Map();
-  function blockSpeichernEntprellt(b, verzoegerungMs = 500) {
-    clearTimeout(entprellungen.get(b.clientKey));
-    entprellungen.set(b.clientKey, setTimeout(() => blockSpeichern(b), verzoegerungMs));
+  /* ---------- Beim Verlassen: Ausstehendes SOFORT rausschreiben ----------
+     Dieselbe Falle wie früher bei den Seiten-Feldern: Wer tippt und sofort
+     "Zurück" drückt, verlöre alles, was innerhalb der 500 ms Entprellung
+     entstanden ist -- zerstoeren() hätte den Zeitgeber einfach gekappt. */
+  function flush() {
+    let etwas = false;
+    entprellungen.forEach((t, key) => {
+      if (!t) return;
+      clearTimeout(t); entprellungen.set(key, null);
+      const b = zustand.bloecke.find(x => x.clientKey === key);
+      if (b) { blockSpeichern(b); etwas = true; }
+    });
+    return etwas;
+  }
+  function beschaeftigt() {
+    for (const q of warteschlangen.values()) if (q.beschaeftigt()) return true;
+    return false;
   }
 
-  /* ---------- Momentaufnahme für Rückgängig ---------- */
+  /* ---------- Rückgängig ---------- */
   function momentaufnahme() {
     return zustand.bloecke.map(b => ({ ...b, inhalt: JSON.parse(JSON.stringify(b.inhalt)) }));
   }
   function vorMutationMerken() { undo.merken(momentaufnahme()); }
 
-  /* ---------- Vorschau (dieselbe Darstellung wie öffentlich, per bloecke.js) ---------- */
-  function vorschauNeuZeichnen() {
-    if (!vorschauEl || !window.mmBloecke) return;
-    /* Absichtlich zusätzlich zur Spaltenliste in db.js (die "notiz" nie
-       abfragt): auch hier nie mit übergeben -- doppelt genäht hält besser,
-       gerade weil die Notiz nie öffentlich sichtbar werden darf. */
-    const oeffentlich = zustand.bloecke.map(({ notiz, clientKey, ...rest }) => rest);
-    vorschauEl.innerHTML = window.mmBloecke.seite(oeffentlich);
-  }
-
-  /* ---------- Rendern der Blockliste ---------- */
+  /* ---------- Rendern ---------- */
   function liste() { return wurzel.querySelector('.be-liste'); }
+  function zeileVon(b) { return wurzel.querySelector(`.be-zeile[data-key="${b.clientKey}"]`); }
 
   function neuZeichnen() {
     const alt = liste();
     const neu = document.createElement('ul');
     neu.className = 'be-liste';
-    zustand.bloecke.forEach((b, idx) => neu.appendChild(zeileBauen(b, idx)));
+    zustand.bloecke.forEach(b => neu.appendChild(zeileBauen(b)));
     alt.replaceWith(neu);
     verdrahteListe();
-    vorschauNeuZeichnen();
+  }
+
+  /* Nur EINE Zeile neu -- nach Strukturänderungen (Größe, Ebene, Upload …).
+     Ein offenes "⋯"-Menü bleibt offen: sonst klappt es beim Ändern der
+     Breite zu und man kommt nicht direkt zur Bewegung darunter. */
+  function ersetzeZeile(b) {
+    const alt = zeileVon(b);
+    if (!alt) return neuZeichnen();
+    const menuWarOffen = alt.querySelector('.be-menu') && !alt.querySelector('.be-menu').hidden;
+    alt.replaceWith(zeileBauen(b));
+    if (menuWarOffen) {
+      const m = zeileVon(b)?.querySelector('.be-menu');
+      if (m) m.hidden = false;
+    }
+  }
+
+  /* Eine EINZELNE neue Zeile einhängen, statt die ganze Liste neu zu bauen.
+     Wichtig gegen flackernde Videos: neuZeichnen() baut jedes <iframe> neu
+     auf, ein Enter mitten im Text würde also alle Videos der Seite neu
+     laden. `nach` fehlt nur beim Knopf ganz unten -- dort ist Anhängen
+     richtig; bei Enter und Duplizieren muss die Zeile an die STELLE des
+     Bezugsblocks, sonst laufen Datenmodell und Anzeige auseinander. */
+  function zeileEinfuegen(b, { nach = null } = {}) {
+    const el = zeileBauen(b);
+    const bezug = nach && nach.isConnected ? nach : null;
+    if (bezug) bezug.after(el); else liste().appendChild(el);
+    return el;
   }
 
   function typLabel(typ) { return (BLOCKARTEN_NACH_TYP[typ] || {}).label || typ; }
-  function typIcon(typ) { return (BLOCKARTEN_NACH_TYP[typ] || {}).icon || '•'; }
 
-  function feldZeileBauen(inhaltEl) {
-    const div = document.createElement('div');
-    div.className = 'be-inhalt';
-    div.appendChild(inhaltEl);
-    return div;
+  /* Öffentliche Sicht eines Blocks -- OHNE notiz, niemals. Der Umsetzer
+     bekommt das Feld gar nicht erst zu sehen; es kann deshalb auch bei
+     einem Fehler im Umsetzer nicht im HTML auftauchen. */
+  function oeffentlich(b) {
+    return {
+      typ: b.typ, inhalt: b.inhalt,
+      breite: b.breite || 'normal', bewegung: b.bewegung || 'keine',
+    };
+  }
+  function renderHtml(b) {
+    if (!window.mmBloecke) return '';
+    try { return window.mmBloecke.seite([oeffentlich(b)]) || ''; } catch (_) { return ''; }
+  }
+  function nachAktivieren(el) {
+    try { if (window.mmInhalt) window.mmInhalt(el); } catch (_) {}
   }
 
   function autoWachsen(ta) {
     const h = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
-    ta.addEventListener('input', h); requestAnimationFrame(h);
+    ta.addEventListener('input', h);
+    requestAnimationFrame(h);
+    return h;
   }
 
-  /* Textfeld mit Format-Leiste bei Auswahl, Slash-Menü, Enter/Rücktaste-
-     Navigation -- der Kern der "Notion-artigen" Bedienung. */
-  function textFeldBauen(b, wert, aufAenderung, { mehrzeilig = true, platzhalter = '' } = {}) {
+  /* Die eingefärbte Schicht hinter dem durchscheinenden Textfeld.
+     Das abschließende "\n" sorgt dafür, dass eine leere letzte Zeile
+     genauso hoch ist wie im Textfeld. */
+  function highlightAnbinden(ta) {
+    const hl = ta.parentElement.querySelector('.be-highlight');
+    if (!hl) return;
+    const sync = () => { hl.innerHTML = auszeichnungsHtml(ta.value) + '\n'; };
+    sync();
+    ta.addEventListener('input', sync);
+    ta.addEventListener('scroll', () => { hl.scrollTop = ta.scrollTop; });
+  }
+
+  /* ---------- Textfeld mit "/", Enter/Rücktaste, Auswahl-Leiste ---------- */
+  function textFeldBauen(b, wert, aufAenderung,
+    { mehrzeilig = true, platzhalter = '', klasse = 'be-text' } = {}) {
     const ta = document.createElement('textarea');
-    ta.className = 'be-text'; ta.value = wert; ta.rows = 1; ta.placeholder = platzhalter;
+    ta.className = klasse; ta.value = wert; ta.rows = 1; ta.placeholder = platzhalter;
     ta.dataset.key = b.clientKey;
     autoWachsen(ta);
 
     ta.addEventListener('input', () => {
-      /* "/" als allererstes Zeichen öffnet die Blockauswahl. */
-      if (ta.value === '/') { slashOeffnen(b, ta); return; }
+      if (ta.value === '/') { slashOeffnen(b, ta.parentElement); return; }
       if (zustand.slash && zustand.slash.clientKey === b.clientKey) {
         if (ta.value.startsWith('/')) slashFilternAuf(ta.value.slice(1));
         else slashSchliessen();
@@ -166,7 +250,9 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
 
     ta.addEventListener('keydown', (e) => {
       if (zustand.slash && zustand.slash.clientKey === b.clientKey) {
-        if (e.key === 'Escape') { e.preventDefault(); ta.value = ''; aufAenderung(''); slashSchliessen(); return; }
+        if (e.key === 'Escape') {
+          e.preventDefault(); ta.value = ''; aufAenderung(''); slashSchliessen(); return;
+        }
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
           e.preventDefault(); slashTaste(e.key); return;
         }
@@ -174,22 +260,23 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
       if (e.key === 'Enter' && (!mehrzeilig || !e.shiftKey)) {
         e.preventDefault();
         vorMutationMerken();
+        const bezug = zeileVon(b);
         const neuerBlock = blockEinfuegenNach(b, 'text');
-        neuZeichnen();
+        zeileEinfuegen(neuerBlock, { nach: bezug });
         fokussiere(neuerBlock.clientKey);
         return;
       }
       if (e.key === 'Backspace' && ta.value === '' && ta.selectionStart === 0) {
-        if (zustand.bloecke.length <= 1) return;   // die letzte Zeile bleibt immer stehen
+        if (zustand.bloecke.length <= 1) return;
         e.preventDefault();
         vorMutationMerken();
         const vorheriger = blockLoeschen(b);
-        neuZeichnen();
+        const weg = zeileVon(b);
+        if (weg) weg.remove(); else neuZeichnen();
         if (vorheriger) fokussiere(vorheriger.clientKey, { ansEnde: true });
       }
     });
 
-    /* Auswahl markiert -> kleine Leiste mit fett/kursiv/Link/Türchen. */
     const zeigen = () => {
       if (ta.selectionStart === ta.selectionEnd) { formatLeisteVerbergen(); return; }
       formatLeisteZeigen(ta, b);
@@ -198,7 +285,6 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
     ta.addEventListener('mouseup', zeigen);
     ta.addEventListener('keyup', (e) => { if (e.shiftKey || e.key.startsWith('Arrow')) zeigen(); });
     ta.addEventListener('blur', () => setTimeout(formatLeisteVerbergen, 150));
-
     return ta;
   }
 
@@ -215,7 +301,8 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
   }
   function slashSchliessen() {
     zustand.slash = null;
-    const alt = wurzel.querySelector('.be-slash'); if (alt) alt.remove();
+    const alt = wurzel.querySelector('.be-slash');
+    if (alt) alt.remove();
   }
   function slashTaste(taste) {
     if (!zustand.slash) return;
@@ -226,49 +313,45 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
     else slashZeichnen();
   }
   function slashAuswaehlen(typ) {
-    const s = zustand.slash; if (!s) return;
+    const s = zustand.slash;
+    if (!s) return;
     const b = zustand.bloecke.find(x => x.clientKey === s.clientKey);
     slashSchliessen();
     if (!b) return;
     vorMutationMerken();
     b.typ = typ; b.inhalt = leererInhalt(typ);
     blockSpeichern(b);
-    neuZeichnen();
+    ersetzeZeile(b);          // nur diese eine Zeile -- schont fremde Videos
     fokussiere(b.clientKey);
   }
   function slashZeichnen(ankerEl) {
     let el = wurzel.querySelector('.be-slash');
     if (!el) {
       el = document.createElement('div'); el.className = 'be-slash';
-      (ankerEl || wurzel).after ? ankerEl.after(el) : wurzel.appendChild(el);
+      if (ankerEl && ankerEl.after) ankerEl.after(el); else wurzel.appendChild(el);
     }
     const s = zustand.slash;
     el.innerHTML = s.treffer.length
-      ? s.treffer.map((b, i) => `<button type="button" class="be-slash-eintrag${i === s.auswahl ? ' be-slash-aktiv' : ''}" data-typ="${b.typ}">`
-        + `<span class="be-slash-icon">${esc(b.icon)}</span>${esc(b.label)}</button>`).join('')
+      ? s.treffer.map((blk, i) => `<button type="button" class="be-slash-eintrag${i === s.auswahl ? ' be-slash-aktiv' : ''}" data-typ="${blk.typ}"><span class="be-slash-icon">${esc(blk.icon)}</span>${esc(blk.label)}</button>`).join('')
       : '<p class="be-slash-leer">Keine Blockart gefunden.</p>';
     el.querySelectorAll('[data-typ]').forEach(btn =>
       btn.addEventListener('mousedown', (e) => { e.preventDefault(); slashAuswaehlen(btn.dataset.typ); }));
   }
 
-  /* ---------- Format-Leiste bei markiertem Text ---------- */
+  /* ---------- Auswahl-Leiste (fett, kursiv, Link, Türchen) ---------- */
   function formatLeisteVerbergen() {
-    const el = wurzel.querySelector('.be-format'); if (el) el.remove();
+    const el = wurzel.querySelector('.be-format');
+    if (el) el.remove();
   }
-
-  /* Kleines, eigenes Fenster statt der hässlichen (und unter Chrome-
-     Fernsteuerung nicht prüfbaren!) window.prompt()-Dialoge. Nutzt dieselben
-     Klassen wie das alte Link-Fenster im Admin-CSS. Löst mit den Feldwerten
-     auf, oder mit null bei "Abbrechen"/Escape/Klick daneben. */
   function kleinerDialog({ titel, hinweis = '', felder }) {
     return new Promise((loese) => {
       const hg = document.createElement('div'); hg.className = 'mini-hg';
       hg.innerHTML = `<form class="mini-box">
-        <h3 class="tropi">${esc(titel)}</h3>
+        <h3>${esc(titel)}</h3>
         ${felder.map(f => `<label>${esc(f.label)}
           <input name="${esc(f.name)}" placeholder="${esc(f.platzhalter || '')}"
             value="${esc(f.wert || '')}"${f.pflicht ? ' required' : ''}></label>`).join('')}
-        ${hinweis ? `<p class="klein grau">${hinweis}</p>` : ''}
+        ${hinweis ? `<p class="klein grau">${esc(hinweis)}</p>` : ''}
         <div class="mini-knoepfe">
           <button type="button" class="btn ghost" data-tun="abbrechen">Abbrechen</button>
           <button type="submit" class="btn primary">Einfügen</button>
@@ -293,7 +376,6 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
       hg.addEventListener('mousedown', (e) => { if (e.target === hg) schliessen(null); });
     });
   }
-
   function formatLeisteZeigen(ta, b) {
     formatLeisteVerbergen();
     const el = document.createElement('div'); el.className = 'be-format';
@@ -345,26 +427,25 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
     }));
   }
 
-  /* ---------- Block einfügen / löschen / duplizieren ---------- */
+  /* ---------- Einfügen / löschen / duplizieren ---------- */
+  function neuerBlockDatensatz(typ, davor, danach) {
+    return {
+      clientKey: neuerSchluessel(), id: null, seite_id: seiteId, typ,
+      inhalt: leererInhalt(typ), breite: 'normal', bewegung: 'keine', notiz: '',
+      sort_order: naechsteSortierung(davor, danach),
+    };
+  }
   function blockEinfuegenNach(nachB, typ) {
     const idx = zustand.bloecke.findIndex(x => x.clientKey === nachB.clientKey);
     const danach = zustand.bloecke[idx + 1];
-    const neu = {
-      clientKey: neuerSchluessel(), id: null, seite_id: seiteId, typ,
-      inhalt: leererInhalt(typ), breite: 'normal', bewegung: 'keine', notiz: '',
-      sort_order: naechsteSortierung(nachB.sort_order, danach ? danach.sort_order : null),
-    };
+    const neu = neuerBlockDatensatz(typ, nachB.sort_order, danach ? danach.sort_order : null);
     zustand.bloecke.splice(idx + 1, 0, neu);
     blockSpeichern(neu);
     return neu;
   }
   function blockAmEndeEinfuegen(typ) {
     const letzter = zustand.bloecke[zustand.bloecke.length - 1];
-    const neu = {
-      clientKey: neuerSchluessel(), id: null, seite_id: seiteId, typ,
-      inhalt: leererInhalt(typ), breite: 'normal', bewegung: 'keine', notiz: '',
-      sort_order: naechsteSortierung(letzter ? letzter.sort_order : null, null),
-    };
+    const neu = neuerBlockDatensatz(typ, letzter ? letzter.sort_order : null, null);
     zustand.bloecke.push(neu);
     blockSpeichern(neu);
     return neu;
@@ -379,27 +460,23 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
   function blockDuplizieren(b) {
     const idx = zustand.bloecke.findIndex(x => x.clientKey === b.clientKey);
     const danach = zustand.bloecke[idx + 1];
-    const kopie = {
-      clientKey: neuerSchluessel(), id: null, seite_id: seiteId, typ: b.typ,
-      inhalt: JSON.parse(JSON.stringify(b.inhalt)), breite: b.breite, bewegung: b.bewegung,
-      notiz: b.notiz || '', sort_order: naechsteSortierung(b.sort_order, danach ? danach.sort_order : null),
-    };
+    const kopie = neuerBlockDatensatz(b.typ, b.sort_order, danach ? danach.sort_order : null);
+    kopie.inhalt = JSON.parse(JSON.stringify(b.inhalt));
+    kopie.breite = b.breite; kopie.bewegung = b.bewegung; kopie.notiz = b.notiz || '';
     zustand.bloecke.splice(idx + 1, 0, kopie);
     blockSpeichern(kopie);
     return kopie;
   }
-
   function fokussiere(clientKey, { ansEnde = false } = {}) {
     const el = wurzel.querySelector(`[data-fokus="${clientKey}"]`)
       || wurzel.querySelector(`[data-key="${clientKey}"]`);
-    if (!el) return;
+    if (!el || !el.focus) return;
     el.focus();
     if (ansEnde && el.setSelectionRange) el.setSelectionRange(el.value.length, el.value.length);
   }
 
-  /* ---------- Bild-Liste (für 'bild'-Block und die Bildseite von
-     'text_mit_bild') ---------- */
-  function bildlisteBauen(bilder, aufAenderung) {
+  /* ---------- Bild-Bedienung (Upload, Alt-Text, Größe) ---------- */
+  function bildSteuerungBauen(b, bilder, { beiAlt, beiStruktur }) {
     const wrap = document.createElement('div'); wrap.className = 'be-bilder';
     const zeichnen = () => {
       wrap.innerHTML = '';
@@ -407,59 +484,384 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
         const row = document.createElement('div'); row.className = 'be-bild-zeile';
         row.innerHTML = `
           ${bild.url ? `<img class="be-bild-vorschau" src="${esc(bild.url)}" alt="">` : '<div class="be-bild-vorschau be-bild-leer">kein Bild</div>'}
-          <input class="be-bild-alt" placeholder="Alt-Text (für Sehbehinderte / Bildunterschrift)" value="${esc(bild.alt || '')}">
-          <select class="be-bild-groesse">
-            <option value="gross"${bild.groesse === 'gross' ? ' selected' : ''}>groß</option>
+          <input class="be-bild-alt" placeholder="Alt-Text (Bildunterschrift / für Sehbehinderte)" value="${esc(bild.alt || '')}">
+          <select class="be-bild-groesse" aria-label="Bildgröße">
+            <option value="gross"${bild.groesse !== 'mittel' && bild.groesse !== 'klein' ? ' selected' : ''}>groß</option>
             <option value="mittel"${bild.groesse === 'mittel' ? ' selected' : ''}>mittel</option>
             <option value="klein"${bild.groesse === 'klein' ? ' selected' : ''}>klein</option>
           </select>
           <button type="button" class="btn ghost be-bild-ersetzen">Bild wählen</button>
           <button type="button" class="btn ghost be-bild-weg" title="Entfernen">×</button>
           <input type="file" class="be-bild-datei" accept="image/*,image/gif" hidden>`;
-        row.querySelector('.be-bild-alt').addEventListener('input', (e) => { bild.alt = e.target.value; aufAenderung(); });
-        row.querySelector('.be-bild-groesse').addEventListener('change', (e) => { bild.groesse = e.target.value; aufAenderung(); });
-        row.querySelector('.be-bild-weg').addEventListener('click', () => { bilder.splice(i, 1); zeichnen(); aufAenderung(); });
-        row.querySelector('.be-bild-ersetzen').addEventListener('click', () => row.querySelector('.be-bild-datei').click());
+        row.querySelector('.be-bild-alt').addEventListener('input', (e) => {
+          bild.alt = e.target.value;
+          b.inhalt.roh = bildZeilenBauen(bilder);
+          blockSpeichernEntprellt(b);
+          beiAlt(bild);
+        });
+        row.querySelector('.be-bild-groesse').addEventListener('change', (e) => {
+          bild.groesse = e.target.value;
+          b.inhalt.roh = bildZeilenBauen(bilder);
+          blockSpeichern(b); beiStruktur();
+        });
+        row.querySelector('.be-bild-weg').addEventListener('click', () => {
+          bilder.splice(i, 1);
+          b.inhalt.roh = bildZeilenBauen(bilder);
+          blockSpeichern(b); beiStruktur();
+        });
+        row.querySelector('.be-bild-ersetzen')
+          .addEventListener('click', () => row.querySelector('.be-bild-datei').click());
         row.querySelector('.be-bild-datei').addEventListener('change', async (e) => {
-          const datei = e.target.files[0]; e.target.value = ''; if (!datei) return;
+          const datei = e.target.files[0]; e.target.value = '';
+          if (!datei) return;
           const r = await api.bildHochladen(datei);
-          if (r && r.url) { bild.url = r.url; zeichnen(); aufAenderung(); }
+          if (r && r.url) {
+            bild.url = r.url;
+            if (!bild.groesse) bild.groesse = 'gross';
+            b.inhalt.roh = bildZeilenBauen(bilder);
+            blockSpeichern(b); beiStruktur();
+          }
         });
         wrap.appendChild(row);
       });
       const knopf = document.createElement('button');
       knopf.type = 'button'; knopf.className = 'btn ghost be-bild-neu'; knopf.textContent = '+ Bild';
-      knopf.addEventListener('click', () => { bilder.push({ alt: '', url: '', groesse: 'gross' }); zeichnen(); aufAenderung(); });
+      knopf.addEventListener('click', () => {
+        bilder.push({ alt: '', url: '', groesse: 'gross' });
+        b.inhalt.roh = bildZeilenBauen(bilder);
+        blockSpeichern(b);
+        zeichnen(); beiStruktur();
+      });
       wrap.appendChild(knopf);
     };
     zeichnen();
     return wrap;
   }
+  /* Alt-Text in der fertigen Darstellung mitziehen, ohne sie neu zu bauen. */
+  function altInDarstellungPatchen(darstellung, alt) {
+    if (!darstellung) return;
+    darstellung.querySelectorAll('img').forEach(img => img.setAttribute('alt', alt));
+    darstellung.querySelectorAll('figcaption').forEach(fc => { fc.textContent = alt; });
+  }
 
-  /* ---------- eine Blockzeile bauen ---------- */
+  /* ---------- Der Inhalt eines Blocks ---------- */
+  function feldInhaltBauen(b) {
+    const inhaltDiv = document.createElement('div'); inhaltDiv.className = 'be-inhalt';
+
+    /* Fertig dargestellt + Bedienung, die erst bei Annäherung erscheint.
+       `leer` heißt: noch nichts da, dann muss die Bedienung sichtbar
+       bleiben -- sonst sieht man bei einem frischen Block gar nichts. */
+    const medienGeruest = (leer) => {
+      const darstellung = document.createElement('div');
+      darstellung.className = 'be-vorschau-html prose';
+      darstellung.innerHTML = renderHtml(b);
+      nachAktivieren(darstellung);
+      const steuerung = document.createElement('div');
+      steuerung.className = 'be-medien-steuerung' + (leer ? ' leer' : '');
+      inhaltDiv.append(darstellung, steuerung);
+      return { darstellung, steuerung };
+    };
+
+    const textFlaeche = (wert, aufAenderung, platzhalter) => {
+      const wrap = document.createElement('div'); wrap.className = 'be-text-wrap';
+      const hl = document.createElement('div'); hl.className = 'be-highlight';
+      hl.setAttribute('aria-hidden', 'true');
+      const ta = textFeldBauen(b, wert, aufAenderung, { mehrzeilig: true, platzhalter });
+      ta.dataset.fokus = b.clientKey;
+      wrap.append(hl, ta);
+      return { wrap, ta };
+    };
+
+    switch (b.typ) {
+      case 'text': {
+        const { wrap, ta } = textFlaeche(b.inhalt.roh || '',
+          (wert) => { b.inhalt.roh = wert; blockSpeichernEntprellt(b); },
+          'Schreib los — „/" öffnet die Blockauswahl.');
+        ta.setAttribute('aria-label', 'Textblock');
+        inhaltDiv.appendChild(wrap);
+        highlightAnbinden(ta);
+        return inhaltDiv;
+      }
+      case 'ueberschrift': {
+        const { ebene, text } = ueberschriftLesen(b.inhalt.roh);
+        const wrap = document.createElement('div'); wrap.className = 'be-ueberschrift-wrap';
+        const ebeneWahl = document.createElement('select');
+        ebeneWahl.className = 'be-ebene';
+        ebeneWahl.setAttribute('aria-label', 'Überschriftengröße');
+        ebeneWahl.innerHTML = `<option value="2"${ebene === 2 ? ' selected' : ''}>groß</option><option value="3"${ebene === 3 ? ' selected' : ''}>klein</option>`;
+        const ta = textFeldBauen(b, text, (wert) => {
+          b.inhalt.roh = ueberschriftBauen(+ebeneWahl.value, wert);
+          blockSpeichernEntprellt(b);
+        }, { mehrzeilig: false, platzhalter: 'Überschrift', klasse: 'be-ueberschrift' });
+        ta.dataset.ebene = String(ebene);
+        ta.dataset.fokus = b.clientKey;
+        ta.setAttribute('aria-label', 'Überschrift');
+        ebeneWahl.addEventListener('change', () => {
+          ta.dataset.ebene = ebeneWahl.value;
+          b.inhalt.roh = ueberschriftBauen(+ebeneWahl.value, ueberschriftLesen(b.inhalt.roh).text);
+          blockSpeichern(b);
+        });
+        wrap.append(ebeneWahl, ta);
+        inhaltDiv.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'randnotiz': {
+        const wrap = document.createElement('div'); wrap.className = 'be-randnotiz';
+        wrap.innerHTML = `
+          <input class="be-rn-titel" placeholder="Titel" value="${esc(b.inhalt.titel || '')}">
+          <input class="be-rn-z1" placeholder="Zeile 1" value="${esc(b.inhalt.zeile1 || '')}">
+          <input class="be-rn-z2" placeholder="Zeile 2 (optional)" value="${esc(b.inhalt.zeile2 || '')}">
+          <label class="schalter"><input type="checkbox" class="be-rn-punkt"${b.inhalt.punkt ? ' checked' : ''}> grüner Punkt davor</label>`;
+        const aendern = (patch, sofort) => {
+          Object.assign(b.inhalt, patch);
+          if (sofort) blockSpeichern(b); else blockSpeichernEntprellt(b);
+        };
+        wrap.querySelector('.be-rn-titel').addEventListener('input', (e) => aendern({ titel: e.target.value }));
+        wrap.querySelector('.be-rn-z1').addEventListener('input', (e) => aendern({ zeile1: e.target.value }));
+        wrap.querySelector('.be-rn-z2').addEventListener('input', (e) => aendern({ zeile2: e.target.value }));
+        wrap.querySelector('.be-rn-punkt').addEventListener('change', (e) => aendern({ punkt: e.target.checked }, true));
+        inhaltDiv.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'code': {
+        const { sprache, code } = codeLesen(b.inhalt.roh);
+        const wrap = document.createElement('div'); wrap.className = 'be-code';
+        const sprachWahl = document.createElement('select');
+        sprachWahl.className = 'be-code-sprache';
+        sprachWahl.setAttribute('aria-label', 'Sprache');
+        sprachWahl.innerHTML = ['', 'js', 'swift', 'bash', 'json', 'csv']
+          .map(sp => `<option value="${sp}"${sprache === sp ? ' selected' : ''}>${sp || 'einfacher Text'}</option>`).join('');
+        const ta = document.createElement('textarea');
+        ta.className = 'be-code-text'; ta.rows = 4; ta.value = code;
+        ta.dataset.fokus = b.clientKey;
+        ta.setAttribute('aria-label', 'Code');
+        autoWachsen(ta);
+        sprachWahl.addEventListener('change', () => {
+          b.inhalt.roh = codeBauen(sprachWahl.value, ta.value); blockSpeichern(b);
+        });
+        ta.addEventListener('input', () => {
+          b.inhalt.roh = codeBauen(sprachWahl.value, ta.value); blockSpeichernEntprellt(b);
+        });
+        wrap.append(sprachWahl, ta);
+        inhaltDiv.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'bild': {
+        const bilder = bildZeilenLesen(b.inhalt.roh);
+        const { darstellung, steuerung } = medienGeruest(bilder.length === 0);
+        steuerung.appendChild(bildSteuerungBauen(b, bilder, {
+          beiAlt: (bild) => altInDarstellungPatchen(darstellung, bild.alt),
+          beiStruktur: () => ersetzeZeile(b),
+        }));
+        return inhaltDiv;
+      }
+      case 'gif': {
+        const m = String(b.inhalt.roh || '').match(/^!\[([^\]]*)\]\(([^)\s]+)\)/);
+        const url = m ? m[2] : '';
+        const { darstellung, steuerung } = medienGeruest(!url);
+        const wrap = document.createElement('div'); wrap.className = 'be-gif';
+        wrap.innerHTML = `
+          <input class="be-gif-alt" placeholder="Alt-Text" value="${esc(m ? m[1] : '')}">
+          <button type="button" class="btn ghost">GIF wählen</button>
+          <input type="file" accept="image/gif,image/apng,image/webp" hidden>
+          <p class="klein grau">GIFs werden NICHT verkleinert — sonst bliebe nur das erste Einzelbild übrig.</p>`;
+        wrap.querySelector('input[type=file]').addEventListener('change', async (e) => {
+          const datei = e.target.files[0]; e.target.value = '';
+          if (!datei) return;
+          const r = await api.bildHochladen(datei);
+          if (r && r.url) {
+            b.inhalt.roh = `![${wrap.querySelector('.be-gif-alt').value}](${r.url})`;
+            blockSpeichern(b); ersetzeZeile(b);
+          }
+        });
+        wrap.querySelector('.be-gif-alt').addEventListener('input', (e) => {
+          const neuAlt = e.target.value;
+          const mm = String(b.inhalt.roh || '').match(/^!\[([^\]]*)\]\(([^)\s]+)\)/);
+          b.inhalt.roh = `![${neuAlt}](${mm ? mm[2] : ''})`;
+          blockSpeichernEntprellt(b);
+          altInDarstellungPatchen(darstellung, neuAlt);
+        });
+        wrap.querySelector('button').addEventListener('click',
+          () => wrap.querySelector('input[type=file]').click());
+        steuerung.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'video': {
+        const url = String(b.inhalt.roh || '').trim();
+        const { steuerung } = medienGeruest(!url);
+        const wrap = document.createElement('div'); wrap.className = 'be-video';
+        const input = document.createElement('input');
+        input.className = 'be-video-url';
+        input.placeholder = 'https://youtu.be/… oder https://vimeo.com/…';
+        input.value = b.inhalt.roh || '';
+        const hinweis = document.createElement('p');
+        hinweis.className = 'klein grau be-video-hinweis';
+        const pruefen = () => {
+          const v = window.mm && window.mm.videoEmbed(input.value);
+          hinweis.textContent = !input.value ? ''
+            : v ? 'Erkannt: ' + v.kind : 'Kein YouTube- oder Vimeo-Link erkannt.';
+        };
+        pruefen();
+        input.addEventListener('input', () => {
+          b.inhalt.roh = input.value; pruefen(); blockSpeichernEntprellt(b);
+        });
+        /* Erst beim Verlassen neu darstellen -- sonst würde bei jedem
+           Tastendruck ein <iframe> neu aufgebaut und das Tippen stottert. */
+        input.addEventListener('blur', () => ersetzeZeile(b));
+        wrap.append(input, hinweis);
+        steuerung.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'werkzeug': {
+        const { kennung } = werkzeugLesen(b.inhalt.roh);
+        const { steuerung } = medienGeruest(!kennung);
+        const input = document.createElement('input');
+        input.className = 'be-werkzeug';
+        input.placeholder = 'Kennung der Einlage, z. B. the-race';
+        input.value = kennung;
+        input.addEventListener('input', () => {
+          b.inhalt.roh = werkzeugBauen(input.value); blockSpeichernEntprellt(b);
+        });
+        input.addEventListener('blur', () => ersetzeZeile(b));
+        steuerung.appendChild(input);
+        return inhaltDiv;
+      }
+      case 'trenner': {
+        medienGeruest(false);
+        return inhaltDiv;
+      }
+      case 'tuer': {
+        const leer = !(b.inhalt.text || '').trim() && !(b.inhalt.ziel || '').trim();
+        const { darstellung, steuerung } = medienGeruest(leer);
+        const wrap = document.createElement('div'); wrap.className = 'be-tuer';
+        wrap.innerHTML = `
+          <input class="be-tuer-text" placeholder="Beschriftung, z. B. „Auf YouTube ansehen“" value="${esc(b.inhalt.text || '')}">
+          <input class="be-tuer-ziel" placeholder="Adresse oder /welt/…" value="${esc(b.inhalt.ziel || '')}">`;
+        wrap.querySelector('.be-tuer-text').addEventListener('input', (e) => {
+          b.inhalt.text = e.target.value;
+          blockSpeichernEntprellt(b);
+          const el = darstellung.querySelector('a, button');
+          if (el) el.textContent = b.inhalt.text || '';
+        });
+        wrap.querySelector('.be-tuer-ziel').addEventListener('input', (e) => {
+          b.inhalt.ziel = e.target.value; blockSpeichernEntprellt(b);
+        });
+        wrap.querySelectorAll('input').forEach(i => i.addEventListener('blur', () => ersetzeZeile(b)));
+        steuerung.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'abschnitt': {
+        const wrap = document.createElement('div'); wrap.className = 'be-abschnitt';
+        wrap.innerHTML = `
+          <input class="be-ab-titel" placeholder="Titel des Abschnitts" value="${esc(b.inhalt.titel || '')}">
+          <span class="ab-zusatz">
+            <select class="be-ab-art" aria-label="Art des Abschnitts">
+              <option value="beruflich"${b.inhalt.art === 'beruflich' ? ' selected' : ''}>beruflich</option>
+              <option value="persoenlich"${b.inhalt.art === 'persoenlich' ? ' selected' : ''}>persönlich</option>
+              <option value="kontakt"${b.inhalt.art === 'kontakt' ? ' selected' : ''}>kontakt</option>
+            </select>
+            <input type="text" class="be-ab-farbe" placeholder="#RRGGBB" value="${esc(b.inhalt.farbe || '')}" aria-label="Farbe">
+          </span>`;
+        const aendern = (patch, sofort) => {
+          Object.assign(b.inhalt, patch);
+          if (sofort) blockSpeichern(b); else blockSpeichernEntprellt(b);
+        };
+        wrap.querySelector('.be-ab-titel').addEventListener('input', (e) => aendern({ titel: e.target.value }));
+        wrap.querySelector('.be-ab-art').addEventListener('change', (e) => aendern({ art: e.target.value }, true));
+        wrap.querySelector('.be-ab-farbe').addEventListener('input', (e) => aendern({ farbe: e.target.value || null }));
+        inhaltDiv.appendChild(wrap);
+        return inhaltDiv;
+      }
+      case 'text_mit_bild': {
+        const gelesen = textMitBildLesen(b.inhalt.roh);
+        const gitter = document.createElement('div'); gitter.className = 'tm-gitter';
+        gitter.dataset.links = gelesen.bilderLinks ? '1' : '0';
+
+        const textSeite = document.createElement('div'); textSeite.className = 'tm-text';
+        const { wrap, ta } = textFlaeche(gelesen.text, (wert) => {
+          gelesen.text = wert;
+          b.inhalt.roh = textMitBildBauen(gelesen);
+          blockSpeichernEntprellt(b);
+        }, 'Der Text neben den Bildern.');
+        textSeite.appendChild(wrap);
+
+        const bildSeite = document.createElement('div');
+        bildSeite.className = 'tm-bilder-seite be-vorschau-html prose';
+        const bilderRendern = () => {
+          bildSeite.innerHTML = renderHtml({
+            typ: 'bild', inhalt: { roh: bildZeilenBauen(gelesen.bilder) },
+            breite: 'normal', bewegung: 'keine',
+          });
+          nachAktivieren(bildSeite);
+        };
+        bilderRendern();
+
+        const steuerung = document.createElement('div');
+        steuerung.className = 'be-medien-steuerung' + (gelesen.bilder.length === 0 ? ' leer' : '');
+        const schalter = document.createElement('label'); schalter.className = 'schalter';
+        schalter.innerHTML = `<input type="checkbox"${gelesen.bilderLinks ? ' checked' : ''}> Bilder links statt rechts`;
+        schalter.querySelector('input').addEventListener('change', (e) => {
+          gelesen.bilderLinks = e.target.checked;
+          b.inhalt.roh = textMitBildBauen(gelesen);
+          blockSpeichern(b);
+          gitter.dataset.links = gelesen.bilderLinks ? '1' : '0';   // ohne Neuaufbau
+        });
+        steuerung.appendChild(schalter);
+        steuerung.appendChild(bildSteuerungBauen(b, gelesen.bilder, {
+          beiAlt: (bild) => altInDarstellungPatchen(bildSeite, bild.alt),
+          beiStruktur: () => { b.inhalt.roh = textMitBildBauen(gelesen); bilderRendern(); },
+        }));
+
+        gitter.append(textSeite, bildSeite);
+        inhaltDiv.append(gitter, steuerung);
+        highlightAnbinden(ta);
+        return inhaltDiv;
+      }
+      default:
+        return inhaltDiv;
+    }
+  }
+
+  /* ---------- Eine Blockzeile ---------- */
   function zeileBauen(b) {
     const li = document.createElement('li');
-    li.className = 'be-zeile'; li.dataset.key = b.clientKey; li.dataset.typ = b.typ; li.draggable = true;
+    li.className = 'be-zeile';
+    li.dataset.key = b.clientKey; li.dataset.typ = b.typ;
+    /* draggable erst beim Anfassen des Griffs: ein dauerhaft ziehbares
+       Elternelement macht das Markieren von Text in den Feldern darin
+       unzuverlässig. */
+    li.draggable = false;
 
-    const kopf = document.createElement('div'); kopf.className = 'be-kopf';
-    kopf.innerHTML = `
-      <button type="button" class="be-griff" title="Zum Umsortieren ziehen">⠿</button>
-      <span class="be-typ"><span class="be-typ-icon">${esc(typIcon(b.typ))}</span>${esc(typLabel(b.typ))}</span>
-      <span class="be-kopf-fuell"></span>
-      <button type="button" class="be-menu-knopf" title="Weitere Optionen">⋯</button>`;
-    li.appendChild(kopf);
+    const rail = document.createElement('div'); rail.className = 'be-rail';
+    const marke = document.createElement('span');
+    marke.className = 'be-notiz-marke';
+    marke.hidden = !b.notiz;
+    marke.title = 'Dieser Block hat eine Notiz an Claude';
+    const griff = document.createElement('button');
+    griff.type = 'button'; griff.className = 'be-griff';
+    griff.title = 'Zum Umsortieren ziehen'; griff.textContent = '⠿';
+    griff.addEventListener('mousedown', () => { li.draggable = true; });
+    const menueKnopf = document.createElement('button');
+    menueKnopf.type = 'button'; menueKnopf.className = 'be-menu-knopf';
+    menueKnopf.title = `${typLabel(b.typ)} — Einstellungen`;
+    menueKnopf.textContent = '⋯';
+    rail.append(marke, griff, menueKnopf);
+    li.appendChild(rail);
 
     li.appendChild(feldInhaltBauen(b));
 
-    /* Menü: Breite, Bewegung, Notiz an Claude, Duplizieren, Löschen. */
+    /* Alle Einstellungen des Blocks an EINEM Ort. */
     const menu = document.createElement('div'); menu.className = 'be-menu'; menu.hidden = true;
+    const auswahl = (klasse, beschriftung, werte, jetzt) => `<label>${beschriftung}
+      <select class="${klasse}">${werte.map(p => {
+    const [v, l] = p.split('|');
+    return `<option value="${v}"${jetzt === v ? ' selected' : ''}>${l}</option>`;
+  }).join('')}</select></label>`;
     menu.innerHTML = `
-      <label>Breite
-        <select class="be-breite">${BREITEN.map(x => `<option value="${x.wert}"${b.breite === x.wert ? ' selected' : ''}>${esc(x.label)}</option>`).join('')}</select>
-      </label>
-      <label>Bewegung
-        <select class="be-bewegung">${BEWEGUNGEN.map(x => `<option value="${x.wert}"${b.bewegung === x.wert ? ' selected' : ''}>${esc(x.label)}</option>`).join('')}</select>
-      </label>
+      ${auswahl('be-breite', 'Breite',
+    ['schmal|Schmal', 'normal|Normal', 'randnotiz|Randnotiz (am Rand)', 'voll|Volle Breite'], b.breite)}
+      ${auswahl('be-bewegung', 'Bewegung',
+    ['keine|Keine', 'einblenden|Einblenden', 'hochschieben|Hochschieben', 'wachsen|Wachsen', 'zeilenweise|Zeilenweise'], b.bewegung)}
       <label>Notiz an Claude <span class="klein grau">(privat — erscheint nie auf der Seite)</span>
         <textarea class="be-notiz" rows="2" placeholder="z. B.: „hier soll das Bild beim Scrollen leicht wachsen“">${esc(b.notiz || '')}</textarea>
       </label>
@@ -469,185 +871,50 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
       </div>`;
     li.appendChild(menu);
 
-    kopf.querySelector('.be-menu-knopf').addEventListener('click', () => { menu.hidden = !menu.hidden; });
-    menu.querySelector('.be-breite').addEventListener('change', (e) => { b.breite = e.target.value; blockSpeichern(b); vorschauNeuZeichnen(); });
-    menu.querySelector('.be-bewegung').addEventListener('change', (e) => { b.bewegung = e.target.value; blockSpeichern(b); vorschauNeuZeichnen(); });
+    menueKnopf.addEventListener('click', () => {
+      wurzel.querySelectorAll('.be-menu').forEach(m => { if (m !== menu) m.hidden = true; });
+      menu.hidden = !menu.hidden;
+    });
+    menu.querySelector('.be-breite').addEventListener('change', (e) => {
+      b.breite = e.target.value; blockSpeichern(b); ersetzeZeile(b);
+    });
+    menu.querySelector('.be-bewegung').addEventListener('change', (e) => {
+      b.bewegung = e.target.value; blockSpeichern(b); ersetzeZeile(b);
+    });
     const notizFeld = menu.querySelector('.be-notiz');
     autoWachsen(notizFeld);
-    notizFeld.addEventListener('input', (e) => { b.notiz = e.target.value; blockSpeichernEntprellt(b); });
+    notizFeld.addEventListener('input', (e) => {
+      b.notiz = e.target.value;
+      blockSpeichernEntprellt(b);
+      marke.hidden = !b.notiz;
+    });
     menu.querySelector('.be-duplizieren').addEventListener('click', () => {
-      vorMutationMerken(); blockDuplizieren(b); neuZeichnen();
+      vorMutationMerken();
+      const bezug = zeileVon(b);
+      const kopie = blockDuplizieren(b);
+      zeileEinfuegen(kopie, { nach: bezug });
+      menu.hidden = true;
     });
     menu.querySelector('.be-loeschen').addEventListener('click', () => {
-      vorMutationMerken(); blockLoeschen(b); neuZeichnen();
+      vorMutationMerken();
+      const weg = zeileVon(b);
+      blockLoeschen(b);
+      if (weg) weg.remove(); else neuZeichnen();
     });
 
     return li;
   }
 
-  /* Baut den typspezifischen Eingabebereich eines Blocks. */
-  function feldInhaltBauen(b) {
-    const aendern = (patch) => { Object.assign(b.inhalt, patch); blockSpeichernEntprellt(b); };
-    const aendernSofort = (patch) => { Object.assign(b.inhalt, patch); blockSpeichern(b); vorschauNeuZeichnen(); };
-
-    switch (b.typ) {
-      case 'text': {
-        const ta = textFeldBauen(b, b.inhalt.roh || '', (wert) => { b.inhalt.roh = wert; blockSpeichernEntprellt(b); vorschauNeuZeichnen(); },
-          { mehrzeilig: true, platzhalter: 'Schreib los — „/“ öffnet die Blockauswahl.' });
-        ta.dataset.fokus = b.clientKey;
-        return feldZeileBauen(ta);
-      }
-      case 'ueberschrift': {
-        const { ebene, text } = ueberschriftLesen(b.inhalt.roh);
-        const wrap = document.createElement('div'); wrap.className = 'be-ueberschrift-wrap';
-        const ebeneWahl = document.createElement('select'); ebeneWahl.className = 'be-ebene';
-        ebeneWahl.innerHTML = `<option value="2"${ebene === 2 ? ' selected' : ''}>groß</option><option value="3"${ebene === 3 ? ' selected' : ''}>klein</option>`;
-        const ta = textFeldBauen(b, text, (wert) => {
-          b.inhalt.roh = ueberschriftBauen(+ebeneWahl.value, wert); blockSpeichernEntprellt(b); vorschauNeuZeichnen();
-        }, { mehrzeilig: false, platzhalter: 'Überschrift' });
-        ta.classList.add('be-ueberschrift'); ta.dataset.fokus = b.clientKey;
-        ebeneWahl.addEventListener('change', () => {
-          b.inhalt.roh = ueberschriftBauen(+ebeneWahl.value, ueberschriftLesen(b.inhalt.roh).text);
-          blockSpeichern(b); vorschauNeuZeichnen();
-        });
-        wrap.append(ebeneWahl, ta);
-        return feldZeileBauen(wrap);
-      }
-      case 'bild': {
-        const bilder = bildZeilenLesen(b.inhalt.roh);
-        const liste = bildlisteBauen(bilder, () => { b.inhalt.roh = bildZeilenBauen(bilder); blockSpeichernEntprellt(b); vorschauNeuZeichnen(); });
-        return feldZeileBauen(liste);
-      }
-      case 'gif': {
-        const wrap = document.createElement('div'); wrap.className = 'be-gif';
-        const m = String(b.inhalt.roh || '').match(/^!\[([^\]]*)\]\(([^)\s]+)\)/);
-        const alt = m ? m[1] : '', url = m ? m[2] : '';
-        wrap.innerHTML = `
-          ${url ? `<img class="be-bild-vorschau" src="${esc(url)}" alt="">` : '<div class="be-bild-vorschau be-bild-leer">kein GIF</div>'}
-          <input class="be-gif-alt" placeholder="Alt-Text" value="${esc(alt)}">
-          <button type="button" class="btn ghost be-gif-wahl">GIF wählen</button>
-          <input type="file" class="be-gif-datei" accept="image/gif,image/apng" hidden>
-          <p class="klein grau">GIFs werden NICHT verkleinert — sonst bliebe nur das erste Einzelbild übrig.</p>`;
-        const setzen = (neuAlt, neuUrl) => { b.inhalt.roh = `![${neuAlt}](${neuUrl})`; };
-        wrap.querySelector('.be-gif-alt').addEventListener('input', (e) => { setzen(e.target.value, url); blockSpeichernEntprellt(b); vorschauNeuZeichnen(); });
-        wrap.querySelector('.be-gif-wahl').addEventListener('click', () => wrap.querySelector('.be-gif-datei').click());
-        wrap.querySelector('.be-gif-datei').addEventListener('change', async (e) => {
-          const datei = e.target.files[0]; e.target.value = ''; if (!datei) return;
-          const r = await api.bildHochladen(datei);
-          if (r && r.url) { setzen(wrap.querySelector('.be-gif-alt').value, r.url); blockSpeichern(b); neuZeichnen(); }
-        });
-        return feldZeileBauen(wrap);
-      }
-      case 'video': {
-        const wrap = document.createElement('div'); wrap.className = 'be-video';
-        const input = document.createElement('input');
-        input.className = 'be-video-url'; input.placeholder = 'https://youtu.be/… oder https://vimeo.com/…';
-        input.value = b.inhalt.roh || '';
-        const hinweis = document.createElement('p'); hinweis.className = 'klein grau be-video-hinweis';
-        const pruefen = () => {
-          const v = window.mm && window.mm.videoEmbed(input.value);
-          hinweis.textContent = !input.value ? '' : v ? 'Erkannt: ' + v.kind : 'Kein YouTube- oder Vimeo-Link erkannt.';
-        };
-        pruefen();
-        input.addEventListener('input', () => { b.inhalt.roh = input.value; pruefen(); blockSpeichernEntprellt(b); vorschauNeuZeichnen(); });
-        wrap.append(input, hinweis);
-        return feldZeileBauen(wrap);
-      }
-      case 'text_mit_bild': {
-        const gelesen = textMitBildLesen(b.inhalt.roh);
-        const wrap = document.createElement('div'); wrap.className = 'be-textmitbild';
-        const schalter = document.createElement('label'); schalter.className = 'schalter';
-        schalter.innerHTML = `<input type="checkbox"${gelesen.bilderLinks ? ' checked' : ''}> Bilder links statt rechts`;
-        const ta = textFeldBauen(b, gelesen.text, (wert) => {
-          gelesen.text = wert; b.inhalt.roh = textMitBildBauen(gelesen); blockSpeichernEntprellt(b); vorschauNeuZeichnen();
-        }, { mehrzeilig: true, platzhalter: 'Der Text neben den Bildern.' });
-        ta.dataset.fokus = b.clientKey;
-        const bilderListe = bildlisteBauen(gelesen.bilder, () => {
-          b.inhalt.roh = textMitBildBauen(gelesen); blockSpeichernEntprellt(b); vorschauNeuZeichnen();
-        });
-        schalter.querySelector('input').addEventListener('change', (e) => {
-          gelesen.bilderLinks = e.target.checked; b.inhalt.roh = textMitBildBauen(gelesen); blockSpeichern(b); vorschauNeuZeichnen();
-        });
-        wrap.append(schalter, ta, bilderListe);
-        return feldZeileBauen(wrap);
-      }
-      case 'code': {
-        const { sprache, code } = codeLesen(b.inhalt.roh);
-        const wrap = document.createElement('div'); wrap.className = 'be-code';
-        const sprachWahl = document.createElement('select'); sprachWahl.className = 'be-code-sprache';
-        sprachWahl.innerHTML = ['', 'js', 'swift', 'bash', 'json', 'csv']
-          .map(s => `<option value="${s}"${sprache === s ? ' selected' : ''}>${s || 'einfacher Text'}</option>`).join('');
-        const ta = document.createElement('textarea'); ta.className = 'be-code-text'; ta.rows = 4; ta.value = code;
-        autoWachsen(ta);
-        sprachWahl.addEventListener('change', () => { b.inhalt.roh = codeBauen(sprachWahl.value, ta.value); blockSpeichern(b); vorschauNeuZeichnen(); });
-        ta.addEventListener('input', () => { b.inhalt.roh = codeBauen(sprachWahl.value, ta.value); blockSpeichernEntprellt(b); vorschauNeuZeichnen(); });
-        wrap.append(sprachWahl, ta);
-        return feldZeileBauen(wrap);
-      }
-      case 'werkzeug': {
-        const { kennung } = werkzeugLesen(b.inhalt.roh);
-        const input = document.createElement('input'); input.className = 'be-werkzeug';
-        input.placeholder = 'Kennung der Einlage, z. B. the-race'; input.value = kennung;
-        input.addEventListener('input', () => { b.inhalt.roh = werkzeugBauen(input.value); blockSpeichernEntprellt(b); vorschauNeuZeichnen(); });
-        return feldZeileBauen(input);
-      }
-      case 'trenner': {
-        const p = document.createElement('p'); p.className = 'be-trenner-hinweis klein grau';
-        p.textContent = 'Trennstrich mit Blume — braucht keinen Inhalt.';
-        return feldZeileBauen(p);
-      }
-      case 'tuer': {
-        const wrap = document.createElement('div'); wrap.className = 'be-tuer';
-        wrap.innerHTML = `
-          <input class="be-tuer-text" placeholder="Beschriftung, z. B. „Auf YouTube ansehen“" value="${esc(b.inhalt.text || '')}">
-          <input class="be-tuer-ziel" placeholder="Adresse oder /welt/…" value="${esc(b.inhalt.ziel || '')}">`;
-        wrap.querySelector('.be-tuer-text').addEventListener('input', (e) => aendern({ text: e.target.value }));
-        wrap.querySelector('.be-tuer-ziel').addEventListener('input', (e) => aendern({ ziel: e.target.value }));
-        return feldZeileBauen(wrap);
-      }
-      case 'randnotiz': {
-        const wrap = document.createElement('div'); wrap.className = 'be-randnotiz';
-        wrap.innerHTML = `
-          <input class="be-rn-titel" placeholder="Titel" value="${esc(b.inhalt.titel || '')}">
-          <input class="be-rn-z1" placeholder="Zeile 1" value="${esc(b.inhalt.zeile1 || '')}">
-          <input class="be-rn-z2" placeholder="Zeile 2 (optional)" value="${esc(b.inhalt.zeile2 || '')}">
-          <label class="schalter"><input type="checkbox" class="be-rn-punkt"${b.inhalt.punkt ? ' checked' : ''}> grüner Punkt davor</label>`;
-        wrap.querySelector('.be-rn-titel').addEventListener('input', (e) => aendern({ titel: e.target.value }));
-        wrap.querySelector('.be-rn-z1').addEventListener('input', (e) => aendern({ zeile1: e.target.value }));
-        wrap.querySelector('.be-rn-z2').addEventListener('input', (e) => aendern({ zeile2: e.target.value }));
-        wrap.querySelector('.be-rn-punkt').addEventListener('change', (e) => aendernSofort({ punkt: e.target.checked }));
-        return feldZeileBauen(wrap);
-      }
-      case 'abschnitt': {
-        const wrap = document.createElement('div'); wrap.className = 'be-abschnitt';
-        wrap.innerHTML = `
-          <input class="be-ab-titel" placeholder="Titel des Abschnitts" value="${esc(b.inhalt.titel || '')}">
-          <select class="be-ab-art">
-            <option value="beruflich"${b.inhalt.art === 'beruflich' ? ' selected' : ''}>beruflich</option>
-            <option value="persoenlich"${b.inhalt.art === 'persoenlich' ? ' selected' : ''}>persönlich</option>
-            <option value="kontakt"${b.inhalt.art === 'kontakt' ? ' selected' : ''}>kontakt</option>
-          </select>
-          <input type="text" class="be-ab-farbe" placeholder="#RRGGBB (optional)" value="${esc(b.inhalt.farbe || '')}">`;
-        wrap.querySelector('.be-ab-titel').addEventListener('input', (e) => aendern({ titel: e.target.value }));
-        wrap.querySelector('.be-ab-art').addEventListener('change', (e) => aendernSofort({ art: e.target.value }));
-        wrap.querySelector('.be-ab-farbe').addEventListener('input', (e) => aendern({ farbe: e.target.value || null }));
-        return feldZeileBauen(wrap);
-      }
-      default:
-        return feldZeileBauen(document.createElement('div'));
-    }
-  }
-
-  /* ---------- Ziehen zum Umsortieren (wie in der alten Projektliste) ---------- */
+  /* ---------- Ziehen zum Umsortieren ---------- */
   let gezogen = null;
   function verdrahteListe() {
     const ul = liste();
     ul.addEventListener('dragstart', (e) => {
       gezogen = e.target.closest('.be-zeile');
-      gezogen?.classList.add('wird-gezogen');
+      if (gezogen) gezogen.classList.add('wird-gezogen');
     });
     ul.addEventListener('dragend', () => {
-      gezogen?.classList.remove('wird-gezogen');
+      if (gezogen) { gezogen.classList.remove('wird-gezogen'); gezogen.draggable = false; }
       ul.querySelectorAll('.be-zeile.ziel').forEach(z => z.classList.remove('ziel'));
       gezogen = null;
     });
@@ -664,22 +931,19 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
       if (!ziel || !gezogen || ziel === gezogen) return;
       vorMutationMerken();
       const vonKey = gezogen.dataset.key, nachKey = ziel.dataset.key;
-      /* BEIDE Indizes VOR dem Entnehmen lesen -- sonst vergleicht man einen
-         Index von vorher mit einem von nachher, und bei benachbarten Zeilen
-         landet der gezogene Block wieder an derselben Stelle. */
+      /* BEIDE Indizes VOR dem Entnehmen lesen -- danach hat sich der
+         zweite bereits verschoben. */
       const vonIdx = zustand.bloecke.findIndex(x => x.clientKey === vonKey);
       const nachIdx = zustand.bloecke.findIndex(x => x.clientKey === nachKey);
-      const [b] = zustand.bloecke.splice(vonIdx, 1);
-      /* Nach dem Entnehmen rutscht der Index des Ziels um eins zurück,
-         wenn es hinter der Entnahmestelle lag. */
+      const [bl] = zustand.bloecke.splice(vonIdx, 1);
       const nachIdxNeu = nachIdx > vonIdx ? nachIdx - 1 : nachIdx;
-      /* Reihenfolge wie im DOM: hinter das Ziel, wenn von oben kommend. */
-      const davorBild = vonIdx < nachIdx ? nachIdxNeu + 1 : nachIdxNeu;
-      zustand.bloecke.splice(davorBild, 0, b);
-      const davor = zustand.bloecke[davorBild - 1];
-      const danach = zustand.bloecke[davorBild + 1];
-      b.sort_order = naechsteSortierung(davor ? davor.sort_order : null, danach ? danach.sort_order : null);
-      blockSpeichern(b);
+      const einfugeStelle = vonIdx < nachIdx ? nachIdxNeu + 1 : nachIdxNeu;
+      zustand.bloecke.splice(einfugeStelle, 0, bl);
+      const davor = zustand.bloecke[einfugeStelle - 1];
+      const danach = zustand.bloecke[einfugeStelle + 1];
+      bl.sort_order = naechsteSortierung(
+        davor ? davor.sort_order : null, danach ? danach.sort_order : null);
+      blockSpeichern(bl);
       neuZeichnen();
     });
   }
@@ -687,48 +951,70 @@ export function mountBlockEditor(wurzel, { seiteId, anfangsBloecke, api, vorscha
   /* ---------- Rückgängig ---------- */
   function rueckgaengig() {
     const vorher = undo.zurueck();
-    if (!vorher) return;
-    /* Unterschied zum aktuellen Stand ermitteln und NUR die betroffenen
-       Zeilen speichern -- läuft über dieselbe sichere Warteschlange wie
-       jede andere Änderung, verliert also selbst bei einem Rückgängig
-       kurz nach einer Änderung nichts. */
-    const jetztKeys = new Set(zustand.bloecke.map(b => b.clientKey));
-    const vorherKeys = new Set(vorher.map(b => b.clientKey));
-    zustand.bloecke.forEach(b => { if (!vorherKeys.has(b.clientKey)) blockLoeschenSpeichern(b); });
-    vorher.forEach(b => { if (!jetztKeys.has(b.clientKey)) blockSpeichern(b); });
+    if (!vorher) return false;
+    const jetztKeys = new Set(zustand.bloecke.map(bl => bl.clientKey));
+    const vorherKeys = new Set(vorher.map(bl => bl.clientKey));
+    zustand.bloecke.forEach(bl => { if (!vorherKeys.has(bl.clientKey)) blockLoeschenSpeichern(bl); });
+    vorher.forEach(bl => { if (!jetztKeys.has(bl.clientKey)) blockSpeichern(bl); });
     zustand.bloecke = vorher;
-    /* Für alle weiterhin existierenden Blöcke den wiederhergestellten Stand
-       ebenfalls speichern -- er könnte sich vom zuletzt gespeicherten
-       unterscheiden. */
-    zustand.bloecke.forEach(b => { if (jetztKeys.has(b.clientKey) && vorherKeys.has(b.clientKey)) blockSpeichern(b); });
+    zustand.bloecke.forEach(bl => {
+      if (jetztKeys.has(bl.clientKey) && vorherKeys.has(bl.clientKey)) blockSpeichern(bl);
+    });
     neuZeichnen();
+    return true;
   }
 
   /* ---------- Aufbau ---------- */
-  wurzel.innerHTML = '<ul class="be-liste"></ul><div class="be-unten"><button type="button" class="btn ghost be-neu-unten">+ Block hinzufügen</button></div>';
+  wurzel.innerHTML = '<ul class="be-liste"></ul>'
+    + '<div class="be-unten"><button type="button" class="btn ghost be-neu-unten">+ Block hinzufügen</button></div>';
   neuZeichnen();
   wurzel.querySelector('.be-neu-unten').addEventListener('click', () => {
     vorMutationMerken();
-    const b = blockAmEndeEinfuegen('text');
-    neuZeichnen();
-    fokussiere(b.clientKey);
+    const bl = blockAmEndeEinfuegen('text');
+    zeileEinfuegen(bl);            // ans Ende -- hier ist Anhängen richtig
+    fokussiere(bl.clientKey);
   });
+
   const aussenKlick = (e) => {
     if (!e.target.closest('.be-menu') && !e.target.closest('.be-menu-knopf'))
       wurzel.querySelectorAll('.be-menu').forEach(m => { m.hidden = true; });
     if (!e.target.closest('.be-slash') && !e.target.closest('.be-text')) slashSchliessen();
   };
+  const escapeDruck = (e) => {
+    if (e.key !== 'Escape') return;
+    wurzel.querySelectorAll('.be-menu').forEach(m => { m.hidden = true; });
+    slashSchliessen(); formatLeisteVerbergen();
+  };
   document.addEventListener('mousedown', aussenKlick);
+  document.addEventListener('keydown', escapeDruck);
 
   return {
     bloecke() { return zustand.bloecke; },
     rueckgaengig,
     neuZeichnen,
-    blockAmEndeEinfuegen(typ) { const b = blockAmEndeEinfuegen(typ); neuZeichnen(); return b; },
-    /* Beim Wechsel auf eine andere Seite aufrufen -- sonst sammeln sich bei
-       jedem Öffnen des Editors weitere globale Klick-Beobachter an. */
+    flush,
+    beschaeftigt,
+    hatFehler: fehlerOffen,
+    wiederholen: allesWiederholen,
+    /* Von admin.js gemeldet, damit die "gespeichert"-Anzeige EINE Quelle
+       hat und sich Block- und Seiten-Meldungen nicht überschreiben. */
+    fremdSpeichertStart() { fremdeSchreibvorgaenge++; fremdFehler = false; statusAktualisieren(); },
+    fremdSpeichertEnde(fehler = null) {
+      fremdeSchreibvorgaenge = Math.max(0, fremdeSchreibvorgaenge - 1);
+      fremdFehler = !!fehler;
+      statusAktualisieren();
+    },
+    blockAmEndeEinfuegen(typ) {
+      const bl = blockAmEndeEinfuegen(typ);
+      zeileEinfuegen(bl);
+      return bl;
+    },
     zerstoeren() {
       document.removeEventListener('mousedown', aussenKlick);
+      document.removeEventListener('keydown', escapeDruck);
+      /* Sicherheitsnetz NACH flush() im Ablauf: hier sollte nichts mehr
+         pendeln -- falls doch, lieber kappen als später auf eine ganz
+         andere Seite feuern. */
       entprellungen.forEach(t => clearTimeout(t));
       entprellungen.clear();
     },

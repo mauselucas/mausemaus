@@ -332,11 +332,18 @@ async function editorSchliessen({ zurZurListe }) {
      ausgelösten Schreibvorgang wirklich abgeschlossen hat, wird der Editor
      -- und mit ihm die Warteschlange -- zerstört. */
   seitenEntprellung.sofort();
-  while (SEITEN_WARTESCHLANGE?.beschaeftigt()) await new Promise(r => setTimeout(r, 30));
+  /* Dieselbe Falle gilt für die BLÖCKE: auch dort wartet nach dem letzten
+     Tastendruck ein Entprellungs-Zeitgeber. zerstoeren() hätte ihn früher
+     einfach gekappt -- der zuletzt getippte Satz war damit weg. flush()
+     schreibt Ausstehendes stattdessen sofort raus. */
+  EDITOR?.flush();
+  while (SEITEN_WARTESCHLANGE?.beschaeftigt() || EDITOR?.beschaeftigt())
+    await new Promise(r => setTimeout(r, 30));
 
   EDITOR?.zerstoeren();
   EDITOR = null;
   SEITEN_WARTESCHLANGE = null;
+  panelsSchliessen();
   $('#view-edit').hidden = true;
   if (zurZurListe) { $('#view-list').hidden = false; await listeLaden(); }
 }
@@ -380,12 +387,24 @@ async function oeffneEditor(seite) {
      selben Moment die Videoadresse einfügen) können sich so nicht
      gegenseitig überschreiben. Meldet sich an derselben "gespeichert"-
      Anzeige wie der Blockeditor, damit eine Änderung an den Seiten-Feldern
-     genauso sichtbar gespeichert wird wie eine Änderung an einem Block. */
+     genauso sichtbar gespeichert wird wie eine Änderung an einem Block.
+     Die Anzeige selbst beschreibt NICHT diese Funktion, sondern der
+     Blockeditor -- er ist der einzige Ort, der "speichert…", "gespeichert"
+     und "nicht gespeichert" kennt. Sonst überschreibt die eine Quelle die
+     Meldung der anderen und ein Fehlerhinweis verschwindet sofort wieder. */
   SEITEN_WARTESCHLANGE = erzeugeSpeicherWarteschlange(async (felder) => {
-    $('#speicher-status').textContent = 'speichert…';
+    EDITOR?.fremdSpeichertStart();
     const { error } = await sb.from('seiten').update(felder).eq('id', AKTUELL.id);
-    if (error) return toast('Speichern fehlgeschlagen: ' + error.message, true);
-    $('#speicher-status').textContent = 'gespeichert ' + new Date().toLocaleTimeString('de-DE');
+    if (error) {
+      EDITOR?.fremdSpeichertEnde(error);
+      /* Werfen, damit die Warteschlange den Stand FESTHÄLT statt ihn
+         wegzuwerfen -- wiederholen() kann ihn dann erneut losschicken. */
+      throw error;
+    }
+    EDITOR?.fremdSpeichertEnde(null);
+  }, (fehler) => {
+    toast('Nicht gespeichert: ' + (fehler?.message || fehler)
+      + ' — oben auf „nicht gespeichert“ klicken, um es erneut zu versuchen.', true);
   });
 
   const { data: bloecke, error } = await sb.from('bloecke').select('*')
@@ -395,8 +414,10 @@ async function oeffneEditor(seite) {
   EDITOR = mountBlockEditor(document.getElementById('block-editor'), {
     seiteId: AKTUELL.id,
     anfangsBloecke: bloecke,
-    vorschauEl: document.getElementById('vorschau'),
     statusEl: document.getElementById('speicher-status'),
+    /* Ein Klick auf "nicht gespeichert" soll BEIDE Warteschlangen erneut
+       losschicken -- die der Blöcke UND die der Seiten-Felder. */
+    fremdWiederholen: () => !!SEITEN_WARTESCHLANGE?.wiederholen(),
     api: {
       async neu(entwurf) {
         const { data, error } = await sb.from('bloecke').insert(entwurf).select().single();
@@ -414,7 +435,77 @@ async function oeffneEditor(seite) {
       bildHochladen: hochladen,
     },
   });
+
+  /* Nur zur Information im ⚙-Panel: unter welcher Adresse liegt diese Welt? */
+  const slugZeile = $('#dok-slug');
+  slugZeile.hidden = AKTUELL.typ !== 'welt';
+  slugZeile.textContent = 'Adresse dieser Welt: /welt/' + (AKTUELL.slug || '—');
 }
+
+/* ---------- Die beiden Panels (⚙ Einstellungen, ? Hilfe) ----------
+   Sie liegen über dem Dokument und sind immer nur auf Zuruf da -- die
+   Schreibfläche soll nichts umrahmen. */
+
+function panelsSchliessen() {
+  document.querySelectorAll('.seiten-panel').forEach(p => {
+    p.classList.remove('offen'); p.setAttribute('aria-hidden', 'true');
+  });
+  $('#btn-einstellungen')?.setAttribute('aria-expanded', 'false');
+  $('#btn-anleitung')?.setAttribute('aria-expanded', 'false');
+  $('#seiten-menue')?.removeAttribute('open');
+}
+
+function panelUmschalten(panel, knopf) {
+  const wirdOffen = !panel.classList.contains('offen');
+  panelsSchliessen();
+  if (!wirdOffen) return;
+  panel.classList.add('offen');
+  panel.setAttribute('aria-hidden', 'false');
+  knopf.setAttribute('aria-expanded', 'true');
+  /* Das <details> im Hilfe-Panel hat keine sichtbare Zusammenfassung mehr
+     (das Panel IST die auf-/zuklappbare Ebene). Wäre es aus einer früheren
+     Sitzung heraus zugeklappt gemerkt, ließe es sich nie wieder öffnen und
+     die Hilfe bliebe für immer leer -- deshalb hier erzwingen. */
+  if (panel.id === 'panel-anleitung') {
+    const d = $('#anleitung-panel');
+    if (d) d.open = true;
+  }
+}
+
+$('#btn-einstellungen').addEventListener('click',
+  () => panelUmschalten($('#panel-einstellungen'), $('#btn-einstellungen')));
+$('#btn-anleitung').addEventListener('click',
+  () => panelUmschalten($('#panel-anleitung'), $('#btn-anleitung')));
+document.querySelectorAll('.seiten-panel .panel-zu')
+  .forEach(btn => btn.addEventListener('click', panelsSchliessen));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') panelsSchliessen();
+});
+
+/* Rückgängig: ⇧⌘Z bzw. Strg+Umschalt+Z. Das nackte ⌘Z bleibt bewusst das
+   gewohnte Rückgängig INNERHALB eines Textfelds -- dem darf man nichts
+   wegnehmen, sonst verliert man beim Tippen die vertraute Taste. */
+document.addEventListener('keydown', (e) => {
+  if (!(e.metaKey || e.ctrlKey) || !e.shiftKey) return;
+  if (e.key.toLowerCase() !== 'z') return;
+  if ($('#view-edit').hidden || !EDITOR) return;
+  e.preventDefault();
+  toast(EDITOR.rueckgaengig() ? 'Rückgängig gemacht.' : 'Nichts mehr rückgängig zu machen.');
+});
+$('#btn-rueckgaengig').addEventListener('click', () => {
+  $('#seiten-menue')?.removeAttribute('open');
+  if (!EDITOR) return;
+  toast(EDITOR.rueckgaengig() ? 'Rückgängig gemacht.' : 'Nichts mehr rückgängig zu machen.');
+});
+
+/* Nicht mitten in einem Schreibvorgang wegklicken lassen. */
+window.addEventListener('beforeunload', (e) => {
+  if ($('#view-edit').hidden) return;
+  if (seitenEntprellung.ausstehend() || EDITOR?.beschaeftigt() || EDITOR?.hatFehler()) {
+    e.preventDefault(); e.returnValue = '';
+  }
+});
 
 function seiteSpeichernAnstossen() {
   SEITEN_WARTESCHLANGE?.anstossen({

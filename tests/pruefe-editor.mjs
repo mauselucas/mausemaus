@@ -3,8 +3,9 @@
    den Editor an einen erfundenen, im Speicher lebenden Datenspeicher hängt
    (siehe dort). Deckt die drei Stellen ab, an denen im Auftrag "besonders
    scharf" geprüft werden soll: kein Datenverlust bei schneller Bedienung,
-   die Notiz erscheint nirgends in der Vorschau, und jede Blockart lässt
-   sich anlegen/füllen/verschieben/löschen und übersteht ein Neuladen. */
+   die private Notiz erscheint nirgends in gerendertem HTML, und jede
+   Blockart lässt sich anlegen/füllen/verschieben/löschen und übersteht ein
+   Neuladen. */
 import { existsSync, rmSync, symlinkSync } from 'node:fs';
 import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
@@ -32,12 +33,32 @@ pruefe('jede Blockart aus dem Vertrag ist dabei',
   ['text','ueberschrift','randnotiz','bild','gif','video','text_mit_bild','code','werkzeug','trenner','tuer','abschnitt']
     .every(t => typen.includes(t)), typen.join(', '));
 
-/* ---------- Notiz erscheint NIRGENDS in der Vorschau ---------- */
+/* ---------- Die private Notiz erscheint NIRGENDS in gerendertem HTML ----------
+
+   Umgezogen: Früher gab es eine zweite Spalte mit der Kennung #vorschau, und
+   diese Prüfung las deren innerHTML. Seit die Schreibfläche selbst die
+   Vorschau IST, gibt es dieses Element nicht mehr -- die alte Prüfung hätte
+   einen leeren String gelesen und wäre für immer grün gewesen, ohne noch
+   irgendetwas zu bewachen. Genau die Sorte Prüfung, von der es in diesem
+   Projekt schon sechs gab.
+
+   Neue Formulierung, näher an dem, was wirklich zählt: Die Notiz darf in
+   KEINEM der pro Block gerenderten Ausschnitte stehen (dort landet, was der
+   öffentliche Umsetzer erzeugt) und überhaupt nirgends im DOM außer in
+   ihrem eigenen Eingabefeld. */
 
 const notizGeheim = 'Geheime Notiz — darf nie öffentlich zu sehen sein.';
-const vorschauAnfang = await s.werte(`document.getElementById('vorschau').innerHTML`);
-pruefe('die Notiz eines Blocks steht NICHT in der Vorschau',
-  !vorschauAnfang.includes(notizGeheim));
+
+/* Alles, was vom öffentlichen Umsetzer erzeugt wurde, an einem Ort. */
+const GERENDERT = `[...document.querySelectorAll('.be-vorschau-html, .tm-bilder-seite')]`;
+
+pruefe('es gibt überhaupt gerenderte Ausschnitte zu prüfen (sonst wäre die nächste Prüfung hohl)',
+  (await s.werte(`${GERENDERT}.length`)) >= 5,
+  await s.werte(`${GERENDERT}.length + ' Ausschnitte'`));
+
+pruefe('die Notiz eines Blocks steht in KEINEM gerenderten Ausschnitt',
+  (await s.werte(`${GERENDERT}.filter(el => el.innerHTML.includes(${JSON.stringify(notizGeheim)})).length`)) === 0);
+
 /* SCRIPT ausgenommen: das ist hier die Prüfseite selbst, deren eingebettetes
    Skript die erfundenen Anfangsdaten (samt Notiz-Beispieltext) enthält --
    kein echtes Leck, sondern der Testaufbau. Zählt hier nicht, weil kein
@@ -50,20 +71,46 @@ pruefe('die Notiz steht auch nicht irgendwo sonst im HTML der Prüfseite außerh
       && el.children.length === 0
     ).length`)) === 0);
 
-/* GEGENBEWEIS: dieselbe Prüfung MUSS fehlschlagen, wenn die Notiz tatsächlich
-   in die Vorschau gelangt -- sonst wäre die obige Prüfung ein Blindgänger.
-   Absichtlich künstlich in die Vorschau geschrieben, nur um die Prüfmethode
-   selbst zu beweisen -- betrifft keinen echten Code. */
+/* GEGENBEWEIS: dieselbe Prüfung MUSS fehlschlagen, wenn eine Notiz tatsächlich
+   in einen gerenderten Ausschnitt gelangt -- sonst wäre sie ein Blindgänger.
+   Absichtlich künstlich hineingeschrieben, nur um die Prüfmethode selbst zu
+   beweisen -- betrifft keinen echten Code. */
 const gegenbeweisNotiz = await s.werte(`(() => {
-  const el = document.getElementById('vorschau');
+  const el = document.querySelector('.be-vorschau-html');
   const vorher = el.innerHTML;
   el.innerHTML += ${JSON.stringify(notizGeheim)};
-  const erkannt = el.innerHTML.includes(${JSON.stringify(notizGeheim)});
+  const erkannt = ${GERENDERT}.filter(x => x.innerHTML.includes(${JSON.stringify(notizGeheim)})).length === 1;
   el.innerHTML = vorher;   // sofort wieder aufräumen
   return erkannt;
 })()`);
-pruefe('GEGENBEWEIS: die Prüfmethode erkennt eine Notiz, WENN sie in der Vorschau steht',
+pruefe('GEGENBEWEIS: die Prüfmethode erkennt eine Notiz, WENN sie in einem gerenderten Ausschnitt steht',
   gegenbeweisNotiz === true);
+
+/* Die schärfste Fassung: einem Block, der WIRKLICH gerendert wird (Bild),
+   eine Notiz geben -- sie muss gespeichert werden UND darf trotzdem nicht
+   in seiner Darstellung auftauchen. Beim Textblock oben liefe das ins Leere,
+   weil Text gar nicht durch den öffentlichen Umsetzer geht. */
+{
+  const notizAmBild = 'PRIVAT: dieses Bild spaeter durch das Original ersetzen.';
+  await s.werte(`(() => {
+    const zeile = document.querySelector('.be-zeile[data-typ="bild"]');
+    zeile.querySelector('.be-menu-knopf').click();
+    const n = zeile.querySelector('.be-notiz');
+    n.value = ${JSON.stringify(notizAmBild)};
+    n.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await s.warte(750);
+  const id = await idVon('bild');
+  const zeile = JSON.parse(await s.werte(`JSON.stringify(window.__api_zeilen.get(${JSON.stringify(id)}) || null)`));
+  pruefe('eine Notiz an einem gerenderten Block wird wirklich gespeichert',
+    zeile && zeile.notiz === notizAmBild, JSON.stringify(zeile && zeile.notiz));
+  pruefe('…und steht trotzdem in KEINEM gerenderten Ausschnitt',
+    (await s.werte(`${GERENDERT}.filter(el => el.innerHTML.includes(${JSON.stringify(notizAmBild)})).length`)) === 0);
+  pruefe('…und der kleine Punkt am Rand zeigt an, dass dieser Block eine Notiz hat',
+    (await s.werte(`!document.querySelector('.be-zeile[data-typ="bild"] .be-notiz-marke').hidden`)) === true);
+  /* Menü wieder zu, damit die folgenden Prüfungen einen sauberen Stand haben. */
+  await s.werte(`document.querySelector('.be-zeile[data-typ="bild"] .be-menu').hidden = true`);
+}
 
 /* ---------- Bearbeiten eines Textblocks landet in der "Datenbank" ---------- */
 
@@ -348,9 +395,8 @@ pruefe('Auswahl aus dem "/"-Menü verwandelt den Block in die gewählte Art',
   pruefe('Breite wird übernommen', zeile.breite === 'randnotiz', zeile.breite);
   pruefe('Bewegung wird übernommen', zeile.bewegung === 'einblenden', zeile.bewegung);
   pruefe('Notiz an Claude wird gespeichert', zeile.notiz === 'Bitte sanft von unten einblenden lassen.', zeile.notiz);
-  const vorschauJetzt = await s.werte(`document.getElementById('vorschau').innerHTML`);
-  pruefe('…aber die Notiz steht weiterhin NICHT in der Vorschau',
-    !vorschauJetzt.includes('Bitte sanft von unten einblenden lassen.'));
+  pruefe('…aber die Notiz steht weiterhin in KEINEM gerenderten Ausschnitt',
+    (await s.werte(`${GERENDERT}.filter(el => el.innerHTML.includes('Bitte sanft von unten einblenden lassen.')).length`)) === 0);
 }
 
 /* ---------- Umsortieren per Ziehen verändert sort_order UND landet
@@ -381,29 +427,66 @@ pruefe('Auswahl aus dem "/"-Menü verwandelt den Block in die gewählte Art',
 
 /* ---------- "gespeichert"-Anzeige ---------- */
 
-await textBlockSetzen('.be-zeile[data-typ="text"] .be-text', 'Für die Statusanzeige.');
-await s.warte(60);
+/* ACHTUNG, hier lag ein Blindgänger: Die frühere Fassung prüfte
+   `statusWaehrend.includes('speichert')` -- und das Wort "gespeichert"
+   ENTHÄLT "speichert". Die Prüfung konnte also gar nicht fehlschlagen. Der
+   Gegenbeweis darunter testete mit 'speichert…' (mit Auslassungspunkten)
+   eine ganz andere Zeichenkette als die Prüfung selbst und deckte das
+   deshalb nicht auf. Aufgefallen ist es erst, als die Anzeige beim Umbau
+   tatsächlich "gespeichert" zeigte und die Prüfung fröhlich grün blieb.
+
+   Zwei Korrekturen: exakt auf "speichert…" prüfen, und den Zeitpunkt so
+   wählen, dass wirklich ein Schreibvorgang läuft. Die Breite speichert
+   OHNE Entprellung sofort -- zusammen mit einem künstlich langsamen
+   "Netzwerk" ist das Fenster groß genug, um sicher hineinzutreffen. */
+await s.werte(`(() => {
+  const echt = window.__api.aktualisieren.bind(window.__api);
+  window.__api.__echtAktualisieren = echt;
+  window.__api.aktualisieren = async (id, felder) => {
+    await new Promise(r => setTimeout(r, 300));
+    return echt(id, felder);
+  };
+})()`);
+await s.werte(`(() => {
+  const zeile = document.querySelector('.be-zeile[data-typ="text"]');
+  zeile.querySelector('.be-menu-knopf').click();
+  const sel = zeile.querySelector('.be-breite');
+  sel.value = 'schmal'; sel.dispatchEvent(new Event('change'));
+})()`);
+await s.warte(120);   // mitten im 300ms-Schreibvorgang
 const statusWaehrend = await s.werte(`document.getElementById('speicher-status').textContent`);
-await s.warte(750);
+await s.warte(600);
 const statusDanach = await s.werte(`document.getElementById('speicher-status').textContent`);
-pruefe('während des Speicherns steht "speichert…" in der Ecke',
-  statusWaehrend.includes('speichert'), statusWaehrend);
+await s.werte(`window.__api.aktualisieren = window.__api.__echtAktualisieren`);
+
+const zeigtSpeichertGerade = (t) => /^speichert…$/.test(t.trim());
+pruefe('während eines laufenden Speichervorgangs steht GENAU "speichert…" in der Ecke',
+  zeigtSpeichertGerade(statusWaehrend), JSON.stringify(statusWaehrend));
 pruefe('danach steht dort "gespeichert" mit Uhrzeit',
   /^gespeichert \d{2}:\d{2}:\d{2}$/.test(statusDanach), statusDanach);
 
-/* GEGENBEWEIS: eine Anzeige, die immer "gespeichert" zeigt, bestünde die
-   erste der beiden Prüfungen oben nicht -- die Prüfung ist also nicht
-   blind. */
-pruefe('GEGENBEWEIS: eine fest auf "gespeichert" stehende Anzeige würde an der "speichert…"-Prüfung scheitern',
-  !'gespeichert 00:00:00'.includes('speichert…'));
+/* GEGENBEWEIS: Diesmal mit DERSELBEN Funktion, die die Prüfung oben
+   benutzt -- sonst wäre wieder etwas anderes geprüft als behauptet. Eine
+   Anzeige, die dauerhaft "gespeichert" zeigt, muss durchfallen. */
+pruefe('GEGENBEWEIS: "gespeichert 00:00:00" besteht die "speichert…"-Prüfung NICHT',
+  zeigtSpeichertGerade('gespeichert 00:00:00') === false);
+pruefe('GEGENBEWEIS: die alte, zu lasche Prüfung hätte "gespeichert 00:00:00" fälschlich durchgewunken',
+  'gespeichert 00:00:00'.includes('speichert') === true);
+
+/* Der frühere Gegenbeweis stand genau hier und lautete
+     !'gespeichert 00:00:00'.includes('speichert…')
+   -- er prüfte 'speichert…' MIT Auslassungspunkten, während die eigentliche
+   Prüfung 'speichert' OHNE sie benutzte. Zwei verschiedene Zeichenketten,
+   also kein Gegenbeweis, sondern Beiwerk. Entfernt statt auskommentiert:
+   Code, den nichts erreichen kann, wird in diesem Projekt gelöscht. */
 
 /* ---------- Screenshots für den Bericht ---------- */
 await s.werte(`window.scrollTo(0, 0)`);
 await s.warte(150);
 await s.bild(new URL('./bilder/editor-1280.png', import.meta.url).pathname);
-/* Zweites Bild etwas heruntergescrollt -- zeigt, dass die Vorschau stehen
-   bleibt, während die (oft längere) Blockliste weiterläuft. */
-await s.werte(`document.querySelector('.be-spalte:not(.vorschau)').scrollIntoView();
+/* Zweites Bild etwas heruntergescrollt -- zeigt die Mitte des Dokuments
+   mit den fertig dargestellten Medienblöcken. */
+await s.werte(`document.querySelector('.dok-bereich').scrollIntoView();
   window.scrollBy(0, 700)`);
 await s.warte(150);
 await s.bild(new URL('./bilder/editor-1280-mitte.png', import.meta.url).pathname);

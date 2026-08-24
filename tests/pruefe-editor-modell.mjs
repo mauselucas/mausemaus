@@ -219,4 +219,90 @@ await pruefeWarteschlange(erzeugeNaiveWarteschlangeOHNESerialisierung,
   pruefe('danach wieder frei', q.beschaeftigt() === false);
 }
 
+/* ================= Ein gescheiterter Schreibvorgang darf NICHT
+   stillschweigend verschwinden =================
+
+   Der gefährlichste Fehler in einem Editor, der "du musst nie speichern"
+   verspricht: Netz weg oder Anmeldung abgelaufen, der Aufruf wirft, die
+   Warteschlange macht mit dem nächsten weiter -- und der Stand ist für
+   immer fort, während die Anzeige "gespeichert" behauptet. */
+{
+  let sollScheitern = true;
+  const angekommen = [];
+  const fehler = [];
+  const schreiben = async (d) => {
+    await warte(5);
+    if (sollScheitern) throw new Error('Netz weg');
+    angekommen.push(d);
+  };
+  const q = erzeugeSpeicherWarteschlange(schreiben, (f, daten) => fehler.push(daten));
+
+  q.anstossen('wichtiger Satz');
+  await warte(40);
+  pruefe('ein Fehlschlag wird gemeldet statt verschluckt', fehler.length === 1, fehler.join(','));
+  pruefe('nach dem Fehlschlag meldet hatFehler() den offenen Stand', q.hatFehler() === true);
+  pruefe('…und beschaeftigt() ist trotzdem false (sonst wartet das Schließen ewig)',
+    q.beschaeftigt() === false);
+  pruefe('der Stand ist NICHT angekommen (noch nicht)', angekommen.length === 0);
+
+  sollScheitern = false;
+  pruefe('wiederholen() nimmt den gescheiterten Stand wieder auf', q.wiederholen() === true);
+  await warte(40);
+  pruefe('nach dem Wiederholen ist GENAU DERSELBE Stand angekommen',
+    angekommen.length === 1 && angekommen[0] === 'wichtiger Satz', angekommen.join(','));
+  pruefe('danach ist kein Fehler mehr offen', q.hatFehler() === false);
+  pruefe('ein zweites wiederholen() ohne Fehler tut nichts', q.wiederholen() === false);
+}
+
+/* Ein NEUERER Stand hat Vorrang vor dem gescheiterten -- der ist dann ja
+   ohnehin überholt und dürfte den neuen nicht überschreiben. */
+{
+  let sollScheitern = true;
+  const angekommen = [];
+  const schreiben = async (d) => {
+    await warte(5);
+    if (sollScheitern) throw new Error('Netz weg');
+    angekommen.push(d);
+  };
+  const q = erzeugeSpeicherWarteschlange(schreiben, () => {});
+  q.anstossen('alt');
+  await warte(30);
+  sollScheitern = false;
+  q.anstossen('neu');
+  await warte(30);
+  q.wiederholen();
+  await warte(30);
+  pruefe('ein neuerer Stand überschreibt den gescheiterten alten NICHT',
+    angekommen.length === 1 && angekommen[0] === 'neu', angekommen.join(','));
+}
+
+/* GEGENBEWEIS: die alte Fassung (Fehler verschlucken, Stand wegwerfen)
+   verliert den Satz nachweislich -- die Prüfung oben ist also nicht blind. */
+{
+  const angekommen = [];
+  function warteschlangeDIEFEHLERVERSCHLUCKT(schreiben) {
+    let laeuft = false, ausstehend = null;
+    async function schritt() {
+      laeuft = true;
+      const d = ausstehend; ausstehend = null;
+      try { await schreiben(d); } catch { /* genau hier ging er verloren */ }
+      finally { laeuft = false; if (ausstehend !== null) schritt(); }
+    }
+    return { anstossen(d) { ausstehend = d; if (!laeuft) schritt(); },
+      beschaeftigt() { return laeuft || ausstehend !== null; } };
+  }
+  let sollScheitern = true;
+  const q = warteschlangeDIEFEHLERVERSCHLUCKT(async (d) => {
+    await warte(5);
+    if (sollScheitern) throw new Error('Netz weg');
+    angekommen.push(d);
+  });
+  q.anstossen('wichtiger Satz');
+  await warte(40);
+  sollScheitern = false;
+  await warte(40);
+  pruefe('GEGENBEWEIS: die alte Fassung verliert den Satz endgültig — kein Weg zurück',
+    angekommen.length === 0 && typeof q.wiederholen !== 'function');
+}
+
 bericht();

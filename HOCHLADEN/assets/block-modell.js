@@ -367,12 +367,25 @@ export function erzeugeUndoStapel(limit = 30) {
      wird er gemerkt und läuft GARANTIERT als nächstes -- nicht der davor
      übersprungene Zwischenstand.
    - Der letzte "anstossen()"-Aufruf gewinnt am Ende immer, unabhängig davon,
-     wie lange einzelne Netzwerk-Aufrufe brauchen. */
-export function erzeugeSpeicherWarteschlange(schreiben) {
+     wie lange einzelne Netzwerk-Aufrufe brauchen.
+
+   Scheitert ein Schreibvorgang (Netz weg, Anmeldung abgelaufen, Zugriffs-
+   regel greift), wird der Stand NICHT weggeworfen: er bleibt als
+   "gescheitert" liegen und lässt sich mit wiederholen() erneut losschicken.
+   Vorher verschwand er still -- die Anzeige sagte "gespeichert", angekommen
+   war nichts. Das ist der schlimmste denkbare Fehler in einem Editor, dessen
+   ganzes Versprechen "du musst nie auf Speichern drücken" lautet.
+
+   `beiFehler` ist freiwillig. Fehlt es, fliegt der Fehler weiter wie bisher
+   -- damit bleibt jeder vorhandene Aufrufer unverändert gültig.
+   beschaeftigt() zählt einen gescheiterten Stand ABSICHTLICH nicht mit:
+   sonst würde editorSchliessen() bei dauerhaftem Fehler ewig warten. */
+export function erzeugeSpeicherWarteschlange(schreiben, beiFehler = null) {
   let laeuft = false;
   let ausstehend;      // aktuell wartender Stand, oder KEIN_STAND
   const KEIN_STAND = Symbol('kein-stand');
   ausstehend = KEIN_STAND;
+  let gescheitert = KEIN_STAND;   // letzter Stand, dessen Schreiben fehlschlug
 
   async function schritt() {
     laeuft = true;
@@ -380,6 +393,11 @@ export function erzeugeSpeicherWarteschlange(schreiben) {
     ausstehend = KEIN_STAND;
     try {
       await schreiben(daten);
+      gescheitert = KEIN_STAND;
+    } catch (fehler) {
+      gescheitert = daten;          // festhalten, NICHT verwerfen
+      if (!beiFehler) throw fehler; // ohne Handler: Verhalten wie bisher
+      beiFehler(fehler, daten);
     } finally {
       laeuft = false;
       if (ausstehend !== KEIN_STAND) schritt();
@@ -392,6 +410,17 @@ export function erzeugeSpeicherWarteschlange(schreiben) {
       if (!laeuft) schritt();
     },
     beschaeftigt() { return laeuft || ausstehend !== KEIN_STAND; },
+    /* Gibt es einen Stand, der nicht angekommen ist? */
+    hatFehler() { return gescheitert !== KEIN_STAND; },
+    /* Denselben Stand noch einmal losschicken. Ein inzwischen neuerer
+       Stand hat Vorrang -- der gescheiterte ist dann ohnehin überholt. */
+    wiederholen() {
+      if (gescheitert === KEIN_STAND) return false;
+      if (ausstehend === KEIN_STAND) ausstehend = gescheitert;
+      gescheitert = KEIN_STAND;
+      if (!laeuft) schritt();
+      return true;
+    },
   };
 }
 

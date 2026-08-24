@@ -5,15 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>mausemaus — Verwaltung</title>
-<link rel="stylesheet" href="/assets/fonts.css?v=1786833901">
-<link rel="stylesheet" href="/assets/site.css?v=1786833901">
-<link rel="stylesheet" href="/assets/admin.css?v=1786833901">
+<link rel="stylesheet" href="/assets/fonts.css?v=1787606000">
+<link rel="stylesheet" href="/assets/site.css?v=1787606000">
+<link rel="stylesheet" href="/assets/inhalt.css?v=1787606000">
+<link rel="stylesheet" href="/assets/admin.css?v=1787606000">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body class="admin">
 
-<!-- Blumen-Formen für den Trennstrich in der Vorschau -->
+<!-- Blumen-Formen für den Trennstrich. Der öffentliche Umsetzer zeichnet
+     hier dieselben Blöcke wie auf der Website, braucht die Formen also auch. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <g id="bl-a"><path d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></g>
 </defs></svg>
@@ -21,7 +23,7 @@
 <!-- ===== Anmeldung ===== -->
 <div id="login" class="login-wrap">
   <form class="login-box" id="login-form">
-    <div class="brand tropi" style="font-size:52px">mausemaus<span class="dot">.</span></div>
+    <div class="wortmarke gross">mausemaus.</div>
     <p class="login-hint">Verwaltung — bitte anmelden.</p>
     <label>E-Mail<input type="email" id="email" autocomplete="username" required></label>
     <label>Passwort<input type="password" id="pw" autocomplete="current-password" required></label>
@@ -33,7 +35,7 @@
 <!-- ===== Verwaltung ===== -->
 <div id="app" hidden>
   <header class="admin-top">
-    <div class="brand tropi">mausemaus<span class="dot">.</span></div>
+    <span class="wortmarke">mausemaus.</span>
     <div class="reiter" id="reiter">
       <button data-art="projekt" aria-pressed="true">Projekte</button>
       <button data-art="welt" aria-pressed="false">Welten</button>
@@ -41,160 +43,201 @@
     <div class="admin-top-actions">
       <span class="wer" id="wer"></span>
       <button class="btn ghost" id="btn-brief" title="Begrüßung, Profil und Kontakt — alles, was auf der Startseite steht">Startseite (Brief)</button>
-      <button class="btn ghost" id="btn-backup" title="Sichert nur die Datenbank -- hochgeladene Bilder sind NICHT enthalten">Sicherung laden</button>
+      <button class="btn ghost" id="btn-backup" title="Sichert nur die Datenbank — hochgeladene Bilder sind NICHT enthalten">Sicherung laden</button>
       <a class="btn ghost" href="index.html" target="_blank" rel="noopener">Seite ansehen ↗</a>
       <button class="btn ghost" id="btn-logout">Abmelden</button>
     </div>
   </header>
 
-  <!-- Übersicht -->
+  <!-- ===== Ebene 1: Übersicht ===== -->
   <main id="view-list">
     <div class="leiste">
-      <h1 class="tropi" id="listen-titel">Projekte</h1>
+      <h1 id="listen-titel">Projekte</h1>
       <div class="leiste-rechts">
         <label class="schalter"><input type="checkbox" id="zeige-archiv"> Archiv anzeigen</label>
-        <button class="btn primary" id="btn-neu">+ Neu</button>
+        <button class="btn primary" id="btn-neu">+ Neue Seite</button>
       </div>
     </div>
-
-    <!-- Anleitung: nur hier im Admin, kein Inhalt für Besucher. Auf-/zuklappbar,
-         merkt sich den Zustand (assets/anleitung.js). -->
-    <details class="anleitung" id="anleitung-panel">
-      <summary>Anleitung — wie der Editor funktioniert</summary>
-      <div class="anleitung-inhalt">
-        <h3 class="tropi">Blockarten</h3>
-        <p>Tipp <code>/</code> in ein leeres Textfeld — die Liste aller Blockarten öffnet sich,
-          Weitertippen filtert sie. Jeder Block lässt sich über „⋯" duplizieren oder löschen,
-          am Griff <b>⠿</b> links ziehst du ihn an eine andere Stelle.</p>
-        <ul>
-          <li><b>Text</b> — ein normaler Absatz. <code>*kursiv*</code>, <code>**fett**</code>,
-            <code>[Linktext](https://…)</code>.</li>
-          <li><b>Überschrift</b> — groß oder klein wählbar.</li>
-          <li><b>Randnotiz</b> — ein kleiner Kasten mit Titel und ein bis zwei Zeilen, z. B. für Eckdaten.</li>
-          <li><b>Bild</b> — ein Bild oder eine ganze Galerie.</li>
-          <li><b>GIF</b> — bewegtes Bild; wird beim Hochladen NICHT verkleinert, sonst wäre die Animation weg.</li>
-          <li><b>Video</b> — ein YouTube- oder Vimeo-Link.</li>
-          <li><b>Text mit Bild daneben</b> — Text und Bild(er) nebeneinander in zwei Spalten.</li>
-          <li><b>Code</b> — ein Codeausschnitt mit Sprache und einem Kopieren-Knopf.</li>
-          <li><b>Werkzeug / Einlage</b> — eine fest eingebaute interaktive Demo (z. B. die
-            The-Race-Pipeline). Nur für Kennungen sinnvoll, die es wirklich gibt.</li>
-          <li><b>Trennstrich</b> — eine kleine Blume als Absatz-Trenner.</li>
-          <li><b>Türchen / Knopf</b> — ein Knopf, der zu einer Welt führt.</li>
-          <li><b>Abschnitt (Zeitleiste)</b> — nur auf der Brief-Seite wichtig: startet einen neuen
-            Eintrag in der Zeitleiste links. Alles, was danach kommt, gehört zu diesem Abschnitt —
-            bis der nächste Abschnitt-Block einen neuen beginnt.</li>
-        </ul>
-        <h3 class="tropi">Ein Türchen setzen</h3>
-        <p>Am einfachsten: Text markieren, in der kleinen Leiste, die dann erscheint, auf 🚪 klicken,
-          Ziel-Welt eintragen.</p>
-        <p>Von Hand geht es auch, mitten in einem Textblock:</p>
-        <ul>
-          <li><code>[[Wort|ziel|Titel|Vorschautext]]</code> — sichtbares Türchen, mit einer kleinen Blume markiert.</li>
-          <li><code>((Wort|ziel|Titel|Vorschautext))</code> — geheimes Türchen, ganz ohne Kennzeichen im Text,
-            leuchtet nur kurz auf, wenn jemand zufällig mit der Maus darüberfährt.</li>
-        </ul>
-        <p><b>Wort</b> ist der Text, auf den man klickt. <b>ziel</b> ist die Kennung der Welt — der Teil
-          in der Adresse hinter <code>/welt/…</code>. Titel und Vorschautext sind beide freiwillig und
-          erscheinen in einer kleinen Vorschau beim Drüberfahren.</p>
-        <p class="klein grau">Beispiel: <code>[[hier|the-race-automatisierung]]</code> führt zur Welt
-          unter <code>/welt/the-race-automatisierung</code>. Titel und Vorschautext weggelassen — beide
-          sind optional.</p>
-        <h3 class="tropi">Breite und Bewegung</h3>
-        <p>Über „⋯" an jedem Block einstellbar. <b>Breite:</b> schmal, normal, Randnotiz (am Rand,
-          wie eine Spalte) oder volle Breite. <b>Bewegung:</b> blendet den Block beim Scrollen ins
-          Bild ein. Wer in seinem Gerät Bewegung reduziert eingestellt hat, sieht nie eine Animation —
-          der Inhalt bleibt trotzdem immer sichtbar, nur ohne das Einblenden.</p>
-        <p class="klein grau">Alles wird laufend automatisch gespeichert, oben rechts steht „speichert…"
-          bzw. „gespeichert HH:MM:SS" — kein Speichern-Knopf nötig.</p>
-      </div>
-    </details>
-
     <p class="hinweis" id="hinweis-sortieren">Zum Umsortieren die Zeilen am Griff <b>⠿</b> ziehen. Die Reihenfolge wird sofort gespeichert.</p>
     <ul class="liste" id="liste"></ul>
   </main>
 
-  <!-- Editor -->
+  <!-- ===== Ebene 2: Die Seite — eine einzige Spalte ===== -->
   <main id="view-edit" hidden>
-    <div class="leiste">
-      <button class="btn ghost" id="btn-zurueck">← Übersicht</button>
-      <div class="leiste-rechts">
-        <span class="status" id="speicher-status" aria-live="polite"></span>
-        <button class="btn ghost" id="btn-archiv">Archivieren</button>
-        <button class="btn primary" id="btn-veroeffentlichen">Veröffentlichen</button>
-      </div>
-    </div>
+    <header class="edit-kopf">
+      <button class="stumm" id="btn-zurueck">← Zurück</button>
+      <span class="status" id="speicher-status" aria-live="polite"></span>
+      <span class="flex"></span>
+      <button class="stumm" id="btn-einstellungen" aria-expanded="false" aria-controls="panel-einstellungen">⚙︎ Einstellungen</button>
+      <button class="stumm" id="btn-anleitung" aria-expanded="false" aria-controls="panel-anleitung">? Hilfe</button>
+      <details class="menue" id="seiten-menue">
+        <summary class="stumm" title="Mehr">⋮</summary>
+        <div class="menue-inhalt">
+          <a href="index.html" target="_blank" rel="noopener">Seite ansehen ↗</a>
+          <button type="button" id="btn-rueckgaengig">Rückgängig <span class="klein grau">⇧⌘Z</span></button>
+        </div>
+      </details>
+    </header>
 
-    <div class="editor">
-      <!-- linke Spalte: Seiten-Eigenschaften -->
-      <section class="felder">
-        <label>Titel<input id="f-titel" placeholder="z.B. The Race — Staffel 3"></label>
-
+    <div class="dok-bereich">
+      <article class="dokument" id="dokument">
+        <!-- Der Titel ist die erste Zeile des Dokuments, kein Formularfeld. -->
+        <input id="f-titel" class="dok-titel" placeholder="Titel" autocomplete="off">
         <div id="nur-projekt-welt">
-          <label>Untertitel <span class="klein">(Rolle/Auftraggeber bzw. Anrisstext)</span>
-            <textarea id="f-untertitel" rows="2" placeholder="Ein Satz, worum es geht."></textarea></label>
+          <textarea id="f-untertitel" class="dok-untertitel" rows="2"
+            placeholder="Kurz, worum es geht"></textarea>
         </div>
-
-        <div id="nur-projekt">
-          <label>Video-Adresse <span class="klein">(YouTube, Vimeo)</span>
-            <input id="f-video" placeholder="https://youtu.be/…"></label>
-          <div class="reihe">
-            <label class="schalter"><input type="checkbox" id="f-aktuell"> Läuft aktuell</label>
-            <label class="schalter"><input type="checkbox" id="f-embed" checked> Video darf eingebettet werden</label>
-          </div>
-          <p class="klein grau">Haken bei „eingebettet" wegnehmen, wenn im Fenster „Video nicht verfügbar" steht
-            — dann zeigt die Seite das Titelbild mit Play-Knopf, der zum Video führt.</p>
-        </div>
-
-        <div id="nur-welt">
-          <label>Farbstimmung <span class="klein">(#RRGGBB, leer = Standard)</span>
-            <input id="f-farbe" placeholder="#8E4E9B"></label>
-        </div>
-
-        <details id="mehr-felder">
-          <summary>Mehr</summary>
-          <label>Kunde<input id="f-kunde"></label>
-          <label>Jahr<input id="f-jahr" placeholder="2026"></label>
-        </details>
-
-        <div id="mit-bild">
-          <hr>
-          <h3 class="tropi" id="bild-titel">Titelbild</h3>
-          <div class="cover-werkzeug">
-            <div class="cover-rahmen" id="cover-rahmen" title="Bild ziehen, um den Ausschnitt zu wählen">
-              <img id="cover-bild" alt="">
-              <span class="cover-leer" id="cover-leer">Bild hierher ziehen<br><span class="klein">oder unten auswählen</span></span>
-            </div>
-            <div class="cover-knoepfe">
-              <button class="btn ghost" id="btn-cover-datei">Bild wählen</button>
-              <button class="btn ghost" id="btn-cover-youtube">Aus Link holen</button>
-              <button class="btn ghost" id="btn-cover-weg">Entfernen</button>
-              <input type="file" id="cover-datei" accept="image/*,image/gif" hidden>
-            </div>
-            <p class="klein grau">Im Rahmen ziehen legt fest, welcher Bildausschnitt sichtbar ist.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- rechte Seite: Blockeditor + Vorschau -->
-      <div class="be-gitter">
-        <section class="be-spalte">
-          <div id="block-editor"></div>
-        </section>
-        <section class="be-spalte vorschau" style="display:flex;flex-direction:column">
-          <div class="vorschau-kopf">Vorschau <span class="klein grau">— so sehen Besucher es</span></div>
-          <div class="be-vorschau-flaeche"><div class="prose" id="vorschau"></div></div>
-        </section>
-      </div>
+        <div id="block-editor"></div>
+      </article>
     </div>
   </main>
+
+  <!-- ===== Ebene 3a: Seiteneinstellungen, nur auf Zuruf ===== -->
+  <aside class="seiten-panel" id="panel-einstellungen" aria-hidden="true">
+    <div class="panel-kopf">
+      <h2>Seiteneinstellungen</h2>
+      <button class="stumm panel-zu" title="Schließen">✕</button>
+    </div>
+    <div class="panel-inhalt">
+
+      <div id="nur-projekt">
+        <label>Video-Adresse <span class="klein grau">(YouTube, Vimeo)</span>
+          <input id="f-video" placeholder="https://youtu.be/…"></label>
+        <label class="schalter"><input type="checkbox" id="f-aktuell"> Läuft aktuell</label>
+        <label class="schalter"><input type="checkbox" id="f-embed" checked> Video darf eingebettet werden</label>
+        <p class="klein grau">Haken bei „eingebettet“ wegnehmen, wenn im Fenster „Video nicht verfügbar“ steht
+          — dann zeigt die Seite das Titelbild mit Play-Knopf, der zum Video führt.</p>
+      </div>
+
+      <div id="nur-welt">
+        <label>Farbstimmung <span class="klein grau">(#RRGGBB, leer = Standard)</span>
+          <input id="f-farbe" placeholder="#8E4E9B"></label>
+      </div>
+
+      <div id="mehr-felder">
+        <label>Kunde<input id="f-kunde"></label>
+        <label>Jahr<input id="f-jahr" placeholder="2026"></label>
+      </div>
+
+      <div id="mit-bild">
+        <hr>
+        <h3 id="bild-titel">Titelbild</h3>
+        <div class="cover-werkzeug">
+          <div class="cover-rahmen" id="cover-rahmen" title="Bild ziehen, um den Ausschnitt zu wählen">
+            <img id="cover-bild" alt="">
+            <span class="cover-leer" id="cover-leer">Bild hierher ziehen<br><span class="klein">oder unten auswählen</span></span>
+          </div>
+          <div class="cover-knoepfe">
+            <button class="btn ghost" id="btn-cover-datei">Bild wählen</button>
+            <button class="btn ghost" id="btn-cover-youtube">Aus Link holen</button>
+            <button class="btn ghost" id="btn-cover-weg">Entfernen</button>
+            <input type="file" id="cover-datei" accept="image/*,image/gif" hidden>
+          </div>
+          <p class="klein grau">Im Rahmen ziehen legt fest, welcher Bildausschnitt sichtbar ist.</p>
+        </div>
+      </div>
+
+      <p class="klein grau" id="dok-slug" hidden></p>
+      <hr>
+      <div class="leiste-rechts">
+        <button class="btn primary" id="btn-veroeffentlichen">Veröffentlichen</button>
+        <button class="btn" id="btn-archiv">Archivieren</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Ebene 3b: Hilfe, immer über "?" erreichbar ===== -->
+  <aside class="seiten-panel" id="panel-anleitung" aria-hidden="true">
+    <div class="panel-kopf">
+      <h2>Hilfe</h2>
+      <button class="stumm panel-zu" title="Schließen">✕</button>
+    </div>
+    <div class="panel-inhalt">
+      <!-- Bleibt ein <details> (tests/pruefe-anleitung.mjs prüft genau
+           dieses Element), tritt hier aber optisch zurück: das Panel ist
+           schon die auf-/zuklappbare Ebene. -->
+      <details class="anleitung" id="anleitung-panel">
+        <summary>Anleitung — wie der Editor funktioniert</summary>
+        <div class="anleitung-inhalt">
+          <h3>Blockarten</h3>
+          <p>Tipp <code>/</code> in ein leeres Textfeld — die Liste aller Blockarten öffnet sich,
+            Weitertippen filtert sie. Griff <b>⠿</b> und „⋯“ erscheinen, sobald die Maus in der Nähe ist;
+            im „⋯“-Menü stellst du Breite und Bewegung ein, duplizierst oder löschst du den Block.</p>
+          <ul>
+            <li><b>Text</b> — ein normaler Absatz. <code>*kursiv*</code>, <code>**fett**</code>,
+              <code>[Linktext](https://…)</code>.</li>
+            <li><b>Überschrift</b> — groß oder klein wählbar.</li>
+            <li><b>Randnotiz</b> — ein kleiner Kasten mit Titel und ein bis zwei Zeilen, z. B. für Eckdaten.</li>
+            <li><b>Bild</b> — ein Bild oder eine ganze Galerie.</li>
+            <li><b>GIF</b> — bewegtes Bild; wird beim Hochladen NICHT verkleinert, sonst wäre die Animation weg.</li>
+            <li><b>Video</b> — ein YouTube- oder Vimeo-Link.</li>
+            <li><b>Text mit Bild daneben</b> — Text und Bild(er) nebeneinander in zwei Spalten.</li>
+            <li><b>Code</b> — ein Codeausschnitt mit Sprache und einem Kopieren-Knopf.</li>
+            <li><b>Werkzeug / Einlage</b> — eine fest eingebaute interaktive Demo (z. B. die
+              The-Race-Pipeline). Nur für Kennungen sinnvoll, die es wirklich gibt.</li>
+            <li><b>Trennstrich</b> — eine kleine Blume als Absatz-Trenner.</li>
+            <li><b>Türchen / Knopf</b> — ein Knopf, der zu einer Welt führt.</li>
+            <li><b>Abschnitt (Zeitleiste)</b> — nur auf der Brief-Seite wichtig: startet einen neuen
+              Eintrag in der Zeitleiste links. Alles, was danach kommt, gehört zu diesem Abschnitt —
+              bis der nächste Abschnitt-Block einen neuen beginnt.</li>
+          </ul>
+
+          <h3>Wie der Text aussieht</h3>
+          <p>Was du schreibst, ist zugleich die Vorschau — eine zweite Spalte gibt es nicht mehr.
+            <code>**fett**</code> und <code>*kursiv*</code> werden direkt beim Tippen hervorgehoben.
+            Die Sterne bleiben absichtlich sichtbar (nur blasser): So siehst du jederzeit, was
+            wirklich im Text steht.</p>
+
+          <h3>Ein Türchen setzen</h3>
+          <p>Am einfachsten: Text markieren, in der kleinen Leiste auf 🚪 klicken, Ziel-Welt eintragen.</p>
+          <p>Von Hand geht es auch, mitten in einem Textblock:</p>
+          <ul>
+            <li><code>[[Wort|ziel|Titel|Vorschautext]]</code> — sichtbares Türchen, mit einer kleinen Blume markiert.</li>
+            <li><code>((Wort|ziel|Titel|Vorschautext))</code> — geheimes Türchen, ganz ohne Kennzeichen im Text,
+              leuchtet nur kurz auf, wenn jemand zufällig mit der Maus darüberfährt.</li>
+          </ul>
+          <p><b>Wort</b> ist der Text, auf den man klickt. <b>ziel</b> ist die Kennung der Welt — der Teil
+            in der Adresse hinter <code>/welt/…</code>. Titel und Vorschautext sind beide freiwillig.</p>
+          <p class="klein grau">Beispiel: <code>[[hier|the-race-automatisierung]]</code> führt zur Welt
+            unter <code>/welt/the-race-automatisierung</code>.</p>
+
+          <h3>Breite und Bewegung</h3>
+          <p>Über „⋯“ an jedem Block einstellbar. <b>Breite:</b> schmal, normal, Randnotiz (am Rand,
+            wie eine Spalte) oder volle Breite. <b>Bewegung:</b> blendet den Block beim Scrollen ins
+            Bild ein. Wer in seinem Gerät Bewegung reduziert eingestellt hat, sieht nie eine Animation —
+            der Inhalt bleibt trotzdem immer sichtbar.</p>
+
+          <h3>Notizen an Claude</h3>
+          <p>Im „⋯“-Menü jedes Blocks steht ein privates Notizfeld. Blöcke mit Notiz tragen einen
+            kleinen orangenen Punkt am linken Rand, damit du sie wiederfindest. Die Notiz erscheint
+            niemals auf der Website.</p>
+
+          <h3>Tastaturwege</h3>
+          <ul>
+            <li><code>/</code> im leeren Textfeld — Blockauswahl öffnen.</li>
+            <li><code>Enter</code> — nächster Block. <code>Umschalt+Enter</code> — neue Zeile im selben Block.</li>
+            <li><code>Rücktaste</code> im leeren Block — Block löschen.</li>
+            <li><code>⇧⌘Z</code> (bzw. <code>Strg+Umschalt+Z</code>) — die letzte Blockänderung rückgängig.
+              Das normale <code>⌘Z</code> bleibt das gewohnte Rückgängig innerhalb eines Textfelds.</li>
+            <li><code>Esc</code> — Menüs und Panels schließen.</li>
+          </ul>
+
+          <p class="klein grau">Alles wird laufend automatisch gespeichert, oben steht „speichert…“
+            bzw. „gespeichert HH:MM:SS“ — kein Speichern-Knopf nötig. Steht dort rot
+            „nicht gespeichert“, kam der letzte Stand nicht an: einmal darauf klicken schickt ihn erneut los.</p>
+        </div>
+      </details>
+    </div>
+  </aside>
 </div>
 
 <div class="ladebalken" id="ladebalken" hidden><div></div></div>
 <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-<script src="/assets/config.js?v=1786833901"></script>
-<script src="/assets/shared.js?v=1786833901"></script>
-<script src="/assets/bloecke.js?v=1786833901"></script>
-<script type="module" src="/assets/admin.js?v=1786833901"></script>
+<script src="/assets/config.js?v=1787606000"></script>
+<script src="/assets/shared.js?v=1787606000"></script>
+<script src="/assets/bloecke.js?v=1787606000"></script>
+<script src="/assets/inhalt.js?v=1787606000"></script>
+<script type="module" src="/assets/admin.js?v=1787606000"></script>
 </body>
 </html>

@@ -18,7 +18,10 @@ const probenPfad = wurzel + 'tests-temp-anleitung.html';
 
 /* ---------- 1. das ECHTE Anleitung-Element aus admin.html ziehen ---------- */
 const adminHtml = await readFile(adminPfad, 'utf8');
-const m = adminHtml.match(/<details class="anleitung" id="anleitung-panel">[\s\S]*?<\/details>/);
+/* Absichtlich tolerant gegenüber zusätzlichen Attributen (z. B. "open"):
+   eine Prüfung, die 13 andere mit sich reißt, weil jemand ein harmloses
+   Attribut ergänzt hat, prüft nicht mehr die Sache, sondern die Schreibweise. */
+const m = adminHtml.match(/<details[^>]*id="anleitung-panel"[^>]*>[\s\S]*?<\/details>/);
 if (!m) throw new Error('Kein <details id="anleitung-panel"> in admin.html gefunden -- Prüfung kann nicht laufen.');
 const anleitungHtml = m[0];
 
