@@ -20,14 +20,36 @@ body.admin {
 
 /* ===== Grundbausteine ===== */
 .admin label { display:flex; flex-direction:column; gap:5px; font-size:13px; font-weight:500; }
+/* Diese Regeln gestalten die Formularfelder des RAHMENS -- und dürfen die
+   Felder der SCHREIBFLÄCHE ausdrücklich nicht anfassen. Die sind kein
+   Formular, sondern das Dokument selbst: eigene Schrift, eigene Größe,
+   kein Rahmen.
+
+   Warum als Ausnahmeliste statt über höhere Spezifität: Genau hier lag ein
+   Fehler, der beinahe durchgerutscht wäre. `.admin textarea` (0,1,1)
+   schlägt `.be-text` (0,1,0), und `.admin input:not([type])` (0,2,1)
+   schlägt sogar `.admin .dok-titel`. Das Schreibfeld lief dadurch mit
+   Systemschrift in 14px und Zeilenhöhe 1.55, während die eingefärbte
+   Schicht darunter Space Grotesk in 17px mit 1.65 setzte -- zwei
+   Schichten, die deckungsgleich übereinanderliegen MÜSSEN, mit völlig
+   verschiedener Metrik. Ein Spezifitäts-Wettrennen hätte dasselbe beim
+   nächsten Mal wieder erzeugt; eine Ausnahmeliste sagt stattdessen aus,
+   WAS zur Schreibfläche gehört. Bewacht von tests/pruefe-ueberlagerung.mjs
+   ("GRUNDBEDINGUNG"). */
 .admin input[type=text], .admin input[type=email], .admin input[type=password],
-.admin input:not([type]), .admin textarea, .admin select {
+.admin input:not([type]):not(.dok-titel):not(.be-ab-titel),
+.admin textarea:not(.be-text):not(.be-ueberschrift):not(.be-code-text):not(.dok-untertitel),
+.admin select {
   font-family:inherit; font-size:14px; color:var(--text);
   background:var(--flaeche); border:1px solid var(--linie-stark); border-radius:8px;
   padding:8px 10px; width:100%;
 }
-.admin textarea { resize:vertical; line-height:1.55; }
-.admin input:focus, .admin textarea:focus, .admin select:focus {
+.admin textarea:not(.be-text):not(.be-ueberschrift):not(.be-code-text):not(.dok-untertitel) {
+  resize:vertical; line-height:1.55;
+}
+.admin input:not(.dok-titel):not(.be-ab-titel):focus,
+.admin textarea:not(.be-text):not(.be-ueberschrift):not(.be-code-text):not(.dok-untertitel):focus,
+.admin select:focus {
   outline:none; border-color:var(--akzent); box-shadow:0 0 0 3px var(--akzent-schwach);
 }
 .btn {
@@ -231,8 +253,12 @@ body.admin {
 .hz-link { color:var(--akzent); }
 .hz-geheim { color:var(--grau); }
 
-/* Überschrift: Schrift der Website, Größe je Ebene */
-.be-ueberschrift-wrap { display:flex; align-items:flex-start; gap:8px; }
+/* Überschrift: Schrift der Website, Größe je Ebene.
+   Die Größenwahl liegt ABSOLUT am rechten Rand, nicht als Flex-Element
+   davor: Sonst schiebt sie die Überschrift dauerhaft um ihre Breite ein --
+   auch unsichtbar, denn opacity:0 nimmt weiterhin Platz. Genau eine Zeile
+   stünde dann als einzige in der Spalte eingerückt. */
+.be-ueberschrift-wrap { position:relative; display:flex; align-items:flex-start; }
 .be-ueberschrift {
   font-family:'Tropi','Space Grotesk',sans-serif; flex:1; min-width:0;
   background:transparent; border:0; resize:none; overflow:hidden;
@@ -242,8 +268,9 @@ body.admin {
 .be-ueberschrift[data-ebene="2"] { font-size:30px; }
 .be-ueberschrift::placeholder { color:var(--grau-stark); }
 .admin .be-ueberschrift:focus { outline:none; box-shadow:none; }
-.be-ueberschrift-wrap .be-ebene {
-  width:auto; flex-shrink:0; font-size:11px; padding:4px 6px;
+.admin .be-ueberschrift-wrap .be-ebene {
+  position:absolute; right:0; top:4px; z-index:2;
+  width:auto; font-size:11px; padding:4px 6px;
   opacity:0; transition:opacity .12s ease;
 }
 .be-zeile:hover .be-ebene, .be-zeile:focus-within .be-ebene { opacity:1; }

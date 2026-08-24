@@ -480,6 +480,29 @@ pruefe('GEGENBEWEIS: die alte, zu lasche Prüfung hätte "gespeichert 00:00:00" 
    also kein Gegenbeweis, sondern Beiwerk. Entfernt statt auskommentiert:
    Code, den nichts erreichen kann, wird in diesem Projekt gelöscht. */
 
+/* ---------- Die Dokumentspalte ist wirklich EINE Spalte ----------
+   In einem Dokument müssen alle Blöcke am selben linken Rand beginnen.
+   Aufgefallen ist das an der Überschrift: Ihre Größenwahl lag als
+   Flex-Element VOR dem Textfeld und schob es dauerhaft um ihre Breite ein
+   -- auch unsichtbar, denn opacity:0 nimmt weiterhin Platz. Genau eine
+   Zeile stand dadurch eingerückt, was man erst auf dem Bild sieht. */
+{
+  const raender = JSON.parse(await s.werte(`(() => {
+    const feld = (zeile) => zeile.querySelector(
+      '.be-text, .be-ueberschrift, .be-randnotiz, .be-abschnitt, .be-code, .be-vorschau-html, .tm-gitter');
+    return JSON.stringify([...document.querySelectorAll('.be-zeile')]
+      .map(z => ({ typ: z.dataset.typ, links: Math.round((feld(z)?.getBoundingClientRect().left) ?? -1) }))
+      .filter(x => x.links >= 0));
+  })()`));
+  const werte = raender.map(x => x.links);
+  const spanne = Math.max(...werte) - Math.min(...werte);
+  pruefe('alle Blöcke beginnen am selben linken Rand (eine Spalte, nichts eingerückt)',
+    spanne <= 1, raender.map(x => `${x.typ}=${x.links}`).join(' '));
+  pruefe('…und es sind wirklich alle zwölf Blockarten gemessen worden (sonst wäre die Prüfung hohl)',
+    raender.length === (await s.werte(`document.querySelectorAll('.be-zeile').length`)),
+    `${raender.length} gemessen`);
+}
+
 /* ---------- Screenshots für den Bericht ---------- */
 await s.werte(`window.scrollTo(0, 0)`);
 await s.warte(150);
