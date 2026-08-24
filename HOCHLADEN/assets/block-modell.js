@@ -394,3 +394,60 @@ export function erzeugeSpeicherWarteschlange(schreiben) {
     beschaeftigt() { return laeuft || ausstehend !== KEIN_STAND; },
   };
 }
+
+/* ---------- Auszeichnungen im Schreibfeld sichtbar machen ----------
+   Rein DEKORATIV. Das Textfeld bleibt die alleinige Wahrheit; hier wird nur
+   berechnet, was als eingefärbte Schicht HINTER dem durchscheinenden Feld
+   liegt. Zwei Invarianten, beide unverhandelbar:
+
+   1. ERHALT -- jedes Zeichen des Rohtexts steht genau einmal im Ergebnis,
+      roh oder in einem <span>. Verschwindet auch nur ein Stern, laufen
+      Schicht und Textfeld auseinander und die Schrift steht versetzt zum
+      Cursor.
+   2. METRIK -- keine der erzeugten Klassen darf Glyphen breiter machen.
+      KEIN font-weight, KEIN font-style: echtes Fett verschiebt den
+      Zeilenumbruch gegenüber dem Textfeld, obwohl alle Zeichen da sind.
+      Erlaubt sind nur Farbe, Hintergrund, Unterstreichung und Schatten --
+      die malen, ohne das Layout anzufassen.
+
+   EIN Durchlauf mit einem zusammengesetzten Ausdruck, kein verkettetes
+   replace(): dessen eingefügte Tags enthielten selbst *, ( und ) und würden
+   vom jeweils nächsten Ausdruck erneut getroffen.
+
+   Die Weiche entscheidet nach GRUPPENFÜLLUNG, niemals nach dem ersten
+   Zeichen des Treffers. Ein Kursiv-Treffer, dem eine eckige Klammer
+   vorausgeht ("[*wichtig*]"), sähe sonst aus wie ein Link-Treffer, griffe
+   auf leere Gruppen zu und schriebe "undefined" mitten in Lucas' Text. */
+export function auszeichnungsHtml(roh) {
+  const s = String(roh ?? '').replace(/[&<>]/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const RE = new RegExp([
+    /\(\(([^()\n|]+)((?:[^()\n])*)\)\)/.source,        // 1,2 geheimes Türchen
+    /\[\[([^\]\n|]+)((?:[^\]\n])*)\]\]/.source,        // 3,4 Türchen
+    /\[([^\]\n]+)\]\(([^()\s]+)\)/.source,             // 5,6 Link
+    /\*\*([^*\n]+)\*\*/.source,                        // 7   fett
+    /(^|[\s({[])\*([^*\s][^*\n]*?)\*/.source,          // 8,9 kursiv
+  ].join('|'), 'g');
+
+  let aus = '', pos = 0, m;
+  while ((m = RE.exec(s)) !== null) {
+    aus += s.slice(pos, m.index);
+    if (m[1] !== undefined) {
+      aus += `<span class="hz-m">((</span><span class="hz-geheim">${m[1]}${m[2]}</span><span class="hz-m">))</span>`;
+    } else if (m[3] !== undefined) {
+      aus += `<span class="hz-m">[[</span><span class="hz-tuer">${m[3]}</span><span class="hz-m">${m[4]}]]</span>`;
+    } else if (m[5] !== undefined) {
+      aus += `<span class="hz-m">[</span><span class="hz-link">${m[5]}</span><span class="hz-m">](${m[6]})</span>`;
+    } else if (m[7] !== undefined) {
+      aus += `<span class="hz-fett"><span class="hz-m">**</span>${m[7]}<span class="hz-m">**</span></span>`;
+    } else if (m[9] !== undefined) {
+      /* m[8] ist das mitgelesene Zeichen VOR dem Stern (oder '' am Anfang)
+         -- unbedingt zurückgeben, sonst fehlt es im Ergebnis. */
+      aus += `${m[8] ?? ''}<span class="hz-kursiv"><span class="hz-m">*</span>${m[9]}<span class="hz-m">*</span></span>`;
+    } else {
+      aus += m[0];   // defensiv: im Zweifel Text NIE anfassen
+    }
+    pos = m.index + m[0].length;
+  }
+  return aus + s.slice(pos);
+}
