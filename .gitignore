@@ -4,3 +4,6 @@ node_modules/
 tests/.profil/
 tests/bilder/
 HOCHLADEN/tests-feste
+
+# Datensicherungen: enthalten die privaten Notizen -- nie versionieren.
+sicherungen/
