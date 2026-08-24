@@ -109,6 +109,53 @@ const jsFehler520 = schmal.fehlerAufSeite();
 pruefe('keine JavaScript-Fehler bei 520px', jsFehler520.length === 0, jsFehler520.join(' | '));
 await schmal.zu();
 
+/* ---------- Die Falle: zugeklappt gemerkt + Zusammenfassung versteckt ----------
+
+   Im "?"-Panel hat das <details> keine sichtbare Zusammenfassung mehr -- das
+   Panel selbst IST die Ebene, die man auf- und zuklappt. Damit gäbe es aber
+   keinen Weg mehr, ein früher einmal zugeklapptes <details> wieder zu öffnen:
+   Wer die Anleitung irgendwann zugeklappt hat, bekäme fortan ein LEERES
+   Hilfe-Panel, ohne erkennbaren Grund und ohne Ausweg.
+
+   Keine der übrigen Prüfungen sieht das: Sie räumen localStorage zu Beginn
+   ab und starten damit genau in dem einen Zustand, in dem der Fehler nicht
+   auftritt. Deshalb hier ausdrücklich der ANDERE Zustand -- an der echten
+   admin.html, mit vorbelegtem "schon zugeklappt". */
+{
+  const echt = await oeffne('http://127.0.0.1:8911/admin.html', { port: 9351, breite: 1280, hoehe: 1000 });
+  await echt.warte(1200);
+  /* So, wie es nach Wochen Benutzung aussieht: einmal zugeklappt. */
+  await echt.werte(`localStorage.setItem('mm.anleitung.zu', '1')`);
+  await echt.zu();
+
+  const wieder = await oeffne('http://127.0.0.1:8911/admin.html', { port: 9351, breite: 1280, hoehe: 1000 });
+  await wieder.warte(1500);
+  const zustand = JSON.parse(await wieder.werte(`JSON.stringify({
+    gemerkt: localStorage.getItem('mm.anleitung.zu'),
+    detailsVorKlick: document.getElementById('anleitung-panel').open,
+  })`));
+  pruefe('Ausgangslage: die Anleitung ist als „zugeklappt" gemerkt',
+    zustand.gemerkt === '1' && zustand.detailsVorKlick === false, JSON.stringify(zustand));
+
+  /* #app ist ohne Anmeldung versteckt -- die Verdrahtung der Knöpfe läuft
+     aber beim Laden, also lässt sich das Panel hier trotzdem prüfen. */
+  await wieder.werte(`document.getElementById('app').hidden = false;
+    document.getElementById('btn-anleitung').click()`);
+  await wieder.warte(400);
+  const nachher = JSON.parse(await wieder.werte(`JSON.stringify({
+    panelOffen: document.getElementById('panel-anleitung').classList.contains('offen'),
+    detailsOffen: document.getElementById('anleitung-panel').open,
+    hoehe: Math.round(document.querySelector('#panel-anleitung .anleitung-inhalt').getBoundingClientRect().height),
+  })`));
+  pruefe('trotz „zugeklappt" gemerkt: das Hilfe-Panel zeigt die Anleitung wirklich an',
+    nachher.panelOffen && nachher.detailsOffen && nachher.hoehe > 100, JSON.stringify(nachher));
+
+  const fehlerEcht = wieder.fehlerAufSeite();
+  pruefe('keine JavaScript-Fehler auf der echten admin.html', fehlerEcht.length === 0, fehlerEcht.join(' | '));
+  await wieder.werte(`localStorage.removeItem('mm.anleitung.zu')`);   // aufräumen
+  await wieder.zu();
+}
+
 chrome.beenden(); server.beenden();
 await rm(probenPfad, { force: true });
 bericht();
