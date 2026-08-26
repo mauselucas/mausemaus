@@ -558,6 +558,105 @@ async function bildEinfuegenIn(auswahl) {
 pruefe('kein einziger Block enthält ein leeres ![]()',
   !(await s.werte(`JSON.stringify(window.__editor.bloecke().map(b => b.inhalt.roh || ''))`)).includes('![]()'));
 
+/* ---------- Einen ganzen Artikel als Markdown einfuegen ----------
+   Lucas hat einen fertigen Artikel in EINEN Textblock eingefuegt. Auf der
+   Seite war das richtig (renderMarkdown versteht "###", "---", "![](…)"),
+   im Editor sah man aber nur die Zeichen -- die Schreibflaeche kann nur
+   Auszeichnungen INNERHALB eines Blocks darstellen, keine Blockarten.
+   Jetzt wird solcher Text beim Einfuegen in echte Bloecke zerlegt. */
+const ARTIKEL = [
+  '![](https://example.com/bild.webp)',
+  '',
+  'Ein einleitender Absatz mit **fett**.',
+  '',
+  '---',
+  '',
+  '### Das Detail-Ding',
+  '',
+  'Der Absatz danach.',
+].join('\n');
+
+async function textEinfuegenIn(auswahl, text) {
+  const vor = Number(await s.werte(`window.__editor.bloecke().length`));
+  const verhindert = await s.werte(`(() => {
+    const daten = new DataTransfer();
+    daten.setData('text/plain', ${JSON.stringify(text)});
+    const ta = document.querySelector(${JSON.stringify(auswahl)});
+    ta.focus();
+    const ev = new ClipboardEvent('paste', { clipboardData: daten, bubbles: true, cancelable: true });
+    ta.dispatchEvent(ev);
+    return ev.defaultPrevented;
+  })()`);
+  await s.warte(500);
+  return { vor, nach: Number(await s.werte(`window.__editor.bloecke().length`)), verhindert };
+}
+
+{
+  /* Erst einen leeren Textblock erzeugen, in den eingefuegt wird. */
+  await s.werte(`(() => {
+    const bl = window.__editor.bloecke().find(b => b.typ === 'text');
+    bl.inhalt.roh = '';
+    window.__editor.neuZeichnen();
+  })()`);
+  await s.warte(200);
+  const z = await textEinfuegenIn('.be-zeile[data-typ="text"] .be-text', ARTIKEL);
+  pruefe('ein eingefügter Artikel wird in mehrere Blöcke zerlegt',
+    z.nach > z.vor + 1, z.vor + ' -> ' + z.nach + ' Blöcke');
+
+  const arten = JSON.parse(await s.werte(`JSON.stringify(
+    window.__editor.bloecke().map(b => b.typ))`));
+  pruefe('…darunter eine echte Überschrift, ein Trennstrich und ein Bild',
+    arten.includes('ueberschrift') && arten.includes('trenner') && arten.includes('bild'),
+    arten.join(', '));
+
+  /* Der entscheidende Teil: kein Zeichen darf dabei verlorengehen. */
+  const zusammen = await s.werte(`(() => {
+    const roh = window.__editor.bloecke().map(b => (b.inhalt && b.inhalt.roh) || '').join('\\n');
+    const d = document.createElement('div');
+    d.innerHTML = window.mm.renderMarkdown(roh);
+    return (d.innerText || '').replace(/\\s+/g, ' ');
+  })()`);
+  const sollTexte = ['Ein einleitender Absatz mit fett.', 'Das Detail-Ding', 'Der Absatz danach.'];
+  pruefe('…und der gesamte Text bleibt dabei erhalten',
+    sollTexte.every(x => String(zusammen).includes(x)),
+    sollTexte.filter(x => !String(zusammen).includes(x)).join(' | ') || 'alles da');
+}
+
+/* Und für Text, der SCHON in einem Block steht (wie Lucas' Artikel), gibt
+   es denselben Weg über das "⋯"-Menü -- neu einfügen wäre umständlich. */
+{
+  const erg = JSON.parse(await s.werte(`(() => {
+    const bl = window.__editor.bloecke().find(b => b.typ === 'text');
+    bl.inhalt.roh = '### Eine Überschrift\\n\\nEin Absatz.\\n\\n---\\n\\nNoch einer.';
+    window.__editor.neuZeichnen();
+    const knopf = document.querySelector('.be-zeile[data-typ="text"] .be-aufteilen');
+    const sichtbar = !!(knopf && !knopf.hidden);
+    const vorher = window.__editor.bloecke().length;
+    /* Wo steht der Block, den wir zerlegen? Die ersten Bloecke des
+       Dokuments sind andere -- dort zu messen waere am Ziel vorbei. */
+    const stelle = window.__editor.bloecke().findIndex(x => x.clientKey === bl.clientKey);
+    if (sichtbar) knopf.click();
+    return JSON.stringify({ sichtbar, vorher, nachher: window.__editor.bloecke().length,
+      arten: window.__editor.bloecke().slice(stelle, stelle + 4).map(b => b.typ) });
+  })()`));
+  pruefe('bei Text mit Überschriften bietet das „⋯“-Menü „In Blöcke aufteilen“ an',
+    erg.sichtbar === true);
+  pruefe('…und der Knopf zerlegt genau diesen Block in Überschrift, Text, Trenner, Text',
+    erg.nachher > erg.vorher
+    && JSON.stringify(erg.arten) === JSON.stringify(['ueberschrift', 'text', 'trenner', 'text']),
+    erg.vorher + ' -> ' + erg.nachher + ' (' + erg.arten.join(', ') + ')');
+
+  const schlicht = await s.werte(`(() => {
+    const bl = window.__editor.bloecke().find(b => b.typ === 'text');
+    bl.inhalt.roh = 'Nur ein ganz normaler Absatz.';
+    window.__editor.neuZeichnen();
+    const k = document.querySelector('.be-zeile[data-typ="text"] .be-aufteilen');
+    return !!(k && !k.hidden);
+  })()`);
+  pruefe('…bei einem schlichten Absatz bleibt der Knopf verborgen (sonst wäre er sinnlos)',
+    schlicht === false);
+}
+
 /* Reiner TEXT muss ganz normal eingefuegt werden -- sonst waere das
    Einfuegen von Text kaputt, und das macht man tausendmal haeufiger. */
 {

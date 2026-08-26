@@ -427,6 +427,46 @@ export function mountBlockEditor(wurzel, {
     }));
   }
 
+  /* ---------- Einen Textblock in echte Blöcke zerlegen ----------
+     Wer einen ganzen Artikel aus einem anderen Programm einfügt, hat
+     Überschriften, Trennstriche und Bilder als Markdown-Zeichen im Text --
+     "### Titel", "---", "![](…)". Auf der öffentlichen Seite ist das
+     richtig (renderMarkdown versteht alles davon), im Editor sieht man
+     aber nur die Zeichen: Die Schreibfläche kann nur die Auszeichnungen
+     INNERHALB eines Blocks darstellen, nicht ganze Blockarten.
+
+     splitBlocks() aus shared.js kennt genau diese Grenzen -- es ist
+     dieselbe Funktion, die beim Umzug aus den alten Tabellen alle heutigen
+     Blöcke erzeugt hat, und ihre Verlustfreiheit ist bewiesen
+     (tests/pruefe-umzug.mjs). */
+  function teileVon(roh) {
+    if (!window.mm || !window.mm.splitBlocks) return [];
+    try { return window.mm.splitBlocks(String(roh || '')) || []; } catch (_) { return []; }
+  }
+  function laesstSichAufteilen(b) {
+    if (b.typ !== 'text') return false;
+    const teile = teileVon(b.inhalt && b.inhalt.roh);
+    return teile.length > 1 || (teile.length === 1 && teile[0].typ !== 'text');
+  }
+  function aufteilen(b, roh) {
+    const teile = teileVon(roh);
+    if (!teile.length) return false;
+    if (teile.length === 1 && teile[0].typ === 'text') return false;
+    vorMutationMerken();
+    b.typ = teile[0].typ;
+    b.inhalt = { roh: teile[0].roh };
+    blockSpeichern(b);
+    let vorheriger = b;
+    for (const teil of teile.slice(1)) {
+      const nb = blockEinfuegenNach(vorheriger, teil.typ);
+      nb.inhalt = { roh: teil.roh };
+      blockSpeichern(nb);
+      vorheriger = nb;
+    }
+    neuZeichnen();
+    return true;
+  }
+
   /* ---------- Einfügen / löschen / duplizieren ---------- */
   function neuerBlockDatensatz(typ, davor, danach) {
     return {
@@ -916,7 +956,9 @@ export function mountBlockEditor(wurzel, {
       <div class="be-menu-knoepfe">
         <button type="button" class="btn ghost be-duplizieren">Duplizieren</button>
         <button type="button" class="btn ghost be-loeschen">Löschen</button>
-      </div>`;
+      </div>
+      <button type="button" class="btn ghost be-aufteilen"${laesstSichAufteilen(b) ? '' : ' hidden'}
+        title="Überschriften, Trennstriche und Bilder werden zu eigenen Blöcken">In Blöcke aufteilen</button>`;
     li.appendChild(menu);
 
     menueKnopf.addEventListener('click', () => {
@@ -942,6 +984,10 @@ export function mountBlockEditor(wurzel, {
       const kopie = blockDuplizieren(b);
       zeileEinfuegen(kopie, { nach: bezug });
       menu.hidden = true;
+    });
+    menu.querySelector('.be-aufteilen').addEventListener('click', () => {
+      menu.hidden = true;
+      aufteilen(b, b.inhalt && b.inhalt.roh);
     });
     menu.querySelector('.be-loeschen').addEventListener('click', () => {
       vorMutationMerken();
@@ -1049,13 +1095,28 @@ export function mountBlockEditor(wurzel, {
     const daten = e.clipboardData;
     if (!daten) return;
     const bilder = [...(daten.files || [])].filter(f => f.type && f.type.startsWith('image/'));
-    if (!bilder.length) return;              // Text? Dann normal einfuegen lassen.
-    e.preventDefault();
 
     /* In welchen Block wird eingefuegt? */
     const zeile = (document.activeElement && document.activeElement.closest)
       ? document.activeElement.closest('.be-zeile') : null;
     const ziel = zeile ? zustand.bloecke.find(x => x.clientKey === zeile.dataset.key) : null;
+
+    if (!bilder.length) {
+      /* Kein Bild -- aber vielleicht ein ganzer Artikel als Markdown.
+         SEHR zurueckhaltend eingreifen: nur in einen LEEREN Textblock und
+         nur, wenn dabei wirklich mehr als ein Block entsteht. Alles andere
+         muss ganz normal eingefuegt werden -- Text einfuegen macht man
+         tausendmal haeufiger, und das darf nie kaputtgehen. */
+      const text = daten.getData('text/plain');
+      const leererText = ziel && ziel.typ === 'text' && !String(ziel.inhalt.roh || '').trim();
+      if (!text || !leererText) return;
+      const teile = teileVon(text);
+      if (teile.length < 2 && !(teile.length === 1 && teile[0].typ !== 'text')) return;
+      e.preventDefault();
+      aufteilen(ziel, text);
+      return;
+    }
+    e.preventDefault();
 
     ladeVorgang = true;
     const merker = statusEl ? statusEl.textContent : '';
