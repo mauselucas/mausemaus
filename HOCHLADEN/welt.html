@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/assets/fonts.css?v=1787777021">
 <link rel="stylesheet" href="/assets/site.css?v=1787777021">
 <link rel="stylesheet" href="/assets/brief.css?v=1787777021">
+<link rel="stylesheet" href="/assets/blumen.css?v=1787777021">
 <link rel="stylesheet" href="/assets/welt.css?v=1787777021">
 <link rel="stylesheet" href="/assets/inhalt.css?v=1787777021">
 </head>
@@ -31,6 +32,7 @@
 <script src="/assets/shared.js?v=1787777021"></script>
 <script src="/assets/bloecke.js?v=1787777021"></script>
 <script src="/assets/db.js?v=1787777021"></script>
+<script src="/assets/blumen.js?v=1787777021"></script>
 <script src="/assets/tueren.js?v=1787777021"></script>
 <script src="/assets/demo-race.js?v=1787777021"></script>
 <script src="/assets/inhalt.js?v=1787777021"></script>
@@ -93,6 +95,16 @@
 
   window.mmTueren(ziel);
   window.mmInhalt(ziel);
+
+  /* Deko-Blumen. Eine Welt hat keine Abschnitte wie der Brief, deshalb
+     dienen der Titel und jeder fünfte Absatz als Anker. Bewusst nur
+     Absätze und Überschriften: an einem Bild oder einer Werkzeug-Einlage
+     würde die zusätzliche Malebene deren eigene Positionierung stören. */
+  const ankerKandidaten = [...ziel.querySelectorAll('.welt-text > p, .welt-text > h2, .welt-text > h3')];
+  window.mmBlumen([
+    ziel.querySelector('.welt-titel'),
+    ...ankerKandidaten.filter((_, i) => i % 5 === 4),
+  ], { anzahl: 1, erste: 1 });
 })();
 </script>
 </body>

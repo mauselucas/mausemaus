@@ -5,6 +5,9 @@
   --welt-schrift: #232c31;
   --welt-leise: #6E7873;
   min-height:100vh; background:var(--welt-grund); color:var(--welt-schrift);
+  /* schneidet die Deko-Blumen an den Seitenrändern ab -- (clip, visible)
+     bleibt echtes Abschneiden, siehe die Begründung in brief.css */
+  overflow-x:clip;
 }
 .welt.dunkel { --welt-grund:#1b1b20; --welt-schrift:#EDEDF2; --welt-leise:#A5A5B0; }
 /* Auch hier den Ueberzieh-Bereich mitfaerben, sonst blitzt beim Weiterscrollen

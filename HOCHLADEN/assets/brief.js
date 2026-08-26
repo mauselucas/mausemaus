@@ -128,6 +128,11 @@
       }, { once: true });
     });
 
+    /* Deko-Blumen zum Schluss: Sie hängen an den fertigen Abschnitten und
+       wandern damit von selbst mit, wenn Inhalt dazukommt oder das Fenster
+       die Größe wechselt (siehe assets/blumen.js). */
+    if (window.mmBlumen) window.mmBlumen(abschnitte.map(a => a.element));
+
     return abschnitte;
   };
 })();

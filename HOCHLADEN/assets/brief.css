@@ -10,6 +10,15 @@
      und zog das ganze FENSTER auf. Ergebnis: zwei Rollbalken, und man
      konnte hinter das Seitenende weiterscrollen. */
   position:relative; }
+
+/* Schneidet die Deko-Blumen an den Seitenrändern ab. Warum ein eigener
+   Kasten und nicht einfach "overflow-x:clip" am Scroller: Steht "clip" auf
+   der einen Achse und ein scrollender Wert auf der anderen, macht der
+   Browser daraus "hidden". Die x-Achse wäre dann zwar ohne Rollbalken, aber
+   weiterhin ein Scrollbereich -- messbar an scrollWidth, und per Skript
+   sogar verschiebbar. Hier bleibt die y-Achse "visible", und die Paarung
+   (clip, visible) bleibt echtes Abschneiden ohne jeden Scrollbereich. */
+.br-rand { overflow-x:clip; }
 .br-spalte { max-width:560px; margin:0 auto; padding:64px 26px 96px; }
 
 /* Der Ueberzieh-Bereich beim Weiterscrollen an den Enden zeigt den Untergrund
