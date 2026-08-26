@@ -275,6 +275,40 @@ const letzterTyp = await s.werte(`window.__editor.bloecke()[window.__editor.bloe
 pruefe('Auswahl aus dem "/"-Menü verwandelt den Block in die gewählte Art',
   letzterTyp === 'bild', letzterTyp);
 
+/* …UND das muss in der Datenbank ankommen. Genau hier lag der Fehler: Die
+   Art wurde beim Aktualisieren nicht mitgeschickt, die Umwandlung blieb
+   also nur im Fenster stehen. Die alte Prüfung verglich ausschliesslich den
+   Zustand im Fenster und war dafür blind -- ein Blindgänger der leisen
+   Sorte: sie prüfte etwas Echtes, nur an der falschen Stelle. */
+await s.warte(750);
+{
+  const letzteId = await s.werte(`window.__editor.bloecke()[window.__editor.bloecke().length - 1].id`);
+  const zeile = await zeileInDB(letzteId);
+  pruefe('…und die neue Art steht auch wirklich in der "Datenbank"',
+    zeile && zeile.typ === 'bild', JSON.stringify(zeile && zeile.typ));
+}
+
+/* Und dasselbe für eine Art, deren Aussehen WIRKLICH an der Art hängt --
+   bei Kasten und Zitat rettet der Markdown-Umsetzer nichts. */
+{
+  await s.werte(`document.querySelector('.be-neu-unten').click()`);
+  await s.warte(80);
+  await textBlockSetzen('.be-zeile:last-child .be-text', '/');
+  await s.warte(60);
+  await s.werte(`(() => {
+    const ta = document.querySelector('.be-zeile:last-child .be-text');
+    ta.value = '/kasten'; ta.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await s.warte(60);
+  await s.werte(`document.querySelector('.be-slash-eintrag')
+    .dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))`);
+  await s.warte(750);
+  const id = await s.werte(`window.__editor.bloecke()[window.__editor.bloecke().length - 1].id`);
+  const zeile = await zeileInDB(id);
+  pruefe('ein über "/" erzeugter Kasten kommt als Kasten in der "Datenbank" an',
+    zeile && zeile.typ === 'kasten', JSON.stringify(zeile && zeile.typ));
+}
+
 /* ---------- Enter erzeugt den nächsten Block ---------- */
 
 {
@@ -693,7 +727,8 @@ async function textEinfuegenIn(auswahl, text) {
          stimmt die Schreibflaeche wirklich mit dem Ergebnis ueberein. */
       kastenKlassen: kh ? kh.className : '', zitatKlassen: zh ? zh.className : '',
       schreibflaeche: !!(kh && kh.querySelector('.be-text')),
-      farbknoepfe: document.querySelectorAll('.be-zeile[data-typ="kasten"] .be-farbe').length,
+      /* Nur EINE Zeile zaehlen -- spaeter im Lauf entsteht ein zweiter Kasten. */
+      farbknoepfe: document.querySelector('.be-zeile[data-typ="kasten"]').querySelectorAll('.be-farbe').length,
     });
   })()`));
   pruefe('Kasten und Zitat lassen sich anlegen und werden gezeichnet',

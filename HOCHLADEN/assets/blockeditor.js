@@ -110,6 +110,19 @@ export function mountBlockEditor(wurzel, {
   }
   function blockSpeichern(b) {
     warteschlangeFuer(b).anstossen({
+      /* `typ` MUSS mit: Ein Block kann seine Art nachtraeglich aendern --
+         ueber das "/"-Menue, beim Aufteilen eines Artikels, beim Einfuegen
+         eines Bildes in einen leeren Textblock. Ohne diese Zeile blieb die
+         Aenderung nur im Fenster stehen und die Datenbank behielt die alte
+         Art.
+         Lange unbemerkt, weil es fuer die meisten Arten folgenlos war: Ein
+         Textblock mit "## Titel" oder "![](…)" darin wird vom Umsetzer
+         ohnehin als Ueberschrift bzw. Bild dargestellt. Erst bei Kasten und
+         Zitat faellt es auf -- deren Aussehen haengt wirklich an der Art,
+         und die kamen auf der Seite als schlichter (eingefaerbter) Text an.
+         Die alte Pruefung sah es nicht, weil sie nur den Zustand im
+         Fenster verglich, nicht den in der Datenbank. */
+      typ: b.typ,
       inhalt: b.inhalt, breite: b.breite, bewegung: b.bewegung,
       notiz: b.notiz || null, sort_order: b.sort_order,
     });
