@@ -1,0 +1,134 @@
+/* mausemaus — die Einblendungen beim Scrollen.
+
+   Lucas' Wunsch, wörtlich: Titel und Abschnitte sollen sich beim Scrollen
+   einblenden, „aber dieses coole scrollen also wenn ich mitten in der
+   animation aufhöre zu scrollen soll es auch stehen bleiben und wenn ich
+   zurück scrolle soll es auch wieder so zurück animiert werden“.
+
+   Genau das ist eine SCROLL-ANIMATION (animation-timeline: view()): Die
+   Animation hat keinen Startschuss und läuft nicht auf einer Uhr, sondern
+   hängt am Scrollstand. Anhalten friert sie ein, Zurückscrollen spielt sie
+   rückwärts. Kein JavaScript, alles auf dem Compositor.
+
+   ===== Die Sicherheitsregel =====
+   ALLES steht in einem @supports-Block. Kann ein Browser keine
+   Scroll-Animationen (Chrome vor 115, Safari vor 26, Firefox vor 144), gilt
+   hier gar keine Regel und die Seite ist ganz normal und vollständig da.
+   Es gibt bewusst KEINEN JavaScript-Notnagel: Inhalt darf nie davon
+   abhängen, dass ein Skript ihn wieder sichtbar macht.
+
+   ===== Warum nur transform, opacity und filter =====
+   Nichts hier verändert Höhe, Abstand oder Schriftgröße. Sonst würde sich
+   beim Scrollen das Layout verschieben, und die Zeitleiste links rechnete
+   mit falschen Abschnittshöhen.
+
+   ===== Warum die Unschärfe nur Titel und Bilder bekommen =====
+   transform und opacity laufen auf dem Compositor, filter nicht. Zwanzig
+   gleichzeitig unscharfe Absätze kosten Bildrate. Titel und Bilder sind
+   wenige und groß -- dort wirkt es und kostet nichts.
+
+   ===== Warum die Bereiche in PIXELN stehen, nicht in Prozent =====
+   Der naheliegende Bereich wäre "entry 0% entry 100%". Der ist aber genau so
+   lang wie das Element selbst hoch ist: eine Überschrift von 35px wäre nach
+   35px Scrollen fertig -- das schnappt, statt zu gleiten. Ein Bild von 315px
+   bräuchte dagegen zehnmal so lange. Mit einer festen Länge ("entry 0px
+   entry 200px") scrollt man für JEDES Element gleich weit, egal wie groß es
+   ist.
+
+   ===== Die Falle am Seitenende =====
+   Ein Element ganz unten hat nur noch so viel Scrollweg vor sich, wie hinter
+   ihm Platz ist. Reicht der nicht für den ganzen Bereich, bliebe es für
+   immer halb durchsichtig stehen. Deshalb ist der längste Bereich hier 240px
+   -- und deshalb hat die Spalte unten 280px Auslauf (brief.css, welt.css).
+   Beides gehört zusammen: wird der eine Wert größer, muss der andere mit.
+   Gemessen wird das in tests/pruefe-scroll-bewegung.mjs, indem ganz ans Ende
+   gescrollt und JEDES animierte Element nachgesehen wird. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* ---- Titel, Kicker, Rollenzeilen: mit Unschärfe ---- */
+    .br-gruss, .br-titel, .br-rolle, .br-kicker,
+    .welt-titel, .welt-kicker,
+    .br-text > h2, .br-text > h3, .welt-text > h2, .welt-text > h3 {
+      animation: mm-auf-titel linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 200px;
+    }
+
+    /* ---- Fließtext: ohne Unschärfe, dafür überall ---- */
+    .br-text > p, .br-text > ul, .br-text > ol, .br-text > pre,
+    .br-text > blockquote, .br-text > div,
+    .welt-text > p, .welt-text > ul, .welt-text > ol, .welt-text > pre,
+    .welt-text > blockquote, .welt-text > div,
+    .br-marken, .br-kunden, .br-mehr, .br-kontakt, .br-formular {
+      animation: mm-auf-text linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 160px;
+    }
+
+    /* ---- Bilder und Videos: wachsen leicht auf, mit Unschärfe ---- */
+    .br-bild, .br-film, .welt-cover,
+    .br-text > figure, .welt-text > figure {
+      animation: mm-auf-bild linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 240px;
+    }
+
+    /* ---- Eckdaten und Werkzeuge: jede Zeile hat ihre eigene Zeitachse und
+            läuft dadurch von selbst versetzt los -- eine Staffelung, ohne
+            dass irgendwo eine Verzögerung ausgerechnet werden müsste. ---- */
+    .br-infos > div, .br-werkzeuge > div {
+      animation: mm-auf-zeile linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 120px;
+    }
+
+    /* ---- Kasten und Zitat ---- */
+    .mm-kasten, .mm-zitat {
+      animation: mm-auf-kasten linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 180px;
+    }
+
+    /* ---- Die Deko-Blumen treiben langsam durchs Bild ----
+            Nur transform, also praktisch kostenlos. "cover" heißt: die
+            ganze Zeit, in der die Blume irgendwo im Bild ist. */
+    .mm-blume {
+      animation: mm-blume-treiben linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes mm-auf-titel {
+  from { opacity: 0; transform: translateY(26px); filter: blur(7px); }
+  to   { opacity: 1; transform: none;             filter: blur(0);   }
+}
+@keyframes mm-auf-text {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes mm-auf-bild {
+  from { opacity: 0; transform: scale(.965); filter: blur(10px); }
+  to   { opacity: 1; transform: none;        filter: blur(0);    }
+}
+@keyframes mm-auf-zeile {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes mm-auf-kasten {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Ausschliesslich nach OBEN. Nach unten waere die Blume zwar genauso
+   huebsch, wuerde aber den Scrollbereich verlaengern: ein verschobenes
+   Element zaehlt zum Ueberlauf, und im letzten Abschnitt haenge damit
+   wieder leerer Platz am Seitenende (siehe blumen.css, dort wird derselbe
+   Fehler mit "bottom" statt "top" vermieden). Nach oben ist harmlos --
+   dorthin laesst sich nicht scrollen. */
+@keyframes mm-blume-treiben {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-76px); }
+}

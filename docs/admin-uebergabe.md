@@ -106,6 +106,16 @@ create table bloecke (
 ```
 
 `typ`, `breite` und `bewegung` sind projektspezifisch — Celine braucht andere Blockarten.
+
+> **Nachtrag:** Die Spalte `bewegung` gibt es hier noch, das Auswahlfeld dazu aber nicht mehr.
+> Es hat sich als Fehlkonstruktion herausgestellt: Lucas sollte an jedem einzelnen Block
+> auswählen, wie er sich einblendet — und wollte das natürlich nie tun. Ersetzt durch eine
+> Regel für die ganze Seite (`assets/bewegung.css`, CSS-Scroll-Animationen), die niemand
+> einstellen muss. Die Spalte selbst blieb unangetastet: alte Werte wirken einfach nicht
+> mehr, es gab keinen Umzug und nichts nachzupflegen.
+> **Die Lehre für Celines Panel:** Eine Einstellung, die man bei *jedem* Element treffen
+> müsste, ist meistens gar keine Einstellung, sondern eine Entscheidung, die der Bauende
+> treffen sollte.
 **Wichtig ist nur das Muster:** `inhalt` als `jsonb`, `sort_order` als **Fließkommazahl**
 (nicht integer!), und die Prüfbedingungen in der Datenbank statt nur im JavaScript.
 

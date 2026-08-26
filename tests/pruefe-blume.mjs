@@ -13,10 +13,18 @@
    nachmisst, kostet zehn Sekunden; ein geschätztes Maß kostet Wochen, in
    denen es jemandem auffällt und man es wegsieht.
 
-   Die Prüfung läuft rein auf den Dateien, ohne Browser: Wo immer der
-   Blumen-Pfad direkt im Quelltext steht, muss die kanonische viewBox
-   danebenstehen, und Breite/Höhe müssen zum echten Seitenverhältnis passen
-   (die Blume ist BREITER als hoch, nicht höher als breit). */
+   Die Prüfung läuft rein auf den Dateien, ohne Browser: Wo immer eine der
+   drei Blumenformen im Quelltext steht (direkt als Pfad oder über <use>),
+   muss die kanonische viewBox danebenstehen, und Breite/Höhe müssen zum
+   echten Seitenverhältnis passen (bl-a ist BREITER als hoch, nicht höher
+   als breit).
+
+   Anfangs kannte diese Prüfung nur bl-a. Bei bl-b und bl-c hätte dieselbe
+   geratene Zahl also unbemerkt danebenliegen können -- genau der Fehler,
+   um den es hier geht. Jetzt sind alle drei drin.
+   Die von assets/blumen.js zur Laufzeit erzeugten Blumen kann eine
+   Textprüfung nicht sehen (dort steht eine Variable statt einer Zahl); die
+   werden im Browser nachgemessen, siehe tests/pruefe-blumen.mjs. */
 import { readdir, readFile } from 'node:fs/promises';
 
 const ergebnisse = [];
@@ -30,10 +38,17 @@ function bericht() {
   if (schlecht.length) process.exitCode = 1;
 }
 
-/* Nachgemessen mit getBBox() im Browser, nicht geschätzt. */
-const VIEWBOX = '0 0 303.13 275.3';
-const VERHAELTNIS = 303.13 / 275.3;         // 1.101 -- breiter als hoch
-const ANFANG = 'M133.16,237.99';            // Beginn des Blumen-Pfades
+/* Nachgemessen mit getBBox() im Browser, nicht geschätzt.
+   anfang = die ersten Zeichen des jeweiligen Pfades, daran wird die Form im
+   Quelltext erkannt, wenn sie direkt eingesetzt ist. */
+const FORMEN = [
+  { id: 'bl-a', box: '0 0 303.13 275.3',  b: 303.13, h: 275.3,  anfang: 'M133.16,237.99' },
+  { id: 'bl-b', box: '0 0 349.23 339.2',  b: 349.23, h: 339.2,  anfang: 'M256.5,328.87' },
+  { id: 'bl-c', box: '0 0 474.6 413.62',  b: 474.6,  h: 413.62, anfang: 'M304.65,412.67' },
+];
+const VIEWBOX = FORMEN[0].box;
+const VERHAELTNIS = FORMEN[0].b / FORMEN[0].h;   // 1.101 -- breiter als hoch
+const ANFANG = FORMEN[0].anfang;                 // Beginn des Blumen-Pfades
 
 /* Alle ausgelieferten Seiten und Skripte plus die Designfibel. */
 const wurzeln = [
@@ -54,13 +69,15 @@ let gefunden = 0;
 
 for (const { name, url } of dateien) {
   const t = await readFile(url, 'utf8');
-  if (!t.includes(ANFANG) && !t.includes('#bl-a')) continue;
+  const zeigtForm = (text) => FORMEN.find(f => text.includes(f.anfang) || text.includes('#' + f.id));
+  if (!zeigtForm(t)) continue;
 
-  /* Jedes <svg …>, das entweder den Pfad direkt enthält oder das Symbol
-     benutzt, muss die kanonische viewBox tragen. */
+  /* Jedes <svg …>, das eine der drei Formen direkt enthält oder über <use>
+     holt, muss DEREN kanonische viewBox tragen. */
   for (const m of t.matchAll(/<svg\b([^>]*)>([\s\S]{0,3000}?)<\/svg>/g)) {
     const attr = m[1], inhalt = m[2];
-    if (!inhalt.includes(ANFANG) && !inhalt.includes('#bl-a')) continue;
+    const form = zeigtForm(inhalt);
+    if (!form) continue;
     /* Definitionsbloecke (<defs>) werden nie dargestellt -- sie halten nur
        die Formen bereit, damit <use> sie holen kann. Eine viewBox waere
        dort sinnlos. Ausnehmen, sonst meldet die Pruefung einen Fehler, wo
@@ -69,22 +86,23 @@ for (const { name, url } of dateien) {
     gefunden++;
 
     const vb = (attr.match(/viewBox="([^"]+)"/) || [])[1];
-    if (vb !== VIEWBOX) falscheBox.push(`${name}: viewBox="${vb || '(fehlt)'}"`);
+    if (vb !== form.box) falscheBox.push(`${name} (${form.id}): viewBox="${vb || '(fehlt)'}"`);
 
     const b = Number((attr.match(/\bwidth="(\d+(?:\.\d+)?)"/) || [])[1]);
     const h = Number((attr.match(/\bheight="(\d+(?:\.\d+)?)"/) || [])[1]);
     if (b && h) {
+      const soll = form.b / form.h;
       const ist = b / h;
       /* 3% Toleranz: gerundete Pixelwerte dürfen leicht abweichen. */
-      if (Math.abs(ist - VERHAELTNIS) / VERHAELTNIS > 0.03)
-        falschesVerhaeltnis.push(`${name}: ${b}×${h} (${ist.toFixed(3)} statt ${VERHAELTNIS.toFixed(3)})`);
+      if (Math.abs(ist - soll) / soll > 0.03)
+        falschesVerhaeltnis.push(`${name} (${form.id}): ${b}×${h} (${ist.toFixed(3)} statt ${soll.toFixed(3)})`);
     }
   }
 }
 
 pruefe('es gibt überhaupt Blumen zu prüfen (sonst wäre die Prüfung hohl)',
   gefunden >= 5, gefunden + ' gefunden');
-pruefe(`jede Blume benutzt die nachgemessene viewBox "${VIEWBOX}"`,
+pruefe('jede Blume benutzt die nachgemessene viewBox IHRER Form (bl-a, bl-b oder bl-c)',
   falscheBox.length === 0, falscheBox.join(' | '));
 pruefe('Breite und Höhe passen zum echten Seitenverhältnis (breiter als hoch)',
   falschesVerhaeltnis.length === 0, falschesVerhaeltnis.join(' | '));

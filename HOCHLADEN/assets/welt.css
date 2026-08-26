@@ -14,7 +14,9 @@
    an den Enden der helle Grundton durch -- bei einer dunklen Welt besonders hart. */
 html:has(.welt) body { background:#FBFAF6; }
 html:has(.welt.dunkel) body { background:#1b1b20; }
-.welt-spalte { max-width:620px; margin:0 auto; padding:44px 26px 120px; }
+/* 280px Auslauf unten -- gleiche Begründung wie im Brief, siehe
+   assets/bewegung.css. */
+.welt-spalte { max-width:620px; margin:0 auto; padding:44px 26px 280px; }
 .welt-zurueck { display:inline-flex; align-items:center; gap:7px; text-decoration:none;
   font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.14em;
   text-transform:uppercase; color:var(--welt-leise); margin-bottom:34px; }

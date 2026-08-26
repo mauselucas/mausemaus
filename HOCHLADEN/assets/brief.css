@@ -19,7 +19,11 @@
    sogar verschiebbar. Hier bleibt die y-Achse "visible", und die Paarung
    (clip, visible) bleibt echtes Abschneiden ohne jeden Scrollbereich. */
 .br-rand { overflow-x:clip; }
-.br-spalte { max-width:560px; margin:0 auto; padding:64px 26px 96px; }
+/* 280px Auslauf unten sind kein Zierrat: Ein Element ganz am Seitenende
+   hat nur so viel Scrollweg vor sich, wie hinter ihm Platz ist. Ohne den
+   Auslauf käme der letzte Absatz nie am Ende seiner Einblendung an und
+   bliebe halb durchsichtig stehen (siehe assets/bewegung.css). */
+.br-spalte { max-width:560px; margin:0 auto; padding:64px 26px 280px; }
 
 /* Der Ueberzieh-Bereich beim Weiterscrollen an den Enden zeigt den Untergrund
    des DOKUMENTS, nicht den des Scroll-Kastens. Ohne diese Zeile blitzt dort

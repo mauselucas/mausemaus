@@ -108,9 +108,24 @@ for (const { name, pfad } of SEITEN) {
   await s.zu();
 }
 
-/* GEGENBEWEIS: Genau die alte Regel wieder herstellen (Bezugsrahmen weg)
-   und zeigen, dass die Prüfung dann fällt. Nur im Browser, die Datei auf
-   der Platte bleibt unangetastet. */
+/* GEGENBEWEIS: Genau den alten Zustand wieder herstellen und zeigen, dass
+   die Prüfung dann fällt. Nur im Browser, die Datei auf der Platte bleibt
+   unangetastet.
+
+   Seit dem Umbau gehört DREIERLEI zum alten Zustand -- der fehlende
+   Bezugsrahmen am Scroller allein reicht nicht mehr aus, um den Fehler
+   auszulösen. Zwei spätere Änderungen fangen ihn nebenbei mit ab:
+
+   - .br-rand schneidet die Deko-Blumen an den Seitenrändern ab
+     ("overflow: clip" gilt für den ganzen Teilbaum).
+   - .br-formular blendet sich beim Scrollen ein, und dabei steht eine
+     Verschiebung (transform) darauf. Ein Element mit transform ist selbst
+     Bezugsrahmen für absolut positionierte Kinder -- das Spamfallen-Feld
+     kann dadurch gar nicht mehr bis zum <body> durchreichen.
+
+   Beides wird hier mit ausgeschaltet. Sonst wäre dieser Gegenbeweis still
+   verstummt und die Prüfung darüber ein Blindgänger geworden -- man hätte
+   ihr nicht mehr angesehen, ob sie noch etwas misst. */
 {
   const s = await oeffne('http://127.0.0.1:8913/', { port: 9353, breite: 1280, hoehe: 900 });
   await s.warte(3000);
@@ -118,6 +133,8 @@ for (const { name, pfad } of SEITEN) {
   const nachher = await s.werte(`(() => {
     const sc = document.querySelector('.br-scroller');
     sc.style.position = 'static';                       // der alte, kaputte Zustand
+    document.querySelector('.br-rand').style.overflowX = 'visible';   // und ohne den Schnitt
+    document.querySelector('.br-formular').style.animation = 'none';   // und ohne die Verschiebung
     const v = document.querySelector('.versteckt');
     v.style.cssText = 'position:absolute; left:-9999px;';
     void document.documentElement.offsetHeight;         // Neuberechnung erzwingen

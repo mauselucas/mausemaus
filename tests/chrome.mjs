@@ -69,6 +69,18 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
       await ruf('Emulation.setDeviceMetricsOverride',
         { width: breiteNeu, height: hoeheNeu, deviceScaleFactor: 1, mobile: breiteNeu < 768 });
     },
+    /* Ein Medienmerkmal vortäuschen, z.B. "Bewegung reduzieren":
+         await s.medien({ 'prefers-reduced-motion': 'reduce' })
+       Das geht über das DevTools-Protokoll und wirkt auf ECHTE CSS-Regeln
+       (@media). Der frühere Weg -- window.matchMedia auf der Seite
+       überschreiben -- erreicht nur JavaScript und lässt CSS-Regeln kalt;
+       für eine Gestaltung, die allein in CSS steht, wäre er wertlos.
+       Ohne Argumente wird die Vortäuschung wieder aufgehoben. */
+    async medien(merkmale = {}) {
+      await ruf('Emulation.setEmulatedMedia', {
+        features: Object.entries(merkmale).map(([name, value]) => ({ name, value })),
+      });
+    },
     async werte(ausdruck) {
       const r = await ruf('Runtime.evaluate',
         { expression: ausdruck, returnByValue: true, awaitPromise: true });
