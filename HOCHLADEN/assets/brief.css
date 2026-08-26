@@ -151,3 +151,51 @@ html, body { background:#FBFAF6; }
 .mm-vorschau-unten { box-shadow:0 -10px 28px rgba(13,24,33,.34); }
 .mm-vorschau span { font-family:'Space Grotesk',sans-serif; font-size:10.5px;
   line-height:1.45; color:#AEB6B2; }
+
+/* ===== Ladeschirm =====
+   Die Blume dreht sich, bis der Brief steht. Beim Abgang hoert sie auf zu
+   drehen, wird kurz groesser und schrumpft dann schnell weg -- im selben Zug
+   blendet die Seite von 0 auf 100 ein.
+
+   Der Sicherheitsgedanke steckt in der Verschachtelung: ALLES Versteckende
+   haengt an html.mm-laedt, und diese Klasse setzt nur JavaScript. Ohne
+   JavaScript (oder wenn ein Skript abbricht) gibt es keinen Ladeschirm und
+   die Seite ist von Anfang an sichtbar. */
+#mm-laden { display: none; }
+html.mm-laedt #mm-laden {
+  display: grid; place-items: center;
+  position: fixed; inset: 0; z-index: 200;
+  background: #FBFAF6;
+}
+html.mm-laedt .br-buehne { opacity: 0; }
+#mm-laden svg { fill: #0D1821; animation: mm-dreh 1.15s linear infinite; }
+@keyframes mm-dreh { to { rotate: 360deg; } }
+
+/* Der Abgang. Erst kurz groesser (32% der Zeit), dann schnell auf null. */
+html.mm-laedt.mm-fertig #mm-laden svg {
+  animation: mm-blume-weg .46s var(--mm-kurve) forwards;
+}
+@keyframes mm-blume-weg {
+  0%   { scale: 1;    rotate: 0deg; }
+  32%  { scale: 1.18; rotate: 0deg; }
+  100% { scale: 0;    rotate: 0deg; }
+}
+html.mm-laedt.mm-fertig #mm-laden {
+  animation: mm-schirm-weg .46s var(--mm-kurve) forwards;
+}
+@keyframes mm-schirm-weg { to { opacity: 0; } }
+html.mm-laedt.mm-fertig .br-buehne {
+  opacity: 1; transition: opacity .42s var(--mm-kurve);
+}
+
+/* Wer Bewegung reduziert hat, bekommt keinen Kreisel und kein Schrumpfen --
+   der Schirm ist dann einfach da und dann weg. Doppelt abgesichert: das
+   JavaScript entfernt ihn ohnehin, hier faellt zusaetzlich jede Animation
+   weg, damit nichts haengen bleiben KANN. */
+@media (prefers-reduced-motion: reduce) {
+  #mm-laden svg,
+  html.mm-laedt.mm-fertig #mm-laden svg,
+  html.mm-laedt.mm-fertig #mm-laden { animation: none; }
+  html.mm-laedt.mm-fertig #mm-laden { opacity: 0; }
+  html.mm-laedt.mm-fertig .br-buehne { transition: none; }
+}

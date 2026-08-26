@@ -17,7 +17,14 @@ const d = JSON.parse(await s.werte(`JSON.stringify({
   schrift: [...document.fonts].some(f => f.family === 'Tropi'),
   schriftQuelle: [...document.fonts].length + ' Schriftschnitte aus CSS',
   css: getComputedStyle(document.body).backgroundColor,
-  hoehe: document.body.scrollHeight
+  /* NICHT document.body messen: Der Brief scrollt in einem INNEREN Bereich,
+     der body bleibt bildschirmhoch. Diese Prüfung bestand früher nur wegen
+     eines Fehlers -- ein absolut positioniertes Formularfeld hing am body
+     statt am Scroller und blähte ihn auf 9303px auf. Nach der Reparatur
+     wären es 900px gewesen und die Prüfung wäre umgefallen, obwohl die
+     Seite völlig in Ordnung ist. Gemeint war immer: "hat die Seite
+     Inhalt?" -- also den Bereich messen, der den Inhalt trägt. */
+  hoehe: (document.querySelector('.br-scroller, #scroller') || document.body).scrollHeight
 })`));
 
 pruefe('Seite lädt', d.titel.includes('mausemaus'), d.titel);

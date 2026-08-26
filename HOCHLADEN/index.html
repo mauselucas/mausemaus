@@ -13,12 +13,41 @@
 <meta property="og:url" content="https://mausemaus.com/">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://mausemaus.com/">
-<link rel="stylesheet" href="/assets/fonts.css">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="stylesheet" href="/assets/leiste.css">
-<link rel="stylesheet" href="/assets/brief.css">
+<link rel="stylesheet" href="/assets/fonts.css?v=1787754132">
+<link rel="stylesheet" href="/assets/site.css?v=1787754132">
+<link rel="stylesheet" href="/assets/leiste.css?v=1787754132">
+<link rel="stylesheet" href="/assets/brief.css?v=1787754132">
+<script>
+/* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
+   Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
+   HTML zu stehen: Ist JavaScript aus oder bricht es ab, wird sie nie
+   gesetzt und die Seite ist von der ersten Sekunde an sichtbar.
+   Zusaetzlich eine harte Notbremse -- selbst wenn das Nachladen der Daten
+   haengt, ist nach 6 Sekunden Schluss mit dem Ladeschirm. */
+(function () {
+  var w = document.documentElement;
+  w.classList.add('mm-laedt');
+  window.mmLadeschirmWeg = function () {
+    if (!w.classList.contains('mm-laedt') || w.classList.contains('mm-fertig')) return;
+    w.classList.add('mm-fertig');
+    setTimeout(function () {
+      w.classList.remove('mm-laedt', 'mm-fertig');
+      var el = document.getElementById('mm-laden');
+      if (el) el.remove();
+    }, 520);
+  };
+  setTimeout(window.mmLadeschirmWeg, 6000);   // Notbremse
+})();
+</script>
 </head>
 <body>
+
+<!-- Ladeschirm: die Blume dreht sich, bis der Brief steht. Das Blumen-Symbol
+     ist hier ABSICHTLICH direkt eingesetzt und nicht per <use> aus shared.js
+     geholt -- der Schirm muss stehen, bevor irgendein Skript geladen ist. -->
+<div id="mm-laden" aria-hidden="true">
+  <svg viewBox="0 0 290 300" width="60" height="62"><path d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></svg>
+</div>
 
 <div class="br-buehne">
   <div id="leiste"></div>
@@ -40,14 +69,14 @@
   </div>
 </div>
 
-<script src="/assets/config.js"></script>
-<script src="/assets/seed.js"></script>
-<script src="/assets/shared.js"></script>
-<script src="/assets/bloecke.js"></script>
-<script src="/assets/db.js"></script>
-<script src="/assets/leiste.js"></script>
-<script src="/assets/brief.js"></script>
-<script src="/assets/tueren.js"></script>
+<script src="/assets/config.js?v=1787754132"></script>
+<script src="/assets/seed.js?v=1787754132"></script>
+<script src="/assets/shared.js?v=1787754132"></script>
+<script src="/assets/bloecke.js?v=1787754132"></script>
+<script src="/assets/db.js?v=1787754132"></script>
+<script src="/assets/leiste.js?v=1787754132"></script>
+<script src="/assets/brief.js?v=1787754132"></script>
+<script src="/assets/tueren.js?v=1787754132"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -81,6 +110,11 @@
      Videofenster und alles Spätere ab. */
   await document.fonts.ready.catch(() => {});
   leiste.neuBerechnen();
+
+  /* Jetzt steht wirklich alles: Daten da, Leiste vermessen, Schriften
+     geladen. Erst hier den Ladeschirm abraeumen -- vorher saehe man das
+     Nachrutschen beim Schriftwechsel. */
+  window.mmLadeschirmWeg();
   window.mmTueren(document.getElementById('brief'));
   window.mmBloecke.bewegungEinrichten(document.getElementById('brief'));
 

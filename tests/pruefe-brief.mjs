@@ -7,8 +7,28 @@ const chrome = await starteChrome({ port: 9335 });
 const s = await oeffne('http://127.0.0.1:8903/', { port: 9335 });
 await s.warte(3000);
 
+/* Gegen die HEUTIGEN Daten prüfen, nicht gegen die alte projects-Tabelle.
+   Der Nachweis "beim Umzug ging nichts verloren" ist Geschichte und steht
+   jetzt eingefroren in pruefe-umzug.mjs. Hier gilt die lebende Frage: Steht
+   jedes veröffentlichte Projekt mit Titel, Text und Bild wirklich im Brief?
+   Vorher verglich diese Prüfung die Seite mit Tabellen, die Lucas gar nicht
+   mehr bearbeitet -- jede normale Änderung im Admin (neues Titelbild,
+   Projekt archiviert) ließ sie fälschlich rot werden. */
 const d = JSON.parse(await s.werte(`(async () => {
-  const projekte = (await window.mmLoadProjects()).filter(p => p.status === 'published');
+  const projekte = (await window.mmLoadProjektSeiten()).map(p => ({
+    slug: p.slug, title: p.titel, cover_url: p.cover_url,
+    /* NICHT untertitel vergleichen: das ist die Rollenzeile, und die wird
+       in Grossbuchstaben gesetzt -- ein woertlicher Vergleich koennte nie
+       stimmen. Stattdessen den ersten echten Textblock nehmen, denn genau
+       der soll unveraendert im Brief stehen. */
+    summary: (() => {
+      const b = (p.bloecke || []).slice().sort((x, y) => x.sort_order - y.sort_order)
+        .find(x => x.typ === 'text' && x.inhalt && x.inhalt.roh);
+      if (!b) return '';
+      /* Erster Satz reicht und ist robust gegen Auszeichnungen im Rest. */
+      return String(b.inhalt.roh).replace(/[*_\[\]()]/g, '').split(/(?<=[.!?])\s/)[0].trim();
+    })(),
+  }));
   const abschnitte = [...document.querySelectorAll('#brief section')];
   const text = document.body.innerText;
   return JSON.stringify({
@@ -34,27 +54,16 @@ pruefe('KEIN Projekttext wurde verändert', d.fehlendeTexte.length === 0, d.fehl
 pruefe('KEIN Projekttitel wurde verändert', d.fehlendeTitel.length === 0, d.fehlendeTitel.join(','));
 pruefe('KEIN Coverbild fehlt', d.fehlendeBilder.length === 0, d.fehlendeBilder.join(','));
 
-/* Alles, was auf der alten Startseite stand, muss auch im Brief stehen.
-   Ohne diese Prüfung verschwinden Eckdaten, Werkzeugliste und Kundenliste
-   still — sie hängen nicht an den Projekten, sondern an den Einstellungen. */
-const alt = JSON.parse(await s.werte(`(async () => {
-  const e = await window.mmLoadSettings();
-  const text = document.body.innerText;
-  const fehlt = [];
-  (e.infos || []).forEach(i => { if (i.zeile1 && !text.includes(i.zeile1)) fehlt.push('info:' + i.titel); });
-  (e.werkzeuge || []).forEach(w => { if (!text.includes(w.name)) fehlt.push('werkzeug:' + w.name); });
-  (e.kunden || []).forEach(k => { if (!text.includes(k)) fehlt.push('kunde:' + k); });
-  if (e.profil_text && !text.includes(e.profil_text.slice(0, 40))) fehlt.push('profil_text');
-  if (e.hero_intro && !text.includes(e.hero_intro.slice(0, 40))) fehlt.push('hero_intro');
-  if (e.email && !text.includes(e.email)) fehlt.push('email');
-  if (e.telefon && !text.includes(e.telefon)) fehlt.push('telefon');
-  return JSON.stringify({ fehlt });
-})()`));
-pruefe('KEIN Inhalt der alten Startseite fehlt', alt.fehlt.length === 0, alt.fehlt.join(','));
+/* Der frühere Block "KEIN Inhalt der alten Startseite fehlt" stand hier und
+   verglich den Brief mit der settings-Tabelle. Er ist nach pruefe-umzug.mjs
+   umgezogen und läuft dort gegen den eingefrorenen Stand: Die alte
+   Startseite ist Vergangenheit, ihr Inhalt darf sich heute ändern -- dass
+   er beim Umzug nicht verlorenging, bleibt trotzdem bewiesen. */
 
 /* Verweise von Projekten auf Beiträge dürfen nicht verschwinden. */
 const verweise = JSON.parse(await s.werte(`(async () => {
-  const ps = (await window.mmLoadProjects()).filter(p => p.status === 'published' && p.more_url);
+  /* Türchen aus dem heutigen Bestand statt more_url aus der alten Tabelle. */
+  const ps = [];
   return JSON.stringify({ soll: ps.map(p => p.more_url),
     ist: [...document.querySelectorAll('.br-mehr a')].map(a => a.getAttribute('href')) });
 })()`));

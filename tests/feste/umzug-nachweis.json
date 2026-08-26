@@ -1,0 +1,1000 @@
+{
+ "erzeugt_aus": "sicherungen/2026-08-24-vor-admin-umbau.json",
+ "stand": "2026-08-24T21:02:57.017103+00:00",
+ "zweck": "Eingefrorener Nachweis, dass beim Umzug projects/posts -> seiten/bloecke nichts verlorenging.",
+ "projects": [
+  {
+   "slug": "test",
+   "title": "test",
+   "body": "test",
+   "summary": "",
+   "status": "archived",
+   "cover_url": null
+  },
+  {
+   "slug": "bastian-keller",
+   "title": "Bastian Keller & Bitbull",
+   "body": "Ich arbeite derzeit als freier Video Editor und Motion Designer für den Content Creator *Bastian Keller* im Umfeld von Bitbull. Im Zentrum steht sein Instagram-Hauptaccount, daneben bauen wir aktuell weitere, kleinere Profile für ihn auf. \n\nZusätzlich unterstütze ich auf seinem YouTube-Kanal bei den täglichen Krypto-News-Updates ebenso wie bei den größeren Dokumentationsvideos, wo ich vor allem bei der Ideenfindung, dem Thumbnail-Design sowie im Schnitt und bei Animationen mitarbeite. Meine Stärken liegen im Schnitt von Motion Graphics und Animationen sowie im Design performancestarker Thumbnails.\n\nIn den täglichen Team-Meetings bringe ich außerdem kreative Content-Ideen ein und wirke an der Content-Strategie mit.\n\n\n---\n\n",
+   "summary": "Schnitt, Motion Graphics und Thumbnail-Design für Instagram- und YouTube-Content — von kurzen Reels bis zu großen Dokuformaten.",
+   "status": "published",
+   "cover_url": "https://i.ytimg.com/vi/bpGfmHmNnic/maxresdefault.jpg"
+  },
+  {
+   "slug": "the-race-staffel-3",
+   "title": "The Race — Staffel 3",
+   "body": "\"The Race\" ist eine deutsche Adventure-Serie für Joyn/ProSieben, in der Teilnehmende ohne Geld und Vorbereitung Tausende Kilometer zu einem Ziel zurücklegen müssen – gefilmt weitgehend von den Teilnehmenden selbst, ohne klassische Regie. Ich war bei 33minutes als Mediengestalter Bild & Ton für Grundschnitt, Feinschnitt und sämtliche Motion Graphics zuständig, sowohl für die reguläre Staffel 3 als auch für die vorgelagerte Wildcard Challenge.\n\n\n![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786804948750-imdb.webp){klein}\n\n\n---\n\nEin zentraler Teil der Arbeit waren wiederkehrende Grafikeinblendungen – etwa Kontostand-Animationen, wenn Teilnehmende Geld erhalten oder verloren haben, dazu Uhrzeit-, Temperatur- und Sponsoring-Einblendungen, jeweils in der Teamfarbe der jeweiligen Teilnehmenden. Da ich im Team der Einzige mit After-Effects-Erfahrung war und der Zeitdruck bei einer 17-köpfigen Produktion entsprechend hoch war, habe ich die komplette Pipeline automatisiert: Ein selbstgeschriebenes After-Effects-Script erzeugte die Animationen über ein einfaches Eingabe-Panel statt manueller Einzelbearbeitung. Darauf aufbauend habe ich eine eigene macOS-App entwickelt, die direkt die bestehende Excel-Tabelle mit allen Werten einlas und die Animationen vollautomatisch rendern ließ. \n\n\n![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786796275683-cleanshot-2026-08-15-at-14-17-09-2x.webp){mittel}\n\n\n---\n\n\nBei einzelnen Folgen war ich zudem an der Storyplanung beteiligt und praktisch für den kompletten Schnitt verantwortlich. Als konkrete Referenz eignet sich besonders Folge 3, bei der ich den Großteil eigenständig übernommen habe: von der Storyline über das Verweben des Teilnehmenden-Footage zu einer spannungsreichen Erzählung bis hin zur kompletten Animation.\n\n\n---\n\n\n",
+   "summary": "Schnitt und Motion Design für die Adventure-Serie, inklusive selbstgebauter Automatisierung für sämtliche Grafikeinblendungen der Staffel.",
+   "status": "published",
+   "cover_url": "https://i.ytimg.com/vi/a852kZ4VCgk/maxresdefault.jpg"
+  },
+  {
+   "slug": "absent-musikvideo",
+   "title": "Musikvideo „Rockstar Selfish“",
+   "body": "Kilian, besser bekannt als Musiker Absent, kannte ich bereits aus einer früheren Zusammenarbeit (und weil ich großer fan bin jaja), bei der ich YouTube-Videos aus seinen Twitch-Highlights geschnitten hatte. Nach einigen Monaten ohne Kontakt meldete er sich spontan per FaceTime: Er brauchte kurzfristig ein Musikvideo zu seinem Song \"Rockstar Selfish\", hatte aber kein professionelles Kameramaterial – nur den Wunsch, aktuelle Bilder und Videos von seiner Tour einzubauen.\n\n\n![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786803223741-cleanshot-2026-08-15-at-16-13-25-2x.webp){klein}\n\n\nDa der Release-Tag für Musik freitags ist und er sich erst zwei Tage vorher gemeldet hatte (ganz viel liebe), blieb kaum Zeit.\n\n\n---\n\n\n\nAus früheren Streams wusste ich, dass Kilian einen iMac nutzt, und wollte ohnehin mal etwas im macOS-Look ausprobieren. Daraus entstand das Konzept: Ich bat ihn lediglich um eine Bildschirmaufnahme mit Photo Booth in drei verschiedenen Takes – mehr Rohmaterial gab es nicht. Aus diesem einfachen Ausgangsmaterial habe ich das komplette Video geschnitten, mit Effekten und eigenen Animationen versehen und die gewünschten Tour-Aufnahmen eingebaut. Kilian war von der Idee direkt überzeugt, eine Feedbackschleife war nicht nötig.\n\nAuf den ersten Blick wirkt das Konzept simpel – im Kontext von Absent als Künstler und einigen anderen Musikvideos passt der reduzierte, direkte macOS-Look aber bewusst zu seiner Ästhetik. Angesichts der extrem kurzen Produktionszeit und des minimalen Ausgangsmaterials ist das Ergebnis ein rundes, in sich stimmiges Musikvideo.\n\n\n\n---\n\n",
+   "summary": "In zwei Tagen konzipiert und geschnitten — ausschließlich aus Screen-Recordings und Photo-Booth-Aufnahmen im macOS-Look.",
+   "status": "published",
+   "cover_url": "/absent.jpg"
+  },
+  {
+   "slug": "jules",
+   "title": "YouTube-Content für Jules",
+   "body": "Für den YouTube-Kanal von Jules war ich Teil eines fünfköpfigen Editing-Teams. Die Arbeitsweise: Wir bekamen jeweils nur die fertige Tonspur eines Videos und die Aufgabe, uns kreativ frei zu entfalten – innerhalb des etablierten Jules-Stils, aber ohne festes Skript für den visuellen Teil. Jeder im Team suchte sich einen Abschnitt aus, schnitt ihn, baute Animationen und wählte passende Memes und Footage aus.\n\n![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786805044507-cleanshot-2026-08-15-at-16-06-55-2x.webp){mittel}\n\n\nDer Prozess lief iterativ: Erst ein grober Schnitt mit Grundkonzept und Platzhaltern, dann Verfeinerung. Stellen, für die noch keine passende Idee oder kein passendes Material da war, blieben zunächst offen und wurden in wöchentlichen Feedback-Runden mit dem ganzen Team weiterentwickelt – dort wurde gegenseitig geholfen, Ideen ausgetauscht und Jules selbst gab regelmäßig Input. Am Ende entscheidet Jules, was im finalen Video wie verwendet wird; Teile werden verschoben, angepasst oder von ihm selbst nachbearbeitet, da der Kanal seiner ist.\n\n![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786805066538-cleanshot-2026-08-15-at-16-06-12-2x.webp){klein}\n\n\n\n---\n\n\n\nWeil in einem Team-Editing-Prozess mit mehreren Überarbeitungsschritten kein einzelnes Video eindeutig einer Person zuzuordnen ist, hier stattdessen konkrete Timestamps, an denen mein Schnitt im finalen Video zu sehen ist:\n\n\"**Das Scheitern von Walmart in Deutschland**\" – 0:55–1:54, 5:19–5:42, 7:19–7:35\n\n\"**Eine Anleitung für die Autobahn**\" – 11:36–13:09\n\n\"**Ein Video über die Deutsche Bahn**\" – 4:58–5:15, 6:48–7:59\n\n---\n\n",
+   "summary": "Schnitt, Animation und Meme-Auswahl im Team erarbeitet — mit kreativem Freiraum innerhalb des bestehenden Kanal-Stils.",
+   "status": "published",
+   "cover_url": "https://i.ytimg.com/vi/uWkpyFr9e9Y/maxresdefault.jpg"
+  },
+  {
+   "slug": "simplicissimus-fern",
+   "title": "Editing & 3D für Simplicissimus",
+   "body": "Bei Simplicissimus war ich Teil eines rund 45-köpfigen Teams, das Dokumentationsvideos im bekannten Simplicissimus Stil produziert. Anders als bei kleineren Projekten gibt es hier mehr Vorgaben: Neben der zugewiesenen Tonspur bekommt man ein Skript mit Anweisungen zur groben Bildsprache und meist auch passendes Footage. Meine Aufgabe ist es, aus den groben Ideen der Creative Direction einen stimmigen Schnitt zu bauen – hauptsächlich verantwortlich bin ich für Feinschnitt, 2D-Animationen und Effekte, unterstütze aber auch dort, wo gerade Bedarf ist.\n\n\n---\n\n\nIm Laufe der Zeit habe ich mir aus eigenem Interesse und mit Unterstützung der 3D-Animator:innen im Team 3D-Animation angeeignet – von einfachen bis hin zu komplexeren Szenen, die auch in den Videos zum Einsatz kommen. Auch wenn die Struktur bei Simplicissimus enger ist als etwa bei Jules, ist sie keineswegs starr: Eigene Ideen einzubringen ist ausdrücklich erwünscht, teils sogar bevorzugt. Wie bei Teamproduktionen üblich lässt sich auch hier kein Video eindeutig \"das habe ich gemacht\" zuordnen, da man parallel an mehreren Projekten mitarbeitet.\n\nAls Referenz eignet sich das Video \"The CIA's Scariest Weapon\", bei dem ich größtenteils den Feinschnitt sowie mehrere 3D-Animationen übernommen habe – darunter die 3D-Animation des Röhrenfernsehers, während komplexere 3D-Szenen im Video von anderen Teammitgliedern stammen.\n\n\n\n![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786801627043-simpli2.webp)\n\n\n\n\n---\n\n\n",
+   "summary": "Feinschnitt, 2D- und 3D-Animation für Dokumentationsformate — inklusive selbst erlernter 3D-Skills, die im laufenden Betrieb produktiv wurden.",
+   "status": "published",
+   "cover_url": "/fern.jpg"
+  }
+ ],
+ "posts": [
+  {
+   "slug": "the-race-automatisierung",
+   "title": "Wie ich die Grafik-Pipeline von The Race automatisiert habe",
+   "body": "PLATZHALTER — dieser Text wird von Lucas selbst geschrieben.\n\n## Das Werkzeug\n\nSo sah das Eingabe-Panel aus. Teilnehmer wählen, Animationsart wählen, Beträge eintragen — die Euro-Summe rechnet sich selbst.\n\n::demo the-race-pipeline\n\n---\n\n## Die Anbindung an After Effects\n\nJede Einblendung ist eine Komposition mit benannten Textebenen. Das Skript sucht sie über den Namen, setzt die Werte und legt die Komposition in die Renderliste.\n\n```jsx\nfunction baueEinblendung(daten) {\n    var vorlage = findeComp(\"TPL_Geld\");\n    var comp    = vorlage.duplicate();\n    comp.name   = daten.teilnehmer + \"_\" + daten.szene;\n\n    setzeText(comp, \"EUR_Summe\", formatEuro(daten.eur));\n    setzeText(comp, \"Delta\",     (daten.delta > 0 ? \"+\" : \"\") + kurz(daten.delta));\n\n    var farbe = comp.layer(\"BG_Pille\").property(\"Contents\")\n                    .property(\"Fill 1\").property(\"Color\");\n    farbe.setValue(hexZuRgb(daten.teamfarbe));\n\n    var eintrag = app.project.renderQueue.items.add(comp);\n    eintrag.outputModule(1).file = new File(daten.ziel);\n    return comp;\n}\n```\n\n---\n\n## Das Ergebnis\n\n![So sah die fertige Einblendung in der Sendung aus](/therace-einblendung.jpg){mittel}\n\nMehr dazu bei [The Race auf Joyn](https://www.joyn.de).\n",
+   "status": "published"
+  },
+  {
+   "slug": "verteidiger-isfj-t",
+   "title": "Verteidiger (ISFJ-T)",
+   "body": "PLATZHALTER — hier schreibt Lucas seinen eigenen Text.\n\nEin paar Anregungen, was hier stehen könnte (einfach überschreiben):\n\n- Was das Ergebnis über die Arbeitsweise sagt\n- Wo es im Schnitt-Alltag tatsächlich merkbar wird\n- Wo es eben nicht passt\n\n---\n\n## So könnte ein Block mit Bild daneben aussehen\n\n:::\nText steht links, Bilder oder GIFs stehen rechts daneben.\n\nMan kann mehrere Absätze in einen Block packen — die Aufteilung siehst nur du im Editor, auf der fertigen Seite ist davon nichts zu sehen.\n\n![](/therace-einblendung.jpg)\n:::\n",
+   "status": "published"
+  }
+ ],
+ "seiten": [
+  {
+   "id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "slug": "brief",
+   "typ": "brief",
+   "titel": "Hallo ich bin",
+   "status": "published"
+  },
+  {
+   "id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "slug": "bastian-keller",
+   "typ": "projekt",
+   "titel": "Bastian Keller & Bitbull",
+   "status": "published"
+  },
+  {
+   "id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "slug": "the-race-staffel-3",
+   "typ": "projekt",
+   "titel": "The Race — Staffel 3",
+   "status": "published"
+  },
+  {
+   "id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "slug": "jules",
+   "typ": "projekt",
+   "titel": "YouTube-Content für Jules",
+   "status": "published"
+  },
+  {
+   "id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "slug": "simplicissimus-fern",
+   "typ": "projekt",
+   "titel": "Editing & 3D für Simplicissimus",
+   "status": "published"
+  },
+  {
+   "id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "slug": "absent-musikvideo",
+   "typ": "projekt",
+   "titel": "Musikvideo „Rockstar Selfish“",
+   "status": "published"
+  },
+  {
+   "id": "760dd498-1fe3-436b-be48-d8984e3fb6ca",
+   "slug": "test",
+   "typ": "projekt",
+   "titel": "test",
+   "status": "archived"
+  },
+  {
+   "id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "slug": "the-race-automatisierung",
+   "typ": "welt",
+   "titel": "Wie ich die Grafik-Pipeline von The Race automatisiert habe",
+   "status": "published"
+  },
+  {
+   "id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "slug": "verteidiger-isfj-t",
+   "typ": "welt",
+   "titel": "Verteidiger (ISFJ-T)",
+   "status": "published"
+  },
+  {
+   "id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "slug": "spielwiese",
+   "typ": "welt",
+   "titel": "Spielwiese",
+   "status": "draft"
+  }
+ ],
+ "bloecke": [
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "tuer",
+   "inhalt": {
+    "text": "Auf YouTube ansehen",
+    "ziel": "https://www.youtube.com/watch?v=a852kZ4VCgk"
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt und Motion Design für die Adventure-Serie, inklusive selbstgebauter Automatisierung für sämtliche Grafikeinblendungen der Staffel."
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "text",
+   "inhalt": {
+    "roh": "\"The Race\" ist eine deutsche Adventure-Serie für Joyn/ProSieben, in der Teilnehmende ohne Geld und Vorbereitung Tausende Kilometer zu einem Ziel zurücklegen müssen – gefilmt weitgehend von den Teilnehmenden selbst, ohne klassische Regie. Ich war bei 33minutes als Mediengestalter Bild & Ton für Grundschnitt, Feinschnitt und sämtliche Motion Graphics zuständig, sowohl für die reguläre Staffel 3 als auch für die vorgelagerte Wildcard Challenge."
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786804948750-imdb.webp){klein}"
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Ein zentraler Teil der Arbeit waren wiederkehrende Grafikeinblendungen – etwa Kontostand-Animationen, wenn Teilnehmende Geld erhalten oder verloren haben, dazu Uhrzeit-, Temperatur- und Sponsoring-Einblendungen, jeweils in der Teamfarbe der jeweiligen Teilnehmenden. Da ich im Team der Einzige mit After-Effects-Erfahrung war und der Zeitdruck bei einer 17-köpfigen Produktion entsprechend hoch war, habe ich die komplette Pipeline automatisiert: Ein selbstgeschriebenes After-Effects-Script erzeugte die Animationen über ein einfaches Eingabe-Panel statt manueller Einzelbearbeitung. Darauf aufbauend habe ich eine eigene macOS-App entwickelt, die direkt die bestehende Excel-Tabelle mit allen Werten einlas und die Animationen vollautomatisch rendern ließ. "
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786796275683-cleanshot-2026-08-15-at-14-17-09-2x.webp){mittel}"
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 80
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Bei einzelnen Folgen war ich zudem an der Storyplanung beteiligt und praktisch für den kompletten Schnitt verantwortlich. Als konkrete Referenz eignet sich besonders Folge 3, bei der ich den Großteil eigenständig übernommen habe: von der Storyline über das Verweben des Teilnehmenden-Footage zu einer spannungsreichen Erzählung bis hin zur kompletten Animation."
+   },
+   "sort_order": 90
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 100
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt · 2D-Animation · Prozessautomatisierung"
+   },
+   "sort_order": 110
+  },
+  {
+   "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+   "typ": "tuer",
+   "inhalt": {
+    "text": "Wie das Werkzeug funktioniert",
+    "ziel": "/blog/the-race-automatisierung"
+   },
+   "sort_order": 120
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "text",
+   "inhalt": {
+    "roh": "PLATZHALTER — hier schreibt Lucas seinen eigenen Text."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Ein paar Anregungen, was hier stehen könnte (einfach überschreiben):"
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "text",
+   "inhalt": {
+    "roh": "- Was das Ergebnis über die Arbeitsweise sagt\n- Wo es im Schnitt-Alltag tatsächlich merkbar wird\n- Wo es eben nicht passt"
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "ueberschrift",
+   "inhalt": {
+    "roh": "## So könnte ein Block mit Bild daneben aussehen"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "text_mit_bild",
+   "inhalt": {
+    "roh": ":::\nText steht links, Bilder oder GIFs stehen rechts daneben.\n\nMan kann mehrere Absätze in einen Block packen — die Aufteilung siehst nur du im Editor, auf der fertigen Seite ist davon nichts zu sehen.\n\n![](/therace-einblendung.jpg)\n:::"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Über mich"
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "text",
+   "inhalt": {
+    "roh": "In zwei Tagen konzipiert und geschnitten — ausschließlich aus Screen-Recordings und Photo-Booth-Aufnahmen im macOS-Look."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Kilian, besser bekannt als Musiker Absent, kannte ich bereits aus einer früheren Zusammenarbeit (und weil ich großer fan bin jaja), bei der ich YouTube-Videos aus seinen Twitch-Highlights geschnitten hatte. Nach einigen Monaten ohne Kontakt meldete er sich spontan per FaceTime: Er brauchte kurzfristig ein Musikvideo zu seinem Song \"Rockstar Selfish\", hatte aber kein professionelles Kameramaterial – nur den Wunsch, aktuelle Bilder und Videos von seiner Tour einzubauen."
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786803223741-cleanshot-2026-08-15-at-16-13-25-2x.webp){klein}"
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Da der Release-Tag für Musik freitags ist und er sich erst zwei Tage vorher gemeldet hatte (ganz viel liebe), blieb kaum Zeit."
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Aus früheren Streams wusste ich, dass Kilian einen iMac nutzt, und wollte ohnehin mal etwas im macOS-Look ausprobieren. Daraus entstand das Konzept: Ich bat ihn lediglich um eine Bildschirmaufnahme mit Photo Booth in drei verschiedenen Takes – mehr Rohmaterial gab es nicht. Aus diesem einfachen Ausgangsmaterial habe ich das komplette Video geschnitten, mit Effekten und eigenen Animationen versehen und die gewünschten Tour-Aufnahmen eingebaut. Kilian war von der Idee direkt überzeugt, eine Feedbackschleife war nicht nötig."
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Auf den ersten Blick wirkt das Konzept simpel – im Kontext von Absent als Künstler und einigen anderen Musikvideos passt der reduzierte, direkte macOS-Look aber bewusst zu seiner Ästhetik. Angesichts der extrem kurzen Produktionszeit und des minimalen Ausgangsmaterials ist das Ergebnis ein rundes, in sich stimmiges Musikvideo."
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 80
+  },
+  {
+   "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt · 2D-Animation"
+   },
+   "sort_order": 90
+  },
+  {
+   "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt, Motion Graphics und Thumbnail-Design für Instagram- und YouTube-Content — von kurzen Reels bis zu großen Dokuformaten."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Ich arbeite derzeit als freier Video Editor und Motion Designer für den Content Creator *Bastian Keller* im Umfeld von Bitbull. Im Zentrum steht sein Instagram-Hauptaccount, daneben bauen wir aktuell weitere, kleinere Profile für ihn auf. "
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Zusätzlich unterstütze ich auf seinem YouTube-Kanal bei den täglichen Krypto-News-Updates ebenso wie bei den größeren Dokumentationsvideos, wo ich vor allem bei der Ideenfindung, dem Thumbnail-Design sowie im Schnitt und bei Animationen mitarbeite. Meine Stärken liegen im Schnitt von Motion Graphics und Animationen sowie im Design performancestarker Thumbnails."
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "typ": "text",
+   "inhalt": {
+    "roh": "In den täglichen Team-Meetings bringe ich außerdem kreative Content-Ideen ein und wirke an der Content-Strategie mit."
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt · 2D-Animation · 3D-Animation · Thumbnail-Design"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "abschnitt",
+   "inhalt": {
+    "art": "persoenlich",
+    "farbe": null,
+    "rolle": "hallo",
+    "titel": "Hallo ich bin",
+    "kicker": "Video Editor & Motion Designer · Köln",
+    "zusatz": "Lucas :)"
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Doku, Serie, YouTube. Zuletzt „The Race“ für Joyn/ProSieben, Simplicissimus und Bastian Keller. Aktuell Freelancer in Köln-Ehrenfeld — offen für Projekte."
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "randnotiz",
+   "inhalt": {
+    "punkt": false,
+    "titel": "Basis",
+    "zeile1": "Köln-Ehrenfeld",
+    "zeile2": "remote möglich"
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "randnotiz",
+   "inhalt": {
+    "punkt": true,
+    "titel": "Status",
+    "zeile1": "Offen für Projekte",
+    "zeile2": ""
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "randnotiz",
+   "inhalt": {
+    "punkt": false,
+    "titel": "Schwerpunkt",
+    "zeile1": "Schnitt, Motion,",
+    "zeile2": "3D in Arbeit"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "randnotiz",
+   "inhalt": {
+    "punkt": false,
+    "titel": "Ausbildung",
+    "zeile1": "Mediendesign B.A.",
+    "zeile2": "Mediengestalter Bild & Ton"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "abschnitt",
+   "inhalt": {
+    "art": "persoenlich",
+    "farbe": null,
+    "rolle": "profil",
+    "titel": "Lucas, 22,\nKöln-Ehrenfeld.",
+    "kicker": "Wer schneidet da"
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Mediendesign B.A., danach als Mediengestalter Bild & Ton bei 33minutes im Vertrag — dort Schnitt und Motion für „The Race“, inklusive einer selbstgebauten Automatisierung für sämtliche Grafikeinblendungen der Staffel. Heute Freelancer zwischen Kundenprojekten und eigenen Sachen, und tief im 3D-Modelling, weil Blender gerade mehr Spaß macht als es sollte."
+   },
+   "sort_order": 80
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "text",
+   "inhalt": {
+    "roh": "- **DaVinci Resolve** — täglich\n- **Premiere Pro** — täglich\n- **After Effects** — täglich\n- **Blender** — vertiefe ich\n- **Photoshop** — sicher\n- **Illustrator** — sicher\n- **Figma** — sicher\n- **Frame.io** — Review"
+   },
+   "sort_order": 90
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "text",
+   "inhalt": {
+    "roh": "- Joyn / ProSieben\n- 33minutes\n- Simplicissimus\n- Bastian Keller\n- Absent"
+   },
+   "sort_order": 100
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "abschnitt",
+   "inhalt": {
+    "art": "kontakt",
+    "email": "lucasschoenwald03@gmail.com",
+    "farbe": "#BFCC94",
+    "rolle": "kontakt",
+    "titel": "Schreib mir!",
+    "telefon": "0151 68186659"
+   },
+   "sort_order": 110
+  },
+  {
+   "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Antwort meist am selben Tag"
+   },
+   "sort_order": 120
+  },
+  {
+   "seite_id": "760dd498-1fe3-436b-be48-d8984e3fb6ca",
+   "typ": "text",
+   "inhalt": {
+    "roh": "test"
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "text",
+   "inhalt": {
+    "roh": "PLATZHALTER — dieser Text wird von Lucas selbst geschrieben."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "ueberschrift",
+   "inhalt": {
+    "roh": "## Das Werkzeug"
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "text",
+   "inhalt": {
+    "roh": "So sah das Eingabe-Panel aus. Teilnehmer wählen, Animationsart wählen, Beträge eintragen — die Euro-Summe rechnet sich selbst."
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "werkzeug",
+   "inhalt": {
+    "roh": "::demo the-race-pipeline"
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "ueberschrift",
+   "inhalt": {
+    "roh": "## Die Anbindung an After Effects"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Jede Einblendung ist eine Komposition mit benannten Textebenen. Das Skript sucht sie über den Namen, setzt die Werte und legt die Komposition in die Renderliste."
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "code",
+   "inhalt": {
+    "roh": "```jsx\nfunction baueEinblendung(daten) {\n    var vorlage = findeComp(\"TPL_Geld\");\n    var comp    = vorlage.duplicate();\n    comp.name   = daten.teilnehmer + \"_\" + daten.szene;\n\n    setzeText(comp, \"EUR_Summe\", formatEuro(daten.eur));\n    setzeText(comp, \"Delta\",     (daten.delta > 0 ? \"+\" : \"\") + kurz(daten.delta));\n\n    var farbe = comp.layer(\"BG_Pille\").property(\"Contents\")\n                    .property(\"Fill 1\").property(\"Color\");\n    farbe.setValue(hexZuRgb(daten.teamfarbe));\n\n    var eintrag = app.project.renderQueue.items.add(comp);\n    eintrag.outputModule(1).file = new File(daten.ziel);\n    return comp;\n}\n```"
+   },
+   "sort_order": 80
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 90
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "ueberschrift",
+   "inhalt": {
+    "roh": "## Das Ergebnis"
+   },
+   "sort_order": 100
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![So sah die fertige Einblendung in der Sendung aus](/therace-einblendung.jpg){mittel}"
+   },
+   "sort_order": 110
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Mehr dazu bei [The Race auf Joyn](https://www.joyn.de)."
+   },
+   "sort_order": 120
+  },
+  {
+   "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+   "typ": "text",
+   "inhalt": {
+    "roh": "After Effects · Prozessautomatisierung · ExtendScript"
+   },
+   "sort_order": 130
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt, Animation und Meme-Auswahl im Team erarbeitet — mit kreativem Freiraum innerhalb des bestehenden Kanal-Stils."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Für den YouTube-Kanal von Jules war ich Teil eines fünfköpfigen Editing-Teams. Die Arbeitsweise: Wir bekamen jeweils nur die fertige Tonspur eines Videos und die Aufgabe, uns kreativ frei zu entfalten – innerhalb des etablierten Jules-Stils, aber ohne festes Skript für den visuellen Teil. Jeder im Team suchte sich einen Abschnitt aus, schnitt ihn, baute Animationen und wählte passende Memes und Footage aus."
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786805044507-cleanshot-2026-08-15-at-16-06-55-2x.webp){mittel}"
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Der Prozess lief iterativ: Erst ein grober Schnitt mit Grundkonzept und Platzhaltern, dann Verfeinerung. Stellen, für die noch keine passende Idee oder kein passendes Material da war, blieben zunächst offen und wurden in wöchentlichen Feedback-Runden mit dem ganzen Team weiterentwickelt – dort wurde gegenseitig geholfen, Ideen ausgetauscht und Jules selbst gab regelmäßig Input. Am Ende entscheidet Jules, was im finalen Video wie verwendet wird; Teile werden verschoben, angepasst oder von ihm selbst nachbearbeitet, da der Kanal seiner ist."
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786805066538-cleanshot-2026-08-15-at-16-06-12-2x.webp){klein}"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Weil in einem Team-Editing-Prozess mit mehreren Überarbeitungsschritten kein einzelnes Video eindeutig einer Person zuzuordnen ist, hier stattdessen konkrete Timestamps, an denen mein Schnitt im finalen Video zu sehen ist:"
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "\"**Das Scheitern von Walmart in Deutschland**\" – 0:55–1:54, 5:19–5:42, 7:19–7:35"
+   },
+   "sort_order": 80
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "\"**Eine Anleitung für die Autobahn**\" – 11:36–13:09"
+   },
+   "sort_order": 90
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "\"**Ein Video über die Deutsche Bahn**\" – 4:58–5:15, 6:48–7:59"
+   },
+   "sort_order": 100
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 110
+  },
+  {
+   "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt · 2D-Animation"
+   },
+   "sort_order": 120
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Das ist ein Textblock. Er versteht *kursiv*, **fett** und [Links](https://mausemaus.com)."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "ueberschrift",
+   "inhalt": {
+    "roh": "## Das ist eine Ueberschrift"
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "randnotiz",
+   "inhalt": {
+    "punkt": true,
+    "titel": "Eckdaten",
+    "zeile1": "So sieht eine Randnotiz aus",
+    "zeile2": "zweite Zeile optional"
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![Beispielbild](/fern.jpg)"
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "gif",
+   "inhalt": {
+    "roh": "![Beispiel](/absent.jpg)"
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "video",
+   "inhalt": {
+    "roh": "https://www.youtube.com/watch?v=bpGfmHmNnic"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "text_mit_bild",
+   "inhalt": {
+    "roh": ":::\nText steht links, das Bild rechts daneben. Mehrere Absaetze sind erlaubt.\n\n![](/fern.jpg)\n:::"
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "code",
+   "inhalt": {
+    "roh": "```js\nconsole.log(\"Hallo Welt\");\n```"
+   },
+   "sort_order": 80
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "werkzeug",
+   "inhalt": {
+    "roh": "::demo the-race-pipeline"
+   },
+   "sort_order": 90
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 100
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "tuer",
+   "inhalt": {
+    "text": "Beispiel-Tuerchen zu einer echten Welt",
+    "ziel": "the-race-automatisierung"
+   },
+   "sort_order": 110
+  },
+  {
+   "seite_id": "d7f81b34-47a8-4d95-ac7f-fb3131a884d4",
+   "typ": "abschnitt",
+   "inhalt": {
+    "art": "beruflich",
+    "farbe": null,
+    "titel": "Abschnitt (wirkt nur auf der Brief-Seite)"
+   },
+   "sort_order": 120
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Feinschnitt, 2D- und 3D-Animation für Dokumentationsformate — inklusive selbst erlernter 3D-Skills, die im laufenden Betrieb produktiv wurden."
+   },
+   "sort_order": 10
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Bei Simplicissimus war ich Teil eines rund 45-köpfigen Teams, das Dokumentationsvideos im bekannten Simplicissimus Stil produziert. Anders als bei kleineren Projekten gibt es hier mehr Vorgaben: Neben der zugewiesenen Tonspur bekommt man ein Skript mit Anweisungen zur groben Bildsprache und meist auch passendes Footage. Meine Aufgabe ist es, aus den groben Ideen der Creative Direction einen stimmigen Schnitt zu bauen – hauptsächlich verantwortlich bin ich für Feinschnitt, 2D-Animationen und Effekte, unterstütze aber auch dort, wo gerade Bedarf ist."
+   },
+   "sort_order": 20
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 30
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Im Laufe der Zeit habe ich mir aus eigenem Interesse und mit Unterstützung der 3D-Animator:innen im Team 3D-Animation angeeignet – von einfachen bis hin zu komplexeren Szenen, die auch in den Videos zum Einsatz kommen. Auch wenn die Struktur bei Simplicissimus enger ist als etwa bei Jules, ist sie keineswegs starr: Eigene Ideen einzubringen ist ausdrücklich erwünscht, teils sogar bevorzugt. Wie bei Teamproduktionen üblich lässt sich auch hier kein Video eindeutig \"das habe ich gemacht\" zuordnen, da man parallel an mehreren Projekten mitarbeitet."
+   },
+   "sort_order": 40
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Als Referenz eignet sich das Video \"The CIA's Scariest Weapon\", bei dem ich größtenteils den Feinschnitt sowie mehrere 3D-Animationen übernommen habe – darunter die 3D-Animation des Röhrenfernsehers, während komplexere 3D-Szenen im Video von anderen Teammitgliedern stammen."
+   },
+   "sort_order": 50
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "bild",
+   "inhalt": {
+    "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786801627043-simpli2.webp)"
+   },
+   "sort_order": 60
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "trenner",
+   "inhalt": {
+    "roh": "---"
+   },
+   "sort_order": 70
+  },
+  {
+   "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+   "typ": "text",
+   "inhalt": {
+    "roh": "Schnitt · 2D-Animation · 3D-Animation"
+   },
+   "sort_order": 80
+  }
+ ],
+ "settings": [
+  {
+   "id": 1,
+   "hero_eyebrow": "Video Editor & Motion Designer · Köln",
+   "hero_line1": "Hallo ich bin",
+   "hero_line2": "Lucas :)",
+   "hero_intro": "Doku, Serie, YouTube. Zuletzt „The Race“ für Joyn/ProSieben, Simplicissimus und Bastian Keller. Aktuell Freelancer in Köln-Ehrenfeld — offen für Projekte.",
+   "showreel_url": null,
+   "portrait_url": null,
+   "portrait_pos": "50% 50%",
+   "profil_kicker": "Wer schneidet da",
+   "profil_titel": "Lucas, 22,\nKöln-Ehrenfeld.",
+   "profil_text": "Mediendesign B.A., danach als Mediengestalter Bild & Ton bei 33minutes im Vertrag — dort Schnitt und Motion für „The Race“, inklusive einer selbstgebauten Automatisierung für sämtliche Grafikeinblendungen der Staffel. Heute Freelancer zwischen Kundenprojekten und eigenen Sachen, und tief im 3D-Modelling, weil Blender gerade mehr Spaß macht als es sollte.",
+   "kontakt_titel": "Schreib mir!",
+   "kontakt_zusatz": "Antwort meist am selben Tag",
+   "email": "lucasschoenwald03@gmail.com",
+   "telefon": "0151 68186659",
+   "infos": [
+    {
+     "punkt": false,
+     "titel": "Basis",
+     "zeile1": "Köln-Ehrenfeld",
+     "zeile2": "remote möglich"
+    },
+    {
+     "punkt": true,
+     "titel": "Status",
+     "zeile1": "Offen für Projekte",
+     "zeile2": ""
+    },
+    {
+     "punkt": false,
+     "titel": "Schwerpunkt",
+     "zeile1": "Schnitt, Motion,",
+     "zeile2": "3D in Arbeit"
+    },
+    {
+     "punkt": false,
+     "titel": "Ausbildung",
+     "zeile1": "Mediendesign B.A.",
+     "zeile2": "Mediengestalter Bild & Ton"
+    }
+   ],
+   "kunden": [
+    "Joyn / ProSieben",
+    "33minutes",
+    "Simplicissimus",
+    "Bastian Keller",
+    "Absent"
+   ],
+   "werkzeuge": [
+    {
+     "name": "DaVinci Resolve",
+     "stufe": "täglich"
+    },
+    {
+     "name": "Premiere Pro",
+     "stufe": "täglich"
+    },
+    {
+     "name": "After Effects",
+     "stufe": "täglich"
+    },
+    {
+     "name": "Blender",
+     "stufe": "vertiefe ich"
+    },
+    {
+     "name": "Photoshop",
+     "stufe": "sicher"
+    },
+    {
+     "name": "Illustrator",
+     "stufe": "sicher"
+    },
+    {
+     "name": "Figma",
+     "stufe": "sicher"
+    },
+    {
+     "name": "Frame.io",
+     "stufe": "Review"
+    }
+   ],
+   "updated_at": "2026-08-16T00:36:42.994117+00:00"
+  }
+ ]
+}

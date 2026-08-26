@@ -4,8 +4,20 @@
      neu — renderMarkdown(aneinandergehängte Rohteile aller Blöcke)
    Verglichen wird der SICHTBARE Text und jede Bild- und Videoadresse.
    Schlägt die Prüfung an, benennt sie den fehlenden Abschnitt wörtlich. */
+import { readFile } from 'node:fs/promises';
 import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
+
+/* Der Umzugs-Nachweis läuft gegen einen EINGEFRORENEN Stand, nicht gegen die
+   laufende Datenbank. Grund: Lucas bearbeitet seine Seite täglich im Admin --
+   neues Titelbild, Projekt archiviert, Platzhaltertext durch echten ersetzt.
+   Gegen die lebende Datenbank verglichen wurde diese Prüfung dadurch rot,
+   obwohl nichts kaputt war. Eine Prüfung, die bei normaler Benutzung Alarm
+   schlägt, wird ignoriert und ist damit wertlos.
+   Die Frage "ging beim Umzug etwas verloren?" hat ohnehin genau eine
+   richtige Antwort, und die ändert sich nie mehr. */
+const nachweis = JSON.parse(
+  await readFile(new URL('./feste/umzug-nachweis.json', import.meta.url), 'utf8'));
 
 const wurzel = new URL('../HOCHLADEN/', import.meta.url).pathname;
 const server = await starteServer({ wurzel, port: 8907 });
@@ -15,19 +27,15 @@ const s = await oeffne('http://127.0.0.1:8907/', { port: 9347 });
 await s.warte(3000);
 
 const ergebnis = JSON.parse(await s.werte(`(async () => {
-  const CFG = window.MM_CONFIG;
-  const kopf = { apikey: CFG.key, Authorization: 'Bearer ' + CFG.key };
-  const hol = async (pfad) => (await fetch(CFG.url + '/rest/v1/' + pfad, { headers: kopf })).json();
-
-  const projekte = await hol('projects?status=eq.published&select=*&order=sort_order.asc');
-  const beitraege = await hol('posts?status=eq.published&select=*');
-  /* Ausdrückliche Spaltenliste statt "*": "notiz" gehört NICHT hinein --
-     sie ist für "anon" (diesen Schlüssel benutzt diese ganze Prüfung)
-     inzwischen absichtlich gesperrt, ein "*" würde deshalb mit einem
-     Rechte-Fehler scheitern. Diese Liste ist alles, was der Vergleich
-     unten wirklich braucht. */
-  const BLOCK_SPALTEN = 'id,typ,inhalt,sort_order,breite,bewegung';
-  const seiten = await hol('seiten?select=*,bloecke(' + BLOCK_SPALTEN + ')&order=sort_order.asc');
+  const N = ${JSON.stringify(nachweis)};
+  const projekte  = N.projects.filter(p => p.status === 'published');
+  const beitraege = N.posts.filter(p => p.status === 'published');
+  /* Die Seiten samt Blöcken kommen aus demselben eingefrorenen Stand.
+     "notiz" ist dort gar nicht erst enthalten (die Datei wird versioniert,
+     private Notizen gehören nicht hinein) -- der Vergleich braucht sie auch
+     nicht. */
+  const seiten = N.seiten.map(x => ({ ...x,
+    bloecke: N.bloecke.filter(b => b.seite_id === x.id) }));
 
   /* Sichtbaren Text aus gerendertem Markdown ziehen, Leerraum vereinheitlichen. */
   const alsText = (md) => {
@@ -44,7 +52,16 @@ const ergebnis = JSON.parse(await s.werte(`(async () => {
   /* Die Rohteile einer Seite in ihrer Reihenfolge aneinanderhängen. */
   const rohVon = (seite) => (seite.bloecke || [])
     .slice().sort((a, b) => a.sort_order - b.sort_order)
-    .map(b => (b.inhalt && b.inhalt.roh) || '')
+    .map(b => {
+      const i = b.inhalt || {};
+      if (i.roh) return i.roh;
+      /* Randnotiz, Abschnitt und Tuerchen tragen ihren Text NICHT in "roh",
+         sondern in eigenen Feldern. Wer nur "roh" einsammelt, uebersieht
+         genau die Eckdaten aus der alten Startseite (Status, Schwerpunkt)
+         und meldet sie faelschlich als verloren. */
+      return [i.titel, i.zusatz, i.zeile1, i.zeile2, i.text, i.ziel]
+        .filter(Boolean).join(' ');
+    })
     .filter(Boolean).join('\\n\\n');
 
   /* Text in Sinnabschnitte zerlegen, damit wir sagen können, WAS fehlt. */
@@ -72,22 +89,29 @@ const ergebnis = JSON.parse(await s.werte(`(async () => {
     return !seite || seite.titel !== p.title;
   }).map(p => p.slug);
 
-  /* Die private Notiz darf nirgends im ausgelieferten HTML stehen. Seit die
-     Spalte für "anon" gesperrt ist (siehe oben), liefert diese Abfrage gar
-     keine notiz-Werte mehr -- notizen bleibt dadurch immer leer. Das ist
-     kein Blindgänger, sondern die logische Folgerung aus der Prüfung
-     weiter unten ("private Notizen sind für Fremde nicht abfragbar"): kann
-     "anon" die Spalte gar nicht erst lesen, kann auch db.js (das genau
-     denselben Schlüssel benutzt) sie nie ins HTML bringen. Die Zeile bleibt
-     trotzdem stehen, als zweite, unabhängige Absicherung. */
-  const notizen = seiten.flatMap(x => (x.bloecke || []).map(b => b.notiz)).filter(Boolean);
-  const notizSichtbar = notizen.filter(n => document.documentElement.innerHTML.includes(n));
+  /* Hier stand einmal "die Notiz darf nicht im HTML stehen". Gegen den
+     eingefrorenen Stand ist das ein Blindgaenger: Dort gibt es gar keine
+     Notizen, die Pruefung meldete "0 vorhanden, 0 sichtbar" und konnte
+     niemals fehlschlagen. Der wirksame Nachweis ist der gezielte Abruf
+     weiter unten -- der laeuft LIVE gegen die echte Datenbank und
+     verlangt HTTP 401. */
+  /* Der gesamte Text ALLER Bloecke, wie ihn ein Besucher lesen wuerde. */
+  const allerText = seiten.map(x => alsText(rohVon(x))).join(' ');
+  const e = (N.settings && N.settings[0]) || {};
+  const startseiteFehlt = [];
+  const dabei = (wert, name) => { if (wert && !allerText.includes(String(wert).trim())) startseiteFehlt.push(name); };
+  (e.infos || []).forEach(i => dabei(i.zeile1, 'info:' + i.titel));
+  (e.werkzeuge || []).forEach(w => dabei(w.name, 'werkzeug:' + w.name));
+  (e.kunden || []).forEach(k => dabei(k, 'kunde:' + k));
+  if (e.profil_text) dabei(String(e.profil_text).slice(0, 40), 'profil_text');
+  if (e.hero_intro) dabei(String(e.hero_intro).slice(0, 40), 'hero_intro');
 
   return JSON.stringify({
+    startseiteFehlt,
     projekte: projekte.length, beitraege: beitraege.length, seiten: seiten.length,
     fehlend: fehlend.slice(0, 8), fehlendGesamt: fehlend.length,
     ohneSeite, adressFehler: adressFehler.slice(0, 8), adressGesamt: adressFehler.length,
-    titelFehler, notizen: notizen.length, notizSichtbar,
+    titelFehler,
   });
 })()`));
 
@@ -103,9 +127,14 @@ pruefe('alle Titel stimmen überein', ergebnis.titelFehler.length === 0, ergebni
 pruefe('es gibt überhaupt Blöcke zu prüfen',
   ergebnis.seiten >= 7 && ergebnis.projekte === 5,
   ergebnis.seiten + ' Seiten, ' + ergebnis.projekte + ' Projekte, ' + ergebnis.beitraege + ' Beiträge');
-pruefe('private Notizen erscheinen NICHT im ausgelieferten HTML',
-  ergebnis.notizSichtbar.length === 0,
-  ergebnis.notizen + ' Notizen vorhanden, ' + ergebnis.notizSichtbar.length + ' davon sichtbar');
+/* Alles, was auf der alten Startseite stand (Eckdaten, Werkzeuge, Kunden),
+   musste beim Umzug in Bloecke wandern -- es hing an den Einstellungen,
+   nicht an den Projekten, und waere sonst still verschwunden. Frueher lief
+   diese Pruefung in pruefe-brief.mjs gegen die LEBENDE Seite; seit Lucas
+   den Werkzeug-Abschnitt bewusst entfernt hat, schlug sie dort falschen
+   Alarm. Hier gilt sie gegen den eingefrorenen Stand und bleibt wahr. */
+pruefe('KEIN Inhalt der alten Startseite ging beim Umzug verloren',
+  ergebnis.startseiteFehlt.length === 0, ergebnis.startseiteFehlt.join(', '));
 
 /* Der eigentliche Gewinn: nicht nur, dass die Notiz nicht ANGEZEIGT wird,
    sondern dass ein Fremder sie über die Datenbank-Schnittstelle gar nicht
