@@ -22,11 +22,20 @@ const d = JSON.parse(await s.werte(`(async () => {
        stimmen. Stattdessen den ersten echten Textblock nehmen, denn genau
        der soll unveraendert im Brief stehen. */
     summary: (() => {
-      const b = (p.bloecke || []).slice().sort((x, y) => x.sort_order - y.sort_order)
+      const bl = (p.bloecke || []).slice().sort((x, y) => x.sort_order - y.sort_order)
         .find(x => x.typ === 'text' && x.inhalt && x.inhalt.roh);
-      if (!b) return '';
-      /* Erster Satz reicht und ist robust gegen Auszeichnungen im Rest. */
-      return String(b.inhalt.roh).replace(/[*_\[\]()]/g, '').split(/(?<=[.!?])\s/)[0].trim();
+      if (!bl) return '';
+      /* Auszeichnungen NICHT von Hand wegschneiden -- daran bin ich zweimal
+         gescheitert: erst blieben die Sternchen stehen (Backslash im
+         Template-Literal verschluckt), dann verschwanden runde Klammern aus
+         normalem Text ("(und weil ich großer fan bin jaja)"), weil die
+         Regel sie für Markdown-Links hielt.
+         Stattdessen denselben Umsetzer benutzen, den die Seite benutzt --
+         dann KANN das Ergebnis nicht auseinanderlaufen. */
+      const d = document.createElement('div');
+      d.innerHTML = window.mm.renderMarkdown(bl.inhalt.roh);
+      const sichtbar = (d.innerText || d.textContent || '').replace(/\\s+/g, ' ').trim();
+      return sichtbar.split(/(?<=[.!?])\\s/)[0].trim();
     })(),
   }));
   const abschnitte = [...document.querySelectorAll('#brief section')];
