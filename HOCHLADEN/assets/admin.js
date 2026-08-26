@@ -50,6 +50,20 @@ const laden = (an) => { $('#ladebalken').hidden = !an; };
    auch wenn #app noch versteckt ist. */
 richteAnleitungEin($('#anleitung-panel'));
 
+/* Die Hoehe der oberen Kopfzeile laufend messen und als CSS-Variable
+   bereitstellen. Die Editor-Kopfzeile klebt daran fest -- ohne das kleben
+   beide bei 0 und schieben sich beim Scrollen ineinander. Gemessen statt
+   fest eingetragen, weil die obere Leiste auf schmalen Fenstern umbricht
+   und dann fast doppelt so hoch ist. */
+(() => {
+  const oben = document.querySelector('.admin-top');
+  if (!oben) return;
+  const setzen = () => document.documentElement.style
+    .setProperty('--kopf-hoehe', Math.round(oben.getBoundingClientRect().height) + 'px');
+  setzen();
+  new ResizeObserver(setzen).observe(oben);
+})();
+
 /* ---------- Anmeldung ---------- */
 
 $('#login-form').addEventListener('submit', async (e) => {
@@ -355,6 +369,11 @@ async function freierSlug(basis) {
 
 function feldSichtbarkeit(typ) {
   $('#nur-projekt-welt').hidden = typ === 'brief';
+  /* Beim Brief wird der Seitentitel NIRGENDS auf der Seite gezeigt -- die
+     grosse Begruessung kommt aus dem ersten abschnitt-Block. Ohne diesen
+     Hinweis steht "Hallo ich bin" zweimal untereinander und man sucht den
+     Unterschied. */
+  $('#titel-hinweis').hidden = typ !== 'brief';
   $('#nur-projekt').hidden = typ !== 'projekt';
   $('#nur-welt').hidden = typ !== 'welt';
   $('#mit-bild').hidden = typ === 'brief';

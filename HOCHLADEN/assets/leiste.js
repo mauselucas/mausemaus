@@ -6,7 +6,6 @@
   const SCHWELLE = 120;    // ab wie viel Scrollen sie überhaupt zugeht
   const LUFT = 8;          // Mindestabstand zwischen zwei Etiketten
   const LUFT_SEG = 6;      // sichtbarer Abstand zwischen zwei Segmenten (~6 px, s. Vorgaben)
-  const LAENGE = 214;      // Sekunden, auf die der Timecode abgebildet wird
 
   window.mmLeiste = function (wurzel, abschnitte, { scroller }) {
     wurzel.className = 'mml';
@@ -16,7 +15,7 @@
       '<div class="mml-gleis"></div>' +
       '<div class="mml-sicht"></div>' +
       '<div class="mml-etiketten"></div>' +
-      '<div class="mml-kopf"><div class="mml-rund"></div><div class="mml-zeit">00:00</div></div>' +
+      '<div class="mml-kopf"><div class="mml-rund"></div></div>' +
       '<div class="mml-fuss">' +
         '<div><span style="background:#3E5A78"></span>berufliche Projekte</div>' +
         '<div><span></span>persönliches</div>' +
@@ -26,7 +25,6 @@
     const gleis = wurzel.querySelector('.mml-gleis'),
           lage  = wurzel.querySelector('.mml-etiketten'),
           kopf  = wurzel.querySelector('.mml-kopf'),
-          zeit  = wurzel.querySelector('.mml-zeit'),
           sicht = wurzel.querySelector('.mml-sicht'),
           griff = wurzel.querySelector('.mml-griff');
 
@@ -150,11 +148,6 @@
       });
     }
 
-    const mmss = f => {
-      const s = Math.round(f * LAENGE);
-      return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-    };
-
     function aktualisieren() {
       const stand = standVon();
       const max = scroller.scrollHeight - scroller.clientHeight;
@@ -165,7 +158,6 @@
       kopf.style.top = (gt() + anteil * gh()) + 'px';
       sicht.style.top = (gt() + anteil * gh()) + 'px';
       sicht.style.height = (sichtbar * gh()) + 'px';
-      zeit.textContent = mmss(f);
 
       const mitte = stand + scroller.clientHeight * 0.45;
       let akt = 0;

@@ -219,3 +219,8 @@
   .mm-block.mm-block-links .mm-block-text  { order: 1; }
   .mm-block.mm-block-links .mm-block-media { order: 2; }
 }
+
+/* Reiter, die es im echten Werkzeug gab, in der Nachbildung aber nicht
+   hinterlegt sind: sichtbar als Beleg, erkennbar nicht bedienbar. */
+.wz-art[disabled] { opacity: .38; cursor: not-allowed; }
+.wz-art[disabled]:hover { background: none; }

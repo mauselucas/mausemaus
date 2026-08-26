@@ -751,22 +751,49 @@ export function mountBlockEditor(wurzel, {
         return inhaltDiv;
       }
       case 'abschnitt': {
+        /* Ein Abschnitt hat mehr Felder, als frueher zu sehen waren: "rolle"
+           entscheidet ueber die Sonderdarstellung im Brief, "zusatz" ist die
+           farbig gesetzte zweite Zeile des Grusses ("Lucas :)") und "kicker"
+           die kleine gesperrte Zeile darunter. Alle drei wurden vom Brief
+           laengst gerendert, waren im Editor aber nirgends erreichbar --
+           Lucas konnte seinen eigenen Namen auf der Startseite nicht
+           aendern. */
+        const rollen = [['', '— normaler Abschnitt'], ['hallo', 'Gruss (grosse Kopfzeile)'],
+          ['profil', 'Profil'], ['kontakt', 'Kontakt (mit Formular)']];
         const wrap = document.createElement('div'); wrap.className = 'be-abschnitt';
         wrap.innerHTML = `
           <input class="be-ab-titel" placeholder="Titel des Abschnitts" value="${esc(b.inhalt.titel || '')}">
+          <input class="be-ab-zusatz" placeholder="zweite Zeile, farbig (z. B. „Lucas :)“)" value="${esc(b.inhalt.zusatz || '')}">
           <span class="ab-zusatz">
+            <select class="be-ab-rolle" aria-label="Rolle im Brief">
+              ${rollen.map(([v, l]) => `<option value="${v}"${(b.inhalt.rolle || '') === v ? ' selected' : ''}>${l}</option>`).join('')}
+            </select>
             <select class="be-ab-art" aria-label="Art des Abschnitts">
               <option value="beruflich"${b.inhalt.art === 'beruflich' ? ' selected' : ''}>beruflich</option>
               <option value="persoenlich"${b.inhalt.art === 'persoenlich' ? ' selected' : ''}>persönlich</option>
               <option value="kontakt"${b.inhalt.art === 'kontakt' ? ' selected' : ''}>kontakt</option>
             </select>
             <input type="text" class="be-ab-farbe" placeholder="#RRGGBB" value="${esc(b.inhalt.farbe || '')}" aria-label="Farbe">
+            <input type="text" class="be-ab-kicker" placeholder="kleine Zeile darunter" value="${esc(b.inhalt.kicker || '')}" aria-label="Kleine Zeile">
           </span>`;
         const aendern = (patch, sofort) => {
           Object.assign(b.inhalt, patch);
           if (sofort) blockSpeichern(b); else blockSpeichernEntprellt(b);
         };
+        const zusatzFeld = wrap.querySelector('.be-ab-zusatz');
+        /* Die farbige Zeile gehoert nur zum Gruss -- bei allen anderen
+           Rollen waere sie ein Feld ohne Wirkung. */
+        const zusatzZeigen = () => {
+          zusatzFeld.hidden = (b.inhalt.rolle || '') !== 'hallo';
+        };
+        zusatzZeigen();
         wrap.querySelector('.be-ab-titel').addEventListener('input', (e) => aendern({ titel: e.target.value }));
+        zusatzFeld.addEventListener('input', (e) => aendern({ zusatz: e.target.value }));
+        wrap.querySelector('.be-ab-kicker').addEventListener('input', (e) => aendern({ kicker: e.target.value }));
+        wrap.querySelector('.be-ab-rolle').addEventListener('change', (e) => {
+          aendern({ rolle: e.target.value || null }, true);
+          zusatzZeigen();
+        });
         wrap.querySelector('.be-ab-art').addEventListener('change', (e) => aendern({ art: e.target.value }, true));
         wrap.querySelector('.be-ab-farbe').addEventListener('input', (e) => aendern({ farbe: e.target.value || null }));
         inhaltDiv.appendChild(wrap);

@@ -52,10 +52,6 @@
   z-index:5; pointer-events:none; }
 .mml-rund { position:absolute; left:5px; top:5px; width:9px; height:9px; border-radius:50%;
   background:#0D1821; box-shadow:0 0 0 4.5px #FBFAF6, 0 0 0 6px rgba(13,24,33,.22); }
-.mml-zeit { position:absolute; left:196px; top:2.5px; width:44px; text-align:right;
-  font-family:'Space Mono',monospace; font-size:9px; color:#B3AFA2;
-  font-variant-numeric: tabular-nums;
-  transition: opacity var(--mml-dauer) var(--mml-kurve); }
 .mml-sicht { position:absolute; left:26.5px; width:11px; border-radius:99px;
   background:rgba(13,24,33,.055); z-index:3; pointer-events:none; }
 
@@ -72,7 +68,7 @@
   transition: right var(--mml-dauer) var(--mml-kurve), background .15s, color .15s; }
 .mml-griff:hover { background:#BFCC94; color:#0D1821; }
 
-.mml-zu .mml-et, .mml-zu .mml-fuehrung, .mml-zu .mml-fuss, .mml-zu .mml-zeit {
+.mml-zu .mml-et, .mml-zu .mml-fuehrung, .mml-zu .mml-fuss {
   opacity:0; pointer-events:none; }
 .mml-zu .mml-griff { right:-11.5px; }
 
@@ -103,7 +99,7 @@
      bliebe jedes Segment 0 px breit und das Fortschrittsband unsichtbar. */
   .mml-seg { top: auto; bottom: 0; height: 4px; left: var(--von); width: var(--dicke);
     border-radius: 0; }
-  .mml-kopf, .mml-sicht, .mml-fuehrung, .mml-zeit { display: none; }
+  .mml-kopf, .mml-sicht, .mml-fuehrung { display: none; }
 
   /* Etiketten erst sichtbar, wenn aufgeklappt — dann als schlichte Liste. */
   .mml-etiketten { position: static; padding: 12px 14px 18px; }

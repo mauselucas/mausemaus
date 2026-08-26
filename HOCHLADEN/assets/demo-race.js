@@ -57,7 +57,7 @@
             </div>
           </main>
         </div>
-        <div class="wz-fussnote">Bedienbare Nachbildung der Oberfläche · die Euro-Summe wird echt berechnet</div>
+        <div class="wz-fussnote">Nachbildung der Oberfläche · nachträglich neu gebaut · die Euro-Summe wird echt berechnet</div>
       </div>`;
 
     const $ = (s) => wurzel.querySelector(s);
@@ -67,8 +67,15 @@
       <button class="wz-person" data-i="${i}" aria-pressed="${i === person}">
         <i style="background:${p.farbe}"></i>${p.name.replace('\n', ' ')}</button>`).join('');
 
+    /* Nur "Geld" ist hinterlegt. Die uebrigen Reiter bleiben SICHTBAR --
+       sie zeigen, was das echte Werkzeug konnte -- sind aber ausdruecklich
+       nicht bedienbar. Vorher liessen sie sich anklicken und man landete
+       auf einer Seite, die nur erklaert, dass hier nichts ist. Ein Knopf,
+       der ins Leere fuehrt, ist schlechter als einer, der erkennbar nicht
+       geht. */
     $('#wz-arten').innerHTML = ARTEN.map(a => `
-      <button class="wz-art" role="tab" data-art="${a}" aria-pressed="${a === art}">${a}</button>`).join('');
+      <button class="wz-art" role="tab" data-art="${a}" aria-pressed="${a === art}"
+        ${a === 'Geld' ? '' : 'disabled aria-disabled="true" tabindex="-1" title="In dieser Nachbildung ist nur „Geld“ hinterlegt."'}>${a}</button>`).join('');
 
     $('#wz-leute').addEventListener('click', (e) => {
       const b = e.target.closest('.wz-person'); if (!b) return;
@@ -79,6 +86,11 @@
 
     $('#wz-arten').addEventListener('click', (e) => {
       const b = e.target.closest('.wz-art'); if (!b) return;
+      /* Doppelt gesichert: disabled verhindert den Klick schon im Browser,
+         diese Zeile faengt alles ab, was trotzdem hier ankaeme (z. B. ein
+         Klick aus einem Skript). Die Ansicht bleibt dadurch IMMER auf
+         "Geld" -- genau das war der Wunsch. */
+      if (b.disabled || b.dataset.art !== 'Geld') return;
       art = b.dataset.art;
       wurzel.querySelectorAll('.wz-art').forEach(x =>
         x.setAttribute('aria-pressed', x.dataset.art === art));
@@ -114,12 +126,10 @@
     }
 
     function zeichneInhalt() {
-      if (art !== 'Geld') {
-        $('#wz-inhalt').innerHTML =
-          `<p class="wz-hinweis">Für „${art}" gab es im Werkzeug eigene Felder —
-           in dieser Nachbildung ist nur „Geld" hinterlegt.</p>`;
-        return;
-      }
+      /* Frueher stand hier ein Zweig fuer "art !== Geld". Seit die anderen
+         Reiter nicht mehr bedienbar sind, kann er nicht mehr erreicht
+         werden -- und toter Code wird in diesem Projekt entfernt, nicht
+         auskommentiert. */
       $('#wz-inhalt').innerHTML = `
         <div class="wz-felder">
           ${spalte('Betrag vorher', vorher, 'vorher')}

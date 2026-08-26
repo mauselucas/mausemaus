@@ -185,5 +185,42 @@ const jsFehler2 = z.fehlerAufSeite();
 pruefe('keine JavaScript-Fehler bei "zeilenweise"', jsFehler2.length === 0, jsFehler2.join(' | '));
 await z.zu();
 
+/* ---------- "Volle Breite" muss wirklich breit sein ----------
+   Vorher brach ein Block mit Breite "voll" genau um den Innenabstand der
+   Lesespalte aus -- 26px je Seite. Der Unterschied zu "normal" waren damit
+   52px, und Lucas' Reaktion war voellig richtig: "veraendert sich nur
+   minimal". Der Vertrag ist also nicht "voll ist anders", sondern
+   "voll ist DEUTLICH breiter" -- und ragt trotzdem nie aus dem
+   Scrollbereich heraus, auch nicht auf schmalen Fenstern. */
+for (const breite of [1440, 1280, 1024, 700]) {
+  const b = await oeffne('http://127.0.0.1:8909/', { port: 9349, breite, hoehe: 800 });
+  await b.warte(2800);
+  const mass = JSON.parse(await b.werte(`(() => {
+    const sp = document.querySelector('.br-spalte');
+    const sc = document.querySelector('.br-scroller');
+    const probe = document.createElement('div');
+    probe.className = 'mm-breite-voll';
+    probe.style.height = '10px';
+    sp.appendChild(probe);
+    const r = probe.getBoundingClientRect(), rs = sc.getBoundingClientRect();
+    const erg = {
+      normal: Math.round(sp.getBoundingClientRect().width - 52),
+      voll: Math.round(r.width),
+      ragtHeraus: r.left < rs.left - 1 || r.right > rs.right + 1,
+    };
+    probe.remove();
+    return JSON.stringify(erg);
+  })()`));
+  const zugewinn = mass.voll - mass.normal;
+  /* Bei 700px Fensterbreite ist schlicht kein Platz fuer viel Ausbruch --
+     dort genuegt, dass er ueberhaupt greift und nichts herausragt. */
+  const erwartet = breite >= 1024 ? 180 : 40;
+  pruefe(`bei ${breite}px ist "voll" deutlich breiter als "normal" (mind. ${erwartet}px mehr)`,
+    zugewinn >= erwartet, `normal=${mass.normal}px, voll=${mass.voll}px, Zugewinn=${zugewinn}px`);
+  pruefe(`bei ${breite}px ragt "voll" NICHT aus dem Scrollbereich heraus`,
+    mass.ragtHeraus === false);
+  await b.zu();
+}
+
 chrome.beenden(); server.beenden();
 bericht();

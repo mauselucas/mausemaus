@@ -93,7 +93,7 @@ body.admin {
 .admin-top {
   display:flex; justify-content:space-between; align-items:center; gap:16px;
   padding:10px 20px; border-bottom:1px solid var(--linie); background:var(--flaeche);
-  position:sticky; top:0; z-index:20; flex-wrap:wrap;
+  position:sticky; top:0; z-index:30; flex-wrap:wrap;
 }
 .admin-top-actions { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 .wer { font-size:12px; color:var(--grau); margin-right:4px; }
@@ -150,7 +150,14 @@ body.admin {
 
 /* ===== Kopfleiste des Editors ===== */
 .edit-kopf {
-  position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:6px;
+  /* NICHT top:0 -- die Kopfzeile darueber klebt ebenfalls bei 0 und beide
+     landen sonst uebereinander: Beim Scrollen schob sich diese Leiste in
+     die obere hinein. Die Hoehe der oberen Leiste wird in admin.js
+     gemessen und als --kopf-hoehe gesetzt, weil sie auf schmalen Fenstern
+     umbricht und dann hoeher ist. Der Ersatzwert greift nur, falls das
+     Skript nicht laeuft. */
+  position:sticky; top:var(--kopf-hoehe, 53px); z-index:20;
+  display:flex; align-items:center; gap:6px;
   padding:10px 16px; background:color-mix(in srgb, var(--hg) 88%, transparent);
   backdrop-filter:blur(6px); border-bottom:1px solid var(--linie);
 }
@@ -525,3 +532,15 @@ body.admin {
     transition:none !important; animation-duration:.01ms !important;
   }
 }
+
+/* Die zweite, farbige Zeile des Grusses ("Lucas :)") -- im Editor genauso
+   gesetzt wie auf der Seite, damit man sofort sieht, worum es geht. */
+.admin .be-abschnitt input.be-ab-zusatz {
+  font-family:'Tropi','Space Grotesk',sans-serif; font-size:24px;
+  color:var(--sage, #BFCC94); background:transparent; border:0;
+  padding:2px 0; flex-basis:100%; min-width:160px;
+}
+.admin .be-abschnitt input.be-ab-zusatz:focus { outline:none; box-shadow:0 0 0 2px var(--akzent-schwach); }
+.admin .be-ab-rolle, .admin .be-ab-kicker { width:auto; font-size:12px; }
+.admin .be-ab-kicker { min-width:150px; }
+.titel-hinweis { margin:-2px 0 18px; padding-left:var(--leiste); max-width:620px; line-height:1.5; }

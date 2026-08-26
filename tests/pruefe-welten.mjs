@@ -113,5 +113,44 @@ pruefe('bei dunkler Stimmung ändert sich auch die Schriftfarbe',
   farben.hell.schrift + ' -> ' + farben.dunkel.schrift);
 await fp.zu();
 
+/* ---------- Die Werkzeug-Nachbildung: nur "Geld" ist bedienbar ----------
+   Die uebrigen Reiter zeigen, was das echte Werkzeug konnte, sind aber
+   nicht hinterlegt. Frueher liessen sie sich anklicken und man landete auf
+   einer Flaeche, die nur erklaerte, dass hier nichts ist -- ein Knopf, der
+   ins Leere fuehrt. Jetzt sind sie sichtbar, aber gesperrt. */
+{
+  const d = await oeffne('http://127.0.0.1:8905/welt/the-race-automatisierung',
+    { port: 9337, breite: 1100, hoehe: 900 });
+  await d.warte(3000);
+  const reiter = JSON.parse(await d.werte(`(() => {
+    const r = [...document.querySelectorAll('.wz-art')];
+    return JSON.stringify({
+      anzahl: r.length,
+      gesperrt: r.filter(x => x.disabled).map(x => x.textContent),
+      offen: r.filter(x => !x.disabled).map(x => x.textContent),
+    });
+  })()`));
+  pruefe('in der Nachbildung ist genau ein Reiter bedienbar — "Geld"',
+    reiter.offen.length === 1 && reiter.offen[0] === 'Geld',
+    'offen: ' + reiter.offen.join(', ') + ' · gesperrt: ' + reiter.gesperrt.join(', '));
+  pruefe('…und es gibt überhaupt mehrere Reiter zu sperren (sonst wäre die Prüfung hohl)',
+    reiter.anzahl >= 3, reiter.anzahl + ' Reiter');
+
+  /* Der eigentliche Wunsch: klicken darf NICHTS bewirken. */
+  const nachKlick = await d.werte(`(() => {
+    const andere = [...document.querySelectorAll('.wz-art')].find(x => x.dataset.art !== 'Geld');
+    andere.click();
+    const aktiv = [...document.querySelectorAll('.wz-art')]
+      .find(x => x.getAttribute('aria-pressed') === 'true');
+    return aktiv ? aktiv.textContent : '—';
+  })()`);
+  pruefe('ein Klick auf einen gesperrten Reiter lässt die Ansicht auf "Geld"',
+    nachKlick === 'Geld', 'aktiv danach: ' + nachKlick);
+
+  const jsF = d.fehlerAufSeite();
+  pruefe('keine JavaScript-Fehler auf der Werkzeug-Seite', jsF.length === 0, jsF.join(' | '));
+  await d.zu();
+}
+
 await s.zu(); await f.zu(); chrome.beenden(); server.beenden();
 bericht();
