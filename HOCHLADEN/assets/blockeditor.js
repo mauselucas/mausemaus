@@ -23,6 +23,7 @@ import {
   ueberschriftLesen, ueberschriftBauen, codeLesen, codeBauen,
   werkzeugLesen, werkzeugBauen,
   erzeugeUndoStapel, erzeugeSpeicherWarteschlange, auszeichnungsHtml,
+  FARBEN, FARBIGE_TYPEN,
 } from '/assets/block-modell.js';
 
 const esc = (s) => (window.mm ? window.mm.esc(s) : String(s ?? ''));
@@ -666,6 +667,25 @@ export function mountBlockEditor(wurzel, {
         inhaltDiv.appendChild(wrap);
         return inhaltDiv;
       }
+      case 'kasten':
+      case 'zitat': {
+        /* Beide sehen im Editor schon aus wie das Ergebnis: der Kasten mit
+           seinem hellen Grund, das Zitat mit dem farbigen Balken links.
+           Innen liegt dieselbe durchscheinende Schreibflaeche wie beim
+           Textblock -- fett, kursiv, Links und Tuerchen wirken also auch
+           hier. */
+        const huelle = document.createElement('div');
+        huelle.className = (b.typ === 'kasten' ? 'mm-kasten' : 'mm-zitat') + ' be-huelle';
+        if (b.inhalt.farbe) huelle.classList.add('mm-farbe-' + b.inhalt.farbe);
+        const { wrap, ta } = textFlaeche(b.inhalt.roh || '',
+          (wert) => { b.inhalt.roh = wert; blockSpeichernEntprellt(b); },
+          b.typ === 'kasten' ? 'Was in den Kasten soll.' : 'Das Zitat.');
+        ta.setAttribute('aria-label', b.typ === 'kasten' ? 'Kasten' : 'Zitat');
+        huelle.appendChild(wrap);
+        inhaltDiv.appendChild(huelle);
+        highlightAnbinden(ta);
+        return inhaltDiv;
+      }
       case 'randnotiz': {
         const wrap = document.createElement('div'); wrap.className = 'be-randnotiz';
         wrap.innerHTML = `
@@ -950,6 +970,16 @@ export function mountBlockEditor(wurzel, {
     ['schmal|Schmal', 'normal|Normal', 'randnotiz|Randnotiz (am Rand)', 'voll|Volle Breite'], b.breite)}
       ${auswahl('be-bewegung', 'Bewegung',
     ['keine|Keine', 'einblenden|Einblenden', 'hochschieben|Hochschieben', 'wachsen|Wachsen', 'zeilenweise|Zeilenweise'], b.bewegung)}
+      ${FARBIGE_TYPEN.includes(b.typ) ? `<label>Farbe
+        <span class="be-farben">${FARBEN.map(f => `
+          <button type="button" class="be-farbe${(b.inhalt.farbe || '') === f.wert ? ' gewaehlt' : ''}"
+            data-farbe="${f.wert}" title="${esc(f.label)}" aria-label="${esc(f.label)}"
+            ${f.hex ? `style="--bf:${f.hex}"` : 'data-ohne="1"'}></button>`).join('')}</span>
+      </label>` : ''}
+      ${(b.typ === 'bild' || b.typ === 'gif') ? `<label class="schalter">
+        <input type="checkbox" class="be-rahmen"${b.inhalt.ohne_rahmen ? '' : ' checked'}>
+        Kontur und Schatten
+      </label>` : ''}
       <label>Notiz an Claude <span class="klein grau">(privat — erscheint nie auf der Seite)</span>
         <textarea class="be-notiz" rows="2" placeholder="z. B.: „hier soll das Bild beim Scrollen leicht wachsen“">${esc(b.notiz || '')}</textarea>
       </label>
@@ -970,6 +1000,29 @@ export function mountBlockEditor(wurzel, {
     });
     menu.querySelector('.be-bewegung').addEventListener('change', (e) => {
       b.bewegung = e.target.value; blockSpeichern(b); ersetzeZeile(b);
+    });
+    menu.querySelectorAll('.be-farbe').forEach(k => k.addEventListener('click', () => {
+      b.inhalt.farbe = k.dataset.farbe || '';
+      blockSpeichern(b);
+      menu.querySelectorAll('.be-farbe').forEach(x =>
+        x.classList.toggle('gewaehlt', (x.dataset.farbe || '') === (b.inhalt.farbe || '')));
+      /* Kasten und Zitat tragen die Farbe sichtbar -- dort sofort nachziehen,
+         ohne die Zeile neu zu bauen (das Schreibfeld soll den Fokus behalten). */
+      const huelle = zeileVon(b)?.querySelector('.be-huelle');
+      if (huelle) {
+        [...huelle.classList].filter(c => c.startsWith('mm-farbe-')).forEach(c => huelle.classList.remove(c));
+        if (b.inhalt.farbe) huelle.classList.add('mm-farbe-' + b.inhalt.farbe);
+      }
+      if (b.typ === 'text') ersetzeZeile(b);
+    }));
+    const rahmenFeld = menu.querySelector('.be-rahmen');
+    if (rahmenFeld) rahmenFeld.addEventListener('change', (e) => {
+      /* Gespeichert wird die AUSNAHME (ohne_rahmen), nicht der Normalfall --
+         so bleibt jeder vorhandene Block unveraendert und die bestehenden
+         Pruefungen sehen weiterhin dasselbe HTML. */
+      b.inhalt.ohne_rahmen = !e.target.checked;
+      blockSpeichern(b);
+      ersetzeZeile(b);
     });
     const notizFeld = menu.querySelector('.be-notiz');
     autoWachsen(notizFeld);

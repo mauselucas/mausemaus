@@ -677,6 +677,70 @@ async function textEinfuegenIn(auswahl, text) {
     Number(await s.werte(`window.__editor.bloecke().length`)) === Number(vorZahl));
 }
 
+/* ---------- Kasten, Zitat, Farbe und der Bildrahmen im Editor ---------- */
+{
+  const erg = JSON.parse(await s.werte(`(() => {
+    const k = window.__editor.blockAmEndeEinfuegen('kasten');
+    k.inhalt = { roh: 'Ein Hinweis.', farbe: '' };
+    const z = window.__editor.blockAmEndeEinfuegen('zitat');
+    z.inhalt = { roh: 'Ein Zitat.', farbe: '' };
+    window.__editor.neuZeichnen();
+    const kh = document.querySelector('.be-zeile[data-typ="kasten"] .be-huelle');
+    const zh = document.querySelector('.be-zeile[data-typ="zitat"] .be-huelle');
+    return JSON.stringify({
+      kastenDa: !!kh, zitatDa: !!zh,
+      /* Die Huelle traegt DIESELBEN Klassen wie auf der Seite -- nur so
+         stimmt die Schreibflaeche wirklich mit dem Ergebnis ueberein. */
+      kastenKlassen: kh ? kh.className : '', zitatKlassen: zh ? zh.className : '',
+      schreibflaeche: !!(kh && kh.querySelector('.be-text')),
+      farbknoepfe: document.querySelectorAll('.be-zeile[data-typ="kasten"] .be-farbe').length,
+    });
+  })()`));
+  pruefe('Kasten und Zitat lassen sich anlegen und werden gezeichnet',
+    erg.kastenDa && erg.zitatDa);
+  pruefe('…sie tragen im Editor dieselben Klassen wie auf der Seite',
+    erg.kastenKlassen.includes('mm-kasten') && erg.zitatKlassen.includes('mm-zitat'),
+    erg.kastenKlassen + ' / ' + erg.zitatKlassen);
+  pruefe('…und man schreibt direkt hinein (dieselbe durchscheinende Fläche wie beim Text)',
+    erg.schreibflaeche === true);
+  pruefe('das „⋯“-Menü bietet die ganze Farbpalette an',
+    erg.farbknoepfe === 8, erg.farbknoepfe + ' Knöpfe');
+
+  /* Eine Farbe waehlen -- sie muss gespeichert werden UND sofort sichtbar sein. */
+  await s.werte(`(() => {
+    const zeile = document.querySelector('.be-zeile[data-typ="kasten"]');
+    zeile.querySelector('.be-menu-knopf').click();
+    zeile.querySelector('.be-farbe[data-farbe="violett"]').click();
+  })()`);
+  await s.warte(750);
+  const idK = await idVon('kasten');
+  const gespeichert = await zeileInDB(idK);
+  pruefe('eine gewählte Farbe wird gespeichert',
+    gespeichert && gespeichert.inhalt.farbe === 'violett',
+    JSON.stringify(gespeichert && gespeichert.inhalt));
+  pruefe('…und die Schreibfläche färbt sich sofort, ohne den Block neu zu bauen',
+    (await s.werte(`document.querySelector('.be-zeile[data-typ="kasten"] .be-huelle').className`))
+      .includes('mm-farbe-violett'));
+  await s.werte(`document.querySelector('.be-zeile[data-typ="kasten"] .be-menu').hidden = true`);
+
+  /* Kontur und Schatten abschalten. */
+  await s.werte(`(() => {
+    const zeile = document.querySelector('.be-zeile[data-typ="bild"]');
+    zeile.querySelector('.be-menu-knopf').click();
+    const k = zeile.querySelector('.be-rahmen');
+    k.checked = false;
+    k.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await s.warte(750);
+  const idB = await idVon('bild');
+  const bild = await zeileInDB(idB);
+  pruefe('„Kontur und Schatten“ lässt sich abschalten und wird gespeichert',
+    bild && bild.inhalt.ohne_rahmen === true, JSON.stringify(bild && bild.inhalt));
+  pruefe('…und die Darstellung im Editor kennzeichnet es',
+    (await s.werte(`!!document.querySelector('.be-zeile[data-typ="bild"] .mm-ohne-rahmen')`)) === true);
+  await s.werte(`document.querySelector('.be-zeile[data-typ="bild"] .be-menu').hidden = true`);
+}
+
 /* ---------- Die Dokumentspalte ist wirklich EINE Spalte ----------
    In einem Dokument müssen alle Blöcke am selben linken Rand beginnen.
    Aufgefallen ist das an der Überschrift: Ihre Größenwahl lag als
@@ -702,7 +766,10 @@ const AUSSENKANTE = `(el => el ? Math.round(el.getBoundingClientRect().left) : -
   const raender = JSON.parse(await s.werte(`(() => {
     const kante = ${AUSSENKANTE};
     const feld = (zeile) => zeile.querySelector(
-      '.be-text, .be-ueberschrift, .be-randnotiz, .be-abschnitt, .be-code, .be-vorschau-html, .tm-gitter');
+      /* .be-huelle (Kasten/Zitat) steht wie .be-randnotiz VOR .be-text:
+         Diese Bloecke SIND ein Kasten mit eigener Polsterung -- dort ist
+         die Aussenkante der Spaltenrand, ihr Innenabstand ist Gestaltung. */
+      '.be-huelle, .be-randnotiz, .be-text, .be-ueberschrift, .be-abschnitt, .be-code, .be-vorschau-html, .tm-gitter');
     return JSON.stringify([...document.querySelectorAll('.be-zeile')]
       .map(z => ({ typ: z.dataset.typ, links: kante(feld(z)) }))
       .filter(x => x.links >= 0));

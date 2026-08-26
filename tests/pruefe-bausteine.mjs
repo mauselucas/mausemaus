@@ -185,6 +185,56 @@ const jsFehler2 = z.fehlerAufSeite();
 pruefe('keine JavaScript-Fehler bei "zeilenweise"', jsFehler2.length === 0, jsFehler2.join(' | '));
 await z.zu();
 
+/* ---------- Kasten, Zitat und die Farben ---------- */
+{
+  const f = await oeffne('http://127.0.0.1:8909/', { port: 9349, breite: 1000, hoehe: 800 });
+  await f.warte(2800);
+  const erg = JSON.parse(await f.werte(`(() => {
+    const r = (o) => window.mmBloecke.render(o);
+    const d = document.createElement('div');
+    document.body.appendChild(d);
+    const messe = (html) => { d.innerHTML = html; const el = d.firstElementChild;
+      const cs = getComputedStyle(el);
+      return { klassen: el.className, grund: cs.backgroundColor, balken: cs.borderLeftColor,
+        balkenBreite: cs.borderLeftWidth }; };
+
+    const kastenOhne  = messe(r({ typ:'kasten', breite:'normal', bewegung:'keine', inhalt:{ roh:'x', farbe:'' } }));
+    const kastenRot   = messe(r({ typ:'kasten', breite:'normal', bewegung:'keine', inhalt:{ roh:'x', farbe:'terrakotta' } }));
+    const zitatViolett= messe(r({ typ:'zitat',  breite:'normal', bewegung:'keine', inhalt:{ roh:'x', farbe:'violett' } }));
+    /* Ein erfundener Wert aus der Datenbank darf NICHT als Klasse durchrutschen. */
+    const boese = r({ typ:'kasten', breite:'normal', bewegung:'keine',
+      inhalt:{ roh:'x', farbe:'" onload="alert(1)' } });
+    /* Vorgabe-Bild und Bild ohne Rahmen */
+    const bildNormal = r({ typ:'bild', breite:'normal', bewegung:'keine', inhalt:{ roh:'![](/favicon.svg)' } });
+    const bildNackt  = r({ typ:'bild', breite:'normal', bewegung:'keine', inhalt:{ roh:'![](/favicon.svg)', ohne_rahmen:true } });
+    d.remove();
+    return JSON.stringify({ kastenOhne, kastenRot, zitatViolett, boese, bildNormal, bildNackt });
+  })()`));
+
+  pruefe('ein Kasten ohne Farbe hat einen ruhigen neutralen Grund',
+    erg.kastenOhne.klassen === 'mm-kasten' && erg.kastenOhne.grund !== 'rgba(0, 0, 0, 0)',
+    erg.kastenOhne.klassen + ' / ' + erg.kastenOhne.grund);
+  pruefe('ein Kasten mit Farbe bekommt einen ANDEREN, farbigen Grund',
+    erg.kastenRot.grund !== erg.kastenOhne.grund && erg.kastenRot.klassen.includes('mm-farbe-terrakotta'),
+    erg.kastenRot.klassen + ' / ' + erg.kastenRot.grund);
+  pruefe('ein Zitat trägt die Farbe im Balken links',
+    erg.zitatViolett.balken === 'rgb(142, 78, 155)' && parseFloat(erg.zitatViolett.balkenBreite) >= 2,
+    erg.zitatViolett.balken + ' / ' + erg.zitatViolett.balkenBreite);
+
+  /* Sicherheitsnetz: Farbnamen kommen aus der Datenbank ins HTML. Ohne
+     Positivliste liesse sich darüber ein Attribut einschleusen. */
+  pruefe('ein erfundener Farbwert wird NICHT als Klasse übernommen',
+    !erg.boese.includes('onload') && !erg.boese.includes('mm-farbe-"'),
+    erg.boese.slice(0, 90));
+
+  pruefe('ein Bild ohne Rahmen trägt die Kennzeichnung, ein normales nicht',
+    erg.bildNackt.includes('mm-ohne-rahmen') && !erg.bildNormal.includes('mm-ohne-rahmen'));
+  /* Der wichtigste Teil: der VORHANDENE Bestand darf sich nicht ändern. */
+  pruefe('ein Bild mit Vorgabewerten erzeugt weiterhin exakt dasselbe HTML wie bisher',
+    !erg.bildNormal.includes('mm-baustein'), erg.bildNormal.slice(0, 70));
+  await f.zu();
+}
+
 /* ---------- "Volle Breite" muss wirklich breit sein ----------
    Vorher brach ein Block mit Breite "voll" genau um den Innenabstand der
    Lesespalte aus -- 26px je Seite. Der Unterschied zu "normal" waren damit

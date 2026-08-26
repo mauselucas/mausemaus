@@ -544,3 +544,32 @@ body.admin {
 .admin .be-ab-rolle, .admin .be-ab-kicker { width:auto; font-size:12px; }
 .admin .be-ab-kicker { min-width:150px; }
 .titel-hinweis { margin:-2px 0 18px; padding-left:var(--leiste); max-width:620px; line-height:1.5; }
+
+/* ===== Kasten und Zitat im Editor =====
+   Die Huelle traegt dieselben Klassen wie auf der Seite (mm-kasten /
+   mm-zitat aus site.css) -- so ist das, was Lucas schreibt, wirklich das,
+   was Besucher sehen. Hier nur die Kleinigkeiten, die den Rahmen des
+   Editors betreffen. */
+.be-huelle { margin: 6px 0; }
+.be-huelle .be-text-wrap { width: 100%; }
+
+/* ===== Farbauswahl im "⋯"-Menü ===== */
+.be-farben { display: flex; flex-wrap: wrap; gap: 7px; padding-top: 2px; }
+.be-farbe {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer; padding: 0;
+  border: 1px solid var(--linie-stark);
+  background: var(--bf, transparent);
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+/* "ohne Farbe" als durchgestrichener Kreis, damit es nicht wie Weiß aussieht. */
+.be-farbe[data-ohne] {
+  background:
+    linear-gradient(to bottom right,
+      transparent calc(50% - 1px), var(--grau-stark) calc(50% - 1px),
+      var(--grau-stark) calc(50% + 1px), transparent calc(50% + 1px));
+}
+.be-farbe:hover { transform: scale(1.12); }
+.be-farbe.gewaehlt {
+  box-shadow: 0 0 0 2px var(--flaeche), 0 0 0 4px var(--text);
+}
+.be-farbe:focus-visible { outline: 2px solid var(--akzent); outline-offset: 3px; }

@@ -21,7 +21,35 @@ export const BLOCKARTEN = [
   { typ: 'trenner',       label: 'Trennstrich',             icon: '—',   stichworte: ['trenner', 'linie', 'strich'] },
   { typ: 'tuer',          label: 'Türchen / Knopf',         icon: '🚪',  stichworte: ['tuer', 'tür', 'knopf', 'button', 'link'] },
   { typ: 'abschnitt',     label: 'Abschnitt (Zeitleiste)',  icon: '§',   stichworte: ['abschnitt', 'zeitleiste', 'section'] },
+  { typ: 'kasten',        label: 'Kasten',                  icon: '▭',   stichworte: ['kasten', 'hinweis', 'box', 'callout', 'hervorheben'] },
+  { typ: 'zitat',         label: 'Zitat',                   icon: '❝',  stichworte: ['zitat', 'quote', 'einzug', 'strich'] },
 ];
+
+/* ---------- Farben für Blöcke ----------
+   Bewusst eine feste kleine Auswahl statt eines freien Farbwählers: Auf einer
+   Seite, deren ganzer Auftritt "eine laute Stelle, sonst Ruhe" heißt, ist ein
+   Farbwähler die schnellste Art, sich den Auftritt zu zerlegen. Die Töne hier
+   stammen alle aus der Seite selbst -- Salbei ist der Akzent, die übrigen sind
+   die Farben der Projektseiten. Terrakotta ist der einzige Zusatz, weil es
+   keinen roten Ton gab.
+
+   Gespeichert wird der NAME, nicht der Hexwert. Dadurch bleibt eine einmal
+   gewählte Farbe richtig, auch wenn der Ton später nachjustiert wird -- und
+   die helle Variante lässt sich aus demselben Wert ableiten, statt sie als
+   zweiten Hexwert doppelt zu pflegen (siehe site.css, color-mix). */
+export const FARBEN = [
+  { wert: '',           label: 'ohne Farbe', hex: null },
+  { wert: 'salbei',     label: 'Salbei',     hex: '#BFCC94' },
+  { wert: 'oliv',       label: 'Oliv',       hex: '#7F8F55' },
+  { wert: 'ocker',      label: 'Ocker',      hex: '#A8913F' },
+  { wert: 'terrakotta', label: 'Terrakotta', hex: '#A85B4B' },
+  { wert: 'violett',    label: 'Violett',    hex: '#8E4E9B' },
+  { wert: 'tiefblau',   label: 'Tiefblau',   hex: '#344966' },
+  { wert: 'schiefer',   label: 'Schiefer',   hex: '#6E6E7A' },
+];
+export const FARB_WERTE = FARBEN.map(f => f.wert);
+/* Blockarten, bei denen eine Farbe überhaupt etwas bewirkt. */
+export const FARBIGE_TYPEN = ['text', 'kasten', 'zitat'];
 
 export const BLOCKARTEN_NACH_TYP = Object.fromEntries(BLOCKARTEN.map(b => [b.typ, b]));
 
@@ -52,6 +80,8 @@ export function leererInhalt(typ) {
     case 'randnotiz':    return { titel: '', zeile1: '', zeile2: '', punkt: false };
     case 'tuer':          return { ziel: '', text: 'Mehr dazu' };
     case 'abschnitt':    return { titel: '', art: 'beruflich', farbe: null };
+    case 'kasten':       return { roh: '', farbe: '' };
+    case 'zitat':        return { roh: '', farbe: '' };
     /* text, bild, gif, video */
     default: return { roh: '' };
   }

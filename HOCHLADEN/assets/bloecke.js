@@ -22,14 +22,28 @@
      Kind in einer <dl class="br-infos"> (siehe brief.js), eine zusätzliche
      Hülle würde deren Gitter durcheinanderbringen; abschnitt liefert ohnehin
      nie eigenes HTML. */
+  /* Erlaubte Farbnamen -- muss zu FARBEN in block-modell.js passen. Bewusst
+     eine Liste statt "irgendein String": ein Wert aus der Datenbank landet
+     sonst ungeprueft als CSS-Klasse im HTML. */
+  const FARBEN = new Set(['salbei', 'oliv', 'ocker', 'terrakotta', 'violett', 'tiefblau', 'schiefer']);
+  const farbeVon = (inh) => (inh && FARBEN.has(inh.farbe) ? inh.farbe : null);
+
   function einhuellen(html, block) {
     if (!html || block.typ === 'randnotiz' || block.typ === 'abschnitt') return html;
+    const inh = block.inhalt || {};
     const breite = block.breite && block.breite !== 'normal' ? block.breite : null;
     const bewegung = block.bewegung && block.bewegung !== 'keine' ? block.bewegung : null;
-    if (!breite && !bewegung) return html;
+    /* Textfarbe nur beim reinen Textblock -- bei Kasten und Zitat traegt das
+       Element seine Farbe selbst (Hintergrund bzw. Balken). */
+    const textfarbe = block.typ === 'text' ? farbeVon(inh) : null;
+    /* Bilder und GIFs koennen Kontur und Schatten ablegen. */
+    const ohneRahmen = (block.typ === 'bild' || block.typ === 'gif') && inh.ohne_rahmen === true;
+    if (!breite && !bewegung && !textfarbe && !ohneRahmen) return html;
     const klassen = ['mm-baustein'];
     if (breite) klassen.push('mm-breite-' + breite);
     if (bewegung) klassen.push('mm-bewegung-' + bewegung);
+    if (textfarbe) klassen.push('mm-textfarbe', 'mm-farbe-' + textfarbe);
+    if (ohneRahmen) klassen.push('mm-ohne-rahmen');
     return '<div class="' + klassen.join(' ') + '">' + html + '</div>';
   }
 
@@ -54,6 +68,16 @@
       case 'tuer':
         return einhuellen('<p class="br-mehr"><a class="mm-tuer" href="' + window.mm.esc(inh.ziel || '#') + '">' +
           window.mm.esc(inh.text || 'Mehr dazu') + '</a></p>', block);
+      case 'kasten': {
+        const f = farbeVon(inh);
+        return einhuellen('<div class="mm-kasten' + (f ? ' mm-farbe-' + f : '') + '">'
+          + window.mm.renderMarkdown(inh.roh || '') + '</div>', block);
+      }
+      case 'zitat': {
+        const f = farbeVon(inh);
+        return einhuellen('<blockquote class="mm-zitat' + (f ? ' mm-farbe-' + f : '') + '">'
+          + window.mm.renderMarkdown(inh.roh || '') + '</blockquote>', block);
+      }
       case 'abschnitt':
         return '';   // reiner Marker für gruppieren(), kein eigener Inhalt
       default:

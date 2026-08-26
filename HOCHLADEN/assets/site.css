@@ -425,3 +425,68 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
   .mm-bewegung-wachsen.mm-sichtbar,
   .mm-bewegung-zeilenweise.mm-sichtbar > * { animation: none; }
 }
+
+/* ===== Farben für Blöcke =====
+   Ein Ton je Farbe, alles andere wird daraus abgeleitet: der Kasten mischt
+   ihn hell über den Seitengrund, das Zitat nimmt ihn für seinen Balken, ein
+   Textblock für die Schrift. Nur EIN Wert je Farbe -- so kann die helle
+   Variante nie zur kräftigen driften.
+   Die Töne stammen aus der Seite selbst (Salbei ist der Akzent, die übrigen
+   sind die Farben der Projektseiten). Terrakotta ist der einzige Zusatz,
+   weil es keinen roten Ton gab. */
+.mm-farbe-salbei     { --bf: #BFCC94; }
+.mm-farbe-oliv       { --bf: #7F8F55; }
+.mm-farbe-ocker      { --bf: #A8913F; }
+.mm-farbe-terrakotta { --bf: #A85B4B; }
+.mm-farbe-violett    { --bf: #8E4E9B; }
+.mm-farbe-tiefblau   { --bf: #344966; }
+.mm-farbe-schiefer   { --bf: #6E6E7A; }
+
+/* Der Grund, über den gemischt wird -- Brief und Welten stehen beide auf
+   diesem Ton. Als Variable, damit die Mischung nicht an drei Stellen
+   verschieden ausfällt. */
+:root { --mm-grund: #FBFAF6; }
+
+/* ---- Kasten ----
+   Ohne gewählte Farbe ein ganz leiser neutraler Ton, mit Farbe dieselbe
+   Mischung aus deren Ton. 14% ist bewusst niedrig: Der Kasten soll den Text
+   tragen, nicht ihn überschreien. */
+.mm-kasten {
+  /* Ohne gewählte Farbe ein sehr leiser neutraler Ton -- 5% Tinte, sonst
+     wirkt der Kasten wie ein grauer Balken statt wie eine ruhige Fläche. */
+  background: color-mix(in srgb, var(--ink) 5%, var(--mm-grund));
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 22px 0;
+}
+/* Mit Farbe: derselbe Ton, nur kräftiger gemischt -- 14% trägt den Text,
+   ohne ihn zu überschreien. */
+.mm-kasten[class*="mm-farbe-"] {
+  background: color-mix(in srgb, var(--bf) 14%, var(--mm-grund));
+}
+.mm-kasten > :first-child { margin-top: 0; }
+.mm-kasten > :last-child  { margin-bottom: 0; }
+
+/* ---- Zitat ----
+   Der Balken links trägt die Farbe, der Text bleibt normal lesbar. */
+.mm-zitat {
+  border-left: 3px solid var(--bf, var(--ink));
+  padding: 2px 0 2px 18px;
+  margin: 22px 0;
+}
+.mm-zitat > :first-child { margin-top: 0; }
+.mm-zitat > :last-child  { margin-bottom: 0; }
+
+/* ---- Textfarbe ---- */
+.mm-textfarbe { color: var(--bf); }
+
+/* ---- Bild ohne Kontur und Schatten ----
+   Vorgabe ist MIT (so sieht die ganze Seite bisher aus); wer es ablegt,
+   bekommt das nackte Bild. Die Rundung bleibt -- scharfe Ecken gibt es in
+   dieser Bildsprache nirgends. */
+.mm-ohne-rahmen figure,
+.mm-ohne-rahmen img { box-shadow: none !important; border: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-kasten, .mm-zitat { transition: none; }
+}
