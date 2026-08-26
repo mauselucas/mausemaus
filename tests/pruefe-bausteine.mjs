@@ -1,9 +1,16 @@
-/* Prüft, dass Breite und Bewegung (assets/bloecke.js, assets/site.css)
+/* Prüft, dass Breite, Farbe und Rahmen (assets/bloecke.js, assets/site.css)
    auf der öffentlichen Seite sichtbar wirken -- UND dass sie für den ganz
-   überwiegenden Bestand an Inhalt (Breite "normal", Bewegung "keine") am
+   überwiegenden Bestand an Inhalt (Breite "normal", keine Farbe) am
    ausgelieferten HTML rein GAR NICHTS ändern. Letzteres ist der wichtigere
    Teil: die vier gesperrten Prüfungen (pruefe-bestand/leiste/brief/welten)
-   verlassen sich darauf. */
+   verlassen sich darauf.
+
+   Das frühere Feld "Bewegung" je Block gibt es nicht mehr -- die Seite
+   animiert seit dem Umbau alles von selbst am Scrollstand
+   (assets/bewegung.css, geprüft in tests/pruefe-scroll-bewegung.mjs). Was
+   hier davon übrig bleibt, ist der UMZUGS-Vertrag: alte Werte, die noch in
+   der Datenbank stehen, dürfen nichts mehr bewirken und dürfen vor allem
+   nichts unsichtbar machen. */
 import { existsSync, rmSync, symlinkSync } from 'node:fs';
 import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
@@ -21,7 +28,7 @@ const s = await oeffne('http://127.0.0.1:8909/tests-feste/baustein-probe.html',
 await s.warte(200);
 
 const block = (typ, inhalt, breite = 'normal', bewegung = 'keine') =>
-  ({ typ, inhalt, breite, bewegung, sort_order: 1 });
+  ({ typ, inhalt, breite, bewegung, sort_order: 1 });   // bewegung: Altbestand aus der Datenbank
 
 /* ================= Standardfall: unverändert, byte-genau ================= */
 
@@ -30,7 +37,7 @@ const block = (typ, inhalt, breite = 'normal', bewegung = 'keine') =>
   const ohneHuelle = await s.werte(`window.mm.renderMarkdown(${JSON.stringify(roh.roh)})`);
   await s.werte(`window.__zeichne([${JSON.stringify(block('text', roh))}], null)`);
   const html = await s.werte(`document.getElementById('ziel').innerHTML`);
-  pruefe('Standard-Block (Breite normal, Bewegung keine) bekommt KEINE Hülle',
+  pruefe('Standard-Block (Breite normal, ohne Farbe) bekommt KEINE Hülle',
     !html.includes('mm-baustein'), html.slice(0, 120));
   pruefe('…und ist mit dem alten Umsetzer bytegleich (nur um den Abstands-Block ergänzt)',
     html.replace('<div id="abstand"></div>', '').trim() === ohneHuelle.trim());
@@ -83,72 +90,63 @@ const block = (typ, inhalt, breite = 'normal', bewegung = 'keine') =>
     raender.linksRausgebrochen && raender.rechtsRausgebrochen, JSON.stringify(raender));
 }
 
-/* ================= Bewegung: sicher ohne Skript, wirksam mit Skript ================= */
+/* ================= Altbestand "bewegung" ist wirkungslos =================
 
-/* Ohne __einrichten() aufzurufen (so, als würde bewegungEinrichten() aus
-   irgendeinem Grund nie laufen) MUSS der Block normal sichtbar bleiben --
-   das ist die wichtigste Prüfung in diesem Abschnitt: geht sie kaputt,
-   kann Inhalt bei einem Skriptfehler unsichtbar werden. */
+   Bis zum Umbau konnte man je Block eine Bewegung wählen; bloecke.js hängte
+   dafür eine Klasse mm-bewegung-* an, und ein Beobachter blendete den Block
+   beim Erscheinen ein. Beides ist weg -- die Seite animiert jetzt alles von
+   selbst am Scrollstand (assets/bewegung.css). In der Datenbank stehen die
+   alten Werte aber weiter; die Spalte wird bewusst NICHT angefasst.
+
+   Der Vertrag lautet deshalb: Ein Block mit altem Bewegungswert sieht aus
+   wie jeder andere. Keine Klasse, keine Hülle, volle Deckkraft. Die
+   Deckkraft ist der wichtige Teil -- der alte Weg machte Blöcke absichtlich
+   unsichtbar und verließ sich darauf, dass ein Skript sie wieder einblendet.
+   Bliebe davon irgendein Rest stehen, wäre Inhalt weg. */
 {
-  await s.werte(`window.__zeichne([${JSON.stringify(block('text', { roh: 'Bewegter Text ohne Einrichtung.' }, 'normal', 'einblenden'))}], null)`);
-  const deckkraft = await s.werte(`getComputedStyle(document.querySelector('.mm-bewegung-einblenden')).opacity`);
-  pruefe('OHNE bewegungEinrichten() bleibt ein Bewegungs-Block normal sichtbar (Deckkraft 1)',
-    Number(deckkraft) === 1, deckkraft);
+  const funde = [];
+  for (const wert of ['einblenden', 'hochschieben', 'wachsen', 'zeilenweise']) {
+    await s.werte(`window.__zeichne([${JSON.stringify(
+      block('text', { roh: 'Absatz mit altem Bewegungswert aus der Datenbank.' }, 'normal', wert))}], null)`);
+    const gemessen = JSON.parse(await s.werte(`(() => {
+      const ziel = document.getElementById('ziel');
+      return JSON.stringify({
+        klasse: ziel.innerHTML.includes('mm-bewegung-'),
+        huelle: ziel.innerHTML.includes('mm-baustein'),
+        deckkraft: Number(getComputedStyle(ziel.querySelector('p')).opacity),
+      });
+    })()`));
+    funde.push({ wert, ...gemessen });
+  }
+  pruefe('alte Bewegungswerte erzeugen KEINE mm-bewegung-Klasse mehr',
+    funde.every(f => !f.klasse), funde.filter(f => f.klasse).map(f => f.wert).join(', '));
+  pruefe('…und auch keine Hülle — der Block bleibt bytegleich zum Standardfall',
+    funde.every(f => !f.huelle), funde.filter(f => f.huelle).map(f => f.wert).join(', '));
+  pruefe('…und der Text ist voll sichtbar (Deckkraft 1), nie halb versteckt',
+    funde.every(f => f.deckkraft === 1), funde.map(f => f.wert + ':' + f.deckkraft).join(', '));
 }
 
-/* Mit Einrichtung: außerhalb des Bildschirms unsichtbar, nach dem
-   Scrollen ins Bild sichtbar. */
+/* GEGENBEWEIS: genau den alten Zustand wiederherstellen -- Klasse anhängen
+   und die alte CSS-Regel wieder einsetzen. Alle drei Prüfungen oben würden
+   ihn erkennen. Nur im Browser, die Dateien auf der Platte bleiben
+   unangetastet. */
 {
-  await s.werte(`window.__zeichne([${JSON.stringify(block('text', { roh: 'Bewegter Text.' }, 'normal', 'hochschieben'))}], null)`);
-  await s.werte(`window.__einrichten()`);
-  await s.werte(`window.scrollTo(0, 0)`);
-  await s.warte(80);
-  const vorher = await s.werte(`getComputedStyle(document.querySelector('.mm-bewegung-hochschieben')).opacity`);
-  pruefe('nach dem Einrichten, außerhalb des Bildschirms, ist der Block unsichtbar',
-    Number(vorher) === 0, vorher);
-
-  /* Nicht blind eine Dauer abwarten: Die Seite scrollt sanft, der Block
-     kommt also erst verzögert ins Bild, und die Animation startet
-     entsprechend später. Eine feste Wartezeit misst dann mitten in der
-     Bewegung (beobachtet: 0.52). Stattdessen warten, bis sich die Deckkraft
-     nicht mehr ändert -- das ist zugleich strenger, weil es den ECHTEN
-     Endzustand prüft statt einen Zwischenwert nach Zufall. */
-  const nachher = await s.werte(`(async () => {
-    const el = document.querySelector('.mm-bewegung-hochschieben');
-    el.scrollIntoView({ block: 'center' });
-    let vorher = -1, gleich = 0;
-    for (let i = 0; i < 40; i++) {                 // höchstens 4 Sekunden
-      await new Promise(r => setTimeout(r, 100));
-      const jetzt = Number(getComputedStyle(el).opacity);
-      if (jetzt === vorher) { if (++gleich >= 3) break; } else { gleich = 0; }
-      vorher = jetzt;
-    }
-    return String(vorher);
-  })()`);
-  /* Nicht exakt 1 verlangen -- Chrome rundet die Deckkraft am Ende einer
-     Animation manchmal minimal ab (z.B. 0.9977), ohne dass optisch noch
-     etwas zu sehen wäre. */
-  pruefe('…und nach dem Scrollen ins Bild wird er (fast vollständig) sichtbar',
-    Number(nachher) > 0.97, nachher);
-  const sichtbarKlasse = await s.werte(`document.querySelector('.mm-bewegung-hochschieben').classList.contains('mm-sichtbar')`);
-  pruefe('…die Klasse "mm-sichtbar" wurde gesetzt', sichtbarKlasse === true);
-}
-
-/* prefers-reduced-motion: reduce -- window.matchMedia wird direkt auf der
-   Seite überschrieben (zuverlässiger als eine echte CDP-Emulation für
-   dieses eine, klar abgegrenzte Verhalten) und bewegungEinrichten() erneut
-   mit frischen Blöcken aufgerufen. */
-{
-  await s.werte(`window.__zeichne([${JSON.stringify(block('text', { roh: 'Bewegter Text mit reduzierter Bewegung.' }, 'normal', 'wachsen'))}], null)`);
-  await s.werte(`(() => {
-    window.matchMedia = () => ({ matches: true, addEventListener(){}, removeEventListener(){} });
-  })()`);
-  await s.werte(`window.__einrichten()`);
-  const klasse = await s.werte(`document.querySelector('.mm-bewegung-wachsen').className`);
-  const deckkraft = await s.werte(`getComputedStyle(document.querySelector('.mm-bewegung-wachsen')).opacity`);
-  pruefe('bei prefers-reduced-motion:reduce wird "mm-bereit" NIE gesetzt (keine Bewegung ausgelöst)',
-    !klasse.includes('mm-bereit'), klasse);
-  pruefe('…der Block bleibt durchgehend sichtbar', Number(deckkraft) === 1, deckkraft);
+  const alt = JSON.parse(await s.werte(`(() => {
+    const stil = document.createElement('style');
+    stil.textContent = '.mm-bewegung-einblenden.mm-bereit { opacity: 0 }';
+    document.head.appendChild(stil);
+    const ziel = document.getElementById('ziel');
+    ziel.innerHTML = '<div class="mm-baustein mm-bewegung-einblenden mm-bereit"><p>x</p></div>';
+    const erg = JSON.stringify({
+      klasse: ziel.innerHTML.includes('mm-bewegung-'),
+      huelle: ziel.innerHTML.includes('mm-baustein'),
+      deckkraft: Number(getComputedStyle(ziel.querySelector('p').parentElement).opacity),
+    });
+    stil.remove(); ziel.innerHTML = '';
+    return erg;
+  })()`));
+  pruefe('GEGENBEWEIS: der alte Zustand (Klasse, Hülle, Deckkraft 0) würde von allen drei erkannt',
+    alt.klasse === true && alt.huelle === true && alt.deckkraft === 0, JSON.stringify(alt));
 }
 
 /* Bildschirmfoto für den Bericht: alle vier Breiten nebeneinander. */
@@ -166,24 +164,6 @@ await s.bild(new URL('./bilder/bausteine-breiten.png', import.meta.url).pathname
 const jsFehler = s.fehlerAufSeite();
 pruefe('keine JavaScript-Fehler auf der Prüfseite', jsFehler.length === 0, jsFehler.join(' | '));
 await s.zu();
-
-/* ================= zeilenweise: gestaffelte Verzögerung je Kind =================
-   Eigene, frische Seite -- der vorige Abschnitt hat window.matchMedia
-   überschrieben, und das lässt sich nicht sauber zurücksetzen. */
-const z = await oeffne('http://127.0.0.1:8909/tests-feste/baustein-probe.html',
-  { port: 9349, breite: 1280, hoehe: 1000 });
-await z.warte(200);
-await z.werte(`window.__zeichne([${JSON.stringify(block('text', { roh: 'Erste Zeile.\n\nZweite Zeile.\n\nDritte Zeile.' }, 'normal', 'zeilenweise'))}], null)`);
-await z.werte(`window.scrollTo(0, 0)`);
-await z.werte(`window.__einrichten()`);
-const verzoegerungen = JSON.parse(await z.werte(`JSON.stringify([...document.querySelector('.mm-bewegung-zeilenweise').children].map(k => k.style.getPropertyValue('--mm-verzoegerung')))`));
-pruefe('"zeilenweise" gibt jedem Kind eine eigene, steigende Verzögerung',
-  verzoegerungen.length >= 2 && verzoegerungen[0] === '0ms' && verzoegerungen[1] !== '0ms',
-  verzoegerungen.join(', '));
-
-const jsFehler2 = z.fehlerAufSeite();
-pruefe('keine JavaScript-Fehler bei "zeilenweise"', jsFehler2.length === 0, jsFehler2.join(' | '));
-await z.zu();
 
 /* ---------- Kasten, Zitat und die Farben ---------- */
 {

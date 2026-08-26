@@ -168,7 +168,7 @@ await s.warte(750);
 }
 
 /* Die schärfste Fassung: ZWEI ECHTE Speichervorgänge, ohne jede Entprellung
-   dazwischen (Breite/Bewegung speichern sofort) -- und mit der ERSTEN
+   dazwischen (die Breite speichert sofort) -- und mit der ERSTEN
    Antwort künstlich LANGSAMER als der zweiten, damit die Reihenfolge, in
    der die Antworten hereinkommen, garantiert NICHT der Reihenfolge
    entspricht, in der sie ausgelöst wurden. Genau dieser Fall ist es, den
@@ -409,7 +409,7 @@ await s.warte(750);
   pruefe('…und zwar wirklich als Trennstrich-Block', trenner === 1, trenner);
 }
 
-/* ---------- Breite, Bewegung, Notiz werden gespeichert ---------- */
+/* ---------- Breite und Notiz werden gespeichert, "bewegung" bleibt liegen ---------- */
 
 {
   await s.werte(`(() => {
@@ -417,8 +417,6 @@ await s.warte(750);
     zeile.querySelector('.be-menu-knopf').click();
     zeile.querySelector('.be-breite').value = 'randnotiz';
     zeile.querySelector('.be-breite').dispatchEvent(new Event('change'));
-    zeile.querySelector('.be-bewegung').value = 'einblenden';
-    zeile.querySelector('.be-bewegung').dispatchEvent(new Event('change'));
     const notiz = zeile.querySelector('.be-notiz');
     notiz.value = 'Bitte sanft von unten einblenden lassen.';
     notiz.dispatchEvent(new Event('input', { bubbles: true }));
@@ -427,7 +425,16 @@ await s.warte(750);
   const id = await idVon('abschnitt');
   const zeile = await zeileInDB(id);
   pruefe('Breite wird übernommen', zeile.breite === 'randnotiz', zeile.breite);
-  pruefe('Bewegung wird übernommen', zeile.bewegung === 'einblenden', zeile.bewegung);
+  /* Das Feld "Bewegung" gibt es im "⋯"-Menü nicht mehr -- die Seite
+     animiert alles von selbst am Scrollstand. Der ALTE Wert in der
+     Datenbank muss davon unberührt bleiben: Wir fassen die Spalte nicht an,
+     also darf sie sich auch nicht beim Ändern von Breite oder Notiz
+     mitverändern. Der Startwert dieses Blocks ist "hochschieben" (siehe
+     tests/feste/blockeditor-probe.html). */
+  pruefe('das Feld "Bewegung" ist aus dem "⋯"-Menü verschwunden',
+    (await s.werte(`document.querySelectorAll('.be-bewegung').length`)) === 0);
+  pruefe('…und der alte Wert in der Datenbank bleibt beim Speichern unangetastet',
+    zeile.bewegung === 'hochschieben', String(zeile.bewegung));
   pruefe('Notiz an Claude wird gespeichert', zeile.notiz === 'Bitte sanft von unten einblenden lassen.', zeile.notiz);
   pruefe('…aber die Notiz steht weiterhin in KEINEM gerenderten Ausschnitt',
     (await s.werte(`${GERENDERT}.filter(el => el.innerHTML.includes('Bitte sanft von unten einblenden lassen.')).length`)) === 0);

@@ -10,7 +10,7 @@
      ÖFFENTLICHEN Umsetzer (bloecke.js) fertig dargestellt; ihre Bedienung
      erscheint erst bei Annäherung.
    - Griff und "⋯" bleiben unsichtbar, bis die Maus nah ist.
-   - Alle Blockeinstellungen (Breite, Bewegung, Notiz) liegen im "⋯"-Menü.
+   - Alle Blockeinstellungen (Breite, Farbe, Notiz) liegen im "⋯"-Menü.
      Blöcke mit Notiz tragen dauerhaft einen kleinen Punkt am Rand.
 
    Die private Notiz wird dem Umsetzer GAR NICHT ERST übergeben (siehe
@@ -123,7 +123,13 @@ export function mountBlockEditor(wurzel, {
          Die alte Pruefung sah es nicht, weil sie nur den Zustand im
          Fenster verglich, nicht den in der Datenbank. */
       typ: b.typ,
-      inhalt: b.inhalt, breite: b.breite, bewegung: b.bewegung,
+      /* "bewegung" steht hier ABSICHTLICH nicht. Die Seite animiert seit
+         dem Umbau alles von selbst beim Scrollen (assets/bewegung.css), das
+         Feld gibt es im Menue nicht mehr -- wir aendern den Wert also nie und
+         schicken ihn deshalb auch nicht mit. Das ist das GEGENTEIL des
+         "typ"-Fehlers darueber: dort wurde ein Wert geaendert und nicht
+         geschickt, hier wird er nie geaendert. */
+      inhalt: b.inhalt, breite: b.breite,
       notiz: b.notiz || null, sort_order: b.sort_order,
     });
   }
@@ -182,7 +188,7 @@ export function mountBlockEditor(wurzel, {
 
   /* Nur EINE Zeile neu -- nach Strukturänderungen (Größe, Ebene, Upload …).
      Ein offenes "⋯"-Menü bleibt offen: sonst klappt es beim Ändern der
-     Breite zu und man kommt nicht direkt zur Bewegung darunter. */
+     Breite zu und man kommt nicht direkt zur Farbe darunter. */
   function ersetzeZeile(b) {
     const alt = zeileVon(b);
     if (!alt) return neuZeichnen();
@@ -215,7 +221,7 @@ export function mountBlockEditor(wurzel, {
   function oeffentlich(b) {
     return {
       typ: b.typ, inhalt: b.inhalt,
-      breite: b.breite || 'normal', bewegung: b.bewegung || 'keine',
+      breite: b.breite || 'normal',
     };
   }
   function renderHtml(b) {
@@ -981,8 +987,6 @@ export function mountBlockEditor(wurzel, {
     menu.innerHTML = `
       ${auswahl('be-breite', 'Breite',
     ['schmal|Schmal', 'normal|Normal', 'randnotiz|Randnotiz (am Rand)', 'voll|Volle Breite'], b.breite)}
-      ${auswahl('be-bewegung', 'Bewegung',
-    ['keine|Keine', 'einblenden|Einblenden', 'hochschieben|Hochschieben', 'wachsen|Wachsen', 'zeilenweise|Zeilenweise'], b.bewegung)}
       ${FARBIGE_TYPEN.includes(b.typ) ? `<label>Farbe
         <span class="be-farben">${FARBEN.map(f => `
           <button type="button" class="be-farbe${(b.inhalt.farbe || '') === f.wert ? ' gewaehlt' : ''}"
@@ -994,7 +998,7 @@ export function mountBlockEditor(wurzel, {
         Kontur und Schatten
       </label>` : ''}
       <label>Notiz an Claude <span class="klein grau">(privat — erscheint nie auf der Seite)</span>
-        <textarea class="be-notiz" rows="2" placeholder="z. B.: „hier soll das Bild beim Scrollen leicht wachsen“">${esc(b.notiz || '')}</textarea>
+        <textarea class="be-notiz" rows="2" placeholder="z. B.: „hier fehlt noch ein besseres Bild“">${esc(b.notiz || '')}</textarea>
       </label>
       <div class="be-menu-knoepfe">
         <button type="button" class="btn ghost be-duplizieren">Duplizieren</button>
@@ -1010,9 +1014,6 @@ export function mountBlockEditor(wurzel, {
     });
     menu.querySelector('.be-breite').addEventListener('change', (e) => {
       b.breite = e.target.value; blockSpeichern(b); ersetzeZeile(b);
-    });
-    menu.querySelector('.be-bewegung').addEventListener('change', (e) => {
-      b.bewegung = e.target.value; blockSpeichern(b); ersetzeZeile(b);
     });
     menu.querySelectorAll('.be-farbe').forEach(k => k.addEventListener('click', () => {
       b.inhalt.farbe = k.dataset.farbe || '';

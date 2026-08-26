@@ -13,8 +13,8 @@
     'text_mit_bild', 'code', 'werkzeug', 'trenner',
   ]);
 
-  /* Breite/Bewegung als Hülle um einen Block legen -- aber NUR, wenn sie vom
-     Standard abweichen ('normal'/'keine'). Im Standardfall bleibt html exakt
+  /* Breite/Farbe/Rahmen als Hülle um einen Block legen -- aber NUR, wenn sie
+     vom Standard abweichen. Im Standardfall bleibt html exakt
      unverändert: sämtlicher schon vorhandener Inhalt hat diese Werte, die
      vier bestehenden Prüfungen (pruefe-bestand/leiste/brief/welten) dürfen
      sich also nicht ändern -- und tun es dadurch auch nicht.
@@ -32,16 +32,14 @@
     if (!html || block.typ === 'randnotiz' || block.typ === 'abschnitt') return html;
     const inh = block.inhalt || {};
     const breite = block.breite && block.breite !== 'normal' ? block.breite : null;
-    const bewegung = block.bewegung && block.bewegung !== 'keine' ? block.bewegung : null;
     /* Textfarbe nur beim reinen Textblock -- bei Kasten und Zitat traegt das
        Element seine Farbe selbst (Hintergrund bzw. Balken). */
     const textfarbe = block.typ === 'text' ? farbeVon(inh) : null;
     /* Bilder und GIFs koennen Kontur und Schatten ablegen. */
     const ohneRahmen = (block.typ === 'bild' || block.typ === 'gif') && inh.ohne_rahmen === true;
-    if (!breite && !bewegung && !textfarbe && !ohneRahmen) return html;
+    if (!breite && !textfarbe && !ohneRahmen) return html;
     const klassen = ['mm-baustein'];
     if (breite) klassen.push('mm-breite-' + breite);
-    if (bewegung) klassen.push('mm-bewegung-' + bewegung);
     if (textfarbe) klassen.push('mm-textfarbe', 'mm-farbe-' + textfarbe);
     if (ohneRahmen) klassen.push('mm-ohne-rahmen');
     return '<div class="' + klassen.join(' ') + '">' + html + '</div>';
@@ -85,34 +83,12 @@
     }
   }
 
-  /* Baustein-Elemente mit einer mm-bewegung-*-Klasse starten in ihrem ganz
-     normalen, sichtbaren Zustand -- läuft dieses Skript aus irgendeinem
-     Grund nicht (Fehler, alter Browser, `prefers-reduced-motion`), geht
-     dadurch NIE Inhalt verloren, nur das Einblenden entfällt. Erst wenn der
-     Beobachter wirklich bereitsteht, werden sie kurz unsichtbar gemacht und
-     beim Erscheinen im Bild wieder eingeblendet. */
-  function bewegungEinrichten(wurzel) {
-    if (!wurzel) return;
-    const bausteine = [...wurzel.querySelectorAll('[class*="mm-bewegung-"]')];
-    if (!bausteine.length) return;
-    if (!('IntersectionObserver' in window) ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    bausteine.forEach(el => {
-      el.classList.add('mm-bereit');
-      if (el.classList.contains('mm-bewegung-zeilenweise')) {
-        [...el.children].forEach((kind, i) => kind.style.setProperty('--mm-verzoegerung', (i * 60) + 'ms'));
-      }
-    });
-    const beobachter = new IntersectionObserver((eintraege) => {
-      eintraege.forEach(e => {
-        if (!e.isIntersecting) return;
-        e.target.classList.add('mm-sichtbar');
-        beobachter.unobserve(e.target);
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-    bausteine.forEach(el => beobachter.observe(el));
-  }
+  /* Frueher stand hier bewegungEinrichten(): ein Beobachter, der Bloecke mit
+     einer selbst gewaehlten "Bewegung" beim Erscheinen einblendete. Das Feld
+     gibt es nicht mehr -- die Seite animiert jetzt ALLES von selbst und am
+     Scrollstand festgemacht (assets/bewegung.css, reines CSS). Die Spalte
+     "bewegung" in der Datenbank bleibt unangetastet, ihre Werte wirken nur
+     nicht mehr. */
 
   /* Reiht die Blöcke einer Seite aneinander, sortiert nach sort_order --
      für eine Welt-Seite reicht das allein (siehe welt.html). */
@@ -142,5 +118,5 @@
     return gruppen;
   }
 
-  window.mmBloecke = { render, seite, gruppieren, bewegungEinrichten };
+  window.mmBloecke = { render, seite, gruppieren };
 })();

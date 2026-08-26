@@ -102,7 +102,11 @@
     { id: 'blk-wz',   seite_id: 's1', typ: 'werkzeug', inhalt: { roh: '::demo the-race' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 9 },
     { id: 'blk-tr',   seite_id: 's1', typ: 'trenner', inhalt: { roh: '---' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 10 },
     { id: 'blk-tuer', seite_id: 's1', typ: 'tuer', inhalt: { ziel: 'https://example.com', text: 'Mehr dazu' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 11 },
-    { id: 'blk-ab',   seite_id: 's1', typ: 'abschnitt', inhalt: { titel: 'Ein Abschnitt', art: 'beruflich', farbe: '#8E4E9B' }, breite: 'normal', bewegung: 'keine', notiz: '', sort_order: 12 },
+    /* "bewegung: hochschieben" ist ABSICHTLICH ein alter Wert aus der Zeit,
+       als man die Bewegung je Block wählen konnte. Er muss unangetastet
+       stehen bleiben, wenn im Editor etwas anderes geändert wird -- geprüft
+       in pruefe-editor.mjs. */
+    { id: 'blk-ab',   seite_id: 's1', typ: 'abschnitt', inhalt: { titel: 'Ein Abschnitt', art: 'beruflich', farbe: '#8E4E9B' }, breite: 'normal', bewegung: 'hochschieben', notiz: '', sort_order: 12 },
   ];
   anfangsBloecke.forEach(b => zeilen.set(b.id, structuredClone(b)));
 

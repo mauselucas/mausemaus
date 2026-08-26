@@ -60,14 +60,6 @@ export const BREITEN = [
   { wert: 'voll',      label: 'Volle Breite' },
 ];
 
-export const BEWEGUNGEN = [
-  { wert: 'keine',       label: 'Keine' },
-  { wert: 'einblenden',  label: 'Einblenden' },
-  { wert: 'hochschieben', label: 'Hochschieben' },
-  { wert: 'wachsen',     label: 'Wachsen' },
-  { wert: 'zeilenweise', label: 'Zeilenweise' },
-];
-
 /* ---------- leerer Inhalt je Blockart ---------- */
 
 export function leererInhalt(typ) {

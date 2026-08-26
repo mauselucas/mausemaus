@@ -357,12 +357,15 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
 .panel-link.zweitrangig { background: transparent; color: var(--ink); }
 .panel-link.zweitrangig:hover { background: var(--sage); }
 
-/* ===== Baustein-Breiten und -Bewegungen (Blockeditor) =====
-   Wird von assets/bloecke.js um Blöcke gelegt, deren Breite/Bewegung vom
-   Standard ("normal"/"keine") abweicht -- im Standardfall (aller bisherige
-   Inhalt) entsteht gar keine Hülle, siehe dort. Farben bewusst NICHT fest
-   verdrahtet (Welten können dunkel sein, siehe welt.css): nur Ausmaß und
-   Deckkraft, keine eigenen Hintergrund-/Randfarben. */
+/* ===== Baustein-Breiten (Blockeditor) =====
+   Wird von assets/bloecke.js um Blöcke gelegt, deren Breite vom Standard
+   ("normal") abweicht -- im Standardfall (aller bisherige Inhalt) entsteht
+   gar keine Hülle, siehe dort. Farben bewusst NICHT fest verdrahtet (Welten
+   können dunkel sein, siehe welt.css): nur Ausmaß und Deckkraft, keine
+   eigenen Hintergrund-/Randfarben.
+   Die Einblendungen beim Scrollen stehen NICHT hier, sondern in
+   assets/bewegung.css -- sie gelten fuer die ganze Seite, nicht nur fuer
+   Bloecke mit Huelle. */
 .mm-baustein { }
 
 /* schmal: eine schlankere, zentrierte Spalte innerhalb des Fließtexts. */
@@ -393,38 +396,6 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
   .mm-breite-voll { margin-inline: calc(-26px - clamp(0px, (100vw - 560px) / 2 - 20px, 90px)); }
 }
 @media (max-width: 620px) { .mm-breite-voll { margin-inline: -20px; } }
-
-/* Bewegungen: erst nach dem Einrichten durch bewegungEinrichten() (in
-   bloecke.js) unsichtbar, und auch dann nur, wenn IntersectionObserver da
-   ist und prefers-reduced-motion nicht "reduce" verlangt -- siehe Kommentar
-   dort. Ohne Skript bleibt jeder Baustein normal sichtbar. */
-.mm-bewegung-einblenden.mm-bereit,
-.mm-bewegung-hochschieben.mm-bereit,
-.mm-bewegung-wachsen.mm-bereit { opacity: 0; }
-.mm-bewegung-zeilenweise.mm-bereit > * { opacity: 0; }
-
-.mm-bewegung-einblenden.mm-sichtbar { animation: mm-einblenden .6s var(--mm-kurve) both; }
-.mm-bewegung-hochschieben.mm-sichtbar { animation: mm-hochschieben .6s var(--mm-kurve) both; }
-.mm-bewegung-wachsen.mm-sichtbar { animation: mm-wachsen .5s var(--mm-kurve) both; }
-.mm-bewegung-zeilenweise.mm-sichtbar > * {
-  animation: mm-einblenden .5s var(--mm-kurve) both;
-  animation-delay: var(--mm-verzoegerung, 0ms);
-}
-
-@keyframes mm-einblenden { from { opacity: 0; } to { opacity: 1; } }
-@keyframes mm-hochschieben { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes mm-wachsen { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .mm-bewegung-einblenden.mm-bereit,
-  .mm-bewegung-hochschieben.mm-bereit,
-  .mm-bewegung-wachsen.mm-bereit,
-  .mm-bewegung-zeilenweise.mm-bereit > * { opacity: 1; }
-  .mm-bewegung-einblenden.mm-sichtbar,
-  .mm-bewegung-hochschieben.mm-sichtbar,
-  .mm-bewegung-wachsen.mm-sichtbar,
-  .mm-bewegung-zeilenweise.mm-sichtbar > * { animation: none; }
-}
 
 /* ===== Farben für Blöcke =====
    Ein Ton je Farbe, alles andere wird daraus abgeleitet: der Kasten mischt
