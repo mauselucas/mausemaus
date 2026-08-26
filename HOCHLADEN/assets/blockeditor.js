@@ -524,15 +524,36 @@ export function mountBlockEditor(wurzel, {
         });
         wrap.appendChild(row);
       });
+      /* "+ Bild" oeffnet SOFORT die Dateiauswahl, statt erst eine leere
+         Zeile anzulegen. Der alte Weg schrieb "![]()"  in den Text -- und
+         das laesst sich nicht wieder einlesen (bildZeilenLesen verlangt
+         eine Adresse). Die leere Zeile verschwand beim naechsten Aufbau
+         also wieder, das "![]()" blieb als sichtbarer Text stehen und
+         waere so auf der oeffentlichen Seite gelandet.
+         Jetzt entsteht ein Eintrag erst, wenn wirklich ein Bild da ist. */
       const knopf = document.createElement('button');
       knopf.type = 'button'; knopf.className = 'btn ghost be-bild-neu'; knopf.textContent = '+ Bild';
-      knopf.addEventListener('click', () => {
-        bilder.push({ alt: '', url: '', groesse: 'gross' });
+      const auswahl = document.createElement('input');
+      auswahl.type = 'file'; auswahl.accept = 'image/*,image/gif';
+      auswahl.multiple = true; auswahl.hidden = true;
+      auswahl.className = 'be-bild-neu-datei';
+      knopf.addEventListener('click', () => auswahl.click());
+      auswahl.addEventListener('change', async (e) => {
+        const dateien = [...e.target.files]; e.target.value = '';
+        if (!dateien.length) return;
+        knopf.disabled = true; knopf.textContent = 'lädt…';
+        let neue = 0;
+        for (const datei of dateien) {
+          const r = await api.bildHochladen(datei);
+          if (r && r.url) { bilder.push({ alt: '', url: r.url, groesse: 'gross' }); neue++; }
+        }
+        knopf.disabled = false; knopf.textContent = '+ Bild';
+        if (!neue) return;
         b.inhalt.roh = bildZeilenBauen(bilder);
         blockSpeichern(b);
         zeichnen(); beiStruktur();
       });
-      wrap.appendChild(knopf);
+      wrap.append(knopf, auswahl);
     };
     zeichnen();
     return wrap;
@@ -1012,8 +1033,70 @@ export function mountBlockEditor(wurzel, {
     wurzel.querySelectorAll('.be-menu').forEach(m => { m.hidden = true; });
     slashSchliessen(); formatLeisteVerbergen();
   };
+  /* ---------- Bild aus der Zwischenablage einfuegen (Strg/Cmd+V) ----------
+     Fuer jemanden, der den ganzen Tag Einzelbilder aus dem Schnittprogramm
+     kopiert, ist das der kuerzeste denkbare Weg: kopieren, in den Text
+     klicken, einfuegen. Ohne das muesste jedes Bild erst als Datei
+     gespeichert und dann ueber die Dateiauswahl geholt werden.
+
+     Wichtig: Nur eingreifen, wenn wirklich BILDER in der Zwischenablage
+     liegen. Reiner Text muss ganz normal eingefuegt werden -- sonst waere
+     das Einfuegen von Text kaputt, und das macht man tausendmal
+     haeufiger. */
+  let ladeVorgang = false;
+  const einfuegen = async (e) => {
+    if (ladeVorgang) return;
+    const daten = e.clipboardData;
+    if (!daten) return;
+    const bilder = [...(daten.files || [])].filter(f => f.type && f.type.startsWith('image/'));
+    if (!bilder.length) return;              // Text? Dann normal einfuegen lassen.
+    e.preventDefault();
+
+    /* In welchen Block wird eingefuegt? */
+    const zeile = (document.activeElement && document.activeElement.closest)
+      ? document.activeElement.closest('.be-zeile') : null;
+    const ziel = zeile ? zustand.bloecke.find(x => x.clientKey === zeile.dataset.key) : null;
+
+    ladeVorgang = true;
+    const merker = statusEl ? statusEl.textContent : '';
+    if (statusEl) statusEl.textContent = bilder.length > 1
+      ? `${bilder.length} Bilder werden hochgeladen…` : 'Bild wird hochgeladen…';
+    const adressen = [];
+    try {
+      for (const datei of bilder) {
+        const r = await api.bildHochladen(datei);
+        if (r && r.url) adressen.push(r.url);
+      }
+    } finally {
+      ladeVorgang = false;
+      if (statusEl) statusEl.textContent = merker;
+    }
+    if (!adressen.length) return;
+
+    const roh = adressen.map(u => `![](${u})`).join('\n');
+    vorMutationMerken();
+
+    /* Steht der Cursor in einem LEEREN Textblock, wird dieser zum Bildblock
+       -- sonst haette man nach jedem Einfuegen eine leere Zeile darueber. */
+    const istLeererText = ziel && ziel.typ === 'text' && !String(ziel.inhalt.roh || '').trim();
+    if (istLeererText) {
+      ziel.typ = 'bild';
+      ziel.inhalt = { roh };
+      blockSpeichern(ziel);
+      ersetzeZeile(ziel);
+      return;
+    }
+
+    const bezug = ziel ? zeileVon(ziel) : null;
+    const neuerBlock = ziel ? blockEinfuegenNach(ziel, 'bild') : blockAmEndeEinfuegen('bild');
+    neuerBlock.inhalt = { roh };
+    blockSpeichern(neuerBlock);
+    zeileEinfuegen(neuerBlock, { nach: bezug });
+  };
+
   document.addEventListener('mousedown', aussenKlick);
   document.addEventListener('keydown', escapeDruck);
+  wurzel.addEventListener('paste', einfuegen);
 
   return {
     bloecke() { return zustand.bloecke; },
@@ -1039,6 +1122,7 @@ export function mountBlockEditor(wurzel, {
     zerstoeren() {
       document.removeEventListener('mousedown', aussenKlick);
       document.removeEventListener('keydown', escapeDruck);
+      wurzel.removeEventListener('paste', einfuegen);
       /* Sicherheitsnetz NACH flush() im Ablauf: hier sollte nichts mehr
          pendeln -- falls doch, lieber kappen als später auf eine ganz
          andere Seite feuern. */

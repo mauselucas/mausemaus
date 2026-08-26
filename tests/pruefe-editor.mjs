@@ -480,6 +480,104 @@ pruefe('GEGENBEWEIS: die alte, zu lasche Prüfung hätte "gespeichert 00:00:00" 
    also kein Gegenbeweis, sondern Beiwerk. Entfernt statt auskommentiert:
    Code, den nichts erreichen kann, wird in diesem Projekt gelöscht. */
 
+/* ---------- "+ Bild" darf niemals ein leeres "![]()" hinterlassen ----------
+   Der alte Weg legte erst eine leere Zeile an und schrieb dafuer "![]()"
+   in den Text. Das laesst sich nicht wieder einlesen (bildZeilenLesen
+   verlangt eine Adresse) -- die Zeile verschwand beim naechsten Aufbau
+   also wieder, das "![]()" blieb als sichtbarer Text stehen und waere so
+   auf der oeffentlichen Seite gelandet. */
+{
+  const vorher = await s.werte(`(() => {
+    const b = window.__editor.bloecke().find(x => x.typ === 'bild');
+    b.inhalt.roh = '';
+    document.querySelector('.be-zeile[data-typ="bild"] .be-bild-neu').click();
+    return JSON.stringify(b.inhalt.roh);
+  })()`);
+  await s.warte(300);
+  const nachher = await s.werte(`JSON.stringify(
+    window.__editor.bloecke().find(x => x.typ === 'bild').inhalt.roh)`);
+  pruefe('"+ Bild" schreibt KEIN leeres ![]() in den Text',
+    !String(nachher).includes('![]()'), 'vorher ' + vorher + ', nachher ' + nachher);
+  pruefe('…es gibt stattdessen eine Dateiauswahl hinter dem Knopf',
+    (await s.werte(`!!document.querySelector('.be-zeile[data-typ="bild"] .be-bild-neu-datei')`)) === true);
+
+  /* GEGENBEWEIS: die alte Form wuerde von dieser Pruefung erkannt. */
+  pruefe('GEGENBEWEIS: ein "![]()" im Text würde auffallen', '![]()'.includes('![]()'));
+}
+
+/* ---------- Bild aus der Zwischenablage (Strg/Cmd+V) ---------- */
+
+/* Legt ein Bild in die Zwischenablage und fuegt es in den angegebenen
+   Block ein. Liefert die Blockzahl vorher und nachher. */
+async function bildEinfuegenIn(auswahl) {
+  const vor = Number(await s.werte(`window.__editor.bloecke().length`));
+  await s.werte(`(() => {
+    const daten = new DataTransfer();
+    const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], 'probe.png', { type: 'image/png' });
+    daten.items.add(png);
+    const ta = document.querySelector(${JSON.stringify(auswahl)});
+    ta.focus();
+    ta.dispatchEvent(new ClipboardEvent('paste', { clipboardData: daten, bubbles: true, cancelable: true }));
+  })()`);
+  await s.warte(900);
+  return { vor, nach: Number(await s.werte(`window.__editor.bloecke().length`)) };
+}
+
+/* Fall A -- der Cursor steht in einem LEEREN Textblock.
+   Dann wird dieser Block selbst zum Bild. Ein neuer Block waere hier
+   falsch: man haette nach jedem Einfuegen eine leere Zeile darueber. */
+{
+  await s.werte(`(() => {
+    const bl = window.__editor.bloecke().find(b => b.typ === 'text');
+    bl.inhalt.roh = '';
+    window.__editor.neuZeichnen();
+  })()`);
+  await s.warte(200);
+  const z = await bildEinfuegenIn('.be-zeile[data-typ="text"] .be-text');
+  pruefe('Einfügen in einen LEEREN Textblock verwandelt genau diesen in ein Bild',
+    z.nach === z.vor, z.vor + ' -> ' + z.nach + ' Blöcke');
+  pruefe('…und das Bild trägt eine echte Adresse',
+    (await s.werte(`JSON.stringify(window.__editor.bloecke()
+      .filter(b => b.typ === 'bild').map(b => b.inhalt.roh))`)).includes('/favicon.svg'));
+}
+
+/* Fall B -- der Cursor steht in einem Textblock MIT Inhalt.
+   Dann kommt ein neuer Bildblock dahinter, der Text bleibt unangetastet. */
+{
+  await textBlockSetzen('.be-zeile[data-typ="text"] .be-text', 'Dieser Satz muss stehen bleiben.');
+  await s.warte(700);
+  const z = await bildEinfuegenIn('.be-zeile[data-typ="text"] .be-text');
+  pruefe('Einfügen in einen GEFÜLLTEN Textblock legt einen neuen Bildblock an',
+    z.nach === z.vor + 1, z.vor + ' -> ' + z.nach + ' Blöcke');
+  pruefe('…und der vorhandene Text bleibt unangetastet',
+    (await s.werte(`JSON.stringify(window.__editor.bloecke()
+      .filter(b => b.typ === 'text').map(b => b.inhalt.roh))`)).includes('Dieser Satz muss stehen bleiben.'));
+}
+
+/* Nirgends darf dabei eine leere Bildklammer entstehen. */
+pruefe('kein einziger Block enthält ein leeres ![]()',
+  !(await s.werte(`JSON.stringify(window.__editor.bloecke().map(b => b.inhalt.roh || ''))`)).includes('![]()'));
+
+/* Reiner TEXT muss ganz normal eingefuegt werden -- sonst waere das
+   Einfuegen von Text kaputt, und das macht man tausendmal haeufiger. */
+{
+  const vorZahl = await s.werte(`window.__editor.bloecke().length`);
+  const verhindert = await s.werte(`(() => {
+    const daten = new DataTransfer();
+    daten.setData('text/plain', 'nur Text');
+    const ta = document.querySelector('.be-zeile[data-typ="text"] .be-text');
+    ta.focus();
+    const ev = new ClipboardEvent('paste', { clipboardData: daten, bubbles: true, cancelable: true });
+    ta.dispatchEvent(ev);
+    return ev.defaultPrevented;
+  })()`);
+  await s.warte(300);
+  pruefe('reiner Text wird NICHT abgefangen (normales Einfügen bleibt heil)',
+    verhindert === false, 'defaultPrevented=' + verhindert);
+  pruefe('…und es entsteht dabei kein Bildblock',
+    Number(await s.werte(`window.__editor.bloecke().length`)) === Number(vorZahl));
+}
+
 /* ---------- Die Dokumentspalte ist wirklich EINE Spalte ----------
    In einem Dokument müssen alle Blöcke am selben linken Rand beginnen.
    Aufgefallen ist das an der Überschrift: Ihre Größenwahl lag als
