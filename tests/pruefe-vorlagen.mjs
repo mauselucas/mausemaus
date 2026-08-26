@@ -7,7 +7,8 @@
    eine absichtlich kaputte Variante, an der dieselbe Prüfung nachweislich
    fehlschlägt (siehe unten "sechs Prüfungen, die gar nicht fehlschlagen
    konnten" -- der teuerste Fehler des Vorhabens laut Auftrag). */
-import { vorlageBloecke, BLOCKARTEN_NACH_TYP } from '../HOCHLADEN/assets/block-modell.js';
+import { readFile } from 'node:fs/promises';
+import { vorlageBloecke, BLOCKARTEN_NACH_TYP, leerSeitenEntwurf } from '../HOCHLADEN/assets/block-modell.js';
 
 const ergebnisse = [];
 function pruefe(name, bedingung, zusatz = '') {
@@ -90,6 +91,59 @@ pruefe('vorlageBloecke("gibtsnicht") liefert nichts, statt einen Fehler zu werfe
   const aufsteigend = nummeriert.every((n, i) => i === 0 || n > nummeriert[i - 1]);
   pruefe('die von admin.js vergebene Reihenfolge wäre eindeutig und aufsteigend',
     eindeutig && aufsteigend, nummeriert.join(','));
+}
+
+/* ================= Der Entwurf für eine NEUE Seite =================
+
+   Der Fehler dahinter: Der Entwurf trug ein `id: null` mit sich, weil
+   dieselbe Form auch als Vorlage für das Objekt im Arbeitsspeicher diente.
+   Ein ausdrücklich mitgeschicktes `null` schlägt aber den automatischen
+   Vorgabewert der Spalte -- die Datenbank wies jeden neuen Datensatz ab:
+   "null value in column id violates not-null constraint".
+
+   Der Knopf "+ Neue Seite" war damit seit dem ersten Tag kaputt. Gemerkt
+   hat es niemand, weil alle vorhandenen Seiten aus dem Umzugsskript
+   stammen -- gedrückt hat den Knopf erst Lucas, Wochen später. */
+{
+  const e = leerSeitenEntwurf('welt', [10, 20, 30]);
+
+  pruefe('der Entwurf enthält KEIN "id" — die Datenbank vergibt die Kennung selbst',
+    !Object.prototype.hasOwnProperty.call(e, 'id'),
+    'Felder: ' + Object.keys(e).join(', '));
+
+  /* Dasselbe gilt für jedes andere Feld, das die Datenbank selbst füllt. */
+  const selbstVergeben = ['id', 'created_at', 'updated_at'];
+  const zuviel = selbstVergeben.filter(k => Object.prototype.hasOwnProperty.call(e, k));
+  pruefe('…und auch kein created_at/updated_at (die setzt die Datenbank)',
+    zuviel.length === 0, zuviel.join(', '));
+
+  pruefe('der Entwurf trägt die geforderte Art', e.typ === 'welt', e.typ);
+  pruefe('…startet als Entwurf, nicht veröffentlicht', e.status === 'draft', e.status);
+  pruefe('…und reiht sich hinter den vorhandenen Seiten ein',
+    e.sort_order === 40, String(e.sort_order));
+  pruefe('ohne vorhandene Seiten fängt die Sortierung sauber an',
+    leerSeitenEntwurf('projekt', []).sort_order === 10,
+    String(leerSeitenEntwurf('projekt', []).sort_order));
+
+  /* GEGENBEWEIS: genau die alte, kaputte Form würde erkannt. */
+  const kaputt = { id: null, slug: '', typ: 'welt', status: 'draft' };
+  pruefe('GEGENBEWEIS: die alte Form mit "id: null" würde von dieser Prüfung erkannt',
+    Object.prototype.hasOwnProperty.call(kaputt, 'id'));
+}
+
+/* Und an der echten Datei: der Aufruf, der wirklich in die Datenbank
+   schreibt, darf kein "id" mitschicken. Rein strukturell, ohne Anmeldung --
+   der Fehler lag ja nicht in der Logik, sondern in dem, was übergeben wurde. */
+{
+  const js = await readFile(new URL('../HOCHLADEN/assets/admin.js', import.meta.url), 'utf8');
+  const stelle = (js.match(/sb\.from\('seiten'\)\.insert\(([^)]*)\)/) || [])[0] || '';
+  pruefe('admin.js legt Seiten überhaupt noch über insert() an',
+    stelle.length > 0, stelle);
+  pruefe('…und baut den Entwurf über leerSeitenEntwurf (keine zweite, abweichende Form)',
+    js.includes('leerSeitenEntwurf('), '');
+  pruefe('in admin.js steht nirgends mehr ein "id: null"',
+    !/\bid:\s*null\b/.test(js),
+    (js.match(/.{0,40}\bid:\s*null\b.{0,40}/) || [''])[0]);
 }
 
 bericht();

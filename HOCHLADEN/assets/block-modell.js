@@ -480,3 +480,29 @@ export function auszeichnungsHtml(roh) {
   }
   return aus + s.slice(pos);
 }
+
+/* ---------- Entwurf für eine neue Seite ----------
+   Liefert GENAU die Felder, die beim Anlegen in die Datenbank geschrieben
+   werden -- und ausdrücklich KEIN `id`.
+
+   Genau daran ist das Anlegen einer neuen Seite gescheitert: Der Entwurf
+   trug ein `id: null` mit sich, weil dieselbe Form auch als Vorlage für das
+   Objekt im Arbeitsspeicher diente. Ein ausdrücklich mitgeschicktes `null`
+   schlägt aber den automatischen Vorgabewert der Spalte
+   (`gen_random_uuid()`) -- die Datenbank bekam eine leere Kennung und wies
+   den Datensatz ab: "null value in column id violates not-null constraint".
+
+   Aufgefallen ist es erst spät, weil alle vorhandenen Seiten aus dem
+   Umzugsskript stammen. Der Knopf "+ Neue Seite" war seit dem ersten Tag
+   kaputt, nur hatte ihn nie jemand gedrückt.
+
+   Reine Funktion, damit genau das prüfbar ist, ohne sich anzumelden. */
+export function leerSeitenEntwurf(typ, vorhandeneSortierungen = []) {
+  const zahlen = (vorhandeneSortierungen || []).filter(n => typeof n === 'number' && isFinite(n));
+  const max = zahlen.length ? Math.max(0, ...zahlen) : 0;
+  return {
+    slug: '', typ, titel: '', untertitel: '', kunde: '', jahr: '',
+    cover_url: null, cover_pos: '50% 50%', video_url: '', embed_ok: true, farbe: '',
+    ist_aktuell: false, status: 'draft', sort_order: max + 10,
+  };
+}

@@ -13,7 +13,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   erzeugeSpeicherWarteschlange, naechsteSortierung, vorlageBloecke,
-  naechsterFreierSlug, ersterFehler, erzeugeEntprellung,
+  naechsterFreierSlug, ersterFehler, erzeugeEntprellung, leerSeitenEntwurf,
   darfDurchsCanvas, endungFuerMime, endungUndArtFuerBlob,
 } from '/assets/block-modell.js';
 import { mountBlockEditor } from '/assets/blockeditor.js';
@@ -294,13 +294,10 @@ let AKTUELL = null;       // die gerade geöffnete Zeile aus `seiten`
 let EDITOR = null;        // Rückgabe von mountBlockEditor()
 let SEITEN_WARTESCHLANGE = null;
 
+/* Der Entwurf fuer die Datenbank -- OHNE `id`, damit die Spalte ihren
+   eigenen Vorgabewert erzeugen kann (siehe leerSeitenEntwurf). */
 function leereSeite(typ) {
-  const max = Math.max(0, ...SEITEN.filter(s => s.typ === typ).map(p => p.sort_order || 0));
-  return {
-    id: null, slug: '', typ, titel: '', untertitel: '', kunde: '', jahr: '',
-    cover_url: null, cover_pos: '50% 50%', video_url: '', embed_ok: true, farbe: '',
-    ist_aktuell: false, status: 'draft', sort_order: max + 10,
-  };
+  return leerSeitenEntwurf(typ, SEITEN.filter(s => s.typ === typ).map(p => p.sort_order || 0));
 }
 
 /* Eine neue Seite entsteht SOFORT in der Datenbank (nicht erst beim
