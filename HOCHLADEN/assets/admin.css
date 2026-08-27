@@ -167,12 +167,12 @@ body.admin {
 .dok-bereich { max-width:768px; margin:0 auto; padding:48px 24px 160px; }
 .dokument { max-width:720px; margin:0 auto; }
 .dok-titel {
-  font-family:'Tropi','Space Grotesk',sans-serif; font-size:clamp(30px,5vw,42px);
+  font-family:'TropiWeb','Manrope',sans-serif; font-size:clamp(30px,5vw,42px);
   line-height:1.15; color:var(--ink); background:transparent; border:0; width:100%;
   padding:0 0 0 var(--leiste); margin:0 0 6px; border-radius:6px;
 }
 .dok-untertitel {
-  font-family:'Space Grotesk',sans-serif; font-size:17px; line-height:1.55;
+  font-family:'Manrope',sans-serif; font-size:17px; line-height:1.55;
   color:var(--muted); background:transparent; border:0; width:100%; resize:none;
   padding:0 0 0 var(--leiste); margin:0 0 28px;
 }
@@ -228,7 +228,7 @@ body.admin {
    Beide MÜSSEN zeichenweise deckungsgleich sein, sonst steht die Schrift
    versetzt zum Cursor -- deshalb teilen sie sich exakt diese eine Regel. */
 .be-text, .be-highlight {
-  font-family:'Space Grotesk',sans-serif; font-size:17px; line-height:1.65;
+  font-family:'Manrope',sans-serif; font-size:17px; line-height:1.65;
   letter-spacing:normal; padding:2px 0; margin:0; border:0;
   white-space:pre-wrap; overflow-wrap:break-word; word-break:normal;
   width:100%; box-sizing:border-box;
@@ -280,7 +280,7 @@ body.admin {
    stünde dann als einzige in der Spalte eingerückt. */
 .be-ueberschrift-wrap { position:relative; display:flex; align-items:flex-start; }
 .be-ueberschrift {
-  font-family:'Tropi','Space Grotesk',sans-serif; flex:1; min-width:0;
+  font-family:'TropiWeb','Manrope',sans-serif; flex:1; min-width:0;
   background:transparent; border:0; resize:none; overflow:hidden;
   color:var(--ink); padding:2px 0; line-height:1.2;
 }
@@ -307,7 +307,7 @@ body.admin {
 
 .be-abschnitt { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .admin .be-abschnitt input.be-ab-titel {
-  font-family:'Tropi','Space Grotesk',sans-serif; font-size:24px; color:var(--ink);
+  font-family:'TropiWeb','Manrope',sans-serif; font-size:24px; color:var(--ink);
   background:transparent; border:0; padding:2px 0; flex:1; min-width:160px;
 }
 .admin .be-abschnitt input.be-ab-titel:focus { outline:none; box-shadow:0 0 0 2px var(--akzent-schwach); }
@@ -360,7 +360,11 @@ body.admin {
   display:flex; align-items:center; justify-content:center; font-size:9px;
   color:var(--grau); background:var(--hg); text-align:center;
 }
-.admin .be-bild-alt { flex:1; min-width:120px; font-size:12.5px; padding:6px 9px; }
+/* Zwei Textfelder je Bild: sichtbare Unterschrift und unsichtbare
+   Beschreibung. Beide duerfen schrumpfen, damit die Zeile mit Vorschau,
+   Groessenwahl und zwei Knoepfen nicht umbricht. */
+.admin .be-bild-unterschrift,
+.admin .be-bild-beschreibung { flex:1 1 130px; min-width:110px; font-size:12.5px; padding:6px 9px; }
 .admin .be-bild-zeile select { width:auto; font-size:12px; padding:6px 8px; }
 .be-bild-zeile .btn { padding:5px 10px; font-size:12px; }
 .be-bild-neu { align-self:flex-start; }
@@ -536,7 +540,7 @@ body.admin {
 /* Die zweite, farbige Zeile des Grusses ("Lucas :)") -- im Editor genauso
    gesetzt wie auf der Seite, damit man sofort sieht, worum es geht. */
 .admin .be-abschnitt input.be-ab-zusatz {
-  font-family:'Tropi','Space Grotesk',sans-serif; font-size:24px;
+  font-family:'TropiWeb','Manrope',sans-serif; font-size:24px;
   color:var(--sage, #BFCC94); background:transparent; border:0;
   padding:2px 0; flex-basis:100%; min-width:160px;
 }

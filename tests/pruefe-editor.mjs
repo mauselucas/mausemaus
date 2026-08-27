@@ -918,5 +918,58 @@ const jsFehler2 = m.fehlerAufSeite();
 pruefe('keine JavaScript-Fehler bei 520px', jsFehler2.length === 0, jsFehler2.join(' | '));
 await m.zu();
 
+/* ---------- Bild: Unterschrift und Beschreibung sind ZWEI Felder ----------
+
+   Der Bild-Block trug frueher ein einziges Feld, dessen Text gleichzeitig
+   sichtbar unter dem Bild stand UND das alt-Attribut fuellte. Wer ein Bild
+   fuer Blinde beschreiben wollte, musste die Beschreibung also allen
+   sichtbar hinschreiben -- weshalb es niemand tat und saemtliche Bilder der
+   Seite ohne alt-Text dastanden.
+
+   Dass die beiden Texte an der richtigen Stelle LANDEN, prueft
+   pruefe-bildbeschreibung.mjs an der Zeichenkette. Hier geht es um das
+   Stueck dazwischen, das nur ein Browser zeigt: dass der Editor wirklich
+   zwei Felder anbietet und jedes davon am richtigen Ende ankommt. */
+{
+  const p2 = await oeffne(URL_PROBE, { port: 9348, breite: 1280, hoehe: 1000 });
+  await p2.warte(400);
+
+  const felder = JSON.parse(await p2.werte(`JSON.stringify(
+    [...document.querySelectorAll('.be-zeile[data-typ="bild"] input')]
+      .map(i => i.className).filter(k => k.startsWith('be-bild-')))`));
+  pruefe('der Bild-Block bietet ein Feld für die sichtbare Unterschrift',
+    felder.includes('be-bild-unterschrift'), felder.join(', '));
+  pruefe('…und ein zweites für die unsichtbare Beschreibung',
+    felder.includes('be-bild-beschreibung'), felder.join(', '));
+
+  const ergebnis = JSON.parse(await p2.werte(`(() => {
+    const z = document.querySelector('.be-zeile[data-typ="bild"]');
+    const tippe = (k, w) => { const el = z.querySelector('.' + k);
+      el.value = w; el.dispatchEvent(new Event('input', { bubbles: true })); };
+    tippe('be-bild-unterschrift', 'Bello im Schnee, 2019');
+    tippe('be-bild-beschreibung', 'Ein brauner Hund springt durch tiefen Schnee');
+    const img = z.querySelector('.be-vorschau-html img');
+    const fc = z.querySelector('.be-vorschau-html figcaption');
+    return JSON.stringify({
+      alt: img ? img.getAttribute('alt') : null,
+      sichtbar: fc ? fc.textContent : null,
+    });
+  })()`));
+
+  pruefe('die Beschreibung landet im alt-Attribut',
+    ergebnis.alt === 'Ein brauner Hund springt durch tiefen Schnee', ergebnis.alt);
+  pruefe('die Unterschrift steht sichtbar unter dem Bild',
+    ergebnis.sichtbar === 'Bello im Schnee, 2019', ergebnis.sichtbar);
+  /* Der Kern der Sache: die beiden duerfen nicht wieder dasselbe sein. */
+  pruefe('GEGENBEWEIS: die Beschreibung steht NICHT sichtbar unter dem Bild',
+    ergebnis.sichtbar !== ergebnis.alt &&
+    !String(ergebnis.sichtbar).includes('brauner Hund'), ergebnis.sichtbar);
+
+  const jsF3 = p2.fehlerAufSeite();
+  pruefe('keine JavaScript-Fehler beim Beschriften eines Bildes',
+    jsF3.length === 0, jsF3.join(' | '));
+  await p2.zu();
+}
+
 chrome.beenden(); server.beenden();
 bericht();

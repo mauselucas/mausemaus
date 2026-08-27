@@ -33,7 +33,14 @@
       if (besucht.has(slug)) a.classList.add('mm-tuer-besucht');
       a.addEventListener('click', () => merken(slug));
 
-      a.addEventListener('mouseenter', () => {
+      /* Die Vorschau hing frueher NUR an mouseenter/mouseleave. Damit sah sie
+         niemand, der die Seite mit der Tastatur bedient -- und auf dem Handy
+         gibt es gar keinen Mauszeiger, dort bekam sie also KEIN Besucher der
+         mobilen Fassung je zu Gesicht. focus/blur horchen auf dasselbe:
+         beim Tabben auf ein Tuerchen geht die Vorschau auf wie beim
+         Ueberfahren. Ein Fingertipp loest auf Beruehrungsgeraeten ebenfalls
+         focus aus, bevor dem Link gefolgt wird. */
+      const zeigen = () => {
         const t = a.dataset.titel, x = a.dataset.text;
         if (!t && !x) return;
         kasten.innerHTML =
@@ -56,8 +63,13 @@
         } else {
           kasten.style.top = oben + 'px';
         }
-      });
-      a.addEventListener('mouseleave', () => { kasten.hidden = true; });
+      };
+      const verstecken = () => { kasten.hidden = true; };
+
+      a.addEventListener('mouseenter', zeigen);
+      a.addEventListener('mouseleave', verstecken);
+      a.addEventListener('focus', zeigen);
+      a.addEventListener('blur', verstecken);
     });
   };
 })();

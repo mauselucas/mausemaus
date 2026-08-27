@@ -280,10 +280,19 @@ export function tuerEinfuegen(text, start, end, wort, slug, titel, zusatztext, g
 /* ---------- Bild-Zeilen (ein 'bild'-Block kann mehrere enthalten -- eine
    Galerie) ---------- */
 
-const IMG_LINE = /^!\[([^\]]*)\]\(([^)\s]+)\)(?:\{(klein|mittel|gross)\})?$/;
+/* Muss Zeichen fuer Zeichen zu IMG_LINE in shared.js passen -- dort steht
+   erklaert, wofuer die vier Gruppen stehen. */
+const IMG_LINE = /^!\[([^\]]*)\]\(([^)\s]+)\)(?:\{(klein|mittel|gross)\})?(?:\{([^}]*)\})?$/;
 
-export function bildZeileBauen({ alt = '', url = '', groesse = 'gross' } = {}) {
-  return `![${alt}](${url})` + (groesse && groesse !== 'gross' ? `{${groesse}}` : '');
+export function bildZeileBauen({ unterschrift = '', url = '', groesse = 'gross', beschreibung = '' } = {}) {
+  /* Die Beschreibung steht in der ZWEITEN Klammer -- also muss die erste
+     (die Groesse) dastehen, sobald es eine Beschreibung gibt, auch wenn sie
+     "gross" und damit der Normalfall ist. Ohne sie ruecke die Beschreibung
+     an die Stelle der Groesse und wuerde beim Lesen als solche verstanden. */
+  const groesseNoetig = (groesse && groesse !== 'gross') || !!beschreibung;
+  return `![${unterschrift}](${url})`
+    + (groesseNoetig ? `{${groesse || 'gross'}}` : '')
+    + (beschreibung ? `{${beschreibung}}` : '');
 }
 
 export function bildZeilenLesen(roh) {
@@ -292,7 +301,8 @@ export function bildZeilenLesen(roh) {
     .map(z => {
       const m = z.match(IMG_LINE);
       if (!m) return null;
-      return { alt: m[1] || '', url: m[2] || '', groesse: m[3] || 'gross' };
+      return { unterschrift: m[1] || '', url: m[2] || '', groesse: m[3] || 'gross',
+               beschreibung: m[4] || '' };
     })
     .filter(Boolean);
 }

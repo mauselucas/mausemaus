@@ -13,6 +13,28 @@
 <meta property="og:url" content="https://mausemaus.com/">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://mausemaus.com/">
+<meta property="og:site_name" content="mausemaus">
+<meta property="og:locale" content="de_DE">
+<meta name="theme-color" content="#F0F4EF">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="mausemaus — Lucas Schönwald">
+<meta name="twitter:description" content="Lucas Schönwald — Video Editor und Motion Designer in Köln.">
+<meta name="twitter:image" content="https://mausemaus.com/og-bild.jpg">
+<!-- Sagt Suchmaschinen, WER hier schreibt und WO er sitzt. Bewusst fest
+     eingetragen: das beschreibt Lucas, nicht den Inhalt, und aendert sich
+     nicht mit den Projekten. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Lucas Schönwald",
+  "alternateName": "mausemaus",
+  "jobTitle": "Video Editor und Motion Designer",
+  "url": "https://mausemaus.com/",
+  "image": "https://mausemaus.com/og-bild.jpg",
+  "address": { "@type": "PostalAddress", "addressLocality": "Köln", "addressCountry": "DE" }
+}
+</script>
 <!-- Scroll-Animationen fuer Engines, die sie selbst nicht koennen (Firefox).
      Chrome und Safari laufen an dieser Stelle vorbei: Sie holen null Byte
      und animieren wie bisher rein in CSS auf dem Compositor.
@@ -34,17 +56,27 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1787819522"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787819522">');
+  document.write('<script src="/assets/scroll-timeline.js?v=1787858995"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787858995">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787819522">
-<link rel="stylesheet" href="/assets/site.css?v=1787819522">
-<link rel="stylesheet" href="/assets/leiste.css?v=1787819522">
-<link rel="stylesheet" href="/assets/brief.css?v=1787819522">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787819522">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787819522">
+<!-- Die zwei Schnitte, die oben sofort sichtbar sind (der grosse Gruss in
+     Tropi, der Fliesstext in Manrope), schon jetzt anfordern statt
+     erst, wenn das CSS gelesen ist. Bewusst NUR diese beiden: laedt man alle
+     vor, holt man sich genau die Verzoegerung zurueck, die das Herausloesen
+     gerade beseitigt hat. Die Namen tragen einen Fingerabdruck des Inhalts
+     und werden von tests/schriften-loesen.mjs vergeben.
+     crossorigin ist bei Schriften Pflicht -- ohne das Wort laedt der Browser
+     die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
+<link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts.css?v=1787858995">
+<link rel="stylesheet" href="/assets/site.css?v=1787858995">
+<link rel="stylesheet" href="/assets/leiste.css?v=1787858995">
+<link rel="stylesheet" href="/assets/brief.css?v=1787858995">
+<link rel="stylesheet" href="/assets/blumen.css?v=1787858995">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1787858995">
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -77,38 +109,72 @@
   <svg viewBox="0 0 303.13 275.3" width="60" height="54"><path d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></svg>
 </div>
 
+<!-- Sprungmarke: Wer mit der Tastatur ankommt, landet sonst zuerst in der
+     Zeitleiste und muss sich durch alle Abschnitte tabben, bevor der Brief
+     anfaengt. Der Link ist unsichtbar, bis er den Fokus bekommt. -->
+<a class="br-sprung" href="#brief">Zum Brief springen</a>
+
 <div class="br-buehne">
-  <div id="leiste"></div>
-  <div class="br-scroller" id="scroller">
+  <!-- <nav> statt <div>: die Leiste IST die Navigation dieser Seite. Ohne
+       diese Auszeichnung findet ein Screenreader sie gar nicht als solche. -->
+  <nav id="leiste" aria-label="Abschnitte des Briefs"></nav>
+  <main class="br-scroller" id="scroller">
    <!-- .br-rand schneidet die Deko-Blumen an den Seitenrändern ab, siehe brief.css -->
    <div class="br-rand">
     <div class="br-spalte">
       <div id="brief"></div>
 
-      <form name="anfrage" method="POST" data-netlify="true"
-            netlify-honeypot="bot-feld" action="/?danke=1#anfragen"
+      <!-- Das Formular lief frueher ueber Netlify Forms (data-netlify="true").
+           Seit dem Umzug auf GitHub Pages gibt es das nicht mehr: dort waere
+           das Attribut wirkungslos gewesen und jede Anfrage waere spurlos
+           verschwunden. Jetzt laeuft es ueber Formspree.
+
+           Wichtig an der Bauweise: das action-Attribut steht im HTML. Ohne
+           JavaScript schickt der Browser das Formular ganz normal ab und
+           Formspree zeigt seine eigene Dankeseite -- die Anfrage kommt an.
+           Das Skript weiter unten faengt das Absenden nur ab, um den
+           Seitenwechsel zu ersparen und die Antwort hier auf der Seite zu
+           zeigen. Bricht es ab, bleibt der normale Weg uebrig. Keine
+           Anfrage haengt davon ab, dass ein Skript funktioniert. -->
+      <form name="anfrage" method="POST"
+            action="https://formspree.io/f/xljerkoz"
             class="br-formular" id="anfragen">
-        <input type="hidden" name="form-name" value="anfrage">
-        <p class="versteckt"><label>Bitte leer lassen: <input name="bot-feld"></label></p>
-        <label><input type="text" name="name" placeholder="Dein Name" required></label>
-        <label><input type="email" name="email" placeholder="Deine E-Mail" required></label>
-        <label><textarea name="nachricht" rows="4" placeholder="Worum geht's?" required></textarea></label>
+        <!-- Formspree wirft eine Einsendung weg, sobald das Feld _gotcha
+             gefuellt ist. Menschen sehen es nicht, automatische Ausfueller
+             schon. Der Name ist von Formspree vorgegeben. -->
+        <p class="versteckt"><label>Bitte leer lassen: <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
+        <!-- Betreffzeile der Mail, die bei Lucas ankommt. -->
+        <input type="hidden" name="_subject" value="Neue Anfrage über mausemaus.com">
+        <!-- Die Beschriftung stand vorher NUR im placeholder. Der verschwindet,
+             sobald jemand zu tippen anfaengt -- wer dann den Faden verliert,
+             sieht nicht mehr, welches Feld welches ist, und ein Screenreader
+             liest ein unbeschriftetes Feld vor. Der Text steht jetzt im
+             <label> und ist mit .versteckt nur optisch ausgeblendet: fuer
+             Auge und Aussehen aendert sich nichts, fuer Vorlesen alles. -->
+        <label><span class="versteckt">Dein Name</span>
+          <input type="text" name="name" placeholder="Dein Name" required></label>
+        <label><span class="versteckt">Deine E-Mail-Adresse</span>
+          <input type="email" name="email" placeholder="Deine E-Mail" required></label>
+        <label><span class="versteckt">Worum geht's?</span>
+          <textarea name="nachricht" rows="4" placeholder="Worum geht's?" required></textarea></label>
         <button type="submit">Anfrage senden →</button>
+        <!-- aria-live: ein Screenreader liest die Rueckmeldung vor, sobald sie
+             erscheint. Ohne das Attribut bliebe sie fuer Blinde stumm. -->
+        <p class="br-formular-antwort" id="anfrage-antwort" role="status" aria-live="polite"></p>
       </form>
     </div>
    </div>
-  </div>
+  </main>
 </div>
 
-<script src="/assets/config.js?v=1787819522"></script>
-<script src="/assets/seed.js?v=1787819522"></script>
-<script src="/assets/shared.js?v=1787819522"></script>
-<script src="/assets/bloecke.js?v=1787819522"></script>
-<script src="/assets/db.js?v=1787819522"></script>
-<script src="/assets/blumen.js?v=1787819522"></script>
-<script src="/assets/leiste.js?v=1787819522"></script>
-<script src="/assets/brief.js?v=1787819522"></script>
-<script src="/assets/tueren.js?v=1787819522"></script>
+<script src="/assets/config.js?v=1787858995"></script>
+<script src="/assets/shared.js?v=1787858995"></script>
+<script src="/assets/bloecke.js?v=1787858995"></script>
+<script src="/assets/db.js?v=1787858995"></script>
+<script src="/assets/blumen.js?v=1787858995"></script>
+<script src="/assets/leiste.js?v=1787858995"></script>
+<script src="/assets/brief.js?v=1787858995"></script>
+<script src="/assets/tueren.js?v=1787858995"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -161,5 +227,57 @@
   }
 })();
 </script>
+
+<!-- Anfrageformular ohne Seitenwechsel abschicken. Faellt dieses Skript
+     aus, bleibt das action-Attribut im <form> uebrig und der Browser schickt
+     ganz normal ab -- die Anfrage kommt trotzdem an, nur mit Seitenwechsel
+     auf Formsprees eigene Dankeseite. Deshalb wird preventDefault() erst
+     INNERHALB des Handlers aufgerufen und nicht das action-Attribut entfernt. -->
+<script>
+(function () {
+  var form = document.getElementById('anfragen');
+  if (!form || !window.fetch) return;
+  var antwort = document.getElementById('anfrage-antwort');
+  var knopf = form.querySelector('button[type=submit]');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    antwort.className = 'br-formular-antwort';
+    antwort.textContent = 'Wird gesendet …';
+    knopf.disabled = true;
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    }).then(function (r) {
+      if (r.ok) {
+        form.reset();
+        antwort.className = 'br-formular-antwort gut';
+        antwort.textContent = 'Angekommen! Ich melde mich.';
+      } else {
+        return r.json().then(function (d) {
+          throw new Error((d.errors || []).map(function (f) { return f.message; }).join(', ')
+            || 'Das hat nicht geklappt.');
+        });
+      }
+    }).catch(function (err) {
+      antwort.className = 'br-formular-antwort schlecht';
+      /* Bewusst mit Ausweg: wer hier haengenbleibt, soll trotzdem
+         schreiben koennen, statt einfach abzuspringen. */
+      antwort.textContent = (err.message || 'Das hat nicht geklappt.')
+        + ' Schreib mir sonst direkt an hallo@mausemaus.com.';
+    }).then(function () { knopf.disabled = false; });
+  });
+})();
+</script>
+
+<!-- Besucherstatistik (GoatCounter). Bewusst so und nicht anders:
+     keine Cookies, keine personenbezogenen Daten, nichts, was ueber
+     Seiten hinweg wiedererkennt -- deshalb braucht die Seite dafuer KEIN
+     Einwilligungsbanner. Steht ganz am Ende und traegt async: faellt der
+     Dienst aus oder blockt ihn ein Adblocker, merkt die Seite davon nichts.
+     admin.html bekommt das ausdruecklich NICHT -- Lucas' eigene Arbeit im
+     Editor gehoert nicht in die Besucherzahlen. -->
+<script data-goatcounter="https://mauselucas.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

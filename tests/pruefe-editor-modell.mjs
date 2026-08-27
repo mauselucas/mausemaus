@@ -75,8 +75,8 @@ pruefe('einzig übrige Zeile', naechsteSortierung(null, null) === 1000);
 
 {
   const roh = bildZeilenBauen([
-    { alt: 'Erstes', url: 'a.webp', groesse: 'gross' },
-    { alt: '', url: 'b.webp', groesse: 'klein' },
+    { unterschrift: 'Erstes', url: 'a.webp', groesse: 'gross' },
+    { unterschrift: '', url: 'b.webp', groesse: 'klein' },
   ]);
   pruefe('Bild ohne eigene Größe bekommt keine {…}-Angabe',
     roh.split('\n')[0] === '![Erstes](a.webp)');
@@ -85,6 +85,18 @@ pruefe('einzig übrige Zeile', naechsteSortierung(null, null) === 1000);
   const zurueck = bildZeilenLesen(roh);
   pruefe('Bild-Zeilen lassen sich verlustfrei hin und zurück lesen',
     zurueck.length === 2 && zurueck[0].url === 'a.webp' && zurueck[1].groesse === 'klein');
+  pruefe('ohne Beschreibung bleibt das Feld leer, nicht undefined',
+    zurueck[0].beschreibung === '' && zurueck[1].beschreibung === '');
+  /* Unterschrift und Beschreibung sind ZWEI Dinge: die eine steht sichtbar
+     unter dem Bild, die andere liest nur ein Screenreader vor. Wer sie wieder
+     zusammenlegt, nimmt Lucas die Moeglichkeit, ein Bild zu beschreiben, ohne
+     die Beschreibung allen hinzuschreiben -- siehe pruefe-bildbeschreibung. */
+  const beides = bildZeilenLesen(bildZeilenBauen([
+    { unterschrift: 'sichtbar', url: 'c.webp', groesse: 'gross', beschreibung: 'unsichtbar' },
+  ]));
+  pruefe('Unterschrift und Beschreibung bleiben getrennt erhalten',
+    beides[0].unterschrift === 'sichtbar' && beides[0].beschreibung === 'unsichtbar',
+    JSON.stringify(beides[0]));
 }
 
 /* Gegenbeweis: ein Parser, der Klammern ignoriert, würde die Größe verlieren. */

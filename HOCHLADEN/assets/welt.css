@@ -23,9 +23,9 @@ html:has(.welt.dunkel) body { background:#1b1b20; }
 .welt-zurueck:hover { color:var(--welt); }
 .welt-kicker { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.18em;
   text-transform:uppercase; color:var(--welt); margin:0 0 9px; }
-.welt-titel { font-family:'Tropi',cursive,sans-serif; font-weight:400;
+.welt-titel { font-family:'TropiWeb','Manrope',sans-serif; font-weight:400;
   font-size:clamp(30px,5vw,44px); line-height:1.05; margin:0 0 16px; }
-.welt-text { font-family:'Space Grotesk',sans-serif; font-size:16.5px; line-height:1.8; }
+.welt-text { font-family:'Manrope',sans-serif; font-size:16.5px; line-height:1.8; }
 .welt-text p { margin:0 0 20px; }
 .welt-text img { max-width:100%; height:auto; border-radius:8px; }
 .welt-text a { color:var(--welt); }

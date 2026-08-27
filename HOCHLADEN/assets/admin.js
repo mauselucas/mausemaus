@@ -135,12 +135,20 @@ async function hochladen(datei) {
        wäre einer Negativliste, die nur GIF/APNG kennt, unbemerkt
        durchgerutscht. */
     const bewegt = !darfDurchsCanvas(datei.type);
-    let blob, endung, art, hinweis;
+    let blob, endung, art, hinweis, breite = 0, hoehe = 0;
 
     if (bewegt) {
       blob = datei;
       endung = endungFuerMime(datei.type, 'bild');
       art = datei.type;
+      /* Auch beim unveraenderten Bild die Maße lesen -- sie kommen unten in
+         den Dateinamen. Bewusst in einem try: ein Format, das der Browser
+         nicht als Bitmap oeffnen kann, darf den Upload NICHT scheitern
+         lassen. Ohne Maße wird die Datei einfach ohne sie benannt. */
+      try {
+        const bm = await createImageBitmap(datei);
+        breite = bm.width; hoehe = bm.height; bm.close?.();
+      } catch {}
       const mb = datei.size / 1024 / 1024;
       hinweis = `Bild hochgeladen — ${Math.round(datei.size / 1024)} kB, unverändert `
         + `(Animation/Originalqualität bleibt erhalten)`;
@@ -153,12 +161,27 @@ async function hochladen(datei) {
          Endung .webp und der Typangabe image/webp im Speicher. */
       ({ endung, art } = endungUndArtFuerBlob(k.blob.type));
       blob = k.blob;
+      breite = k.b; hoehe = k.h;
       hinweis = `Bild hochgeladen — ${k.b}×${k.h}, `
         + `${Math.round(datei.size / 1024)} kB → ${Math.round(k.blob.size / 1024)} kB`
         + (art !== 'image/webp' ? ` (als ${endung.toUpperCase()} — WebP hat der Browser hier nicht geschrieben)` : '');
     }
 
-    const name = `${Date.now()}-${slugify(datei.name.replace(/\.[^.]+$/, '')) || 'bild'}.${endung}`;
+    /* Die Maße wandern in den DATEINAMEN (…-1600x900.webp).
+
+       Warum dorthin und nicht in die Bild-Zeile: Ein Bild ohne width/height
+       hat fuer den Browser bis zum Laden die Hoehe 0 -- der Text darunter
+       springt beim Erscheinen nach unten, und die Zeitleiste muss sich neu
+       vermessen. Die Maße gehoeren also ins HTML. Sie zusaetzlich in der
+       Auszeichnungssprache unterzubringen hiesse, sie an zwei Stellen zu
+       pflegen und eine dritte Klammer einzufuehren; im Dateinamen stehen
+       sie ohne jede Syntaxaenderung dort, wo die Adresse ohnehin hinkommt,
+       und shared.js liest sie beim Anzeigen einfach heraus.
+
+       Bestehende Bilder tragen die Maße nicht -- fuer die bleibt alles wie
+       bisher. Das ist Absicht: nichts an vorhandenen Inhalten anfassen. */
+    const masse = breite && hoehe ? `-${breite}x${hoehe}` : '';
+    const name = `${Date.now()}-${slugify(datei.name.replace(/\.[^.]+$/, '')) || 'bild'}${masse}.${endung}`;
     const { error } = await sb.storage.from('media').upload(name, blob, {
       contentType: art, cacheControl: '31536000' });
     if (error) throw error;

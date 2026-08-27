@@ -1,0 +1,44 @@
+# Veroeffentlicht den Ordner HOCHLADEN auf GitHub Pages.
+#
+# Warum es diese Datei ueberhaupt gibt: Das Repo enthaelt mehr als die Seite --
+# Tests, Doku, Werkzeuge. Veroeffentlicht werden darf davon NUR der Ordner
+# HOCHLADEN. GitHub Pages kann von sich aus bloss die Wurzel eines Branches
+# oder den Ordner /docs ausliefern, beides passt hier nicht. Also uebernimmt
+# dieser Ablauf das Aussuchen.
+#
+# Vor dem Push gehoert `node tests/hochladen.mjs` gelaufen: der setzt die
+# Versionsstempel und baut die Teilen-Vorschauen der Welten. Das passiert
+# bewusst NICHT hier, weil es die Zugangsdaten zur Datenbank braeuchte.
+name: Seite veroeffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # laesst sich auf GitHub auch von Hand ausloesen
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Laufen zwei Veroeffentlichungen gleichzeitig los, gewinnt die neuere.
+# Eine bereits laufende wird aber zu Ende gefuehrt (cancel-in-progress: false),
+# damit die Seite nie in einem halben Zustand stehen bleibt.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  veroeffentlichen:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: HOCHLADEN          # <- nur dieser Ordner geht online
+      - id: deployment
+        uses: actions/deploy-pages@v4

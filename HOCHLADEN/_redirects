@@ -1,3 +1,9 @@
+# --- vorgebaute Welten (erzeugt von tests/hochladen.mjs) ---
+/welt/the-race-automatisierung /welt/the-race-automatisierung.html 200
+/blog/the-race-automatisierung /welt/the-race-automatisierung.html 200
+/welt/verteidiger-isfj-t /welt/verteidiger-isfj-t.html   200
+/blog/verteidiger-isfj-t /welt/verteidiger-isfj-t.html   200
+# --- Ende vorgebaute Welten ---
 # Schöne Adressen ohne Bauwerkzeug — Netlify schreibt intern um (Status 200),
 # in der Adressleiste bleibt die schöne Fassung stehen.
 /welt/:slug        /welt.html      200

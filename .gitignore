@@ -7,3 +7,8 @@ HOCHLADEN/tests-feste
 
 # Datensicherungen: enthalten die privaten Notizen -- nie versionieren.
 sicherungen/
+
+# Werkzeuge der Assistenz, gehoeren nicht zum Projekt.
+.agents/
+.claude/
+skills-lock.json

@@ -131,6 +131,25 @@
     /* Deko-Blumen zum Schluss: Sie hängen an den fertigen Abschnitten und
        wandern damit von selbst mit, wenn Inhalt dazukommt oder das Fenster
        die Größe wechselt (siehe assets/blumen.js). */
+    /* Genau EINE h1 muss die Seite haben -- sie ist fuer Screenreader und
+       Suchmaschinen die Ueberschrift des Ganzen. Sie entsteht oben nur im
+       Abschnitt mit der Rolle "hallo". Loescht Lucas den im Admin oder gibt
+       ihm eine andere Rolle, haette der Brief GAR KEINE h1 mehr, und alle
+       Abschnitte begaennen bei h2 -- ohne dass es jemandem auffiele.
+       Deshalb hier zum Schluss nachsehen und notfalls die erste
+       Abschnitts-Ueberschrift zur h1 machen. Bewusst nachtraeglich am
+       fertigen Baum statt als Sonderfall in renderGruppe(): so greift es
+       ganz gleich, welcher Weg oben genommen wurde. */
+    if (!ziel.querySelector('h1')) {
+      const erste = ziel.querySelector('h2.br-titel');
+      if (erste) {
+        const h1 = document.createElement('h1');
+        h1.className = erste.className;
+        h1.innerHTML = erste.innerHTML;
+        erste.replaceWith(h1);
+      }
+    }
+
     if (window.mmBlumen) window.mmBlumen(abschnitte.map(a => a.element));
 
     return abschnitte;

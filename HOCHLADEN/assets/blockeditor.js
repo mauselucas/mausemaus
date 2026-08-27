@@ -544,7 +544,8 @@ export function mountBlockEditor(wurzel, {
         const row = document.createElement('div'); row.className = 'be-bild-zeile';
         row.innerHTML = `
           ${bild.url ? `<img class="be-bild-vorschau" src="${esc(bild.url)}" alt="">` : '<div class="be-bild-vorschau be-bild-leer">kein Bild</div>'}
-          <input class="be-bild-alt" placeholder="Alt-Text (Bildunterschrift / für Sehbehinderte)" value="${esc(bild.alt || '')}">
+          <input class="be-bild-unterschrift" placeholder="Bildunterschrift (steht sichtbar unter dem Bild)" value="${esc(bild.unterschrift || '')}">
+          <input class="be-bild-beschreibung" placeholder="Beschreibung (unsichtbar — für Blinde und Google)" value="${esc(bild.beschreibung || '')}">
           <select class="be-bild-groesse" aria-label="Bildgröße">
             <option value="gross"${bild.groesse !== 'mittel' && bild.groesse !== 'klein' ? ' selected' : ''}>groß</option>
             <option value="mittel"${bild.groesse === 'mittel' ? ' selected' : ''}>mittel</option>
@@ -553,8 +554,17 @@ export function mountBlockEditor(wurzel, {
           <button type="button" class="btn ghost be-bild-ersetzen">Bild wählen</button>
           <button type="button" class="btn ghost be-bild-weg" title="Entfernen">×</button>
           <input type="file" class="be-bild-datei" accept="image/*,image/gif" hidden>`;
-        row.querySelector('.be-bild-alt').addEventListener('input', (e) => {
-          bild.alt = e.target.value;
+        /* Zwei Felder, zwei Wirkungen: die Unterschrift ist sichtbar und
+           wandert deshalb auch in die Vorschau, die Beschreibung ist es
+           nicht und aendert dort nur das alt-Attribut. */
+        row.querySelector('.be-bild-beschreibung').addEventListener('input', (e) => {
+          bild.beschreibung = e.target.value;
+          b.inhalt.roh = bildZeilenBauen(bilder);
+          blockSpeichernEntprellt(b);
+          beiAlt(bild);
+        });
+        row.querySelector('.be-bild-unterschrift').addEventListener('input', (e) => {
+          bild.unterschrift = e.target.value;
           b.inhalt.roh = bildZeilenBauen(bilder);
           blockSpeichernEntprellt(b);
           beiAlt(bild);
@@ -618,11 +628,18 @@ export function mountBlockEditor(wurzel, {
     zeichnen();
     return wrap;
   }
-  /* Alt-Text in der fertigen Darstellung mitziehen, ohne sie neu zu bauen. */
-  function altInDarstellungPatchen(darstellung, alt) {
+  /* Unterschrift und Beschreibung in der fertigen Darstellung mitziehen,
+     ohne sie neu zu bauen. Die beiden wirken an VERSCHIEDENEN Stellen:
+     die Unterschrift sichtbar in der <figcaption>, die Beschreibung
+     unsichtbar im alt-Attribut. Ist keine Beschreibung da, springt die
+     Unterschrift ein -- genau wie beim Anzeigen in shared.js. */
+  function altInDarstellungPatchen(darstellung, bild) {
     if (!darstellung) return;
+    const b = bild || {};
+    const unterschrift = b.unterschrift || '';
+    const alt = b.beschreibung || unterschrift;
     darstellung.querySelectorAll('img').forEach(img => img.setAttribute('alt', alt));
-    darstellung.querySelectorAll('figcaption').forEach(fc => { fc.textContent = alt; });
+    darstellung.querySelectorAll('figcaption').forEach(fc => { fc.textContent = unterschrift; });
   }
 
   /* ---------- Der Inhalt eines Blocks ---------- */
@@ -750,18 +767,24 @@ export function mountBlockEditor(wurzel, {
         const bilder = bildZeilenLesen(b.inhalt.roh);
         const { darstellung, steuerung } = medienGeruest(bilder.length === 0);
         steuerung.appendChild(bildSteuerungBauen(b, bilder, {
-          beiAlt: (bild) => altInDarstellungPatchen(darstellung, bild.alt),
+          beiAlt: (bild) => altInDarstellungPatchen(darstellung, bild),
           beiStruktur: () => ersetzeZeile(b),
         }));
         return inhaltDiv;
       }
       case 'gif': {
-        const m = String(b.inhalt.roh || '').match(/^!\[([^\]]*)\]\(([^)\s]+)\)/);
-        const url = m ? m[2] : '';
+        /* bildZeilenLesen benutzen statt einer eigenen kleinen Regel: nur so
+           wird die Beschreibung aus der zweiten Klammer ueberhaupt gefunden.
+           Ein GIF, das noch die alte Fassung traegt (Text in der ERSTEN
+           Klammer), wird dabei nicht verloren -- der faellt unten auf die
+           Unterschrift zurueck. */
+        const [gelesen = {}] = bildZeilenLesen(b.inhalt.roh);
+        const url = gelesen.url || '';
+        const gifText = gelesen.beschreibung || gelesen.unterschrift || '';
         const { darstellung, steuerung } = medienGeruest(!url);
         const wrap = document.createElement('div'); wrap.className = 'be-gif';
         wrap.innerHTML = `
-          <input class="be-gif-alt" placeholder="Alt-Text" value="${esc(m ? m[1] : '')}">
+          <input class="be-gif-alt" placeholder="Beschreibung (unsichtbar — für Blinde und Google)" value="${esc(gifText)}">
           <button type="button" class="btn ghost">GIF wählen</button>
           <input type="file" accept="image/gif,image/apng,image/webp" hidden>
           <p class="klein grau">GIFs werden NICHT verkleinert — sonst bliebe nur das erste Einzelbild übrig.</p>`;
@@ -770,16 +793,23 @@ export function mountBlockEditor(wurzel, {
           if (!datei) return;
           const r = await api.bildHochladen(datei);
           if (r && r.url) {
-            b.inhalt.roh = `![${wrap.querySelector('.be-gif-alt').value}](${r.url})`;
+            const t = wrap.querySelector('.be-gif-alt').value;
+            b.inhalt.roh = t ? `![](${r.url}){gross}{${t}}` : `![](${r.url})`;
             blockSpeichern(b); ersetzeZeile(b);
           }
         });
         wrap.querySelector('.be-gif-alt').addEventListener('input', (e) => {
+          /* Beim GIF gibt es nur ein Feld, und was dort steht, ist eine
+             BESCHREIBUNG -- ein GIF traegt selten eine Bildunterschrift.
+             Deshalb landet der Text in der zweiten Klammer und bleibt
+             unsichtbar. Die Groessenangabe muss dafuer mitgeschrieben
+             werden (siehe bildZeileBauen). */
           const neuAlt = e.target.value;
           const mm = String(b.inhalt.roh || '').match(/^!\[([^\]]*)\]\(([^)\s]+)\)/);
-          b.inhalt.roh = `![${neuAlt}](${mm ? mm[2] : ''})`;
+          const adresse = mm ? mm[2] : '';
+          b.inhalt.roh = neuAlt ? `![](${adresse}){gross}{${neuAlt}}` : `![](${adresse})`;
           blockSpeichernEntprellt(b);
-          altInDarstellungPatchen(darstellung, neuAlt);
+          altInDarstellungPatchen(darstellung, { beschreibung: neuAlt });
         });
         wrap.querySelector('button').addEventListener('click',
           () => wrap.querySelector('input[type=file]').click());
@@ -935,7 +965,7 @@ export function mountBlockEditor(wurzel, {
         });
         steuerung.appendChild(schalter);
         steuerung.appendChild(bildSteuerungBauen(b, gelesen.bilder, {
-          beiAlt: (bild) => altInDarstellungPatchen(bildSeite, bild.alt),
+          beiAlt: (bild) => altInDarstellungPatchen(bildSeite, bild),
           beiStruktur: () => { b.inhalt.roh = textMitBildBauen(gelesen); bilderRendern(); },
         }));
 

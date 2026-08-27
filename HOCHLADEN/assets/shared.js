@@ -70,7 +70,37 @@ function linkZiel(ziel) {
 }
 
 /* Bild-Zeile, optional mit Größenangabe: ![Text](bild.jpg){klein} */
-const IMG_LINE   = /^!\[([^\]]*)\]\(([^)\s]+)\)(?:\{(klein|mittel|gross)\})?$/;
+/* Eine Bild-Zeile:  ![Unterschrift](adresse){groesse}{Beschreibung}
+   Beide {…} sind freiwillig.
+
+   WARUM zwei getrennte Texte: Bis hierher gab es nur EINEN, und der landete
+   gleichzeitig im alt-Attribut UND sichtbar als Bildunterschrift. Wer ein
+   Bild für Blinde beschreiben wollte, musste diese Beschreibung also allen
+   sichtbar unter das Bild schreiben -- weshalb es niemand tat und saemtliche
+   Bilder der Seite ohne alt-Text dastanden. Jetzt gilt:
+     Gruppe 1  Unterschrift  -> sichtbar als <figcaption>
+     Gruppe 4  Beschreibung  -> unsichtbar, nur als alt-Attribut
+   Fehlt die Beschreibung, springt wie bisher die Unterschrift ein: alle
+   bestehenden Inhalte verhalten sich dadurch haargenau wie vorher. */
+const IMG_LINE   = /^!\[([^\]]*)\]\(([^)\s]+)\)(?:\{(klein|mittel|gross)\})?(?:\{([^}]*)\})?$/;
+
+/* Liest die Bildmaße aus dem Dateinamen (…-1600x900.webp) und macht daraus
+   width/height am <img>.
+
+   Wozu: Ohne diese Angaben ist ein Bild fuer den Browser bis zum Laden
+   0 Pixel hoch. Steht es erst einmal da, springt alles darunter nach unten
+   -- besonders auffaellig hier, weil die Zeitleiste links sich danach neu
+   vermessen muss. Mit width/height kennt der Browser das Seitenverhaeltnis
+   von Anfang an und haelt den Platz frei.
+
+   Die Maße vergibt admin.js beim Hochladen. Bilder von frueher tragen sie
+   nicht -- die bekommen wie bisher gar keine Angabe und verhalten sich
+   unveraendert. */
+const MASSE_IM_NAMEN = /-(\d{2,5})x(\d{2,5})\.[a-z0-9]+(?:[?#]|$)/i;
+function masseVon(url) {
+  const t = String(url).match(MASSE_IM_NAMEN);
+  return t ? ` width="${t[1]}" height="${t[2]}"` : '';
+}
 const GROESSEN   = { klein: 'mm-klein', mittel: 'mm-mittel', gross: '' };
 
 /* Etikett oben links am Code-Block. Schlüssel = was du hinter ``` schreibst. */
@@ -171,14 +201,18 @@ function renderMarkdown(src) {
     if (IMG_LINE.test(line)) {
       flushAll();
       const bild = (zeile, nr) => {
-        const [, alt, roh, groesse] = zeile.match(IMG_LINE);
+        const [, unterschrift, roh, groesse, beschreibung] = zeile.match(IMG_LINE);
+        /* Das alt-Attribut ist das, was ein Screenreader VORLIEST. Erste Wahl
+           ist die eigens dafuer gedachte Beschreibung; gibt es keine, ist die
+           Unterschrift immer noch besser als nichts. */
+        const alt = beschreibung || unterschrift || '';
         /* Relative Pfade auf die Wurzel beziehen — sonst zeigen sie unter
            /blog/… ins Leere, weil der Browser gegen /blog/ auflöst. */
         const url = /^(https?:|data:|\/)/.test(roh) ? roh : '/' + roh;
         const kl = GROESSEN[groesse] || '';
         return `<figure class="${kl}" data-bild="${nr}">`
-          + `<img src="${esc(url)}" alt="${esc(alt)}" loading="lazy">`
-          + (alt ? `<figcaption>${inline(alt)}</figcaption>` : '') + '</figure>';
+          + `<img src="${esc(url)}" alt="${esc(alt)}" loading="lazy"${masseVon(url)}>`
+          + (unterschrift ? `<figcaption>${inline(unterschrift)}</figcaption>` : '') + '</figure>';
       };
       const eigeneGroesse = (z) => !!z.match(IMG_LINE)[3];
 

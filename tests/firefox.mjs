@@ -20,7 +20,7 @@ const FIREFOX = '/Applications/Firefox.app/Contents/MacOS/firefox';
 const WURZEL = new URL('../HOCHLADEN/', import.meta.url).pathname;
 const TYP = { '.html':'text/html;charset=utf-8', '.css':'text/css', '.js':'text/javascript',
   '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.txt':'text/plain',
-  '.json':'application/json' };
+  '.json':'application/json', '.woff2':'font/woff2' };
 
 export function firefoxDa() { return existsSync(FIREFOX); }
 

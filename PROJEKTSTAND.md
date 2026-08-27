@@ -3,12 +3,46 @@
 Stand: 27.08.2026 · Branch `brief-umbau` · Diese Datei ist die Übergabe.
 Sie gehört **nicht** in den Upload-Ordner.
 
+## Vor JEDEM Hochladen: ein Befehl
+
+```bash
+node tests/hochladen.mjs
+```
+
+Der macht alles Noetige in einem Rutsch: Versionsstempel setzen, die
+Teilen-Vorschau der Welten vorbauen, `_redirects`, `seed.js` und
+`sitemap.xml` neu schreiben und jede Welt zusätzlich unter `blog/` ablegen.
+Danach committen und pushen — GitHub Pages veröffentlicht von selbst. (Er löst
+den früheren `tests/stempel.mjs` ab, der weiterhin existiert und von ihm
+mitbenutzt wird.)
+
+Ist die Datenbank gerade nicht erreichbar, bricht er ab und laesst
+**alles unangetastet** — lieber ein alter Stand als ein halber.
+
+> **Ein Haken, den man kennen muss:** Aenderst du danach etwas nur im
+> Admin, ohne neu hochzuladen, bleibt die **Teilen-Vorschau** (das Bild,
+> das WhatsApp und LinkedIn zeigen) auf dem alten Stand. Die Seite selbst
+> ist sofort aktuell — die kommt weiter live aus der Datenbank.
+
 ## Was die Seite ist
 
 Portfolio von Lucas Schönwald (Video Editor & Motion Designer, Köln).
-Statische Seiten auf **Netlify**, Inhalte aus **Supabase**. Kein Bauwerkzeug —
-Änderungen gehen per Drag & Drop des Ordners `HOCHLADEN` auf die Deploys-Seite
-von Netlify. Git wird nur lokal zur Nachvollziehbarkeit geführt.
+Statische Seiten auf **GitHub Pages**, Inhalte aus **Supabase**. Kein
+Bauwerkzeug — veröffentlicht wird der Inhalt des Ordners `HOCHLADEN`.
+
+**Umzug von Netlify (August 2026).** Netlifys Abrechnungsmodell war der Grund.
+Drei Dinge sind dabei weggefallen und mussten ersetzt werden:
+
+1. **`_redirects` wirkt nicht mehr.** Die Datei liegt weiter im Ordner, ist auf
+   GitHub Pages aber wirkungslos. Ersatz: GitHub Pages liefert `<name>.html`
+   von sich aus unter `/<name>` aus, und `tests/hochladen.mjs` schreibt jede
+   Welt doppelt — nach `welt/<slug>.html` und `blog/<slug>.html` —, damit auch
+   die alte Adressform weiter funktioniert.
+2. **`_headers` wirkt nicht mehr.** Keine eigenen Cache- und Sicherheits-Header
+   mehr. GitHub Pages setzt `max-age=600` und liefert ETags; praktisch heißt
+   das eine kurze Rückfrage statt eines vollen Downloads. Verschmerzbar.
+3. **Netlify Forms ist weg.** Das Anfrageformular läuft jetzt über Formspree,
+   siehe unten.
 
 **Wichtig:** Lucas kann nicht programmieren. Alles Inhaltliche muss über
 `/admin.html` selbst änderbar sein. Wenn etwas nur im Code änderbar wäre, ist
@@ -43,6 +77,15 @@ Damit hängt zusammen:
 
 Umgeschrieben über `_redirects`. **Alle Dateiverweise müssen absolut sein**
 (`/assets/…`) — relative Pfade brechen unter `/welt/…`.
+
+Für jede veröffentlichte Welt liegt zusätzlich eine **vorgebaute Fassung**
+unter `HOCHLADEN/welt/<slug>.html`, und `_redirects` bekommt dafür eine
+ausdrückliche Zeile ÜBER der Sammelregel. Grund: `welt.html` baut ihren
+Inhalt erst im Browser zusammen — im Quelltext steht nur ein leeres `<div>`.
+Google führt JavaScript aus, WhatsApp, LinkedIn, Slack und Twitter **nicht**.
+Ohne die vorgebaute Fassung zeigte jede verschickte Projektadresse nur das
+allgemeine `og-bild.jpg`. Erzeugt von `tests/hochladen.mjs`; unbekannte Slugs
+fallen weiterhin auf die Sammelregel zurück.
 
 ## Supabase
 
@@ -161,12 +204,48 @@ Der ganze Hergang mit allen Messwerten steht in
 
 ## Weitere offene Punkte
 
-- **Netlify-Formular:** einmalig unter Forms die E-Mail-Benachrichtigung
-  einschalten.
+- **Formular:** läuft über Formspree (`https://formspree.io/f/xljerkoz`).
+  Der kostenlose Tarif deckt 50 Einsendungen im Monat. Geprüft von
+  `tests/pruefe-formular.mjs` — dieser Test schickt bewusst **nie** eine echte
+  Anfrage ab, sondern ersetzt vorher `window.fetch`.
 - **Porträtfoto und Showreel-Link** fehlen — im Admin unter „Startseite"
   nachtragbar.
 - **Die Welten** enthalten Platzhaltertexte, die Lucas selbst schreibt.
 - `bewegung`-Spalte in `bloecke` ist funktionslos und könnte irgendwann weg.
+- **Bildbeschreibungen fehlen noch überall.** Der Bild-Block hat jetzt ZWEI
+  Felder — „Bildunterschrift" (sichtbar) und „Beschreibung" (unsichtbar, für
+  Blinde und Google). Die Beschreibungen muss Lucas im Admin nachtragen; das
+  ist Textarbeit, keine Programmierarbeit.
+- **Die zwei Welten haben kein Coverbild.** Für die Teilen-Vorschau nimmt
+  `hochladen.mjs` ersatzweise das erste Bild aus dem Inhalt — ein richtiges
+  Coverbild im Admin wäre besser. Bei „Wie ich die Grafik-Pipeline …" gibt es
+  gar kein Bild, dort erscheint das allgemeine `og-bild.jpg`.
+- **Kein Türchen hat Vorschautext.** Alle `data-titel`/`data-text` sind leer,
+  die Hover-Vorschau erscheint deshalb derzeit für niemanden. Im Admin über
+  `[[Wort|ziel|Titel|Vorschautext]]` zu füllen.
+
+## Besucherstatistik
+
+**GoatCounter**, Konto `mauselucas` — eingebaut in `index.html` und
+`welt.html`, ausdrücklich NICHT in `admin.html` (Lucas' eigene Arbeit im
+Editor gehört nicht in die Besucherzahlen).
+
+```html
+<script data-goatcounter="https://mauselucas.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+```
+
+Keine Cookies, keine personenbezogenen Daten, nichts, was über Seiten hinweg
+wiedererkennt — deshalb **kein Einwilligungsbanner nötig**. Das Skript trägt
+`async` und steht ganz am Ende: fällt der Dienst aus oder blockt ihn ein
+Adblocker, merkt die Seite davon nichts.
+
+Zahlen unter <https://mauselucas.goatcounter.com>.
+
+> **Auf dem Testserver zählt es absichtlich nicht.** GoatCounters eigener
+> Filter meldet auf `localhost`/`127.0.0.1` „localhost" und schickt nichts.
+> Gemessen — das ist kein Fehler in der Einrichtung. Die Zahlen fangen erst
+> an zu laufen, wenn die Seite live auf mausemaus.com steht.
 
 ## Gelernte Fallstricke (nicht wiederholen)
 
@@ -215,6 +294,54 @@ Der ganze Hergang mit allen Messwerten steht in
     Animationsfassung lief rechnerisch einwandfrei — im untersten Bildviertel,
     wo niemand hinsieht. Gemessen wurde OB sich etwas bewegt, nicht WO.
     Deshalb: jede Prüfung einmal absichtlich brechen („Gegenbeweis").
+18. **`indexOf` liefert −1, und −1 ist kleiner als alles.** Eine Prüfung
+    lautete `kopf.indexOf(a) < kopf.indexOf(b)` und war grün, auch als `a`
+    ganz fehlte. Gefunden hat das nicht der Verstand, sondern der
+    Sabotage-Durchlauf aus Punkt 17 — die Prüfung wurde als einzige nicht
+    rot. Erst prüfen, DASS etwas da ist, dann erst wo.
+19. **Feste `width`/`height` am Bild brauchen zwingend `height:auto` im CSS.**
+    Sonst gilt für die Breite das Stylesheet und für die Höhe das Attribut:
+    Bilder werden gestaucht. Gemessen: 0,56:1 statt 1,78:1 — fast dreimal zu
+    hoch. `welt.css` hatte `height:auto`, `brief.css` und `site.css` nicht.
+20. **`opacity:0` macht unsichtbar, nicht unerreichbar.** Als die
+    Zeitleisten-Etiketten von `<div>` zu `<button>` wurden, waren sie bei
+    eingeklappter Leiste weiterhin ertabbar — man landete auf unsichtbaren
+    Schaltflächen. `pointer-events:none` hält nur die Maus ab. Es braucht
+    `visibility:hidden`, verzögert um die Dauer der Blende.
+21. **„Verwaist" muss man gegen die DATENBANK prüfen, nicht gegen den Code.**
+    `absent.jpg` und `fern.jpg` sahen unreferenziert aus — sie sind die
+    Coverbilder zweier Projekte und stehen nur in Supabase. Ein `grep` über
+    das Repo hätte sie gelöscht. Der frisch erzeugte `seed.js` ist eine
+    exakte Kopie der Datenbank und damit das richtige Suchziel.
+22. **Totes CSS nicht nach Laufzeit-Treffern wegwerfen.** Regeln wie
+    `.mm-farbe-ocker` greifen erst, WENN Lucas einen Block so einfärbt. Wer
+    misst, welche Selektoren gerade passen, und den Rest löscht, zerstört
+    künftige Inhalte. Entfernt wurde deshalb nur, was zur zurückgebauten
+    Kachel-Seite gehört — abschnittsweise, nicht selektorweise.
+23. **Drei Schriftschnitte waren dieselbe Datei.** Space Grotesk 400, 500 und
+    700 hatten denselben Fingerabdruck — 44 kB, die jeder Besucher doppelt
+    holte. Aufgefallen ist das erst, als die Dateinamen einen Hash aus dem
+    Inhalt bekamen. Wer Schriften einbettet, sieht so etwas nie.
+24. **`immutable` im Cache braucht eine Adresse, die sich ändern KANN.** Für
+    CSS und JS sorgt der `?v=`-Stempel dafür. Schriften bekommen ihn nicht
+    (das Skript stempelt nur `.css`/`.js`) und `seed.js` wird nachgeladen —
+    beide brauchten deshalb eine eigene Lösung: Fingerabdruck im Dateinamen
+    bzw. eine ausdrückliche Ausnahme in `_headers`.
+25. **Ein Familienname für eine Webschrift kann mit einer installierten
+    Schrift kollidieren — und Firefox verliert dabei.** Die Überschriften
+    standen bei Lucas in Firefox in der Ersatzschrift, in Chrome und Safari
+    nicht. Ursache: auf dem Mac liegt `/Library/Fonts/Tropi Land - (Demo)
+    hanscostudio.com 2.ttf`. Firefox löst Familiennamen über macOS auf und
+    griff bei `'Tropi'` daneben. Gemessen: dieselbe Datei unter einem freien
+    Namen registriert zeichnet in Firefox sofort (724 px), unter `'Tropi'`
+    bleibt sie beim Wert einer nicht vorhandenen Schrift (409 px). Die
+    Familie heißt deshalb `'TropiWeb'`. Lehre: den Namen im `@font-face` so
+    wählen, dass er garantiert keiner echten Schrift entspricht.
+26. **Ein Fehler nur in einem Browser ist ein Hinweis auf die Umgebung, nicht
+    auf den Code.** Datei, CSS und Auslieferung waren nachweislich in
+    Ordnung (gleiche Prüfsumme lokal wie live, HTTP 200, `font/woff2`,
+    `document.fonts` meldete `loaded`). Erst der Vergleich „gleiche Datei,
+    anderer Name" zeigte, worauf es ankam.
 
 ## Testserver, der Netlify nachahmt
 

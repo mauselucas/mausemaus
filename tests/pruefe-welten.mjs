@@ -28,7 +28,7 @@ await s.warte(2500);
 const d = JSON.parse(await s.werte(`JSON.stringify({
   titel: document.title,
   grund: getComputedStyle(document.getElementById('welt')).backgroundColor,
-  schrift: [...document.fonts].some(f => f.family === 'Tropi'),
+  schrift: [...document.fonts].some(f => f.family === 'TropiWeb'),
   ueberschrift: (document.querySelector('.welt-titel')||{}).textContent || '',
   regeln: [...document.styleSheets].reduce((n, b) => {
     try { return n + b.cssRules.length; } catch { return n; } }, 0),

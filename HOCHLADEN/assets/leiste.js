@@ -93,6 +93,13 @@
       abschnitte.forEach((ab, i) => {
         const s = document.createElement('div');
         s.className = 'mml-seg';
+        /* Das Segment ist die zeichnerische Haelfte der Leiste -- es fuehrt
+           GENAU dieselbe Bewegung aus wie sein Etikett daneben. Waeren beide
+           bedienbar, muesste sich jemand mit der Tastatur durch jeden
+           Abschnitt zweimal tabben und ein Screenreader lieste alles doppelt
+           vor. Bedienbar ist deshalb nur das Etikett (es traegt den Titel),
+           das Segment ist ausdruecklich Zierde. */
+        s.setAttribute('aria-hidden', 'true');
         const o = anfang[i];
         const h = Math.max(2.2, ende[i] - o - LUECKE);
         /* --von/--dicke statt top/height direkt: welche Achse gemeint ist,
@@ -107,7 +114,14 @@
       });
 
       abschnitte.forEach(ab => {
-        const e = document.createElement('div');
+        /* <button> statt <div>: Damit ist das Etikett ohne jedes eigene
+           Zutun mit Tab erreichbar, hoert auf Enter UND Leertaste und wird
+           beim Vorlesen als Schaltflaeche angekuendigt. Vorher war die
+           ganze Leiste nur mit der Maus zu bedienen -- mit der Tastatur kam
+           man an keinen Abschnitt heran. Das Aussehen bleibt gleich, den
+           Knopf-Grundstil nimmt leiste.css wieder weg. */
+        const e = document.createElement('button');
+        e.type = 'button';
         e.className = 'mml-et';
         e.innerHTML = '<span class="mml-punkt"' + (ab.farbe ? ' style="background:' + ab.farbe + '"' : '') + '></span>' +
                       '<span class="mml-titel"></span>';
@@ -165,7 +179,15 @@
       /* Der letzte Abschnitt kann nie bis zur Schwelle hochscrollen,
          weil darunter kein Text mehr kommt — also ganz unten immer er. */
       if (max > 0 && stand >= max - 4) akt = abschnitte.length - 1;
-      etiketten.forEach((e, i) => e.classList.toggle('mml-jetzt', i === akt));
+      /* Die Klasse allein FAERBT nur -- vorgelesen wird sie nicht. Damit auch
+         ohne Blick auf den Bildschirm klar ist, wo man gerade steht, traegt
+         der aktive Abschnitt zusaetzlich aria-current. */
+      etiketten.forEach((e, i) => {
+        const jetzt = i === akt;
+        e.classList.toggle('mml-jetzt', jetzt);
+        if (jetzt) e.setAttribute('aria-current', 'true');
+        else e.removeAttribute('aria-current');
+      });
 
       const runter = stand > letzterStand;
       letzterStand = stand;

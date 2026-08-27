@@ -15,13 +15,13 @@
 }
 .mml-zu { width: 64px; }
 
-.mml-marke { font-family:'Tropi',cursive,sans-serif; font-size:21px; line-height:1;
+.mml-marke { font-family:'TropiWeb','Manrope',sans-serif; font-size:21px; line-height:1;
   padding:22px 20px 0; color:#0D1821; white-space:nowrap;
   transition: opacity var(--mml-dauer) var(--mml-kurve); }
 .mml-marke em { font-style:normal; color:#BFCC94; }
 .mml-zu .mml-marke { opacity:0; }
 .mml-mini { position:absolute; top:23px; left:0; width:64px; text-align:center; opacity:0;
-  font-family:'Tropi',cursive,sans-serif; font-size:22px; color:#0D1821;
+  font-family:'TropiWeb','Manrope',sans-serif; font-size:22px; color:#0D1821;
   transition: opacity var(--mml-dauer) var(--mml-kurve); }
 .mml-zu .mml-mini { opacity:1; }
 
@@ -33,17 +33,30 @@
 .mml-seg:after { content:''; position:absolute; left:-10px; right:-10px; top:0; bottom:0; }
 
 .mml-etiketten { position:absolute; inset:0; pointer-events:none; }
-.mml-et { position:absolute; left:52px; width:172px; padding:5px 9px; border-radius:6px;
+/* Die Etiketten sind seit der Tastaturbedienung echte <button>. Der
+   Grundstil eines Knopfes (Rahmen, grauer Untergrund, mittige Schrift,
+   eigene Schriftart) muss deshalb hier wieder weg -- das Aussehen soll sich
+   gegenueber der div-Fassung um KEIN Pixel unterscheiden. Was bleibt: Tab,
+   Enter, Leertaste und die Ansage als Schaltflaeche. */
+.mml-et { appearance:none; border:0; background:transparent; font:inherit;
+  text-align:left; color:inherit; cursor:pointer;
+  position:absolute; left:52px; width:172px; padding:5px 9px; border-radius:6px;
   display:flex; gap:8px; align-items:flex-start; pointer-events:auto; cursor:pointer;
-  transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve); }
+  transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve),
+              visibility 0s; }
 .mml-punkt { width:6px; height:6px; border-radius:50%; margin-top:5.5px; flex:none;
   background: var(--mml-blass); }
-.mml-titel { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:12.5px;
+.mml-titel { font-family:'Manrope',sans-serif; font-weight:500; font-size:12.5px;
   line-height:1.32; color:#5b625f; min-width:0; }
 .mml-et:hover { background:#F2EFE6; transform:translateX(2px); }
 .mml-et:hover .mml-titel { color:#0D1821; }
 .mml-et.mml-jetzt { background:#EFEDE2; }
 .mml-et.mml-jetzt .mml-titel { color:#0D1821; font-weight:600; }
+/* Ohne sichtbaren Fokus ist eine Tabfolge wertlos: man weiss nicht, wo man
+   ist. :focus-visible statt :focus, damit der Rahmen beim Klicken mit der
+   Maus NICHT erscheint -- nur beim Bedienen mit der Tastatur. */
+.mml-et:focus { outline:none; }
+.mml-et:focus-visible { outline:2px solid #344966; outline-offset:2px; background:#F2EFE6; }
 
 .mml-fuehrung { position:absolute; width:1px; background:#DAD6CA;
   transition: opacity var(--mml-dauer) var(--mml-kurve); }
@@ -58,7 +71,7 @@
 .mml-fuss { position:absolute; bottom:24px; left:28px;
   transition: opacity var(--mml-dauer) var(--mml-kurve); }
 .mml-fuss div { display:flex; align-items:center; gap:7px; margin-bottom:5px;
-  font-family:'Space Grotesk',sans-serif; font-size:9.5px; line-height:1.4; color:#A8A398; }
+  font-family:'Manrope',sans-serif; font-size:9.5px; line-height:1.4; color:#A8A398; }
 .mml-fuss span { width:8px; height:8px; border-radius:99px; background: var(--mml-blass); }
 
 .mml-griff { position:absolute; bottom:22px; right:11px; width:23px; height:23px;
@@ -70,6 +83,18 @@
 
 .mml-zu .mml-et, .mml-zu .mml-fuehrung, .mml-zu .mml-fuss {
   opacity:0; pointer-events:none; }
+/* visibility:hidden ZUSAETZLICH zu opacity:0 -- und zwar erst, wenn die
+   Blende durch ist (Verzoegerung = Dauer der Blende).
+
+   Warum das seit der Tastaturbedienung noetig ist: opacity:0 macht ein
+   Element unsichtbar, aber NICHT unerreichbar. pointer-events:none haelt
+   nur die Maus ab. Die Etiketten sind jetzt echte <button> -- ohne diese
+   Zeile koennte man sich bei eingeklappter Leiste durch eine Reihe
+   unsichtbarer Schaltflaechen tabben und saehe nirgends, wo man steht.
+   visibility:hidden nimmt sie aus der Tabfolge heraus. */
+.mml-zu .mml-et { visibility:hidden;
+  transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve),
+              visibility 0s linear var(--mml-dauer); }
 .mml-zu .mml-griff { right:-11.5px; }
 
 /* Wer weniger Bewegung eingestellt hat, bekommt keine. */

@@ -8,39 +8,22 @@
   const CACHE = 'mm.projects.v1';
   const eingerichtet = CFG.url && !CFG.url.startsWith('HIER_');
 
-  window.mmLoadProjects = async function () {
-    if (!eingerichtet) return ausSeed('Supabase noch nicht eingetragen');
+  /* Hier stand mmLoadProjects() -- das Laden der alten `projects`-Tabelle.
+     Seit dem Umbau auf seiten/bloecke ruft es niemand mehr auf (geprueft
+     ueber alle HTML-, JS- und Pruefdateien). Die Tabelle selbst bleibt in
+     der Datenbank: die Sicherungs-Ausgabe im Admin greift noch darauf zu.
 
-    try {
-      const r = await fetch(
-        `${CFG.url}/rest/v1/projects?status=eq.published&order=sort_order.asc&select=*`,
-        { headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` } });
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + (await r.text()).slice(0, 120));
-      const daten = await r.json();
-      try { localStorage.setItem(CACHE, JSON.stringify({ zeit: Date.now(), daten })); } catch {}
-      return daten;
-    } catch (e) {
-      /* Netz weg oder Projekt pausiert -> zuletzt geladene Fassung zeigen,
-         damit die Seite nie leer ist. */
-      console.warn('[mausemaus] Datenbank nicht erreichbar:', e.message);
-      try {
-        const c = JSON.parse(localStorage.getItem(CACHE) || 'null');
-        if (c && c.daten && c.daten.length) {
-          console.info('[mausemaus] zeige zwischengespeicherte Fassung von',
-            new Date(c.zeit).toLocaleString('de-DE'));
-          return c.daten;
-        }
-      } catch {}
-      return ausSeed('weder Datenbank noch Zwischenspeicher verfügbar');
-    }
-  };
+     mmLoadSettings() und mmLoadPosts() weiter unten gehoeren ebenfalls zum
+     alten Modell, bleiben aber stehen -- pruefe-brief.mjs und
+     pruefe-welten.mjs benutzen sie. Sie zu entfernen hiesse, zwei laufende
+     Pruefungen umzubauen, ohne dass ein Besucher etwas davon haette. */
 
   /* ---------- Einstellungen der Startseite ---------- */
 
   const CACHE_E = 'mm.settings.v1';
 
   window.mmLoadSettings = async function () {
-    if (!eingerichtet) return window.SEED_SETTINGS || null;
+    if (!eingerichtet) { await seedHolen(); return window.SEED_SETTINGS || null; }
     try {
       const r = await fetch(`${CFG.url}/rest/v1/settings?id=eq.1&select=*`,
         { headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` } });
@@ -58,6 +41,7 @@
          Brief bei einem Ausfall Anfang und Ende — die Projekte allein
          abzusichern reicht nicht. */
       console.info('[mausemaus] Einstellungen aus seed.js');
+      await seedHolen();
       return window.SEED_SETTINGS || null;
     }
   };
@@ -89,19 +73,12 @@
     }
   };
 
-  function ausSeed(grund) {
-    console.info('[mausemaus] Notfall-Daten aus seed.js —', grund);
-    return (window.SEED_PROJECTS || [])
-      .filter(p => p.status === 'published')
-      .sort((a, b) => a.sort_order - b.sort_order);
-  }
-
   /* ---------- Blockeditor: seiten/bloecke ----------
      `notiz` wird bewusst nirgends mit abgefragt -- die Spalte ist für
      "anon" ohnehin per REVOKE gesperrt (siehe Migration), select=* auf den
      eingebetteten Blöcken würde also mit einem Rechte-Fehler scheitern.
      Die Spaltenliste hier ist deshalb Teil des Vertrags, nicht nur Zierde. */
-  const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,breite,bewegung,sort_order,created_at,updated_at';
+  const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,breite,sort_order,created_at,updated_at';
   const eingebettet = `select=*,bloecke(${BLOCK_SPALTEN})`;
 
   const sortiereBloecke = (seite) => {
@@ -140,7 +117,7 @@
   const CACHE_P = 'mm.projekte.v1';
 
   window.mmLoadProjektSeiten = async function () {
-    if (!eingerichtet) return (window.SEED_SEITEN && window.SEED_SEITEN.projekte) || [];
+    if (!eingerichtet) return ausSeedProjekte();
     try {
       const r = await fetch(
         `${CFG.url}/rest/v1/seiten?typ=eq.projekt&status=eq.published&order=sort_order.asc&${eingebettet}`,
@@ -155,14 +132,52 @@
         const c = JSON.parse(localStorage.getItem(CACHE_P) || 'null');
         if (c && c.daten) return c.daten;
       } catch {}
-      return (window.SEED_SEITEN && window.SEED_SEITEN.projekte) || [];
+      return ausSeedProjekte();
     }
   };
 
-  function ausSeedSeite(typ, slug) {
+  /* ---------- Notfall-Daten erst holen, wenn sie gebraucht werden ----------
+
+     seed.js ist 75 kB und lag frueher als festes <script> in jeder Seite --
+     jeder Besucher holte und verarbeitete es, obwohl es die DRITTE und
+     letzte Rueckfallstufe ist und im Normalbetrieb nie gebraucht wird.
+
+     Warum das Nachladen hier trotzdem sicher ist: Wer diese Zeilen erreicht,
+     hat gerade die Startseite von Netlify bekommen -- Netlify ist also
+     erreichbar, und seed.js liegt bei Netlify. Ausgefallen ist die
+     DATENBANK (Supabase), ein anderer Rechner. Genau dieser Fall ist der
+     haeufige.
+
+     Und wenn auch das Nachladen scheitert, wird NICHTS schlimmer als vorher:
+     die Funktion liefert dann null, und die Seite zeigt ihre freundliche
+     "Hier ist nichts"-Fassung -- dieselbe wie bei einem unbekannten Slug.
+     Deshalb lehnt das Versprechen unten NIE ab, es wird nur erfuellt. */
+  let seedGeladen = null;
+  function seedHolen() {
+    /* Schon da? Dann nichts tun. Das gilt auch, wenn seed.js weiterhin fest
+       in einer Seite steht -- der alte Weg funktioniert unveraendert. */
+    if (window.SEED_SEITEN) return Promise.resolve();
+    if (seedGeladen) return seedGeladen;
+    seedGeladen = new Promise((fertig) => {
+      const el = document.createElement('script');
+      el.src = '/assets/seed.js';
+      el.onload = fertig;
+      el.onerror = () => { console.warn('[mausemaus] seed.js nicht erreichbar'); fertig(); };
+      document.head.appendChild(el);
+    });
+    return seedGeladen;
+  }
+
+  async function ausSeedSeite(typ, slug) {
+    await seedHolen();
     console.info('[mausemaus] Notfall-Daten aus seed.js —', typ, slug);
     const s = window.SEED_SEITEN || {};
     if (typ === 'brief') return s.brief || null;
     return (s.welten || []).find(w => w.slug === slug) || null;
+  }
+
+  async function ausSeedProjekte() {
+    await seedHolen();
+    return (window.SEED_SEITEN && window.SEED_SEITEN.projekte) || [];
   }
 })();

@@ -18,12 +18,12 @@
 html { scroll-behavior: smooth; }
 body {
   background: var(--paper); color: var(--ink);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Manrope', sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   position: relative;   /* Bezugspunkt für den Deko-Layer */
 }
-.tropi { font-family: 'Tropi', sans-serif; font-weight: 400; }
+.tropi { font-family: 'TropiWeb', sans-serif; font-weight: 400; }
 .mono  { font-family: 'Space Mono', monospace; }
 
 .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
@@ -43,20 +43,20 @@ body {
 .f4 { top: 72%; left:  -3vw;   width:  96px; rotate: -20deg; }
 .f5 { top: 89%; right: -2vw;   width: 110px; rotate:  24deg; }
 
-/* ===== Header ===== */
-header { padding: 80px 0 50px; position: relative; }
-.brand {
-  font-family: 'Tropi', sans-serif; font-size: clamp(56px, 12vw, 120px);
-  line-height: 0.85; color: var(--ink); letter-spacing: 1px;
-}
-.brand .dot { color: var(--sage); }
-.pill {
-  margin-top: 22px; font-size: clamp(15px, 2.2vw, 19px); font-weight: 500;
-  color: var(--navy); max-width: 620px; line-height: 1.5;
-}
-.intro {
-  margin-top: 16px; font-size: 14.5px; line-height: 1.65; color: #2c343b; max-width: 560px;
-}
+/* Hier standen frueher rund 230 Zeilen fuer die Kachel-Startseite, die es
+   seit dem Umbau auf den Brief nicht mehr gibt: Header, Filterleiste,
+   Kachel-Raster, Instagram-Panel, "Laeuft aktuell", das Detail-Fenster
+   samt Bewegungsuebergang und die Persoenlichkeits-Pille. Nichts davon
+   wurde noch von irgendeiner Seite benutzt -- gemessen, nicht vermutet
+   (siehe pruefe-tempo.mjs) -- aber site.css wird von index.html,
+   welt.html, 404.html UND admin.html geladen, also trug jeder Besucher
+   die 10 kB mit.
+
+   BEHALTEN wurde alles, was noch jemand braucht: .wrap, .deko/.flower und
+   der Footer (404.html), .meta (404.html), .prose und .md-* (der Editor
+   und die Welten) und das ganze mm-*-Blocksystem weiter unten -- dessen
+   Farbregeln greifen erst, WENN Lucas einen Block einfaerbt, sie duerfen
+   also nie nach "wird gerade nicht benutzt" weggeworfen werden. */
 .meta {
   margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px;
 }
@@ -67,188 +67,10 @@ header { padding: 80px 0 50px; position: relative; }
   transition: all .15s ease;
 }
 .meta a:hover { background: var(--ink); color: var(--paper); }
-
-/* ===== Section heading ===== */
-.sec-label {
-  font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 3px;
-  text-transform: uppercase; color: var(--navy); font-weight: 700;
-  display: flex; align-items: center; gap: 14px; margin: 30px 0 36px;
-}
-.sec-label::after { content: ""; flex: 1; height: 1.5px; background: var(--line); }
-
-/* ===== Filterleiste ===== */
-.filters { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 28px; }
-.filters button {
-  font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: 0.5px;
-  color: var(--ink); background: transparent; cursor: pointer;
-  border: 1.5px solid var(--ink); border-radius: 40px; padding: 6px 14px;
-  transition: background .15s ease, color .15s ease;
-}
-.filters button:hover { background: rgba(13,24,33,0.07); }
-.filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-
-/* ===== Kachel-Raster ===== */
-.grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 22px; padding-bottom: 40px;   /* Kacheln einer Reihe gleich hoch (stretch) */
-}
-.tile {
-  display: flex; flex-direction: column; text-align: left;
-  background: #fff; border: 1.5px solid var(--ink); border-radius: 18px;
-  overflow: hidden; cursor: pointer; padding: 0; font: inherit; color: inherit;
-  transition: transform .16s ease, box-shadow .16s ease;
-}
-.tile:hover, .tile:focus-visible { transform: translateY(-4px); box-shadow: 8px 10px 0 var(--ink); outline: none; }
-.tile:focus-visible { box-shadow: 8px 10px 0 var(--ink), 0 0 0 3px var(--sky); }
-
-.tile-cover {
-  position: relative; aspect-ratio: 16 / 10; overflow: hidden;
-  border-bottom: 1.5px solid var(--ink);
-  display: flex; align-items: center; justify-content: center;
-}
-.tile-cover.sky { background: var(--sky); } .tile-cover.sage { background: var(--sage); }
-.tile-cover.navy { background: var(--navy); } .tile-cover.ink { background: var(--ink); }
-.tile-cover > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  object-position: var(--pos, 50% 50%); }   /* Bildausschnitt pro Projekt einstellbar */
-/* Play-Knopf — kontextfrei, damit er in Kachel UND Detail-Fenster funktioniert */
-.play {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--paper); border: 2px solid var(--ink);
-  display: flex; align-items: center; justify-content: center;
-  position: relative; z-index: 2; text-decoration: none;
-  transition: transform .16s ease;
-}
-.play::after {
-  content: ""; width: 0; height: 0; margin-left: 4px;
-  border-top: 10px solid transparent; border-bottom: 10px solid transparent;
-  border-left: 16px solid var(--ink);
-}
-.tile:hover .play { transform: scale(1.12); }
-/* Im Fenster mittig auf dem Cover platziert */
-.panel-cover .play {
-  position: absolute; top: 50%; left: 50%; width: 68px; height: 68px;
-  transform: translate(-50%, -50%);
-}
-.panel-cover .play:hover { transform: translate(-50%, -50%) scale(1.1); }
-
-.tile-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.tile-role {
-  font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.6px;
-  text-transform: uppercase; color: var(--muted);
-}
-.tile-title { font-family: 'Tropi', sans-serif; font-size: 23px; line-height: 1.05; }
-.tile-desc { font-size: 13.5px; line-height: 1.55; color: #2c343b; }
-.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; padding-top: 6px; }
-.pill {
-  font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: 0.8px;
-  text-transform: uppercase; color: var(--navy);
-  border: 1.2px solid var(--line); border-radius: 30px; padding: 3px 8px; background: var(--paper);
-}
-
-/* ===== Instagram-Profilpanel (statt Coverbild, wenn ein Handle gepflegt ist) ===== */
-.ig-card { position: relative; z-index: 2; display: flex; flex-direction: column;
-  align-items: center; gap: 9px; padding: 18px 16px; text-align: center; }
-.thumb-blur { position: absolute; inset: -24px; width: calc(100% + 48px); height: calc(100% + 48px);
-  object-fit: cover; filter: blur(34px) saturate(1.2) brightness(0.45); z-index: 0; }
-.ig-ring { position: relative; width: 88px; height: 88px; border-radius: 50%; padding: 3px;
-  background: conic-gradient(from 150deg, #f9ce34, #ee2a7b, #6228d7, #1f6fe0, #f9ce34);
-  transition: transform .16s ease; }
-.tile:hover .ig-ring { transform: scale(1.06) rotate(-3deg); }
-.ig-pic { width: 100%; height: 100%; border-radius: 50%;
-  border: 3px solid var(--ink); background-clip: padding-box;
-  background-size: cover; background-position: center; }
-.ig-badge { position: absolute; right: -3px; bottom: -3px; width: 26px; height: 26px;
-  border-radius: 8px; background: var(--paper); border: 2px solid var(--ink);
-  display: flex; align-items: center; justify-content: center; }
-.ig-badge svg { width: 14px; height: 14px; fill: none; stroke: var(--ink); stroke-width: 2; }
-.ig-handle { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--paper);
-  letter-spacing: 0.3px; font-weight: 700; }
-.ig-stats { font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: 1.4px;
-  text-transform: uppercase; color: rgba(240,244,239,0.6); margin-top: -5px; }
-
-/* ===== "Läuft aktuell" ===== */
-.live {
-  display: inline-flex; align-items: center; gap: 7px;
-  align-self: flex-start; width: fit-content;   /* nicht über die ganze Kachelbreite ziehen */
-  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
-  letter-spacing: 1.6px; text-transform: uppercase; color: var(--ink);
-  background: var(--sage); border: 1.5px solid var(--ink); border-radius: 40px;
-  padding: 4px 12px 4px 10px;
-}
-.live .pulse { width: 7px; height: 7px; border-radius: 50%; background: #1f7a4d;
-  box-shadow: 0 0 0 0 rgba(31,122,77,0.55); animation: pulse 2s infinite; }
-@keyframes pulse {
-  70%  { box-shadow: 0 0 0 8px rgba(31,122,77,0); }
-  100% { box-shadow: 0 0 0 0 rgba(31,122,77,0); }
-}
-
-/* ===== Detail-Fenster ===== */
-.overlay {
-  position: fixed; inset: 0; z-index: 50; display: none;
-  align-items: center; justify-content: center; padding: 32px 20px;
-  overflow: hidden;
-}
-.overlay[open], .overlay.is-open { display: flex; }
-.overlay-bg { position: fixed; inset: 0; background: rgba(13,24,33,0.55); backdrop-filter: blur(3px); }
-.panel {
-  position: relative; z-index: 2; width: min(880px, 100%);
-  background: var(--paper); border: 1.5px solid var(--ink); border-radius: 20px;
-  box-shadow: 10px 12px 0 var(--ink); overflow: hidden;
-  /* Höhe begrenzt — lange Texte scrollen INNERHALB des Fensters */
-  max-height: min(88vh, 940px); display: flex; flex-direction: column;
-}
-.panel-scroll {
-  overflow-y: auto; overscroll-behavior: contain; flex: 1;
-  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
-}
-.panel-scroll::-webkit-scrollbar { width: 10px; }
-.panel-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; border: 3px solid var(--paper); }
-/* Sanfter Verlauf am unteren Rand als Hinweis "hier geht es weiter" */
-.panel::after {
-  content: ""; position: absolute; left: 0; right: 10px; bottom: 0; height: 44px;
-  background: linear-gradient(to top, var(--paper), transparent);
-  pointer-events: none; opacity: 0; transition: opacity .2s ease;
-}
-.panel.has-more::after { opacity: 1; }
-.panel-cover { position: relative; aspect-ratio: 16 / 8; border-bottom: 1.5px solid var(--ink); overflow: hidden; }
-/* Instagram-Panel im Fenster: Höhe nach Inhalt statt viel leere Fläche */
-.panel-cover.is-ig { aspect-ratio: auto; }
-.panel-cover.is-ig .ig-card { padding: 34px 16px; gap: 12px; }
-.panel-cover.is-ig .ig-ring { width: 124px; height: 124px; }
-.panel-cover.is-ig .ig-handle { font-size: 13px; }
-.panel-cover.is-ig .ig-badge { width: 32px; height: 32px; border-radius: 10px; }
-.panel-cover.is-ig .ig-badge svg { width: 17px; height: 17px; }
-.panel-cover > img { width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); }
-.panel-head { padding: 24px 32px 0; }
-.panel-role {
-  font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
-}
-.panel-title { font-family: 'Tropi', sans-serif; font-size: clamp(28px, 5vw, 42px); line-height: 1; margin-bottom: 12px; }
-.panel-body { padding: 20px 32px 32px; }
-.panel-link {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 8px;
-  font-family: 'Space Mono', monospace; font-size: 12.5px; font-weight: 700;
-  color: var(--paper); background: var(--ink); text-decoration: none;
-  border: 1.5px solid var(--ink); border-radius: 40px; padding: 9px 18px;
-  transition: transform .15s ease;
-}
-.panel-link:hover { transform: translateY(-2px); }
-
-.close {
-  position: absolute; top: 14px; right: 14px; z-index: 4;
-  width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
-  background: var(--paper); border: 1.5px solid var(--ink);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; line-height: 1; color: var(--ink);
-  transition: transform .15s ease, background .15s ease;
-}
-.close:hover { transform: rotate(90deg); background: var(--sage); }
-
 /* ===== Inhalt im Detail-Fenster (aus Markdown) ===== */
 .prose { font-size: 15px; line-height: 1.7; color: #2c343b; }
 .prose > * + * { margin-top: 16px; }
-.prose h2, .prose h3 { font-family: 'Tropi', sans-serif; color: var(--ink); line-height: 1.1; margin-top: 28px; }
+.prose h2, .prose h3 { font-family: 'TropiWeb', sans-serif; color: var(--ink); line-height: 1.1; margin-top: 28px; }
 .prose h2 { font-size: 26px; } .prose h3 { font-size: 21px; }
 .prose strong { color: var(--ink); }
 .prose a { color: var(--navy); text-underline-offset: 3px; }
@@ -258,7 +80,9 @@ header { padding: 80px 0 50px; position: relative; }
   color: var(--navy); font-style: italic;
 }
 .prose figure { margin: 0; }
-.prose img { width: 100%; border: 1.5px solid var(--ink); border-radius: 12px; display: block; }
+/* height:auto: siehe .br-text img in brief.css — ohne das verzerren Bilder,
+   die ihre echten Maße als width/height tragen. */
+.prose img { width: 100%; height: auto; border: 1.5px solid var(--ink); border-radius: 12px; display: block; }
 .prose figcaption {
   font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.5px;
   color: var(--muted); margin-top: 7px; text-align: center;
@@ -280,31 +104,13 @@ header { padding: 80px 0 50px; position: relative; }
 .md-rule::before, .md-rule::after { content: ""; flex: 1; height: 1.5px; background: var(--line); }
 .md-rule svg { width: 26px; height: 24px; flex-shrink: 0; opacity: 0.55; }
 
-/* ===== Bewegungsübergang Kachel -> Fenster ===== */
-/* Der Rahmen wandert und wächst — das ist der eigentliche Effekt. */
-::view-transition-group(tile) {
-  animation-duration: .34s;
-  animation-timing-function: cubic-bezier(.4, 0, .2, 1);
-}
-/* Standbilder NICHT verzerren (Vorgabe wäre 'fill' = auseinanderziehen),
-   sondern beschneiden und oben ausrichten. */
-::view-transition-old(tile), ::view-transition-new(tile) {
-  object-fit: cover; object-position: 50% 0;
-}
-/* Das alte Standbild schnell weg, das neue früh da — sonst liegt das
-   auseinandergezogene Kachelbild sichtbar auf dem fertigen Fenster ("Geist"). */
-::view-transition-old(tile) { animation: mmOut .12s linear forwards; }
-::view-transition-new(tile) { animation: mmIn  .22s linear both; }
-@keyframes mmOut { to   { opacity: 0; } }
-@keyframes mmIn  { from { opacity: 0; } }
-
 /* ===== Footer ===== */
 footer {
   background: var(--ink); color: var(--paper); margin-top: 30px;
   padding: 60px 0; position: relative; overflow: hidden;
 }
 .foot-grid { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2; }
-.foot-brand { font-family: 'Tropi', sans-serif; font-size: 44px; color: var(--paper); }
+.foot-brand { font-family: 'TropiWeb', sans-serif; font-size: 44px; color: var(--paper); }
 .foot-brand .dot { color: var(--sky); }
 .foot-links { display: flex; flex-direction: column; gap: 8px; font-family: 'Space Mono', monospace; font-size: 13px; }
 .foot-links a { color: rgba(240,244,239,0.85); text-decoration: none; }
@@ -313,16 +119,11 @@ footer {
 /* Footer-Blume: hell und zart statt schwarz-auf-schwarz (war vorher unsichtbar) */
 footer .flower svg { fill: rgba(240,244,239,0.07); }
 
-/* ===== Responsive ===== */
-@media (max-width: 900px) {
-  .panel-head { padding: 22px 22px 0; } .panel-body { padding: 18px 22px 26px; }
-}
+/* ===== Responsive =====
+   Die Regeln fuer Kacheln, Detail-Fenster und Header sind mit ihren
+   Bausteinen zusammen entfallen. Was bleibt, wird noch gebraucht: die
+   Bildergalerie im Text (Welten, Editor) und die Deko-Blumen (404.html). */
 @media (max-width: 720px) {
-  header { padding: 50px 0 30px; }
-  .grid { grid-template-columns: 1fr; gap: 18px; }
-  .tile:hover { transform: none; box-shadow: 5px 6px 0 var(--ink); }
-  .overlay { padding: 0; }
-  .panel { border-radius: 0; border-left: 0; border-right: 0; box-shadow: none; min-height: 100%; }
   .md-gallery-2, .md-gallery-3 { grid-template-columns: 1fr; }
   /* Blumen deutlich kleiner und halb aus dem Bild, sonst überdecken sie den Text */
   .f1 { width: 74px; top: 1%;  right: -7vw; }
@@ -331,31 +132,6 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
   .f4 { width: 62px; top: 70%; left:  -8vw; }
   .f5 { width: 70px; top: 90%; right: -7vw; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .live .pulse { animation: none; }
-  .tile, .tile:hover, .close:hover, .panel-link:hover { transition: none; transform: none; }
-}
-
-/* ===== Persönlichkeits-Pille (16Personalities-Ergebnis) ===== */
-.typ-pille {
-  display: inline-flex; align-items: center; gap: 10px; margin: 26px 0 4px;
-  text-decoration: none; color: var(--paper); background: #4298B4;
-  border: 1.5px solid var(--ink); border-radius: 40px; padding: 9px 18px 9px 14px;
-  font-family: 'Space Mono', monospace; font-size: 12.5px; letter-spacing: .3px;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.typ-pille:hover { transform: translateY(-3px); box-shadow: 5px 6px 0 var(--ink); }
-.typ-pille svg { width: 19px; height: 19px; flex-shrink: 0; fill: rgba(255,255,255,.28); }
-.typ-pille svg .haken { stroke: var(--paper); stroke-width: 2.1; }
-.typ-pille b { font-weight: 700; }
-.typ-pfeil { transition: transform .15s ease; }
-.typ-pille:hover .typ-pfeil { transform: translateX(4px); }
-
-/* Mehrere Knöpfe nebeneinander im Detail-Fenster */
-.panel-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-.panel-knoepfe .panel-link { margin-top: 0; }
-.panel-link.zweitrangig { background: transparent; color: var(--ink); }
-.panel-link.zweitrangig:hover { background: var(--sage); }
 
 /* ===== Baustein-Breiten (Blockeditor) =====
    Wird von assets/bloecke.js um Blöcke gelegt, deren Breite vom Standard

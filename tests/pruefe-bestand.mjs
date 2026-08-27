@@ -14,7 +14,7 @@ const d = JSON.parse(await s.werte(`JSON.stringify({
      namens "Tropi Land" — die Prüfung meldete deshalb auch dann Erfolg,
      wenn fonts.css gar nicht geladen war. Stattdessen nachsehen, ob die
      Schrift wirklich aus einer @font-face-Regel der Seite stammt. */
-  schrift: [...document.fonts].some(f => f.family === 'Tropi'),
+  schrift: [...document.fonts].some(f => f.family === 'TropiWeb'),
   schriftQuelle: [...document.fonts].length + ' Schriftschnitte aus CSS',
   css: getComputedStyle(document.body).backgroundColor,
   /* NICHT document.body messen: Der Brief scrollt in einem INNEREN Bereich,
