@@ -327,21 +327,33 @@ Zahlen unter <https://mauselucas.goatcounter.com>.
     (das Skript stempelt nur `.css`/`.js`) und `seed.js` wird nachgeladen —
     beide brauchten deshalb eine eigene Lösung: Fingerabdruck im Dateinamen
     bzw. eine ausdrückliche Ausnahme in `_headers`.
-25. **Ein Familienname für eine Webschrift kann mit einer installierten
-    Schrift kollidieren — und Firefox verliert dabei.** Die Überschriften
-    standen bei Lucas in Firefox in der Ersatzschrift, in Chrome und Safari
-    nicht. Ursache: auf dem Mac liegt `/Library/Fonts/Tropi Land - (Demo)
-    hanscostudio.com 2.ttf`. Firefox löst Familiennamen über macOS auf und
-    griff bei `'Tropi'` daneben. Gemessen: dieselbe Datei unter einem freien
-    Namen registriert zeichnet in Firefox sofort (724 px), unter `'Tropi'`
-    bleibt sie beim Wert einer nicht vorhandenen Schrift (409 px). Die
-    Familie heißt deshalb `'TropiWeb'`. Lehre: den Namen im `@font-face` so
-    wählen, dass er garantiert keiner echten Schrift entspricht.
-26. **Ein Fehler nur in einem Browser ist ein Hinweis auf die Umgebung, nicht
-    auf den Code.** Datei, CSS und Auslieferung waren nachweislich in
-    Ordnung (gleiche Prüfsumme lokal wie live, HTTP 200, `font/woff2`,
-    `document.fonts` meldete `loaded`). Erst der Vergleich „gleiche Datei,
-    anderer Name" zeigte, worauf es ankam.
+25. **Das Scroll-Animations-Polyfill zerstört die `@font-face`-Regeln.**
+    Nach dem Umzug meldete Lucas, die Schriften luden in Firefox nicht — in
+    Chrome und Safari war alles richtig. flackr/scroll-timeline liest beim
+    Start jedes `<link rel=stylesheet>` und jedes `<style>` ein, schreibt sie
+    um und hängt sie als `blob:`-Adresse wieder ein; die `@font-face`-Regeln
+    überleben das nicht. Chrome und Safari sind nie betroffen, weil das
+    Polyfill dort gar nicht erst lädt. Ersatz ist
+    `assets/schriften-retten.js`: es holt `fonts.css` als Text, liest die
+    Regeln aus und registriert sie über die JS-Schnittstelle neu. Es liest
+    dabei bewusst die Datei statt eine zweite Liste zu führen — sonst liefen
+    Dateinamen und Fingerabdrücke auseinander. Ein zweites `<link>` auf
+    `fonts.css` nachträglich einzuhängen half **nicht** (gemessen): das
+    Polyfill greift auch später eingefügte Stylesheets ab. Geprüft von
+    `tests/pruefe-schriften-firefox.mjs`.
+26. **Zwei falsche Fährten auf dem Weg dorthin — beide durch schlechtes
+    Messen.** Erstens wurde `offsetWidth` einer Testspanne gemessen; die Zahl
+    war in Wahrheit die Breite des Elternelements und für jede Schrift
+    identisch. Elementbreiten hängen am Layout, nicht an der Schrift. Was
+    trägt, ist ein ins Canvas gezeichnetes Wort und die Zahl seiner gefärbten
+    Pixel. Zweitens wurde daraus geschlossen, der Familienname `Tropi`
+    kollidiere mit der auf dem Mac installierten Schrift „Tropi Land". Das war
+    falsch — betroffen waren **alle** Familien, auch Manrope und Space Mono.
+    Die Familie heißt seitdem trotzdem `TropiWeb`; die Umbenennung schadet
+    nicht und schließt eine echte Kollisionsmöglichkeit aus, war aber nie die
+    Ursache. Lehre: bevor eine Erklärung steht, prüfen, ob sie auch erklärt,
+    was NICHT betroffen ist. Hier war nichts unbetroffen — das hätte die
+    Namenstheorie sofort erledigt.
 
 ## Testserver, der Netlify nachahmt
 

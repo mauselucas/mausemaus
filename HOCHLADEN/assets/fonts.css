@@ -15,13 +15,11 @@
    hat Space Grotesk als Fliesstext abgeloest.
 
    Warum die Familie 'TropiWeb' heisst und nicht 'Tropi': Auf Lucas' Mac liegt
-   eine installierte Schrift namens "Tropi Land". Firefox loest Familiennamen
-   ueber macOS auf und griff bei 'Tropi' nach dieser lokalen Schrift statt nach
-   der hier deklarierten -- die Ueberschriften standen in Firefox in der
-   Ersatzschrift, in Chrome und Safari nicht. Gemessen: dieselbe Datei unter
-   einem freien Namen zeichnet in Firefox sofort (724 px), unter 'Tropi' bleibt
-   sie bei 409 px, dem Wert einer nicht vorhandenen Schrift. Der Name muss also
-   eindeutig bleiben -- nicht zurueck auf 'Tropi' aendern. */
+   eine installierte Schrift "Tropi Land". Eine Namenskollision waere damit
+   moeglich, und ein freier Name kostet nichts. ACHTUNG: Das war NICHT die
+   Ursache des Firefox-Fehlers, als der Name vergeben wurde -- der lag am
+   Scroll-Animations-Polyfill, siehe assets/schriften-retten.js und
+   PROJEKTSTAND.md, Fallstricke 25 und 26. */
 
 @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 200 800;
   src: url(/assets/schriften/manrope-var-e310b55a.woff2) format('woff2'); font-display: swap; }
