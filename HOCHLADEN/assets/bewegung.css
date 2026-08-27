@@ -31,18 +31,36 @@
    Der naheliegende Bereich wäre "entry 0% entry 100%". Der ist aber genau so
    lang wie das Element selbst hoch ist: eine Überschrift von 35px wäre nach
    35px Scrollen fertig -- das schnappt, statt zu gleiten. Ein Bild von 315px
-   bräuchte dagegen zehnmal so lange. Mit einer festen Länge ("entry 0px
-   entry 200px") scrollt man für JEDES Element gleich weit, egal wie groß es
-   ist.
+   bräuchte dagegen zehnmal so lange. Mit einer festen Länge scrollt man für
+   JEDES Element gleich weit, egal wie groß es ist.
+
+   ===== Warum die Bereiche NICHT bei 0px anfangen =====
+   Die erste Fassung stand auf "entry 0px entry 200px". Rechnerisch lief sie
+   einwandfrei -- und trotzdem war Lucas' erste Rückmeldung: „es ist nichts
+   animiert". Er hatte recht, und die Prüfung hatte es nicht gesehen, weil
+   sie nur gemessen hat OB sich etwas bewegt, nicht WO auf dem Bildschirm.
+
+   "entry 0px" heißt: die Oberkante des Elements berührt gerade die
+   Unterkante des Bildes. Der ganze Ablauf lag damit zwischen 100% und 75%
+   der Bildhöhe -- im untersten Viertel, am Rand des Blickfelds. Alles, was
+   im Lesebereich ankam, war längst fertig. Sichtbar war die Animation nur,
+   wenn man genau auf die untere Kante starrte.
+
+   Jetzt fängt sie erst 40-90px nach dem Auftauchen an und ist bei rund 60%
+   der Bildhöhe fertig -- also dort, wo der Blick tatsächlich hinwandert.
+   Zwei Prüfungen halten das fest: im unteren Viertel muss die Einblendung
+   noch LAUFEN, bis zur Bildmitte muss sie FERTIG sein.
 
    ===== Die Falle am Seitenende =====
    Ein Element ganz unten hat nur noch so viel Scrollweg vor sich, wie hinter
    ihm Platz ist. Reicht der nicht für den ganzen Bereich, bliebe es für
-   immer halb durchsichtig stehen. Deshalb ist der längste Bereich hier 240px
-   -- und deshalb hat die Spalte unten 280px Auslauf (brief.css, welt.css).
-   Beides gehört zusammen: wird der eine Wert größer, muss der andere mit.
-   Gemessen wird das in tests/pruefe-scroll-bewegung.mjs, indem ganz ans Ende
-   gescrollt und JEDES animierte Element nachgesehen wird. */
+   immer halb durchsichtig stehen. Deshalb ist der längste Bereich hier 340px
+   -- und deshalb hat die Spalte unten 380px Auslauf (brief.css, welt.css).
+   Die drei Zahlen hängen zusammen und dürfen nicht auseinanderlaufen:
+   längster Bereich  <  Auslauf  <  halbe Bildhöhe.
+   Die letzte Grenze kommt aus pruefe-scrollen.mjs ("hinter dem letzten
+   Inhalt steht kein halber Bildschirm Leerlauf"). Gemessen wird beides in
+   tests/pruefe-scroll-bewegung.mjs. */
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
@@ -53,7 +71,7 @@
     .br-text > h2, .br-text > h3, .welt-text > h2, .welt-text > h3 {
       animation: mm-auf-titel linear both;
       animation-timeline: view();
-      animation-range: entry 0px entry 200px;
+      animation-range: entry 90px entry 330px;
     }
 
     /* ---- Fließtext: ohne Unschärfe, dafür überall ---- */
@@ -64,7 +82,7 @@
     .br-marken, .br-kunden, .br-mehr, .br-kontakt, .br-formular {
       animation: mm-auf-text linear both;
       animation-timeline: view();
-      animation-range: entry 0px entry 160px;
+      animation-range: entry 60px entry 280px;
     }
 
     /* ---- Bilder und Videos: wachsen leicht auf, mit Unschärfe ---- */
@@ -72,7 +90,7 @@
     .br-text > figure, .welt-text > figure {
       animation: mm-auf-bild linear both;
       animation-timeline: view();
-      animation-range: entry 0px entry 240px;
+      animation-range: entry 40px entry 340px;
     }
 
     /* ---- Eckdaten und Werkzeuge: jede Zeile hat ihre eigene Zeitachse und
@@ -81,14 +99,14 @@
     .br-infos > div, .br-werkzeuge > div {
       animation: mm-auf-zeile linear both;
       animation-timeline: view();
-      animation-range: entry 0px entry 120px;
+      animation-range: entry 40px entry 260px;
     }
 
     /* ---- Kasten und Zitat ---- */
     .mm-kasten, .mm-zitat {
       animation: mm-auf-kasten linear both;
       animation-timeline: view();
-      animation-range: entry 0px entry 180px;
+      animation-range: entry 70px entry 300px;
     }
 
     /* ---- Die Deko-Blumen treiben langsam durchs Bild ----

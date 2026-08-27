@@ -7,6 +7,7 @@
    etwas kaputtzumachen, deckt diese Prüfung ab, und alle drei sind hier
    schon einmal wirklich passiert:
 
+   0. Zwei Blumen liegen übereinander und sehen aus wie ein Fleck.
    1. Deko liegt über dem Text und macht ihn schlechter lesbar.
    2. Deko ragt seitlich hinaus und erzeugt einen zweiten Rollbalken
       (siehe pruefe-scrollen.mjs -- damals war es das versteckte
@@ -108,6 +109,59 @@ const TEXT_MESSUNG = `(() => {
   pruefe('…und wird auf dem Bildschirm im richtigen Seitenverhältnis gezeichnet (nicht gestaucht)',
     falschesVerhaeltnis.length === 0,
     falschesVerhaeltnis.map(f => f.id + ': ' + f.verhaeltnis.toFixed(3)).join(' | '));
+
+  /* ---- Keine Blume liegt auf einer anderen ----
+     Nachgereicht: Die erste Fassung hat jede Blume gegen den TEXT gemessen
+     und dabei übersehen, dass zwei Blumen einander überlappen können. Im
+     ersten Abschnitt lagen genau deshalb zwei übereinander -- Lucas hat es
+     im ersten Blick gesehen, die Prüfung nie. Eine Prüfung, die nur eine
+     von zwei möglichen Überlappungen kennt, ist keine halbe Prüfung,
+     sondern eine, der man nicht ansieht, was sie NICHT abdeckt. */
+  const UEBEREINANDER = `(() => {
+    const b = [...document.querySelectorAll('.mm-blume')].map(el => {
+      const r = el.getBoundingClientRect();
+      return { l: r.left, r: r.right, o: r.top, u: r.bottom,
+               wer: el.className.replace('mm-blume ', '') + ' ' + el.style.width };
+    });
+    const paare = [];
+    for (let i = 0; i < b.length; i++) for (let k = i + 1; k < b.length; k++) {
+      const a = b[i], c = b[k];
+      const quer = Math.min(a.r, c.r) - Math.max(a.l, c.l);
+      const hoch = Math.min(a.u, c.u) - Math.max(a.o, c.o);
+      /* Ein paar Pixel Berührung an den Ecken sind bei gedrehten Formen
+         kaum zu sehen. Erst eine echte gemeinsame Fläche zählt. */
+      if (quer > 12 && hoch > 12)
+        paare.push(\`\${i}(\${a.wer}) × \${k}(\${c.wer}): \${Math.round(quer)}×\${Math.round(hoch)}px\`);
+    }
+    return JSON.stringify({ anzahl: b.length, paare });
+  })()`;
+
+  for (const breite of [1440, 1180, 900]) {
+    await s.groesse(breite, 900);
+    await s.warte(350);
+    const u = JSON.parse(await s.werte(UEBEREINANDER));
+    pruefe(`bei ${breite}px liegt KEINE Blume auf einer anderen`,
+      u.paare.length === 0, u.paare.slice(0, 4).join(' | ') || u.anzahl + ' Blumen geprüft');
+  }
+
+  /* GEGENBEWEIS: zwei Blumen absichtlich übereinanderlegen. */
+  {
+    await s.groesse(1440, 900); await s.warte(300);
+    const g = JSON.parse(await s.werte(`(() => {
+      const b = [...document.querySelectorAll('.mm-blume')];
+      const alt = b[1].style.cssText;
+      /* Nummer 1 auf Nummer 0 schieben: gleiche Seite, gleiche Höhe. */
+      b[1].className = b[0].className;
+      b[1].style.setProperty('--y', b[0].style.getPropertyValue('--y'));
+      b[1].style.setProperty('--raus', b[0].style.getPropertyValue('--raus'));
+      void b[1].offsetHeight;
+      const m = ${UEBEREINANDER};
+      b[1].className = 'mm-blume mm-blume-rechts'; b[1].style.cssText = alt;
+      return m;
+    })()`));
+    pruefe('GEGENBEWEIS: zwei übereinandergeschobene Blumen würden erkannt',
+      g.paare.length > 0, g.paare.slice(0, 2).join(' | ') || 'kein Treffer — die Prüfung wäre blind!');
+  }
 
   /* ---- Der Kernvertrag: keine Blume liegt hinter Text ---- */
   for (const breite of [1440, 1180, 900]) {

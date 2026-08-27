@@ -10,7 +10,17 @@
    auf einer Uhr, ausgelöst durch einen Beobachter) würde durchlaufen und
    beim Zurückscrollen NICHT zurückgehen -- sie fiele hier durch.
 
-   Die zweite Hälfte ist die Sicherheitsseite: Inhalt darf durch eine
+   Die zweite Prüfung ist die, die beim ersten Anlauf gefehlt hat. Damals
+   stimmte rechnerisch alles -- und Lucas' erste Rückmeldung war trotzdem
+   „es ist nichts animiert". Er hatte recht: der ganze Ablauf lag zwischen
+   100% und 75% der Bildhöhe, also im untersten Viertel am Rand des
+   Blickfelds. Die Prüfung hatte gemessen, OB sich etwas bewegt, aber nicht,
+   WO auf dem Bildschirm. Eine Animation, die nur an der unteren Kante
+   stattfindet, ist für den Betrachter keine.
+   Deshalb jetzt zusätzlich: im unteren Viertel muss sie noch LAUFEN, bis
+   zur Bildmitte muss sie FERTIG sein.
+
+   Die dritte Hälfte ist die Sicherheitsseite: Inhalt darf durch eine
    Animation niemals verschwinden. Drei Wege, wie das passieren kann, werden
    ausgeschlossen:
    - am Seitenende hängenbleiben, weil der Scrollweg nicht reicht,
@@ -63,8 +73,9 @@ const messreihe = JSON.parse(await s.werte(`(async () => {
   const obenIm = el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
 
   /* "entry 0px" ist erreicht, wenn die Oberkante des Elements gerade die
-     Unterkante des Bildes berührt. Ab da läuft der Bereich 200px weit
-     (siehe animation-range in bewegung.css). */
+     Unterkante des Bildes berührt. Der Bereich für Titel läuft von dort
+     90px bis 330px (siehe animation-range in bewegung.css) -- die
+     Messpunkte unten liegen davor, mittendrin und dahinter. */
   const anfang = obenIm - sc.clientHeight;
   const lies = async (stand) => {
     sc.scrollTop = stand;
@@ -74,13 +85,13 @@ const messreihe = JSON.parse(await s.werte(`(async () => {
   };
 
   const punkte = [
-    await lies(anfang - 40),        // davor
-    await lies(anfang + 50),        // ein Viertel
-    await lies(anfang + 100),       // die Hälfte
-    await lies(anfang + 150),       // drei Viertel
-    await lies(anfang + 260),       // danach
-    await lies(anfang + 100),       // ZURÜCK auf die Hälfte
-    await lies(anfang - 40),        // ganz zurück
+    await lies(anfang + 40),        // davor (Bereich beginnt erst bei 90)
+    await lies(anfang + 150),       // ein Viertel
+    await lies(anfang + 210),       // die Hälfte
+    await lies(anfang + 270),       // drei Viertel
+    await lies(anfang + 400),       // danach (Bereich endet bei 330)
+    await lies(anfang + 210),       // ZURÜCK auf die Hälfte
+    await lies(anfang + 40),        // ganz zurück
   ];
   return JSON.stringify({ titel: el.textContent.slice(0, 24), punkte });
 })()`));
@@ -140,7 +151,53 @@ pruefe('…und ganz zurück ist er wieder ganz weg',
     ` — statt wie oben auf 0 zurückzugehen`);
 }
 
-/* ================= 2. Kein Layoutversatz ================= */
+/* ================= 2. Sie findet dort statt, wo man hinschaut =================
+   Gemessen wird nicht am Scrollstand, sondern an der LAGE des Elements auf
+   dem Bildschirm -- denn darum geht es. */
+{
+  const lage = JSON.parse(await s.werte(`(async () => {
+    const sc = document.querySelector('.br-scroller');
+    const t = [...document.querySelectorAll('.br-titel')];
+    const el = t[t.length - 2];
+    const obenIm = el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+    /* Das Element genau auf einen Anteil der Bildhöhe schieben. */
+    const stelle = async (anteil) => {
+      sc.scrollTop = obenIm - sc.clientHeight * anteil;
+      ${BILD}
+      return { y: Math.round(el.getBoundingClientRect().top / sc.clientHeight * 100),
+               deckkraft: Number(getComputedStyle(el).opacity) };
+    };
+    return JSON.stringify({ unten: await stelle(0.75), mitte: await stelle(0.5) });
+  })()`));
+
+  pruefe('im unteren Viertel des Bildes LÄUFT die Einblendung noch (man sieht sie wirklich)',
+    lage.unten.deckkraft > 0.05 && lage.unten.deckkraft < 0.95,
+    `bei ${lage.unten.y}% von oben: Deckkraft ${lage.unten.deckkraft.toFixed(3)}`);
+  pruefe('…und bis zur Bildmitte ist sie fertig (man liest nichts Halbdurchsichtiges)',
+    lage.mitte.deckkraft === 1,
+    `bei ${lage.mitte.y}% von oben: Deckkraft ${lage.mitte.deckkraft}`);
+
+  /* GEGENBEWEIS: genau die erste Fassung wiederherstellen. Sie lief
+     tadellos -- nur eben unsichtbar am unteren Bildrand. */
+  const g = JSON.parse(await s.werte(`(async () => {
+    const sc = document.querySelector('.br-scroller');
+    const t = [...document.querySelectorAll('.br-titel')];
+    const el = t[t.length - 2];
+    const stil = document.createElement('style');
+    stil.textContent = '.br-titel { animation-range: entry 0px entry 200px !important; }';
+    document.head.appendChild(stil);
+    const obenIm = el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+    sc.scrollTop = obenIm - sc.clientHeight * 0.75;
+    ${BILD}
+    const deckkraft = Number(getComputedStyle(el).opacity);
+    stil.remove();
+    return JSON.stringify({ deckkraft });
+  })()`));
+  pruefe('GEGENBEWEIS: die erste Fassung war im unteren Viertel schon fertig — genau das, was Lucas sah',
+    g.deckkraft === 1, 'Deckkraft ' + g.deckkraft + ' statt mittendrin');
+}
+
+/* ================= 3. Kein Layoutversatz ================= */
 
 const layout = JSON.parse(await s.werte(`(() => {
   const sc = document.querySelector('.br-scroller');
@@ -161,7 +218,7 @@ pruefe('…und die Seitenlänge ändert sich beim Scrollen nicht',
   Math.abs(layout.seiteAus - layout.seiteDrin) <= 1,
   `${layout.seiteAus}px / ${layout.seiteDrin}px`);
 
-/* ================= 3. Am Seitenende bleibt nichts hängen ================= */
+/* ================= 4. Am Seitenende bleibt nichts hängen ================= */
 
 const ende = JSON.parse(await s.werte(`(async () => {
   const sc = document.querySelector('.br-scroller');
@@ -211,7 +268,7 @@ const fehler = s.fehlerAufSeite();
 pruefe('Brief: keine JavaScript-Fehler', fehler.length === 0, fehler.join(' | '));
 await s.zu();
 
-/* ================= 4. Eine Welt animiert genauso ================= */
+/* ================= 5. Eine Welt animiert genauso ================= */
 {
   const w = await oeffne(ADR + '/welt/verteidiger-isfj-t', { port: 9359, breite: 1440, hoehe: 900 });
   await w.warte(3000);
@@ -240,7 +297,7 @@ await s.zu();
   await w.zu();
 }
 
-/* ================= 5. „Bewegung reduzieren“: alles einfach da =================
+/* ================= 6. „Bewegung reduzieren“: alles einfach da =================
    Der Fall, in dem gar keine Animation laufen darf -- und in dem trotzdem
    (oder gerade deshalb) JEDES Element voll sichtbar sein muss.
    Vorgetäuscht wird das über das DevTools-Protokoll, nicht durch
@@ -285,7 +342,7 @@ await s.zu();
   await r.zu();
 }
 
-/* ================= 6. Die @supports-Absicherung steht wirklich um ALLES =================
+/* ================= 7. Die @supports-Absicherung steht wirklich um ALLES =================
    Ein Browser ohne Scroll-Animationen darf nie eine halbe Regel abbekommen:
    ohne animation-timeline liefe die Animation auf einer Uhr, und mit "both"
    bliebe der Anfangszustand kleben -- also unsichtbarer Inhalt. Diese Regel

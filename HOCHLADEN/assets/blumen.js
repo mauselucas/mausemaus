@@ -35,10 +35,20 @@
 
   const hole = (liste, n) => liste[n % liste.length];
 
-  function blumeBauen(n) {
+  /* n = laufende Nummer über die ganze Seite (bestimmt Form, Größe,
+     Drehung, Höhe …). seite = links oder rechts, und die wird NICHT aus n
+     abgeleitet.
+
+     Genau daran lag der Fehler: Anfangs hing die Seite an n. Beim ersten
+     Anker mit drei Blumen kamen dadurch die Nummern 0 und 2 beide nach
+     links -- und weil auch ihre Höhen dicht beieinanderlagen, lagen zwei
+     Blumen sichtbar übereinander. Lucas hat es im ersten Blick gesehen,
+     meine Prüfung nicht: sie hat jede Blume gegen den TEXT gemessen, aber
+     nie gegen die anderen Blumen. */
+  function blumeBauen(n, seite) {
     const form = FORMEN[n % FORMEN.length];
     const el = document.createElement('div');
-    el.className = 'mm-blume mm-blume-' + (n % 2 ? 'rechts' : 'links');
+    el.className = 'mm-blume mm-blume-' + seite;
     el.setAttribute('aria-hidden', 'true');
     el.style.width = hole(BREITE, n) + 'px';
     el.style.rotate = hole(DREHUNG, n) + 'deg';
@@ -57,14 +67,22 @@
      einzelne Absätze in einer Welt).
      anzahl: Blumen je Anker. erste: zusätzliche Blumen am ERSTEN Anker --
      oben auf der Seite darf es etwas voller sein, dort schaut man hin. */
-  window.mmBlumen = function (anker, { anzahl = 2, erste = 1 } = {}) {
+  window.mmBlumen = function (anker, { anzahl = 2 } = {}) {
     const liste = (anker || []).filter(Boolean);
     if (!liste.length) return 0;
     let n = 0;
     liste.forEach((el, i) => {
       el.classList.add('mm-blumen-anker');
-      const wieViele = anzahl + (i === 0 ? erste : 0);
-      for (let j = 0; j < wieViele; j++) el.appendChild(blumeBauen(n++));
+      /* Höchstens zwei je Anker -- eine links, eine rechts. Eine dritte
+         müsste zwangsläufig auf eine Seite doppelt, und genau daraus wurden
+         die zwei übereinanderliegenden Blumen. Dichte macht die Zahl der
+         Anker, nicht die Zahl je Anker.
+         (i + j) statt nur j: Bekommt ein Anker nur EINE Blume (so in den
+         Welten), wechselt sie so wenigstens von Anker zu Anker die Seite,
+         statt sich alle links aufzureihen. */
+      const wieViele = Math.min(anzahl, 2);
+      for (let j = 0; j < wieViele; j++)
+        el.appendChild(blumeBauen(n++, (i + j) % 2 ? 'rechts' : 'links'));
     });
     return n;
   };
