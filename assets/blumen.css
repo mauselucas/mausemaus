@@ -1,0 +1,55 @@
+/* mausemaus — die Deko-Blumen in den Rändern.
+
+   Auf der alten Kachel-Startseite lagen sie in einem einzigen .deko-Layer
+   über der ganzen Seite und mussten in Prozent der GESAMTHÖHE geraten
+   werden. Beim Umbau auf den Brief sind sie dabei verlorengegangen, und die
+   Rechnerei hätte hier ohnehin nicht mehr gepasst: Der Brief wächst mit dem
+   Inhalt, den Lucas schreibt.
+
+   Deshalb hängt jede Blume jetzt an einem ANKER im Text (einem Abschnitt,
+   einer Überschrift, einem Absatz). Sie wandert damit von selbst mit, wenn
+   Inhalt dazukommt, ein Bild nachlädt oder das Fenster die Größe wechselt.
+   Es gibt keine Neuberechnung, weil es nichts zu berechnen gibt. */
+
+/* Der Anker ist Bezugsrahmen UND eigene Malebene.
+   isolation:isolate ist hier kein Zierrat: Nur mit einer eigenen Malebene
+   darf die Blume mit z-index:-1 HINTER den Text und trotzdem VOR den
+   Seitengrund. Ohne sie fiele sie bis hinter den Hintergrund von
+   .br-scroller und wäre schlicht unsichtbar. */
+.mm-blumen-anker { position: relative; isolation: isolate; }
+
+.mm-blume {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  line-height: 0;
+  color: var(--sage, #BFCC94);
+  /* Immer von UNTEN gerechnet. Das ist die ganze Absicherung gegen
+     zusätzlichen Leerraum am Seitenende: ein absolut positioniertes Kind
+     verlängert den Scrollbereich, wenn es unter seinen Anker ragt. Mit
+     "bottom" kann das nicht passieren -- der untere Rand der Blume liegt
+     immer um var(--y) ÜBER dem unteren Rand des Ankers. Nach oben
+     herausragen ist dagegen harmlos: dorthin lässt sich nicht scrollen. */
+  bottom: var(--y, 10%);
+}
+.mm-blume svg { display: block; width: 100%; height: auto; fill: currentColor; }
+
+/* An der Spaltenkante ausgerichtet, nicht an festen Pixeln. Dadurch KANN
+   eine Blume den Text nicht berühren -- egal wie breit das Fenster ist.
+   Wird es schmaler, rutschen sie von selbst aus dem Bild und werden
+   angeschnitten; genau der Eindruck aus Lucas' Entwurf. */
+.mm-blume-links  { right: calc(100% + var(--raus, 24px)); }
+.mm-blume-rechts { left:  calc(100% + var(--raus, 24px)); }
+
+/* Dunkle Welten: Salbei auf #1b1b20 würde knallen. */
+.welt.dunkel .mm-blume { opacity: .16 !important; }
+
+/* ===== Handy =====
+   Unter 760px gibt es keine Ränder mehr, in denen etwas stehen könnte. Die
+   Blumen hängen dann halb aus dem Bild und liegen zart hinter dem Text --
+   so, wie es die alte Startseite auch schon gemacht hat. */
+@media (max-width: 760px) {
+  .mm-blume { width: 96px !important; opacity: .3 !important; }
+  .mm-blume-links  { right: calc(100% - 46px); }
+  .mm-blume-rechts { left:  calc(100% - 46px); }
+}

@@ -1,0 +1,138 @@
+/* mausemaus — die Zeitleiste. Werte aus dem Entwurfsdokument, nicht raten. */
+/* Eigenständiges Bauteil: verlässt sich nicht auf site.css' globalen
+   Box-Modell-Reset, sondern bringt ihn für sich selbst mit. */
+.mml, .mml *, .mml *::before, .mml *::after { box-sizing: border-box; }
+.mml {
+  --mml-dauer: 860ms;
+  --mml-kurve: var(--mm-kurve);
+  /* Grundfarbe für Abschnitte ohne eigene Farbe — einmal hier, sonst
+     nirgends: leiste.js setzt style.background nur noch, wenn ein
+     Abschnitt wirklich eine eigene Farbe hat. */
+  --mml-blass: #D6D3C4;
+  flex: none; width: 252px; position: relative; background: #FBFAF6;
+  border-right: 1px solid #EDEAE1; z-index: 6;
+  transition: width var(--mml-dauer) var(--mml-kurve);
+}
+.mml-zu { width: 64px; }
+
+.mml-marke { font-family:'Tropi','Manrope',sans-serif; font-size:21px; line-height:1;
+  padding:22px 20px 0; color:#0D1821; white-space:nowrap;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-marke em { font-style:normal; color:#BFCC94; }
+.mml-zu .mml-marke { opacity:0; }
+.mml-mini { position:absolute; top:23px; left:0; width:64px; text-align:center; opacity:0;
+  font-family:'Tropi','Manrope',sans-serif; font-size:22px; color:#0D1821;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-zu .mml-mini { opacity:1; }
+
+.mml-gleis { position:absolute; left:28px; top:74px; bottom:82px; width:8px;
+  border-radius:99px; background:#E9E6DC; }
+/* Segmente mit Abstand und abgerundet — lückenlos wurde geprüft und abgelehnt. */
+.mml-seg { position:absolute; left:0; width:8px; top:var(--von); height:var(--dicke);
+  border-radius:99px; cursor:pointer; background: var(--mml-blass); }
+.mml-seg:after { content:''; position:absolute; left:-10px; right:-10px; top:0; bottom:0; }
+
+.mml-etiketten { position:absolute; inset:0; pointer-events:none; }
+/* Die Etiketten sind seit der Tastaturbedienung echte <button>. Der
+   Grundstil eines Knopfes (Rahmen, grauer Untergrund, mittige Schrift,
+   eigene Schriftart) muss deshalb hier wieder weg -- das Aussehen soll sich
+   gegenueber der div-Fassung um KEIN Pixel unterscheiden. Was bleibt: Tab,
+   Enter, Leertaste und die Ansage als Schaltflaeche. */
+.mml-et { appearance:none; border:0; background:transparent; font:inherit;
+  text-align:left; color:inherit; cursor:pointer;
+  position:absolute; left:52px; width:172px; padding:5px 9px; border-radius:6px;
+  display:flex; gap:8px; align-items:flex-start; pointer-events:auto; cursor:pointer;
+  transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve),
+              visibility 0s; }
+.mml-punkt { width:6px; height:6px; border-radius:50%; margin-top:5.5px; flex:none;
+  background: var(--mml-blass); }
+.mml-titel { font-family:'Manrope',sans-serif; font-weight:500; font-size:12.5px;
+  line-height:1.32; color:#5b625f; min-width:0; }
+.mml-et:hover { background:#F2EFE6; transform:translateX(2px); }
+.mml-et:hover .mml-titel { color:#0D1821; }
+.mml-et.mml-jetzt { background:#EFEDE2; }
+.mml-et.mml-jetzt .mml-titel { color:#0D1821; font-weight:600; }
+/* Ohne sichtbaren Fokus ist eine Tabfolge wertlos: man weiss nicht, wo man
+   ist. :focus-visible statt :focus, damit der Rahmen beim Klicken mit der
+   Maus NICHT erscheint -- nur beim Bedienen mit der Tastatur. */
+.mml-et:focus { outline:none; }
+.mml-et:focus-visible { outline:2px solid #344966; outline-offset:2px; background:#F2EFE6; }
+
+.mml-fuehrung { position:absolute; width:1px; background:#DAD6CA;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+
+.mml-kopf { position:absolute; left:22.5px; width:19px; height:19px; margin-top:-9.5px;
+  z-index:5; pointer-events:none; }
+.mml-rund { position:absolute; left:5px; top:5px; width:9px; height:9px; border-radius:50%;
+  background:#0D1821; box-shadow:0 0 0 4.5px #FBFAF6, 0 0 0 6px rgba(13,24,33,.22); }
+.mml-sicht { position:absolute; left:26.5px; width:11px; border-radius:99px;
+  background:rgba(13,24,33,.055); z-index:3; pointer-events:none; }
+
+.mml-fuss { position:absolute; bottom:24px; left:28px;
+  transition: opacity var(--mml-dauer) var(--mml-kurve); }
+.mml-fuss div { display:flex; align-items:center; gap:7px; margin-bottom:5px;
+  font-family:'Manrope',sans-serif; font-size:9.5px; line-height:1.4; color:#A8A398; }
+.mml-fuss span { width:8px; height:8px; border-radius:99px; background: var(--mml-blass); }
+
+.mml-griff { position:absolute; bottom:22px; right:11px; width:23px; height:23px;
+  border-radius:7px; background:#F2EFE6; color:#9A9689; cursor:pointer; z-index:9;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Mono',monospace; font-size:11px;
+  transition: right var(--mml-dauer) var(--mml-kurve), background .15s, color .15s; }
+.mml-griff:hover { background:#BFCC94; color:#0D1821; }
+
+.mml-zu .mml-et, .mml-zu .mml-fuehrung, .mml-zu .mml-fuss {
+  opacity:0; pointer-events:none; }
+/* visibility:hidden ZUSAETZLICH zu opacity:0 -- und zwar erst, wenn die
+   Blende durch ist (Verzoegerung = Dauer der Blende).
+
+   Warum das seit der Tastaturbedienung noetig ist: opacity:0 macht ein
+   Element unsichtbar, aber NICHT unerreichbar. pointer-events:none haelt
+   nur die Maus ab. Die Etiketten sind jetzt echte <button> -- ohne diese
+   Zeile koennte man sich bei eingeklappter Leiste durch eine Reihe
+   unsichtbarer Schaltflaechen tabben und saehe nirgends, wo man steht.
+   visibility:hidden nimmt sie aus der Tabfolge heraus. */
+.mml-zu .mml-et { visibility:hidden;
+  transition: background .16s, transform .16s, opacity var(--mml-dauer) var(--mml-kurve),
+              visibility 0s linear var(--mml-dauer); }
+.mml-zu .mml-griff { right:-11.5px; }
+
+/* Wer weniger Bewegung eingestellt hat, bekommt keine. */
+@media (prefers-reduced-motion: reduce) {
+  .mml, .mml *, .mml-et, .mml-griff { transition-duration: 1ms !important; }
+}
+
+/* ===== Handy: aus der Spalte wird ein Streifen oben ===== */
+@media (max-width: 760px) {
+  .br-buehne { flex-direction: column; }
+  .br-scroller { height: auto; overflow: visible; }
+
+  .mml, .mml-zu { width: 100%; height: 62px; border-right: 0;
+    border-bottom: 1px solid #EDEAE1; position: sticky; top: 0; overflow: hidden;
+    transition: height var(--mml-dauer) var(--mml-kurve); }
+  /* An den Inhalt anschmiegen, nicht auf feste Höhe aufblasen: Bei neun
+     Abschnitten stünden sonst 300 px Leere unter der Liste. */
+  .mml-offen { height: auto; max-height: 62vh; overflow-y: auto; }
+
+  .mml-marke { opacity: 1 !important; padding: 20px 18px 0; font-size: 19px; }
+  .mml-mini { display: none; }
+
+  /* Das Gleis legt sich quer und wird zum dünnen Fortschrittsband. */
+  .mml-gleis { left: 0; right: 0; top: auto; bottom: 0; width: auto; height: 4px;
+    border-radius: 0; }
+  /* Quer statt hochkant: dieselben Werte, andere Achse. Ohne left/width
+     bliebe jedes Segment 0 px breit und das Fortschrittsband unsichtbar. */
+  .mml-seg { top: auto; bottom: 0; height: 4px; left: var(--von); width: var(--dicke);
+    border-radius: 0; }
+  .mml-kopf, .mml-sicht, .mml-fuehrung { display: none; }
+
+  /* Etiketten erst sichtbar, wenn aufgeklappt — dann als schlichte Liste. */
+  .mml-etiketten { position: static; padding: 12px 14px 18px; }
+  .mml-et { position: static !important; width: auto; margin-bottom: 2px; opacity: 0;
+    pointer-events: none; }
+  .mml-offen .mml-et { opacity: 1; pointer-events: auto; }
+  .mml-fuss { display: none; }
+  .mml-griff { top: 18px; right: 14px; bottom: auto; width: 34px; height: 26px;
+    border-radius: 99px; }
+  .mml-offen .mml-griff { right: 14px; }
+}

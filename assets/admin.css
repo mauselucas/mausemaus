@@ -1,0 +1,579 @@
+/* mausemaus — Verwaltung. Werkzeug, kein Auftritt.
+   Der Rahmen (Kopfzeile, Listen, Panels) ist bewusst stumm: Systemschrift,
+   ruhiges Fast-Weiß, EINE Akzentfarbe. Die Schriften und Farben der Website
+   gelten NUR innerhalb der Schreibfläche -- dort ist die Fläche zugleich die
+   Vorschau, es gibt keine zweite Spalte mehr, in der dasselbe noch einmal
+   steht. */
+
+body.admin {
+  --hg:#fafaf9; --flaeche:#ffffff; --linie:#e7e5e4; --linie-stark:#d6d3d1;
+  --text:#1c1917; --grau:#78716c; --grau-stark:#a8a29e;
+  --akzent:#6366f1; --akzent-schwach:#eef0ff;
+  --gefahr:#b91c1c;
+  background:var(--hg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:14px; line-height:1.5;
+}
+
+/* [hidden] muss gewinnen: eigene display-Regeln würden es sonst aushebeln. */
+[hidden] { display:none !important; }
+
+/* ===== Grundbausteine ===== */
+.admin label { display:flex; flex-direction:column; gap:5px; font-size:13px; font-weight:500; }
+/* Diese Regeln gestalten die Formularfelder des RAHMENS -- und dürfen die
+   Felder der SCHREIBFLÄCHE ausdrücklich nicht anfassen. Die sind kein
+   Formular, sondern das Dokument selbst: eigene Schrift, eigene Größe,
+   kein Rahmen.
+
+   Warum als Ausnahmeliste statt über höhere Spezifität: Genau hier lag ein
+   Fehler, der beinahe durchgerutscht wäre. `.admin textarea` (0,1,1)
+   schlägt `.be-text` (0,1,0), und `.admin input:not([type])` (0,2,1)
+   schlägt sogar `.admin .dok-titel`. Das Schreibfeld lief dadurch mit
+   Systemschrift in 14px und Zeilenhöhe 1.55, während die eingefärbte
+   Schicht darunter Space Grotesk in 17px mit 1.65 setzte -- zwei
+   Schichten, die deckungsgleich übereinanderliegen MÜSSEN, mit völlig
+   verschiedener Metrik. Ein Spezifitäts-Wettrennen hätte dasselbe beim
+   nächsten Mal wieder erzeugt; eine Ausnahmeliste sagt stattdessen aus,
+   WAS zur Schreibfläche gehört. Bewacht von tests/pruefe-ueberlagerung.mjs
+   ("GRUNDBEDINGUNG"). */
+.admin input[type=text], .admin input[type=email], .admin input[type=password],
+.admin input:not([type]):not(.dok-titel):not(.be-ab-titel),
+.admin textarea:not(.be-text):not(.be-ueberschrift):not(.be-code-text):not(.dok-untertitel),
+.admin select {
+  font-family:inherit; font-size:14px; color:var(--text);
+  background:var(--flaeche); border:1px solid var(--linie-stark); border-radius:8px;
+  padding:8px 10px; width:100%;
+}
+.admin textarea:not(.be-text):not(.be-ueberschrift):not(.be-code-text):not(.dok-untertitel) {
+  resize:vertical; line-height:1.55;
+}
+.admin input:not(.dok-titel):not(.be-ab-titel):focus,
+.admin textarea:not(.be-text):not(.be-ueberschrift):not(.be-code-text):not(.dok-untertitel):focus,
+.admin select:focus {
+  outline:none; border-color:var(--akzent); box-shadow:0 0 0 3px var(--akzent-schwach);
+}
+.btn {
+  font-family:inherit; font-size:13px; font-weight:500;
+  border:1px solid var(--linie-stark); border-radius:8px; padding:7px 12px;
+  background:var(--flaeche); color:var(--text); cursor:pointer; white-space:nowrap;
+  text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+  transition:background .12s ease, border-color .12s ease;
+}
+.btn:hover { background:#f5f5f4; }
+.btn.primary { background:var(--akzent); border-color:var(--akzent); color:#fff; }
+.btn.primary:hover { filter:brightness(1.06); background:var(--akzent); }
+.btn.ghost { border-color:transparent; background:transparent; color:var(--grau); }
+.btn.ghost:hover { background:#f5f5f4; color:var(--text); }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.klein { font-size:11.5px; font-weight:400; }
+.grau { color:var(--grau); }
+.fehler { color:var(--gefahr); font-size:13px; }
+.schalter { flex-direction:row !important; align-items:center; gap:8px; font-weight:400; }
+.schalter input { width:auto; }
+.admin hr { border:0; border-top:1px solid var(--linie); margin:8px 0; }
+.stumm {
+  background:none; border:0; cursor:pointer; color:var(--grau);
+  font:inherit; font-size:13px; padding:6px 8px; border-radius:8px; text-decoration:none;
+}
+.stumm:hover { color:var(--text); background:#f0efee; }
+.flex { flex:1; }
+
+/* ===== Anmeldung ===== */
+.login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.login-box {
+  width:min(380px,100%); background:var(--flaeche); border:1px solid var(--linie);
+  border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.07); padding:32px 28px;
+  display:flex; flex-direction:column; gap:14px;
+}
+.wortmarke { font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.wortmarke.gross { font-size:24px; }
+.login-hint { font-size:13px; color:var(--grau); margin-top:-8px; }
+
+/* ===== Kopfzeilen ===== */
+.admin-top {
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  padding:10px 20px; border-bottom:1px solid var(--linie); background:var(--flaeche);
+  position:sticky; top:0; z-index:30; flex-wrap:wrap;
+}
+.admin-top-actions { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.wer { font-size:12px; color:var(--grau); margin-right:4px; }
+.reiter { display:inline-flex; background:#f0efee; border-radius:8px; padding:2px; margin-right:auto; }
+.reiter button {
+  border:0; background:transparent; border-radius:6px; cursor:pointer;
+  padding:6px 14px; font:inherit; font-size:13px; color:var(--grau);
+}
+.reiter button[aria-pressed="true"] {
+  background:var(--flaeche); color:var(--text); font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+
+.admin main { max-width:1100px; margin:0 auto; padding:24px 20px 80px; }
+.leiste { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:6px; }
+.leiste h1 { font-size:22px; font-weight:650; letter-spacing:-.01em; }
+.leiste-rechts { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.hinweis { font-size:12.5px; color:var(--grau); margin-bottom:14px; }
+
+/* Die "gespeichert"-Anzeige. Im Fehlerfall ist sie anklickbar -- ein
+   gescheiterter Stand ist nicht verloren, sondern wartet. */
+.status { font-size:12px; color:var(--grau); }
+.status.status-fehler {
+  color:var(--gefahr); font-weight:600; cursor:pointer;
+  border:1px solid currentColor; border-radius:7px; padding:3px 9px;
+}
+
+/* ===== Übersichtsliste ===== */
+.liste { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.zeile {
+  display:flex; align-items:center; gap:12px; background:var(--flaeche);
+  border:1px solid var(--linie); border-radius:10px; padding:10px 12px;
+  transition:border-color .12s ease;
+}
+.zeile:hover { border-color:var(--linie-stark); }
+.zeile.wird-gezogen { opacity:.4; }
+.zeile.ziel { box-shadow:0 -2px 0 var(--akzent); }
+.zeile.archiviert { opacity:.55; background:var(--hg); border-style:dashed; }
+.griff { cursor:grab; font-size:16px; color:var(--grau-stark); user-select:none; padding:0 2px; }
+.zeile-bild {
+  width:64px; height:42px; border-radius:6px; border:1px solid var(--linie);
+  object-fit:cover; background:var(--hg); flex-shrink:0;
+}
+.zeile-text { flex:1; min-width:0; }
+.zeile-titel { font-size:15px; font-weight:600; }
+.zeile-meta { font-size:11px; color:var(--grau); letter-spacing:.3px; margin-top:2px; }
+.marke {
+  display:inline-block; border-radius:20px; padding:1px 8px; margin-right:6px;
+  font-size:10.5px; border:1px solid var(--linie); color:var(--grau); background:var(--hg);
+}
+.marke.veroeffentlicht { background:#ecfdf3; border-color:#abefc6; color:#067647; }
+.marke.entwurf { background:#fefce8; border-color:#fde68a; color:#a16207; }
+.marke.archiv { background:var(--hg); }
+
+/* ===== Kopfleiste des Editors ===== */
+.edit-kopf {
+  /* NICHT top:0 -- die Kopfzeile darueber klebt ebenfalls bei 0 und beide
+     landen sonst uebereinander: Beim Scrollen schob sich diese Leiste in
+     die obere hinein. Die Hoehe der oberen Leiste wird in admin.js
+     gemessen und als --kopf-hoehe gesetzt, weil sie auf schmalen Fenstern
+     umbricht und dann hoeher ist. Der Ersatzwert greift nur, falls das
+     Skript nicht laeuft. */
+  position:sticky; top:var(--kopf-hoehe, 53px); z-index:20;
+  display:flex; align-items:center; gap:6px;
+  padding:10px 16px; background:color-mix(in srgb, var(--hg) 88%, transparent);
+  backdrop-filter:blur(6px); border-bottom:1px solid var(--linie);
+}
+.edit-kopf .status { margin-left:10px; }
+
+/* ===== Die Dokumentspalte ===== */
+.dok-bereich { max-width:768px; margin:0 auto; padding:48px 24px 160px; }
+.dokument { max-width:720px; margin:0 auto; }
+.dok-titel {
+  font-family:'Tropi','Manrope',sans-serif; font-size:clamp(30px,5vw,42px);
+  line-height:1.15; color:var(--ink); background:transparent; border:0; width:100%;
+  padding:0 0 0 var(--leiste); margin:0 0 6px; border-radius:6px;
+}
+.dok-untertitel {
+  font-family:'Manrope',sans-serif; font-size:17px; line-height:1.55;
+  color:var(--muted); background:transparent; border:0; width:100%; resize:none;
+  padding:0 0 0 var(--leiste); margin:0 0 28px;
+}
+.admin .dok-titel:focus, .admin .dok-untertitel:focus {
+  outline:none; box-shadow:0 0 0 2px var(--akzent-schwach);
+}
+.dok-titel::placeholder, .dok-untertitel::placeholder { color:var(--grau-stark); }
+
+/* ===== Blockzeilen ===== */
+.be-liste { list-style:none; display:flex; flex-direction:column; gap:2px; }
+/* Die Einrückung MUSS breiter sein als die Leiste links -- sonst schiebt
+   sich der "⋯"-Knopf über den Anfang des Textes. Genau das war der Fall:
+   Leiste 59px, Einrückung 44px, also 15px Überlappung. Beide Maße stehen
+   deshalb jetzt in EINER Variablen, statt zweimal geraten zu werden. */
+.dok-bereich { --leiste: 56px; }
+.be-zeile { position:relative; padding-left:var(--leiste); border-radius:8px; }
+.be-zeile.wird-gezogen { opacity:.35; }
+.be-zeile.ziel { box-shadow:0 -2px 0 var(--akzent); }
+
+.be-rail {
+  position:absolute; left:0; top:2px; height:30px; width:calc(var(--leiste) - 4px);
+  display:flex; align-items:center; justify-content:flex-end; gap:2px;
+}
+.be-griff, .be-menu-knopf {
+  background:none; border:0; cursor:pointer; color:var(--grau-stark);
+  font-size:15px; line-height:1; border-radius:6px;
+  /* Feste Maße statt inhaltsabhängiger Breite: nur so ist vorher bekannt,
+     wie breit die Leiste wird, und nur so passt sie verlässlich in die
+     Einrückung. */
+  width:20px; height:22px; padding:0; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .12s ease, color .12s ease;
+}
+.be-zeile:hover .be-griff, .be-zeile:focus-within .be-griff,
+.be-zeile:hover .be-menu-knopf, .be-zeile:focus-within .be-menu-knopf { opacity:1; }
+.be-griff { cursor:grab; }
+.be-griff:active { cursor:grabbing; }
+.be-menu-knopf:hover, .be-griff:hover { color:var(--text); background:#f0efee; }
+/* Berührungsgeräte kennen kein Annähern: sichtbar, aber blass. */
+@media (hover:none) { .be-griff, .be-menu-knopf { opacity:.4; } }
+
+/* Blöcke MIT Notiz tragen dauerhaft ein ruhiges Zeichen -- damit Lucas
+   seine eigenen Notizen wiederfindet, ohne jedes Menü zu öffnen. */
+.be-notiz-marke {
+  width:8px; height:8px; border-radius:50%; background:#f59e0b;
+  flex-shrink:0; margin-right:2px;
+}
+
+.be-inhalt { position:relative; min-width:0; }
+
+/* ---- Textblock: die Fläche IST das Ergebnis ----
+   Ein durchscheinendes Textfeld liegt über einer eingefärbten Schicht.
+   Beide MÜSSEN zeichenweise deckungsgleich sein, sonst steht die Schrift
+   versetzt zum Cursor -- deshalb teilen sie sich exakt diese eine Regel. */
+.be-text, .be-highlight {
+  font-family:'Manrope',sans-serif; font-size:17px; line-height:1.65;
+  letter-spacing:normal; padding:2px 0; margin:0; border:0;
+  white-space:pre-wrap; overflow-wrap:break-word; word-break:normal;
+  width:100%; box-sizing:border-box;
+}
+.be-text-wrap { position:relative; }
+.be-highlight {
+  position:absolute; inset:0; overflow:hidden; color:var(--ink); pointer-events:none;
+}
+.be-text {
+  display:block; background:transparent; color:transparent; caret-color:var(--ink);
+  resize:none; overflow:hidden;
+}
+.be-text::placeholder { color:var(--grau-stark); }
+.be-text:focus { outline:none; }
+.be-text::selection { background:rgba(99,102,241,.22); }
+
+/* ---- Die Auszeichnungen selbst ----
+   EISERNE REGEL: keine dieser Klassen darf die Glyphenbreite verändern.
+   Kein font-weight, kein font-style, kein letter-spacing, keine andere
+   Schriftfamilie -- sonst wandert der Zeilenumbruch der Schicht gegenüber
+   dem Textfeld, obwohl jedes Zeichen erhalten ist.
+   Erlaubt ist nur, was malt: Farbe, Hintergrund, Unterstreichung, Schatten. */
+.hz-m { color:var(--grau-stark); }                 /* Sterne/Klammern: sichtbar, gedämpft */
+.hz-fett {
+  color:var(--text);
+  /* Pseudo-Fett aus versetzten Schatten. Ein Schatten beeinflusst das
+     Layout NIE -- anders als font-weight:bold. Versatz statt Unschärfe,
+     weil ein Unschärferadius unter einem Bildpunkt je nach Bildschirm
+     auf null gerundet wird und dann gar nichts zu sehen wäre. */
+  text-shadow:.32px 0 0 currentColor, -.32px 0 0 currentColor;
+}
+.hz-kursiv {
+  color:var(--text);
+  background:color-mix(in srgb, var(--akzent) 12%, transparent);
+  border-radius:3px;
+}
+.hz-tuer {
+  color:var(--ink);
+  text-decoration:underline dashed var(--akzent);
+  text-decoration-thickness:2px; text-underline-offset:3px;
+}
+.hz-link { color:var(--akzent); }
+.hz-geheim { color:var(--grau); }
+
+/* Überschrift: Schrift der Website, Größe je Ebene.
+   Die Größenwahl liegt ABSOLUT am rechten Rand, nicht als Flex-Element
+   davor: Sonst schiebt sie die Überschrift dauerhaft um ihre Breite ein --
+   auch unsichtbar, denn opacity:0 nimmt weiterhin Platz. Genau eine Zeile
+   stünde dann als einzige in der Spalte eingerückt. */
+.be-ueberschrift-wrap { position:relative; display:flex; align-items:flex-start; }
+.be-ueberschrift {
+  font-family:'Tropi','Manrope',sans-serif; flex:1; min-width:0;
+  background:transparent; border:0; resize:none; overflow:hidden;
+  color:var(--ink); padding:2px 0; line-height:1.2;
+}
+.be-ueberschrift[data-ebene="3"] { font-size:22px; }
+.be-ueberschrift[data-ebene="2"] { font-size:30px; }
+.be-ueberschrift::placeholder { color:var(--grau-stark); }
+.admin .be-ueberschrift:focus { outline:none; box-shadow:none; }
+.admin .be-ueberschrift-wrap .be-ebene {
+  position:absolute; right:0; top:4px; z-index:2;
+  width:auto; font-size:11px; padding:4px 6px;
+  opacity:0; transition:opacity .12s ease;
+}
+.be-zeile:hover .be-ebene, .be-zeile:focus-within .be-ebene { opacity:1; }
+@media (hover:none) { .be-ueberschrift-wrap .be-ebene { opacity:.55; } }
+
+/* Randnotiz sieht schon aus wie das Ergebnis */
+.be-randnotiz {
+  display:flex; gap:8px; flex-wrap:wrap; background:var(--paper);
+  border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:4px 0;
+}
+.be-randnotiz input { border-color:transparent; background:transparent; padding:3px 4px; flex:1; min-width:110px; }
+.be-randnotiz input:focus { border-color:var(--akzent); background:var(--flaeche); }
+.be-randnotiz .schalter { flex-basis:100%; }
+
+.be-abschnitt { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.admin .be-abschnitt input.be-ab-titel {
+  font-family:'Tropi','Manrope',sans-serif; font-size:24px; color:var(--ink);
+  background:transparent; border:0; padding:2px 0; flex:1; min-width:160px;
+}
+.admin .be-abschnitt input.be-ab-titel:focus { outline:none; box-shadow:0 0 0 2px var(--akzent-schwach); }
+.ab-zusatz { display:flex; gap:8px; opacity:0; transition:opacity .12s ease; }
+.be-zeile:hover .ab-zusatz, .be-zeile:focus-within .ab-zusatz { opacity:1; }
+@media (hover:none) { .ab-zusatz { opacity:.7; } }
+.be-ab-farbe { max-width:130px; }
+.be-ab-art { width:auto; }
+
+.be-code { display:flex; flex-direction:column; gap:6px; }
+.admin .be-code .be-code-sprache { width:auto; font-size:11px; align-self:flex-start; padding:4px 8px; }
+.admin .be-code-text {
+  font-family:'Space Mono',monospace; font-size:13px; line-height:1.6; width:100%;
+  background:var(--paper); border:1px solid var(--line); border-radius:10px;
+  padding:10px 12px; resize:none; overflow:hidden; color:var(--ink);
+}
+
+/* Fertig dargestellte Medien + Bedienung, die erst bei Annäherung erscheint */
+.be-vorschau-html { margin:2px 0; max-width:100%; }
+
+/* Manche öffentlichen Bausteine brechen absichtlich aus ihrer Spalte aus,
+   um auf der Website fast fensterbreit zu werden (.mm-demo rechnet mit
+   96vw). Im Editor ist die Spalte aber NICHT die Seite -- ohne diese
+   Rücknahme schöbe die Einlage auf dem Handy über den rechten Rand.
+   Bewusst hier und nicht in inhalt.css: die Datei gehört der öffentlichen
+   Seite, dort ist der Ausbruch richtig. */
+.be-vorschau-html .mm-demo { width:100%; margin-inline:0; }
+/* Sicherheitsnetz für alles Übrige aus dem öffentlichen Umsetzer: breite
+   Inhalte dürfen in sich scrollen, aber nie die Seite breiter machen. */
+.be-vorschau-html table, .be-vorschau-html pre { max-width:100%; overflow-x:auto; }
+.be-tuer, .be-video, .be-gif, .be-medien-steuerung {
+  display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+}
+.be-medien-steuerung {
+  opacity:0; pointer-events:none; transition:opacity .15s ease; margin-top:2px;
+}
+.be-zeile:hover .be-medien-steuerung,
+.be-zeile:focus-within .be-medien-steuerung,
+.be-medien-steuerung.leer { opacity:1; pointer-events:auto; }
+@media (hover:none) { .be-medien-steuerung { opacity:.8; pointer-events:auto; } }
+.be-tuer input { flex:1; min-width:130px; font-size:13px; padding:6px 9px; }
+
+.be-bilder { display:flex; flex-direction:column; gap:8px; margin-top:4px; width:100%; }
+.be-bild-zeile { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.be-bild-vorschau {
+  width:52px; height:38px; object-fit:cover; border-radius:6px;
+  border:1px solid var(--linie); flex-shrink:0; background:var(--hg);
+}
+.be-bild-leer {
+  display:flex; align-items:center; justify-content:center; font-size:9px;
+  color:var(--grau); background:var(--hg); text-align:center;
+}
+/* Zwei Textfelder je Bild: sichtbare Unterschrift und unsichtbare
+   Beschreibung. Beide duerfen schrumpfen, damit die Zeile mit Vorschau,
+   Groessenwahl und zwei Knoepfen nicht umbricht. */
+.admin .be-bild-unterschrift,
+.admin .be-bild-beschreibung { flex:1 1 130px; min-width:110px; font-size:12.5px; padding:6px 9px; }
+.admin .be-bild-zeile select { width:auto; font-size:12px; padding:6px 8px; }
+.be-bild-zeile .btn { padding:5px 10px; font-size:12px; }
+.be-bild-neu { align-self:flex-start; }
+.be-gif p.klein, .be-video-hinweis { flex-basis:100%; margin:2px 0 0; }
+.admin .be-video-url, .admin .be-werkzeug, .admin .be-gif-alt {
+  font-size:13.5px; padding:7px 10px; flex:1; min-width:180px; width:auto;
+}
+
+/* Text mit Bild daneben: zweispaltig wie öffentlich */
+.tm-gitter { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:20px; align-items:start; }
+.tm-gitter[data-links="1"] > .tm-text { order:2; }
+.tm-gitter[data-links="1"] > .tm-bilder-seite { order:1; }
+@media (max-width:640px) {
+  .tm-gitter { grid-template-columns:1fr; }
+  .tm-gitter > * { order:initial !important; }
+}
+
+/* ===== Das "⋯"-Menü: alle Einstellungen eines Blocks an einem Ort ===== */
+.be-menu {
+  position:absolute; right:0; top:32px; z-index:40; width:280px; max-width:calc(100vw - 32px);
+  margin:0; padding:12px; background:var(--flaeche); border:1px solid var(--linie);
+  border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.10);
+  display:flex; flex-direction:column; gap:10px;
+}
+.be-menu label { font-size:12px; }
+.admin .be-menu select, .admin .be-menu textarea { font-size:13px; }
+.be-menu-knoepfe { display:flex; gap:8px; }
+.be-menu-knoepfe .btn { padding:6px 12px; font-size:12px; }
+.be-loeschen { color:var(--gefahr); }
+
+/* ===== Blockauswahl ("/") ===== */
+.be-slash {
+  position:absolute; z-index:40; top:100%; left:0; margin-top:2px; min-width:240px;
+  max-height:280px; overflow-y:auto; background:var(--flaeche); border:1px solid var(--linie);
+  border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.10); padding:6px;
+}
+.be-slash-eintrag {
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  border:0; background:transparent; border-radius:8px; padding:8px 10px; cursor:pointer;
+  font-family:inherit; font-size:13.5px; color:var(--text);
+}
+.be-slash-icon { width:20px; text-align:center; }
+.be-slash-eintrag:hover, .be-slash-aktiv { background:var(--akzent-schwach); }
+.be-slash-leer { font-size:12.5px; color:var(--grau); padding:8px 10px; }
+.be-unten { padding-left:var(--leiste); margin-top:8px; }
+
+/* ===== Auswahl-Leiste bei markiertem Text ===== */
+.be-format {
+  position:absolute; top:-40px; left:0; z-index:40; display:flex; gap:3px;
+  background:var(--text); border-radius:10px; padding:4px; box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.be-format button {
+  width:28px; height:26px; border:0; border-radius:6px; background:transparent;
+  color:#fff; cursor:pointer; font-size:13px;
+}
+.be-format button:hover { background:rgba(255,255,255,.18); }
+
+/* ===== Seiten-Panels (⚙ und ?), von rechts ===== */
+.seiten-panel {
+  position:fixed; top:0; right:0; bottom:0; z-index:60; width:min(420px,94vw);
+  background:var(--flaeche); border-left:1px solid var(--linie);
+  transform:translateX(105%); transition:transform .22s ease;
+  box-shadow:-16px 0 40px rgba(0,0,0,.07);
+  display:flex; flex-direction:column;
+}
+.seiten-panel.offen { transform:none; }
+.panel-kopf {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; border-bottom:1px solid var(--linie);
+}
+.panel-kopf h2 { font-size:15px; font-weight:600; }
+.panel-inhalt { padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; }
+.panel-inhalt h3 { font-size:14px; font-weight:600; margin:0 0 8px; }
+.panel-inhalt > div { display:flex; flex-direction:column; gap:10px; }
+
+/* ===== Anleitung (im "?"-Panel) =====
+   Das <details> bleibt als ELEMENT bestehen -- tests/pruefe-anleitung.mjs
+   zieht genau dieses Element aus admin.html heraus und prüft daran das
+   Merken des Zustands. Optisch tritt es hier aber ganz zurück: das Panel
+   ist bereits die Ebene, die man auf- und zuklappt; ein zweiter Pfeil
+   darin wäre dieselbe Sache zweimal. Weil die Zusammenfassung damit nicht
+   mehr anklickbar ist, ERZWINGT admin.js beim Öffnen des Panels open=true
+   -- sonst bliebe ein früher einmal zugeklapptes <details> für immer
+   unsichtbar, und das Hilfe-Panel wäre einfach leer. */
+.anleitung { border:0; background:transparent; padding:0; }
+#panel-anleitung .anleitung > summary { display:none; }
+.anleitung-inhalt { font-size:13.5px; line-height:1.6; }
+.anleitung-inhalt h3 { font-size:14px; margin:14px 0 4px; }
+.anleitung-inhalt h3:first-child { margin-top:0; }
+.anleitung-inhalt ul { margin:4px 0 10px 18px; padding:0; }
+.anleitung-inhalt li { margin-bottom:5px; }
+.anleitung-inhalt code {
+  background:var(--hg); border:1px solid var(--linie);
+  border-radius:5px; padding:1px 5px; font-family:'Space Mono',monospace; font-size:11.5px;
+}
+
+/* ===== Kopf-Dropdown (⋮) ===== */
+.menue { position:relative; }
+.menue summary { list-style:none; }
+.menue summary::-webkit-details-marker { display:none; }
+.menue-inhalt {
+  position:absolute; right:0; top:calc(100% + 4px); z-index:50; min-width:180px;
+  background:var(--flaeche); border:1px solid var(--linie); border-radius:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,.10); padding:6px;
+  display:flex; flex-direction:column;
+}
+.menue-inhalt a, .menue-inhalt button {
+  padding:8px 10px; border-radius:8px; color:var(--text); text-decoration:none;
+  font:inherit; font-size:13px; background:none; border:0; text-align:left; cursor:pointer;
+}
+.menue-inhalt a:hover, .menue-inhalt button:hover { background:#f5f5f4; }
+
+/* ===== Kachelbild mit Ausschnitt-Wahl ===== */
+.cover-werkzeug { display:flex; flex-direction:column; gap:8px; }
+.cover-rahmen {
+  position:relative; aspect-ratio:16/10; border:1px solid var(--linie-stark);
+  border-radius:10px; overflow:hidden; background:var(--hg);
+  cursor:grab; display:flex; align-items:center; justify-content:center;
+}
+.cover-rahmen.zieht { cursor:grabbing; }
+.cover-rahmen.ziel-aktiv { border-color:var(--akzent); box-shadow:0 0 0 3px var(--akzent-schwach); }
+.cover-rahmen img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:var(--pos,50% 50%);
+}
+.cover-rahmen img[src=""], .cover-rahmen img:not([src]) { display:none; }
+.cover-leer { font-size:12px; text-align:center; color:var(--grau); padding:10px; }
+.cover-knoepfe { display:flex; gap:6px; flex-wrap:wrap; }
+.cover-knoepfe .btn { padding:6px 10px; font-size:12px; }
+
+/* ===== Rückmeldungen ===== */
+.ladebalken { position:fixed; top:0; left:0; right:0; height:2px; background:var(--linie); z-index:100; }
+.ladebalken div { height:100%; width:40%; background:var(--akzent); animation:laden 1.1s infinite ease-in-out; }
+@keyframes laden { 0% { margin-left:-40%; } 100% { margin-left:100%; } }
+.toast {
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+  background:var(--text); color:#fff; border-radius:10px; padding:10px 18px;
+  font-size:12.5px; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,.2); max-width:90vw;
+}
+.toast.schlecht { background:var(--gefahr); }
+
+/* ===== Kleines Fenster (Link/Türchen einfügen) ===== */
+.mini-hg {
+  position:fixed; inset:0; z-index:90; display:flex;
+  align-items:center; justify-content:center; padding:20px;
+  background:rgba(28,25,23,.35); backdrop-filter:blur(2px);
+}
+.mini-box {
+  width:min(430px,100%); background:var(--flaeche); border:1px solid var(--linie);
+  border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.18); padding:22px;
+  display:flex; flex-direction:column; gap:13px;
+}
+.mini-box h3 { font-size:16px; font-weight:600; margin:0; }
+.mini-knoepfe { display:flex; gap:8px; justify-content:flex-end; margin-top:4px; }
+
+/* ===== Handy ab 520 px ===== */
+@media (max-width:640px) {
+  .admin main { padding:16px 12px 60px; }
+  .dok-bereich { padding:28px 14px 120px; }
+  .dok-bereich { --leiste: 48px; }
+  .be-bild-zeile { flex-direction:column; align-items:stretch; }
+  .be-bild-vorschau { width:100%; height:80px; }
+  .admin-top { padding:8px 12px; }
+  .be-menu { width:min(280px, calc(100vw - 48px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.admin *, body.admin *::before, body.admin *::after {
+    transition:none !important; animation-duration:.01ms !important;
+  }
+}
+
+/* Die zweite, farbige Zeile des Grusses ("Lucas :)") -- im Editor genauso
+   gesetzt wie auf der Seite, damit man sofort sieht, worum es geht. */
+.admin .be-abschnitt input.be-ab-zusatz {
+  font-family:'Tropi','Manrope',sans-serif; font-size:24px;
+  color:var(--sage, #BFCC94); background:transparent; border:0;
+  padding:2px 0; flex-basis:100%; min-width:160px;
+}
+.admin .be-abschnitt input.be-ab-zusatz:focus { outline:none; box-shadow:0 0 0 2px var(--akzent-schwach); }
+.admin .be-ab-rolle, .admin .be-ab-kicker { width:auto; font-size:12px; }
+.admin .be-ab-kicker { min-width:150px; }
+.titel-hinweis { margin:-2px 0 18px; padding-left:var(--leiste); max-width:620px; line-height:1.5; }
+
+/* ===== Kasten und Zitat im Editor =====
+   Die Huelle traegt dieselben Klassen wie auf der Seite (mm-kasten /
+   mm-zitat aus site.css) -- so ist das, was Lucas schreibt, wirklich das,
+   was Besucher sehen. Hier nur die Kleinigkeiten, die den Rahmen des
+   Editors betreffen. */
+.be-huelle { margin: 6px 0; }
+.be-huelle .be-text-wrap { width: 100%; }
+
+/* ===== Farbauswahl im "⋯"-Menü ===== */
+.be-farben { display: flex; flex-wrap: wrap; gap: 7px; padding-top: 2px; }
+.be-farbe {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer; padding: 0;
+  border: 1px solid var(--linie-stark);
+  background: var(--bf, transparent);
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+/* "ohne Farbe" als durchgestrichener Kreis, damit es nicht wie Weiß aussieht. */
+.be-farbe[data-ohne] {
+  background:
+    linear-gradient(to bottom right,
+      transparent calc(50% - 1px), var(--grau-stark) calc(50% - 1px),
+      var(--grau-stark) calc(50% + 1px), transparent calc(50% + 1px));
+}
+.be-farbe:hover { transform: scale(1.12); }
+.be-farbe.gewaehlt {
+  box-shadow: 0 0 0 2px var(--flaeche), 0 0 0 4px var(--text);
+}
+.be-farbe:focus-visible { outline: 2px solid var(--akzent); outline-offset: 3px; }

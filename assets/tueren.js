@@ -1,0 +1,75 @@
+/* mausemaus — Hintertürchen. Zeigen vorher, wohin sie führen, aber nicht alles.
+   Besuchte Türen sehen anders aus. Eine Tür ist unmarkiert. */
+(() => {
+  const MERK = 'mm.tueren.besucht.v1';
+
+  const gelesen = () => { try { return new Set(JSON.parse(localStorage.getItem(MERK) || '[]')); }
+                          catch { return new Set(); } };
+  const merken = slug => { const m = gelesen(); m.add(slug);
+    try { localStorage.setItem(MERK, JSON.stringify([...m])); } catch {} };
+
+  window.mmTueren = function (wurzel) {
+    const besucht = gelesen();
+
+    /* Nur EIN Vorschaukasten je Seite. Ohne diesen Wächter legt jeder weitere
+       Aufruf einen zweiten an; beim Überfahren würden dann zwei gleichzeitig
+       aufgehen, und Prüfungen greifen mit querySelector den falschen. */
+    let kasten = document.getElementById('mm-vorschau-kasten');
+    if (!kasten) {
+      kasten = document.createElement('div');
+      kasten.id = 'mm-vorschau-kasten';
+      kasten.className = 'mm-vorschau';
+      kasten.hidden = true;
+      document.body.appendChild(kasten);
+    }
+
+    wurzel.querySelectorAll('a.mm-tuer').forEach(a => {
+      /* Läuft mmTueren() über denselben Bereich erneut, darf ein Türchen
+         nicht einen zweiten Satz Zuhörer bekommen. */
+      if (a.dataset.mmBereit) return;
+      a.dataset.mmBereit = '1';
+
+      const slug = (a.getAttribute('href') || '').split('/').pop();
+      if (besucht.has(slug)) a.classList.add('mm-tuer-besucht');
+      a.addEventListener('click', () => merken(slug));
+
+      /* Die Vorschau hing frueher NUR an mouseenter/mouseleave. Damit sah sie
+         niemand, der die Seite mit der Tastatur bedient -- und auf dem Handy
+         gibt es gar keinen Mauszeiger, dort bekam sie also KEIN Besucher der
+         mobilen Fassung je zu Gesicht. focus/blur horchen auf dasselbe:
+         beim Tabben auf ein Tuerchen geht die Vorschau auf wie beim
+         Ueberfahren. Ein Fingertipp loest auf Beruehrungsgeraeten ebenfalls
+         focus aus, bevor dem Link gefolgt wird. */
+      const zeigen = () => {
+        const t = a.dataset.titel, x = a.dataset.text;
+        if (!t && !x) return;
+        kasten.innerHTML =
+          '<i>Hintertürchen</i>' +
+          (t ? '<b></b>' : '') + (x ? '<span></span>' : '');
+        if (t) kasten.querySelector('b').textContent = t;
+        if (x) kasten.querySelector('span').textContent = x;
+        kasten.hidden = false;
+        kasten.classList.remove('mm-vorschau-unten');
+        const r = a.getBoundingClientRect();
+        const breite = 214;
+        kasten.style.left = Math.max(10,
+          Math.min(window.innerWidth - breite - 10, r.left + r.width / 2 - breite / 2)) + 'px';
+        /* Oben zu wenig Platz? Dann klappt die Vorschau unter das Wort,
+           statt am Bildschirmrand abgeschnitten zu werden. */
+        const oben = r.top - kasten.offsetHeight - 11;
+        if (oben < 8) {
+          kasten.style.top = (r.bottom + 11) + 'px';
+          kasten.classList.add('mm-vorschau-unten');
+        } else {
+          kasten.style.top = oben + 'px';
+        }
+      };
+      const verstecken = () => { kasten.hidden = true; };
+
+      a.addEventListener('mouseenter', zeigen);
+      a.addEventListener('mouseleave', verstecken);
+      a.addEventListener('focus', zeigen);
+      a.addEventListener('blur', verstecken);
+    });
+  };
+})();

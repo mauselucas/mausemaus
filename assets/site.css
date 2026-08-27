@@ -1,0 +1,239 @@
+/* mausemaus — Design-System und Layout */
+:root {
+  --ink:   #0D1821;
+  --navy:  #344966;
+  --sky:   #B4CDED;
+  --paper: #F0F4EF;
+  --sage:  #BFCC94;
+  --line:  #D5D9D2;
+  --muted: #6E7873;
+  /* Vom Auftraggeber festgelegte Bewegungskurve — einmal hier, referenziert
+     von leiste.css, brief.css und welt.css. Darf nicht auseinanderlaufen. */
+  --mm-kurve: cubic-bezier(.50, 0, .12, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* [hidden] muss gewinnen: eigene display-Regeln (z.B. display:inline-flex)
+   schlagen sonst das display:none des Browsers und Verstecktes bleibt sichtbar. */
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;   /* Bezugspunkt für den Deko-Layer */
+}
+.tropi { font-family: 'Tropi', sans-serif; font-weight: 400; }
+.mono  { font-family: 'Space Mono', monospace; }
+
+.wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+
+/* ===== Deko-Blumen ===== */
+/* body positioniert -> der Deko-Layer erstreckt sich über die GANZE Seitenhöhe,
+   nicht nur über den ersten Bildschirm. */
+.deko { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.flower { position: absolute; z-index: 1; pointer-events: none; }
+.flower svg { width: 100%; height: 100%; display: block; }
+
+/* Positionen als Klassen statt Inline-Styles — nur so können Media Queries greifen.
+   (Genau daran scheiterte vorher die Verkleinerung auf dem Handy.) */
+.f1 { top:  2%; right: -2vw;   width: 120px; rotate: -12deg; }
+.f2 { top: 24%; left:  -3.5vw; width: 140px; rotate:  18deg; }
+.f3 { top: 50%; right: -3vw;   width: 100px; rotate:   8deg; }
+.f4 { top: 72%; left:  -3vw;   width:  96px; rotate: -20deg; }
+.f5 { top: 89%; right: -2vw;   width: 110px; rotate:  24deg; }
+
+/* Hier standen frueher rund 230 Zeilen fuer die Kachel-Startseite, die es
+   seit dem Umbau auf den Brief nicht mehr gibt: Header, Filterleiste,
+   Kachel-Raster, Instagram-Panel, "Laeuft aktuell", das Detail-Fenster
+   samt Bewegungsuebergang und die Persoenlichkeits-Pille. Nichts davon
+   wurde noch von irgendeiner Seite benutzt -- gemessen, nicht vermutet
+   (siehe pruefe-tempo.mjs) -- aber site.css wird von index.html,
+   welt.html, 404.html UND admin.html geladen, also trug jeder Besucher
+   die 10 kB mit.
+
+   BEHALTEN wurde alles, was noch jemand braucht: .wrap, .deko/.flower und
+   der Footer (404.html), .meta (404.html), .prose und .md-* (der Editor
+   und die Welten) und das ganze mm-*-Blocksystem weiter unten -- dessen
+   Farbregeln greifen erst, WENN Lucas einen Block einfaerbt, sie duerfen
+   also nie nach "wird gerade nicht benutzt" weggeworfen werden. */
+.meta {
+  margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px;
+}
+.meta a, .meta span {
+  font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.5px;
+  text-decoration: none; color: var(--ink);
+  border: 1.5px solid var(--ink); border-radius: 40px; padding: 7px 15px;
+  transition: all .15s ease;
+}
+.meta a:hover { background: var(--ink); color: var(--paper); }
+/* ===== Inhalt im Detail-Fenster (aus Markdown) ===== */
+.prose { font-size: 15px; line-height: 1.7; color: #2c343b; }
+.prose > * + * { margin-top: 16px; }
+.prose h2, .prose h3 { font-family: 'Tropi', sans-serif; color: var(--ink); line-height: 1.1; margin-top: 28px; }
+.prose h2 { font-size: 26px; } .prose h3 { font-size: 21px; }
+.prose strong { color: var(--ink); }
+.prose a { color: var(--navy); text-underline-offset: 3px; }
+.prose ul { padding-left: 20px; } .prose li + li { margin-top: 5px; }
+.prose blockquote {
+  border-left: 3px solid var(--sage); padding: 2px 0 2px 16px;
+  color: var(--navy); font-style: italic;
+}
+.prose figure { margin: 0; }
+/* height:auto: siehe .br-text img in brief.css — ohne das verzerren Bilder,
+   die ihre echten Maße als width/height tragen. */
+.prose img { width: 100%; height: auto; border: 1.5px solid var(--ink); border-radius: 12px; display: block; }
+.prose figcaption {
+  font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.5px;
+  color: var(--muted); margin-top: 7px; text-align: center;
+}
+.md-gallery { display: grid; gap: 12px; }
+/* Bildgrößen im Text — Vorgabe ist volle Breite, ![](…){klein} bzw. {mittel} verkleinert */
+.prose figure.mm-klein  { max-width: 260px; margin-inline: auto; }
+.prose figure.mm-mittel { max-width: 460px; margin-inline: auto; }
+.md-gallery-2 { grid-template-columns: repeat(2, 1fr); }
+.md-gallery-3 { grid-template-columns: repeat(3, 1fr); }
+.md-video {
+  position: relative; aspect-ratio: 16 / 9; border: 1.5px solid var(--ink);
+  border-radius: 12px; overflow: hidden; background: var(--ink);
+}
+.md-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* Trennstrich mit Blume in der Mitte — hier wird die Deko zum Funktionselement */
+.md-rule { display: flex; align-items: center; gap: 14px; margin: 30px 0; }
+.md-rule::before, .md-rule::after { content: ""; flex: 1; height: 1.5px; background: var(--line); }
+.md-rule svg { width: 26px; height: 24px; flex-shrink: 0; opacity: 0.55; }
+
+/* ===== Footer ===== */
+footer {
+  background: var(--ink); color: var(--paper); margin-top: 30px;
+  padding: 60px 0; position: relative; overflow: hidden;
+}
+.foot-grid { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2; }
+.foot-brand { font-family: 'Tropi', sans-serif; font-size: 44px; color: var(--paper); }
+.foot-brand .dot { color: var(--sky); }
+.foot-links { display: flex; flex-direction: column; gap: 8px; font-family: 'Space Mono', monospace; font-size: 13px; }
+.foot-links a { color: rgba(240,244,239,0.85); text-decoration: none; }
+.foot-links a:hover { color: var(--sky); }
+.foot-note { margin-top: 26px; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; color: rgba(240,244,239,0.5); position: relative; z-index: 2; }
+/* Footer-Blume: hell und zart statt schwarz-auf-schwarz (war vorher unsichtbar) */
+footer .flower svg { fill: rgba(240,244,239,0.07); }
+
+/* ===== Responsive =====
+   Die Regeln fuer Kacheln, Detail-Fenster und Header sind mit ihren
+   Bausteinen zusammen entfallen. Was bleibt, wird noch gebraucht: die
+   Bildergalerie im Text (Welten, Editor) und die Deko-Blumen (404.html). */
+@media (max-width: 720px) {
+  .md-gallery-2, .md-gallery-3 { grid-template-columns: 1fr; }
+  /* Blumen deutlich kleiner und halb aus dem Bild, sonst überdecken sie den Text */
+  .f1 { width: 74px; top: 1%;  right: -7vw; }
+  .f2 { width: 80px; top: 18%; left:  -9vw; }
+  .f3 { width: 66px; top: 46%; right: -8vw; }
+  .f4 { width: 62px; top: 70%; left:  -8vw; }
+  .f5 { width: 70px; top: 90%; right: -7vw; }
+}
+
+/* ===== Baustein-Breiten (Blockeditor) =====
+   Wird von assets/bloecke.js um Blöcke gelegt, deren Breite vom Standard
+   ("normal") abweicht -- im Standardfall (aller bisherige Inhalt) entsteht
+   gar keine Hülle, siehe dort. Farben bewusst NICHT fest verdrahtet (Welten
+   können dunkel sein, siehe welt.css): nur Ausmaß und Deckkraft, keine
+   eigenen Hintergrund-/Randfarben.
+   Die Einblendungen beim Scrollen stehen NICHT hier, sondern in
+   assets/bewegung.css -- sie gelten fuer die ganze Seite, nicht nur fuer
+   Bloecke mit Huelle. */
+.mm-baustein { }
+
+/* schmal: eine schlankere, zentrierte Spalte innerhalb des Fließtexts. */
+.mm-breite-schmal { max-width: min(420px, 82%); margin-inline: auto; }
+
+/* randnotiz: kleiner und etwas leiser gesetzt -- deckt ab, wofür man in
+   Notion sonst eine Spalte anlegen würde, ohne dass echte Seitenränder
+   gebraucht werden (die gibt es in diesem einspaltigen Layout nicht). */
+.mm-breite-randnotiz { max-width: min(340px, 78%); font-size: .92em; opacity: .85; }
+
+/* voll: bricht WEIT aus der Lesespalte aus, nicht nur bis zu deren Rand.
+   Vorher waren es genau -26px (der Innenabstand der Spalte) -- der
+   Unterschied zu "normal" lag damit bei 52px und war kaum zu sehen.
+
+   Wie weit ausgebrochen wird, richtet sich nach dem Platz, der wirklich da
+   ist: Fensterbreite minus Zeitleiste (252px) minus Lesespalte (560px),
+   davon die Haelfte je Seite, abzueglich 32px Luft, gedeckelt bei 170px.
+   Auf einem 1280er Bildschirm werden aus 508px Textbreite so 900px; auf
+   einem knappen Fenster schrumpft der Ausbruch von selbst auf null, statt
+   ueber den Rand zu schiessen. */
+.mm-breite-voll {
+  max-width: none;
+  margin-inline: calc(-26px - clamp(0px, (100vw - 812px) / 2 - 32px, 170px));
+}
+/* Unter 760px liegt die Zeitleiste unten statt links -- dann steht die
+   volle Fensterbreite zur Verfuegung und die Rechnung oben passt nicht mehr. */
+@media (max-width: 760px) {
+  .mm-breite-voll { margin-inline: calc(-26px - clamp(0px, (100vw - 560px) / 2 - 20px, 90px)); }
+}
+@media (max-width: 620px) { .mm-breite-voll { margin-inline: -20px; } }
+
+/* ===== Farben für Blöcke =====
+   Ein Ton je Farbe, alles andere wird daraus abgeleitet: der Kasten mischt
+   ihn hell über den Seitengrund, das Zitat nimmt ihn für seinen Balken, ein
+   Textblock für die Schrift. Nur EIN Wert je Farbe -- so kann die helle
+   Variante nie zur kräftigen driften.
+   Die Töne stammen aus der Seite selbst (Salbei ist der Akzent, die übrigen
+   sind die Farben der Projektseiten). Terrakotta ist der einzige Zusatz,
+   weil es keinen roten Ton gab. */
+.mm-farbe-salbei     { --bf: #BFCC94; }
+.mm-farbe-oliv       { --bf: #7F8F55; }
+.mm-farbe-ocker      { --bf: #A8913F; }
+.mm-farbe-terrakotta { --bf: #A85B4B; }
+.mm-farbe-violett    { --bf: #8E4E9B; }
+.mm-farbe-tiefblau   { --bf: #344966; }
+.mm-farbe-schiefer   { --bf: #6E6E7A; }
+
+/* Der Grund, über den gemischt wird -- Brief und Welten stehen beide auf
+   diesem Ton. Als Variable, damit die Mischung nicht an drei Stellen
+   verschieden ausfällt. */
+:root { --mm-grund: #FBFAF6; }
+
+/* ---- Kasten ----
+   Ohne gewählte Farbe ein ganz leiser neutraler Ton, mit Farbe dieselbe
+   Mischung aus deren Ton. 14% ist bewusst niedrig: Der Kasten soll den Text
+   tragen, nicht ihn überschreien. */
+.mm-kasten {
+  /* Ohne gewählte Farbe ein sehr leiser neutraler Ton -- 5% Tinte, sonst
+     wirkt der Kasten wie ein grauer Balken statt wie eine ruhige Fläche. */
+  background: color-mix(in srgb, var(--ink) 5%, var(--mm-grund));
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 22px 0;
+}
+/* Mit Farbe: derselbe Ton, nur kräftiger gemischt -- 14% trägt den Text,
+   ohne ihn zu überschreien. */
+.mm-kasten[class*="mm-farbe-"] {
+  background: color-mix(in srgb, var(--bf) 14%, var(--mm-grund));
+}
+.mm-kasten > :first-child { margin-top: 0; }
+.mm-kasten > :last-child  { margin-bottom: 0; }
+
+/* ---- Zitat ----
+   Der Balken links trägt die Farbe, der Text bleibt normal lesbar. */
+.mm-zitat {
+  border-left: 3px solid var(--bf, var(--ink));
+  padding: 2px 0 2px 18px;
+  margin: 22px 0;
+}
+.mm-zitat > :first-child { margin-top: 0; }
+.mm-zitat > :last-child  { margin-bottom: 0; }
+
+/* ---- Textfarbe ---- */
+.mm-textfarbe { color: var(--bf); }
+
+/* ---- Bild ohne Kontur und Schatten ----
+   Vorgabe ist MIT (so sieht die ganze Seite bisher aus); wer es ablegt,
+   bekommt das nackte Bild. Die Rundung bleibt -- scharfe Ecken gibt es in
+   dieser Bildsprache nirgends. */
+.mm-ohne-rahmen figure,
+.mm-ohne-rahmen img { box-shadow: none !important; border: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-kasten, .mm-zitat { transition: none; }
+}
