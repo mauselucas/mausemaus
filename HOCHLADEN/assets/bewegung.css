@@ -12,10 +12,44 @@
 
    ===== Die Sicherheitsregel =====
    ALLES steht in einem @supports-Block. Kann ein Browser keine
-   Scroll-Animationen (Chrome vor 115, Safari vor 26, Firefox vor 144), gilt
-   hier gar keine Regel und die Seite ist ganz normal und vollständig da.
-   Es gibt bewusst KEINEN JavaScript-Notnagel: Inhalt darf nie davon
-   abhängen, dass ein Skript ihn wieder sichtbar macht.
+   Scroll-Animationen, gilt hier gar keine Regel und die Seite ist ganz
+   normal und vollständig da. Inhalt darf NIE davon abhängen, dass ein
+   Skript ihn wieder sichtbar macht -- diese Regel steht weiter, auch mit
+   dem Nachbau (siehe unten).
+
+   ===== Wer kann es, wer nicht (gemessen, nicht geglaubt) =====
+   Hier stand einmal „Chrome vor 115, Safari vor 26, Firefox vor 144".
+   Die letzte Zahl war frei erfunden und hat eine ganze Fehlersuche in die
+   falsche Richtung geschickt: Lucas' Firefox 154 kann es nämlich NICHT.
+
+   Gemessen am 27.08.2026, Firefox/154.0 auf macOS 27:
+       CSS.supports('animation-timeline: view()')   =>  false
+       CSS.supports('animation-timeline: scroll()') =>  false
+       CSS.supports('animation-range: entry 90px …')=>  false
+   In Firefox steckt das Ganze bis heute hinter der Einstellung
+   layout.css.scroll-driven-animations.enabled und ist in keiner stabilen
+   Fassung an. Chrome ab 115 und Safari ab 26 können es.
+
+   Merksatz fürs Projekt: Wer im Code eine Behauptung über einen Browser
+   aufschreibt, muss sie datieren und sagen, womit er sie gemessen hat.
+   Sonst steht eine Vermutung irgendwann als Tatsache da. Verlässlich ist
+   allein die Abfrage zur Laufzeit -- genau die steht in @supports.
+
+   ===== Der Nachbau für Firefox =====
+   Damit Lucas seine eigene Seite nicht dauerhaft starr sieht, wird in
+   Engines OHNE eigene Unterstützung ein Polyfill nachgeladen
+   (flackr/scroll-timeline 1.1.0, assets/scroll-timeline.js). Dessen Parser
+   liest den ROHTEXT der Stylesheets und steigt dabei WEDER in @supports
+   NOCH in @media hinab -- alles, was hier unten steht, erreicht ihn also
+   nie. Deshalb gibt es dieselben Regeln ein zweites Mal, flach und ohne
+   At-Block, in assets/bewegung-nachbau.css. Diese Datei wird aus DIESER
+   hier erzeugt (tests/nachbau.mjs) und von pruefe-nachbau.mjs gegen sie
+   gehalten -- von Hand ändern gilt nicht.
+
+   Die Sicherheitsregel bleibt dabei unangetastet: Der Nachbau greift nur,
+   wenn <html> die Klasse mm-bewegung trägt, und die setzt der Lader erst,
+   wenn er das Polyfill wirklich lädt. Kein JavaScript, kein Polyfill,
+   keine Klasse -- dann ist die Seite statisch und VOLLSTÄNDIG sichtbar.
 
    ===== Warum nur transform, opacity und filter =====
    Nichts hier verändert Höhe, Abstand oder Schriftgröße. Sonst würde sich

@@ -13,12 +13,38 @@
 <meta property="og:url" content="https://mausemaus.com/">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://mausemaus.com/">
-<link rel="stylesheet" href="/assets/fonts.css?v=1787801892">
-<link rel="stylesheet" href="/assets/site.css?v=1787801892">
-<link rel="stylesheet" href="/assets/leiste.css?v=1787801892">
-<link rel="stylesheet" href="/assets/brief.css?v=1787801892">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787801892">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787801892">
+<!-- Scroll-Animationen fuer Engines, die sie selbst nicht koennen (Firefox).
+     Chrome und Safari laufen an dieser Stelle vorbei: Sie holen null Byte
+     und animieren wie bisher rein in CSS auf dem Compositor.
+
+     Warum hier drei Dinge zusammen passieren muessen:
+     1. scroll-timeline.js -- das Polyfill (flackr/scroll-timeline 1.1.0).
+     2. bewegung-nachbau.css -- dieselben Regeln flach, weil der Parser des
+        Polyfills nicht in @supports oder @media hineinsieht (gemessen).
+     3. die Klasse mm-bewegung -- ohne sie greift der Nachbau nicht.
+
+     Die Reihenfolge der Absicherung ist Absicht: Die Klasse wird ZULETZT
+     gesetzt und nur, wenn "Bewegung reduzieren" aus ist. Ist JavaScript aus
+     oder bricht hier etwas ab, traegt <html> die Klasse nie, der Nachbau
+     greift nirgends -- und die Seite ist statisch und VOLLSTAENDIG sichtbar.
+     Kein Inhalt haengt jemals davon ab, dass ein Skript ihn sichtbar macht.
+     Siehe docs/scroll-animationen-fuer-ox-alpha.md. -->
+<script>
+(function () {
+  if (!window.CSS || !CSS.supports) return;
+  if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
+  document.write('<script src="/assets/scroll-timeline.js?v=1787819522"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787819522">');
+  document.documentElement.className += ' mm-bewegung';
+})();
+</script>
+<link rel="stylesheet" href="/assets/fonts.css?v=1787819522">
+<link rel="stylesheet" href="/assets/site.css?v=1787819522">
+<link rel="stylesheet" href="/assets/leiste.css?v=1787819522">
+<link rel="stylesheet" href="/assets/brief.css?v=1787819522">
+<link rel="stylesheet" href="/assets/blumen.css?v=1787819522">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1787819522">
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -74,15 +100,15 @@
   </div>
 </div>
 
-<script src="/assets/config.js?v=1787801892"></script>
-<script src="/assets/seed.js?v=1787801892"></script>
-<script src="/assets/shared.js?v=1787801892"></script>
-<script src="/assets/bloecke.js?v=1787801892"></script>
-<script src="/assets/db.js?v=1787801892"></script>
-<script src="/assets/blumen.js?v=1787801892"></script>
-<script src="/assets/leiste.js?v=1787801892"></script>
-<script src="/assets/brief.js?v=1787801892"></script>
-<script src="/assets/tueren.js?v=1787801892"></script>
+<script src="/assets/config.js?v=1787819522"></script>
+<script src="/assets/seed.js?v=1787819522"></script>
+<script src="/assets/shared.js?v=1787819522"></script>
+<script src="/assets/bloecke.js?v=1787819522"></script>
+<script src="/assets/db.js?v=1787819522"></script>
+<script src="/assets/blumen.js?v=1787819522"></script>
+<script src="/assets/leiste.js?v=1787819522"></script>
+<script src="/assets/brief.js?v=1787819522"></script>
+<script src="/assets/tueren.js?v=1787819522"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
