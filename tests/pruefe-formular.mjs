@@ -70,7 +70,13 @@ const schlecht = JSON.parse(await s.werte(`(async () => {
   return JSON.stringify({ text: a.textContent, klasse: a.className, knopfWiederDa: !k.disabled });
 })()`));
 pruefe('Fehler wird gezeigt', schlecht.klasse.includes('schlecht') && schlecht.text.includes('Feld fehlt'), schlecht.text);
-pruefe('Fehlermeldung nennt die E-Mail als Ausweg', schlecht.text.includes('hallo@mausemaus.com'), schlecht.text);
+/* Die Adresse muss eine ECHTE sein. Hier stand einmal hallo@mausemaus.com --
+   eine Adresse, die es nie gab: die Domain gehoert Lucas, aber eine Domain
+   bringt keine Mailbox mit (mausemaus.com hat keine MX-Eintraege, gemessen).
+   Wer im Fehlerfall dorthin schrieb, schrieb ins Leere -- genau in dem
+   Moment, in dem das Formular schon nicht funktioniert hat. */
+pruefe('Fehlermeldung nennt die E-Mail als Ausweg',
+  schlecht.text.includes('lucasschoenwald03@gmail.com'), schlecht.text);
 pruefe('Knopf ist danach wieder bedienbar', schlecht.knopfWiederDa);
 
 const jsF = s.fehlerAufSeite();

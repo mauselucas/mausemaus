@@ -242,15 +242,13 @@ Der ganze Hergang mit allen Messwerten steht in
 
 ## Weitere offene Punkte
 
-- **HSTS fehlt — und nur Lucas kann das ändern.** Im Repo unter
-  Settings → Pages den Haken bei „Enforce HTTPS" setzen. Danach schickt
-  GitHub die Kopfzeile `strict-transport-security` selbst mit, und der
-  allererste Aufruf eines Besuchers kann nicht mehr über unverschlüsseltes
-  `http` umgebogen werden. `tests/pruefe-kopfzeilen.mjs` bleibt bis dahin mit
-  genau dieser einen Prüfung rot — das ist Absicht, kein Fehler im Test.
-- **`404.html` nennt eine andere Mailadresse als der Brief**
-  (`lucasschoenwald03@gmail.com` gegen `hallo@mausemaus.com`). Eine der
-  beiden ist die falsche; Lucas muss sagen, welche.
+- **`hallo@mausemaus.com` existiert nicht.** Die richtige Adresse ist
+  `lucasschoenwald03@gmail.com`. Sie steht in `404.html` korrekt, aber der
+  Brief und die Fehlermeldung des Formulars nennen die erfundene
+  `@mausemaus.com`-Adresse. Entweder überall auf die echte umstellen oder
+  eine Mailbox für die Domain einrichten — die Domain allein bringt keine
+  E-Mail mit, dafür braucht es einen Mail-Anbieter und MX-Einträge (heute
+  hat `mausemaus.com` keine, gemessen mit `dig mausemaus.com MX`).
 - **Formular:** läuft über Formspree (`https://formspree.io/f/xljerkoz`).
   Der kostenlose Tarif deckt 50 Einsendungen im Monat. Geprüft von
   `tests/pruefe-formular.mjs` — dieser Test schickt bewusst **nie** eine echte

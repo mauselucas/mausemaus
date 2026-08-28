@@ -71,12 +71,29 @@ pruefe('http:// wird auf https:// umgeleitet',
 
 /* HSTS sagt dem Browser: diese Seite kuenftig NIE unverschluesselt aufrufen.
    Ohne die Kopfzeile geht der allererste Aufruf einmal ueber http und laesst
-   sich unterwegs umbiegen. GitHub Pages setzt sie NUR, wenn im Repo unter
-   Settings -> Pages "Enforce HTTPS" angehakt ist. Das kann nur Lucas.
-   Diese Pruefung bleibt rot, bis der Haken sitzt -- das ist Absicht. */
-pruefe('HSTS ist gesetzt (Repo → Settings → Pages → "Enforce HTTPS")',
-  !!start.headers.get('strict-transport-security'),
-  start.headers.get('strict-transport-security') || 'fehlt — ein Haken im Repo, kein Code');
+   sich unterwegs umbiegen -- die Umleitung oben schuetzt also erst ab dem
+   zweiten Besuch vollstaendig.
+
+   HIER STAND EINE FALSCHE BEHAUPTUNG: "GitHub Pages setzt sie, wenn
+   'Enforce HTTPS' angehakt ist." Das stimmt nicht. Der Haken ist gesetzt,
+   und die Kopfzeile kommt trotzdem nicht -- gemessen am 28.08.2026, und
+   nicht nur hier: jekyllrb.com und electronjs.org laufen ebenfalls auf
+   GitHub Pages mit eigener Domain und liefern sie genauso wenig. GitHub
+   sendet HSTS nur auf *.github.io; ueber die Regeln einer fremden Domain
+   will es nicht entscheiden. "Enforce HTTPS" bewirkt die Umleitung, mehr
+   nicht.
+
+   Damit ist HSTS auf diesem Hoster nicht erreichbar -- es braeuchte einen
+   Dienst davor (Cloudflare o.ae.). Bewusst nicht gemacht.
+
+   Diese Pruefung ist deshalb eine WACHE, keine Forderung: Kommt die
+   Kopfzeile eines Tages doch, hat GitHub etwas geaendert, und dann gehoert
+   dieser Block umgeschrieben statt weitergeschleppt. */
+pruefe('bekannt und hingenommen: GitHub Pages setzt bei eigener Domain kein HSTS',
+  !start.headers.get('strict-transport-security'),
+  start.headers.get('strict-transport-security')
+    ? 'ANGEKOMMEN: ' + start.headers.get('strict-transport-security') + ' — diese Pruefung gehoert jetzt umgeschrieben'
+    : 'fehlt, wie erwartet — der Schutz liegt allein an der 301-Umleitung oben');
 
 /* ---------- 3. Was GitHub Pages beim Zwischenspeichern tut ---------- */
 

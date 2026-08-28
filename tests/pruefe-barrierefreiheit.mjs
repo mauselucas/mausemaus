@@ -143,8 +143,15 @@ await s.zu(); chrome.beenden(); server.beenden();
     const block = (roh.match(/<noscript>([\s\S]*?)<\/noscript>/) || [])[1] || '';
     pruefe(`${name}: sagt ohne JavaScript wenigstens, was los ist`,
       block.length > 0, block ? block.replace(/\s+/g, ' ').trim().slice(0, 50) : 'kein <noscript>');
+    /* Und zwar ueber eine Adresse, die es WIRKLICH gibt. Hier stand einmal
+       hallo@mausemaus.com -- die Domain gehoert Lucas, aber eine Domain
+       bringt keine Mailbox mit (mausemaus.com hat keine MX-Eintraege,
+       gemessen). Ein Ausweg, der ins Leere fuehrt, ist kein Ausweg. */
     pruefe(`${name}: …und laesst einen Weg offen`,
       block.includes('mailto:'), block.includes('mailto:') ? 'mailto vorhanden' : 'keine Adresse');
+    pruefe(`${name}: …ueber eine Adresse, die es gibt`,
+      !block.includes('@mausemaus.com'),
+      block.includes('@mausemaus.com') ? 'erfundene Domain-Adresse' : 'echte Adresse');
   }
 }
 

@@ -65,12 +65,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1787927033"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1787944189"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1787927033"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787927033">');
+  document.write('<script src="/assets/schriften-retten.js?v=1787944189"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787944189">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -84,12 +84,12 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787927033">
-<link rel="stylesheet" href="/assets/site.css?v=1787927033">
-<link rel="stylesheet" href="/assets/leiste.css?v=1787927033">
-<link rel="stylesheet" href="/assets/brief.css?v=1787927033">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787927033">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787927033">
+<link rel="stylesheet" href="/assets/fonts.css?v=1787944189">
+<link rel="stylesheet" href="/assets/site.css?v=1787944189">
+<link rel="stylesheet" href="/assets/leiste.css?v=1787944189">
+<link rel="stylesheet" href="/assets/brief.css?v=1787944189">
+<link rel="stylesheet" href="/assets/blumen.css?v=1787944189">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1787944189">
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -142,7 +142,7 @@
         <div class="br-text">
           <p>Diese Seite baut ihren Inhalt mit JavaScript auf — im Moment ist es
           abgeschaltet, deshalb steht hier nichts.</p>
-          <p>Schreib mir gern direkt: <a href="mailto:hallo@mausemaus.com">hallo@mausemaus.com</a></p>
+          <p>Schreib mir gern direkt: <a href="mailto:lucasschoenwald03@gmail.com">lucasschoenwald03@gmail.com</a></p>
         </div>
       </noscript>
       <div id="brief"></div>
@@ -198,14 +198,14 @@
   </main>
 </div>
 
-<script src="/assets/config.js?v=1787927033"></script>
-<script src="/assets/shared.js?v=1787927033"></script>
-<script src="/assets/bloecke.js?v=1787927033"></script>
-<script src="/assets/db.js?v=1787927033"></script>
-<script src="/assets/blumen.js?v=1787927033"></script>
-<script src="/assets/leiste.js?v=1787927033"></script>
-<script src="/assets/brief.js?v=1787927033"></script>
-<script src="/assets/tueren.js?v=1787927033"></script>
+<script src="/assets/config.js?v=1787944189"></script>
+<script src="/assets/shared.js?v=1787944189"></script>
+<script src="/assets/bloecke.js?v=1787944189"></script>
+<script src="/assets/db.js?v=1787944189"></script>
+<script src="/assets/blumen.js?v=1787944189"></script>
+<script src="/assets/leiste.js?v=1787944189"></script>
+<script src="/assets/brief.js?v=1787944189"></script>
+<script src="/assets/tueren.js?v=1787944189"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -318,7 +318,7 @@
       /* Bewusst mit Ausweg: wer hier haengenbleibt, soll trotzdem
          schreiben koennen, statt einfach abzuspringen. */
       antwort.textContent = (err.message || 'Das hat nicht geklappt.')
-        + ' Schreib mir sonst direkt an hallo@mausemaus.com.';
+        + ' Schreib mir sonst direkt an lucasschoenwald03@gmail.com.';
     }).then(function () { knopf.disabled = false; });
   });
 })();
