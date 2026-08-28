@@ -31,7 +31,20 @@ const SEITEN = [
 
 for (const { name, pfad } of SEITEN) {
   const s = await oeffne('http://127.0.0.1:8913' + pfad, { port: 9353, breite: 1280, hoehe: 900 });
-  await s.warte(3000);
+  /* Nicht auf die Uhr warten, sondern auf den Zustand: unter Last (alle
+     Pruefungen hintereinander, mehrere Chrome-Instanzen) reichten feste
+     3000 ms nicht, und der Test wurde sporadisch rot, obwohl nichts kaputt
+     war. Eine Pruefung, die manchmal ohne Grund rot ist, wird ignoriert --
+     und dann faellt der echte Fehler auch nicht mehr auf. */
+  /* Der Ladeschirm ist der zuverlaessige Marker dafuer, dass die Seite
+     WIRKLICH steht: index.html raeumt ihn erst ab, wenn die Daten da sind,
+     die Leiste vermessen ist und die Schriften geladen sind. Nur "Inhalt ist
+     da" reichte nicht -- dabei erwischte die Messung einen Zwischenzustand,
+     in dem der Scroller noch nicht griff und das Fenster scrollte (29922 px
+     statt 0). welt.html hat keinen Ladeschirm, dort ist die zweite
+     Bedingung sofort erfuellt. */
+  await s.bisWahr(`document.querySelectorAll('#brief *, #inhalt *').length > 20
+    && !document.getElementById('mm-laden')`, 15000);
 
   const mass = JSON.parse(await s.werte(`(() => {
     const d = document.documentElement;
@@ -128,7 +141,20 @@ for (const { name, pfad } of SEITEN) {
    ihr nicht mehr angesehen, ob sie noch etwas misst. */
 {
   const s = await oeffne('http://127.0.0.1:8913/', { port: 9353, breite: 1280, hoehe: 900 });
-  await s.warte(3000);
+  /* Nicht auf die Uhr warten, sondern auf den Zustand: unter Last (alle
+     Pruefungen hintereinander, mehrere Chrome-Instanzen) reichten feste
+     3000 ms nicht, und der Test wurde sporadisch rot, obwohl nichts kaputt
+     war. Eine Pruefung, die manchmal ohne Grund rot ist, wird ignoriert --
+     und dann faellt der echte Fehler auch nicht mehr auf. */
+  /* Der Ladeschirm ist der zuverlaessige Marker dafuer, dass die Seite
+     WIRKLICH steht: index.html raeumt ihn erst ab, wenn die Daten da sind,
+     die Leiste vermessen ist und die Schriften geladen sind. Nur "Inhalt ist
+     da" reichte nicht -- dabei erwischte die Messung einen Zwischenzustand,
+     in dem der Scroller noch nicht griff und das Fenster scrollte (29922 px
+     statt 0). welt.html hat keinen Ladeschirm, dort ist die zweite
+     Bedingung sofort erfuellt. */
+  await s.bisWahr(`document.querySelectorAll('#brief *, #inhalt *').length > 20
+    && !document.getElementById('mm-laden')`, 15000);
   const vorher = await s.werte(`document.documentElement.scrollHeight - document.documentElement.clientHeight`);
   const nachher = await s.werte(`(() => {
     const sc = document.querySelector('.br-scroller');

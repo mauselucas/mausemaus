@@ -89,6 +89,29 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
       return r.result.result.value;
     },
     warte: ms => new Promise(r => setTimeout(r, ms)),
+    /* Auf einen Zustand warten statt auf die Uhr.
+
+       Feste Wartezeiten sind der haeufigste Grund fuer eine Pruefung, die
+       mal gruen und mal rot ist -- unter Last (alle Pruefungen
+       hintereinander, mehrere Chrome-Instanzen) reicht dieselbe Zahl
+       ploetzlich nicht mehr. Eine Pruefung, die ohne Grund rot wird, wird
+       ignoriert, und dann faellt der echte Fehler auch nicht mehr auf.
+
+       Laeuft die Frist ab, wird NICHT still weitergemacht: es fliegt ein
+       Fehler mit dem Ausdruck im Text. Ein stilles Weiterlaufen waere
+       genau das Verhalten, das die feste Wartezeit hatte. */
+    async bisWahr(ausdruck, frist = 10000, takt = 100) {
+      const ende = Date.now() + frist;
+      for (;;) {
+        let wert = false;
+        try { wert = await this.werte(ausdruck); } catch { /* Seite noch nicht so weit */ }
+        if (wert) return true;
+        if (Date.now() > ende) {
+          throw new Error(`bisWahr: nach ${frist} ms immer noch nicht wahr — ${ausdruck}`);
+        }
+        await new Promise(r => setTimeout(r, takt));
+      }
+    },
     async bild(pfad) {
       const r = await ruf('Page.captureScreenshot', { format: 'png' });
       writeFileSync(pfad, Buffer.from(r.result.data, 'base64'));

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mausemaus</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<!-- Google zieht fuer den Ausschnitt in den Ergebnissen bevorzugt DIESE
+     Angabe, nicht og:description. Fehlt sie, denkt sich Google selbst etwas
+     aus dem Text zusammen. tests/hochladen.mjs setzt hier den Untertitel der
+     Welt ein; unten wird derselbe Wert nochmal aus den Daten nachgetragen. -->
+<meta name="description" content="Video Editor und Motion Designer in Köln." id="meta-description">
 <meta property="og:site_name" content="mausemaus">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mausemaus" id="og-title">
@@ -22,6 +27,15 @@
 <meta name="twitter:title" content="mausemaus" id="tw-title">
 <meta name="twitter:description" content="Video Editor und Motion Designer in Köln." id="tw-description">
 <meta name="twitter:image" content="https://mausemaus.com/og-bild.jpg" id="tw-image">
+<!-- Der GESAMTE Inhalt der Seite kommt von dieser Adresse, aber der
+     Browser erfaehrt ihren Namen erst, wenn assets/db.js geladen, gelesen
+     und gelaufen ist. Namensaufloesung und Verschluesselungs-Handschlag
+     starten also erst dann. Diese Zeile stellt die Verbindung schon
+     waehrend des Ladens her. crossorigin, weil die Abfragen spaeter mit
+     Kopfzeilen laufen -- ohne das Wort baut der Browser eine ZWEITE
+     Verbindung auf und die erste war umsonst.
+     Die Adresse haelt tests/hochladen.mjs mit assets/config.js gleich. -->
+<link rel="preconnect" href="https://mqkggwvcositmpemtqot.supabase.co" crossorigin id="db-preconnect">
 <!-- Scroll-Animationen fuer Engines, die sie selbst nicht koennen (Firefox).
      Chrome und Safari laufen an dieser Stelle vorbei: Sie holen null Byte
      und animieren wie bisher rein in CSS auf dem Compositor.
@@ -43,12 +57,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1787864752"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1787927033"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1787864752"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787864752">');
+  document.write('<script src="/assets/schriften-retten.js?v=1787927033"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787927033">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -62,33 +76,41 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787864752">
-<link rel="stylesheet" href="/assets/site.css?v=1787864752">
-<link rel="stylesheet" href="/assets/brief.css?v=1787864752">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787864752">
-<link rel="stylesheet" href="/assets/welt.css?v=1787864752">
-<link rel="stylesheet" href="/assets/inhalt.css?v=1787864752">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787864752">
+<link rel="stylesheet" href="/assets/fonts.css?v=1787927033">
+<link rel="stylesheet" href="/assets/site.css?v=1787927033">
+<link rel="stylesheet" href="/assets/brief.css?v=1787927033">
+<link rel="stylesheet" href="/assets/blumen.css?v=1787927033">
+<link rel="stylesheet" href="/assets/welt.css?v=1787927033">
+<link rel="stylesheet" href="/assets/inhalt.css?v=1787927033">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1787927033">
 </head>
 <body>
 <div class="welt" id="welt">
   <div class="welt-spalte">
     <a class="welt-zurueck" href="/">← zurück in den Brief</a>
+    <noscript>
+      <div class="welt-text">
+        <p>Diese Seite baut ihren Inhalt mit JavaScript auf — im Moment ist es
+        abgeschaltet, deshalb steht hier nichts.</p>
+        <p>Schreib mir gern direkt: <a href="mailto:hallo@mausemaus.com">hallo@mausemaus.com</a></p>
+      </div>
+    </noscript>
     <div id="inhalt"></div>
   </div>
 </div>
 
-<script src="/assets/config.js?v=1787864752"></script>
-<script src="/assets/shared.js?v=1787864752"></script>
-<script src="/assets/bloecke.js?v=1787864752"></script>
-<script src="/assets/db.js?v=1787864752"></script>
-<script src="/assets/blumen.js?v=1787864752"></script>
-<script src="/assets/tueren.js?v=1787864752"></script>
-<script src="/assets/demo-race.js?v=1787864752"></script>
-<script src="/assets/inhalt.js?v=1787864752"></script>
+<script src="/assets/config.js?v=1787927033"></script>
+<script src="/assets/shared.js?v=1787927033"></script>
+<script src="/assets/bloecke.js?v=1787927033"></script>
+<script src="/assets/db.js?v=1787927033"></script>
+<script src="/assets/blumen.js?v=1787927033"></script>
+<script src="/assets/tueren.js?v=1787927033"></script>
+<script src="/assets/demo-race.js?v=1787927033"></script>
+<script src="/assets/inhalt.js?v=1787927033"></script>
 <script>
 (async () => {
-  /* Netlify schreibt /welt/xy auf diese Datei um — der Name steht in der Adresse.
+  /* GitHub Pages liefert /welt/xy aus, weil es von sich aus ".html" anhaengt
+     — der Name steht in der Adresse.
      Eine kaputte Adresse (z.B. ein einzelnes "%" gefolgt von etwas, das keine
      gültige Prozent-Kodierung ist, wie /welt/100%zz) lässt decodeURIComponent
      mit einem URIError abbrechen -- ungefangen bliebe die ganze Seite leer.
@@ -99,8 +121,15 @@
      unter /welt/<slug>.html liegen, kann jemand genau die Adresse erwischen
      -- ohne diese Zeile suchte die Seite dann nach einer Welt namens
      "absent.html" und zeigte "Hier ist nichts". */
-  const roherSlug = (location.pathname.split('/').filter(Boolean).pop() || '')
-    .replace(/\.html$/, '');
+  /* Zweiter Weg herein: /welt.html?s=<slug>. Den benutzt 404.html fuer
+     Welten, die es in der Datenbank schon gibt, aber noch nicht als
+     vorgebaute Datei -- also alles, was Lucas gerade erst im Admin angelegt
+     hat. Ohne diesen Weg waere eine neue Welt bis zum naechsten Hochladen
+     nicht erreichbar, obwohl sie im Brief schon verlinkt ist.
+     Die haessliche Adresse wird gleich danach wieder gerade gezogen. */
+  const ausAbfrage = new URLSearchParams(location.search).get('s');
+  const roherSlug = ausAbfrage
+    || (location.pathname.split('/').filter(Boolean).pop() || '').replace(/\.html$/, '');
   let slug;
   try { slug = decodeURIComponent(roherSlug); }
   catch { slug = roherSlug; }
@@ -115,6 +144,11 @@
     return;
   }
 
+  /* Die Adresse auf die schoene Form bringen, falls wir ueber ?s= hereinkamen.
+     replaceState statt pushState: der Zurueck-Knopf soll nicht auf die
+     Umleitung zeigen, sonst kaeme man beim Zurueckgehen wieder hierher. */
+  if (ausAbfrage) history.replaceState(null, '', '/welt/' + encodeURIComponent(slug));
+
   document.title = seite.titel + ' — mausemaus';
 
   /* Teilen-Vorschau (WhatsApp, Twitter/X, …) aus den echten Daten der Welt
@@ -127,13 +161,33 @@
   };
   setzeMeta('og-title', 'content', seite.titel + ' — mausemaus');
   if (seite.untertitel) setzeMeta('og-description', 'content', seite.untertitel);
-  if (seite.cover_url) setzeMeta('og-image', 'content', seite.cover_url);
-  const kanonisch = location.origin + location.pathname;
+  /* Das Vorschaubild NUR nachtragen, wenn im <head> noch das allgemeine
+     Ausweichbild steht. Sonst hat tests/hochladen.mjs hier schon eine
+     JPEG-Fassung eingesetzt (1200x630) -- und die ist besser als das, was
+     hier stuende: die Bilder aus dem Admin liegen als WebP in der Datenbank,
+     und WhatsApp, Facebook und LinkedIn zeigen WebP als Vorschau
+     unzuverlaessig bis gar nicht. Ohne diese Bedingung machte das Skript
+     die Arbeit des Vorbauens wieder zunichte.
+     Fuer eine im Admin frisch angelegte Welt, die noch nicht vorgebaut ist,
+     greift der Zweig weiterhin -- dort ist ein WebP besser als nichts. */
+  const nochAusweichbild = (id) => {
+    const el = document.getElementById(id);
+    return el && /\/og-bild\.jpg$/.test(el.getAttribute('content') || '');
+  };
+  if (seite.cover_url && nochAusweichbild('og-image')) setzeMeta('og-image', 'content', seite.cover_url);
+  /* Die kanonische Adresse ist FEST, nicht die gerade aufgerufene. Vorher
+     stand hier location.origin + location.pathname -- und weil dieselbe Welt
+     unter drei Adressen antwortet (/welt/<slug>, /welt/<slug>.html und der
+     alten Form /blog/<slug>, alle drei mit 200 gemessen), zeigte der Verweis
+     dann jeweils auf sich selbst. Google sah drei Seiten statt einer und
+     verteilte die Wertung darauf. Jetzt zeigen alle drei auf dieselbe. */
+  const kanonisch = 'https://mausemaus.com/welt/' + slug;
   setzeMeta('og-url', 'content', kanonisch);
   setzeMeta('og-canonical', 'href', kanonisch);
+  if (seite.untertitel) setzeMeta('meta-description', 'content', seite.untertitel);
   setzeMeta('tw-title', 'content', seite.titel + ' — mausemaus');
   if (seite.untertitel) setzeMeta('tw-description', 'content', seite.untertitel);
-  if (seite.cover_url) setzeMeta('tw-image', 'content', seite.cover_url);
+  if (seite.cover_url && nochAusweichbild('tw-image')) setzeMeta('tw-image', 'content', seite.cover_url);
   if (seite.farbe) {
     welt.style.setProperty('--welt', seite.farbe);
     /* Dunkle Farbstimmung, wenn die Farbe dunkel ist. */
@@ -174,6 +228,6 @@
      admin.html bekommt das ausdruecklich NICHT -- Lucas' eigene Arbeit im
      Editor gehoert nicht in die Besucherzahlen. -->
 <script data-goatcounter="https://mauselucas.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+        async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

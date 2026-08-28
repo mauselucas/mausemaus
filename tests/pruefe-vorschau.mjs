@@ -1,5 +1,5 @@
 /* Prueft, was tests/hochladen.mjs vorbaut: die Teilen-Vorschau der Welten,
-   die sitemap und das Wegerecht in _redirects.
+   die sitemap und die Adressen.
 
    WARUM das ueberhaupt geprueft werden muss: welt.html setzt seine
    og-Angaben erst im Browser. Google fuehrt JavaScript aus, WhatsApp,
@@ -15,7 +15,7 @@
    auseinanderlaufen. */
 
 import { readFile, readdir } from 'node:fs/promises';
-import { pruefe, bericht } from './chrome.mjs';
+import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
 
 const HOCH = new URL('../HOCHLADEN/', import.meta.url);
@@ -58,9 +58,26 @@ for (const w of welten) {
     wert(html, /<meta property="og:url" content="([^"]*)"/) === adresse &&
     wert(html, /<link rel="canonical" href="([^"]*)"/) === adresse,
     wert(html, /<meta property="og:url" content="([^"]*)"/));
+  const bild = wert(html, /<meta property="og:image" content="([^"]*)"/);
   pruefe(`[${kurz}] og:image ist eine vollständige Adresse`,
-    /^https?:\/\//.test(wert(html, /<meta property="og:image" content="([^"]*)"/)),
-    wert(html, /<meta property="og:image" content="([^"]*)"/));
+    /^https?:\/\//.test(bild), bild);
+  /* WhatsApp, Facebook und LinkedIn zeigen WebP als Vorschau unzuverlaessig
+     bis gar nicht -- und genau dieses Bild sieht, wer einen Projektlink
+     bekommt. Auf der Seite selbst bleibt das WebP; nur die Vorschau wird
+     zum JPEG (tests/hochladen.mjs). */
+  pruefe(`[${kurz}] og:image ist ein JPEG, kein WebP`,
+    /\.jpe?g(\?|$)/i.test(bild), bild.split('/').pop());
+  pruefe(`[${kurz}] og:image und twitter:image sind dasselbe Bild`,
+    wert(html, /<meta name="twitter:image" content="([^"]*)"/) === bild,
+    wert(html, /<meta name="twitter:image" content="([^"]*)"/));
+  /* Google nimmt fuer den Ausschnitt in den Ergebnissen bevorzugt DIESE
+     Angabe, nicht og:description. */
+  const beschreibung = wert(html, /<meta name="description" content="([^"]*)"/);
+  pruefe(`[${kurz}] hat eine eigene meta description`,
+    beschreibung.length > 0 && beschreibung !== 'Video Editor und Motion Designer in Köln.',
+    beschreibung.slice(0, 60));
+  pruefe(`[${kurz}] …die nicht laenger als 160 Zeichen ist`,
+    beschreibung.length <= 160, beschreibung.length + ' Zeichen');
   pruefe(`[${kurz}] Twitter-Karte ist groß und trägt dieselben Angaben`,
     html.includes('content="summary_large_image"') &&
     wert(html, /<meta name="twitter:title" content="([^"]*)"/) === erwarteterTitel,
@@ -88,11 +105,12 @@ pruefe('sitemap nennt admin.html NICHT', !sitemap.includes('admin'));
 pruefe('robots.txt verweist auf die sitemap',
   (await lies('./robots.txt')).includes('Sitemap: https://mausemaus.com/sitemap.xml'));
 
-/* ---------- 3. Wegerecht ----------
+/* ---------- 3. Adressen ----------
    Der eigentliche Kern: liefert /welt/<slug> die VORGEBAUTE Seite oder die
-   allgemeine welt.html? Nur ausdrueckliche Zeilen in _redirects entscheiden
-   das zuverlaessig -- der Dateivorrang allein tut es im Nachbau messbar
-   nicht (siehe Kommentar in hochladen.mjs). */
+   allgemeine welt.html? Frueher entschieden das ausdrueckliche Zeilen in
+   _redirects. Diese Datei ist geloescht -- GitHub Pages hat sie nie gelesen.
+   Es haengt jetzt allein daran, dass der Hoster von sich aus ".html" anhaengt.
+   tests/server.mjs bildet genau das nach (an der echten Seite gemessen). */
 
 const server = await starteServer({ wurzel: HOCH.pathname, port: 8908 });
 const titelVon = async (pfad) => {
@@ -105,12 +123,60 @@ for (const w of welten) {
     (await titelVon('/welt/' + w.slug)) === w.titel + ' — mausemaus',
     await titelVon('/welt/' + w.slug));
 }
-pruefe('eine unbekannte Welt fällt weiter auf die Sammelregel zurück',
-  (await titelVon('/welt/gibt-es-nicht')) === 'mausemaus',
-  await titelVon('/welt/gibt-es-nicht'));
-pruefe('die alte /blog/-Adresse führt ebenfalls auf die vorgebaute Seite',
+pruefe('die alte /blog/-Adresse fuehrt ebenfalls auf die vorgebaute Seite',
   (await titelVon('/blog/' + welten[0].slug)) === welten[0].titel + ' — mausemaus',
   await titelVon('/blog/' + welten[0].slug));
+
+/* Eine unbekannte Welt landet auf der 404-Seite -- mit dem richtigen
+   Statuscode. Eine 404-Seite, die 200 meldet, laesst Suchmaschinen die
+   Fehlerseite indexieren. */
+const unbekannt = await fetch('http://127.0.0.1:8908/welt/gibt-es-nicht');
+pruefe('eine unbekannte Welt antwortet mit Status 404', unbekannt.status === 404,
+  'HTTP ' + unbekannt.status);
+
+/* ---------- 4. Die Bruecke fuer frisch angelegte Welten ----------
+   Legt Lucas im Admin eine Welt an, steht sie sofort im Brief -- die
+   vorgebaute Datei entsteht aber erst beim naechsten Hochladen. Unter
+   Netlify fing die Sammelregel das ab; GitHub Pages hat keine. Deshalb
+   reicht 404.html solche Adressen an welt.html weiter, die den Inhalt live
+   aus der Datenbank holt.
+
+   Das braucht einen echten Browser: die Weiterleitung passiert in
+   JavaScript, am rohen Quelltext sieht man sie nicht wirken. */
+
+const chrome = await starteChrome({ port: 9355 });
+const bekannt = welten[0].slug;
+const b = await oeffne('http://127.0.0.1:8908/welt/' + bekannt + '-frisch-angelegt', { port: 9355 });
+await b.warte(2500);
+const gelandet = JSON.parse(await b.werte(`JSON.stringify({
+  pfad: location.pathname, abfrage: location.search, titel: document.title,
+  text: document.body.innerText.slice(0, 120)
+})`));
+pruefe('eine unbekannte Welt-Adresse wird an welt.html weitergereicht',
+  gelandet.pfad !== '/404.html' && !gelandet.titel.includes('Nichts gefunden'),
+  gelandet.pfad + gelandet.abfrage + ' — ' + gelandet.titel);
+pruefe('…und welt.html zeigt dort ihre eigene freundliche Seite, keine Schleife',
+  gelandet.text.includes('Hier ist nichts'), gelandet.text.replace(/\n/g, ' ').slice(0, 70));
+await b.zu();
+
+/* Und der Fall, um den es eigentlich geht: eine Welt, die es in der
+   Datenbank GIBT, deren vorgebaute Datei aber fehlt. Nachgestellt, indem
+   eine Adresse aufgerufen wird, die es als Datei nicht gibt -- mit dem Slug
+   einer echten Welt in der Abfrage. */
+const f = await oeffne('http://127.0.0.1:8908/welt.html?s=' + bekannt, { port: 9355 });
+await f.warte(3000);
+const frisch = JSON.parse(await f.werte(`JSON.stringify({
+  titel: document.title, pfad: location.pathname, abfrage: location.search,
+  ueberschrift: (document.querySelector('.welt-titel')||{}).textContent || ''
+})`));
+pruefe('eine noch nicht vorgebaute Welt laedt trotzdem ihren Inhalt',
+  frisch.ueberschrift.length > 0 && !frisch.titel.includes('Nicht gefunden'),
+  frisch.titel);
+pruefe('…und die Adresse wird danach auf die schoene Form gebracht',
+  frisch.pfad === '/welt/' + bekannt && frisch.abfrage === '',
+  frisch.pfad + frisch.abfrage);
+await f.zu();
+chrome.beenden();
 
 server.beenden();
 bericht();

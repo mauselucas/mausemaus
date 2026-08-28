@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/fonts.css?v=1787864752">
-<link rel="stylesheet" href="/assets/site.css?v=1787864752">
+<link rel="stylesheet" href="/assets/fonts.css?v=1787927033">
+<link rel="stylesheet" href="/assets/site.css?v=1787927033">
 <style>
   .verirrt { text-align: center; padding: 90px 24px 70px; position: relative; z-index: 2; }
   .verirrt .zahl { font-family: 'TropiWeb', sans-serif; font-size: clamp(90px, 20vw, 180px);
@@ -24,6 +24,31 @@
 </style>
 </head>
 <body>
+
+<!-- Bruecke fuer frisch angelegte Welten.
+
+     GitHub Pages kennt keine Umschreibungsregeln: Es findet /welt/<slug> nur,
+     wenn die Datei welt/<slug>.html wirklich da liegt -- und die entsteht erst
+     beim naechsten Hochladen (tests/hochladen.mjs). Legt Lucas im Admin eine
+     Welt an, steht sie sofort im Brief, ihre Adresse liefe aber bis dahin auf
+     diese 404-Seite. Unter Netlify war das anders; das ist eine Folge des
+     Umzugs, kein Wunsch.
+
+     Deshalb: sieht die Adresse nach einer Welt aus, wird an welt.html
+     weitergereicht, die den Inhalt live aus der Datenbank holt. Findet sie
+     dort nichts, zeigt sie ihre eigene freundliche "Hier ist nichts"-Seite --
+     es entsteht also keine Schleife zurueck hierher.
+
+     replace() statt href: sonst laege diese Seite im Verlauf und der
+     Zurueck-Knopf brachte einen sofort wieder her.
+
+     Ohne JavaScript passiert nichts und die 404-Seite bleibt einfach stehen. -->
+<script>
+(function () {
+  var t = location.pathname.match(/^\/(?:welt|blog)\/([^/]+?)(?:\.html)?\/?$/);
+  if (t && t[1]) location.replace('/welt.html?s=' + encodeURIComponent(t[1]));
+})();
+</script>
 
 <div class="deko" aria-hidden="true">
   <div class="flower f1"><svg viewBox="0 0 303.13 275.3"><use href="#bl-a"/></svg></div>
@@ -62,6 +87,6 @@
     <div class="foot-note">© 2026 Lucas Schönwald — Video Editor &amp; Motion Designer</div>
   </div>
 </footer>
-<script src="/assets/shared.js?v=1787864752"></script>
+<script src="/assets/shared.js?v=1787927033"></script>
 </body>
 </html>

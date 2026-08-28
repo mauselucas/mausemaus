@@ -10,8 +10,10 @@ node tests/hochladen.mjs
 ```
 
 Der macht alles Noetige in einem Rutsch: Versionsstempel setzen, die
-Teilen-Vorschau der Welten vorbauen, `_redirects`, `seed.js` und
-`sitemap.xml` neu schreiben und jede Welt zusätzlich unter `blog/` ablegen.
+Teilen-Vorschau der Welten vorbauen (samt JPEG-Vorschaubild und
+`meta description`), `seed.js` und `sitemap.xml` neu schreiben, jede Welt
+zusätzlich unter `blog/` ablegen und die `preconnect`-Zeile mit
+`assets/config.js` gleichziehen.
 Danach committen und pushen — GitHub Pages veröffentlicht von selbst. (Er löst
 den früheren `tests/stempel.mjs` ab, der weiterhin existiert und von ihm
 mitbenutzt wird.)
@@ -33,16 +35,27 @@ Bauwerkzeug — veröffentlicht wird der Inhalt des Ordners `HOCHLADEN`.
 **Umzug von Netlify (August 2026).** Netlifys Abrechnungsmodell war der Grund.
 Drei Dinge sind dabei weggefallen und mussten ersetzt werden:
 
-1. **`_redirects` wirkt nicht mehr.** Die Datei liegt weiter im Ordner, ist auf
-   GitHub Pages aber wirkungslos. Ersatz: GitHub Pages liefert `<name>.html`
-   von sich aus unter `/<name>` aus, und `tests/hochladen.mjs` schreibt jede
-   Welt doppelt — nach `welt/<slug>.html` und `blog/<slug>.html` —, damit auch
-   die alte Adressform weiter funktioniert.
-2. **`_headers` wirkt nicht mehr.** Keine eigenen Cache- und Sicherheits-Header
-   mehr. GitHub Pages setzt `max-age=600` und liefert ETags; praktisch heißt
-   das eine kurze Rückfrage statt eines vollen Downloads. Verschmerzbar.
+1. **`_redirects` wirkt nicht mehr — die Datei ist gelöscht** (28.08.2026).
+   Sie lag noch monatelang im Ordner und suggerierte, die schönen Adressen
+   hingen an ihr. Tatsächlich hängen sie daran, dass GitHub Pages von sich
+   aus `<name>.html` unter `/<name>` ausliefert. `tests/hochladen.mjs`
+   schreibt jede Welt doppelt — nach `welt/<slug>.html` und
+   `blog/<slug>.html` —, damit auch die alte Adressform weiter funktioniert.
+2. **`_headers` wirkt nicht mehr — die Datei ist ebenfalls gelöscht.** Keine
+   eigenen Cache- und Sicherheits-Kopfzeilen. GitHub Pages setzt `max-age=600`
+   und liefert ETags; praktisch heißt das eine kurze Rückfrage statt eines
+   vollen Downloads. Verschmerzbar. Was der Hoster wirklich liefert, misst
+   jetzt `tests/pruefe-kopfzeilen.mjs` an der öffentlichen Seite.
 3. **Netlify Forms ist weg.** Das Anfrageformular läuft jetzt über Formspree,
    siehe unten.
+4. **Eine neu angelegte Welt ist nicht mehr sofort erreichbar.** Unter Netlify
+   fing eine Sammelregel jede `/welt/…`-Adresse ab; GitHub Pages hat so etwas
+   nicht und antwortet mit 404, bis die vorgebaute Datei hochgeladen ist.
+   Ersatz: `404.html` erkennt solche Adressen und reicht sie an
+   `welt.html?s=<slug>` weiter, das den Inhalt live aus der Datenbank holt und
+   die Adresse anschließend wieder gerade zieht. Eine frisch im Admin
+   angelegte Welt funktioniert damit sofort — nur ihre Teilen-Vorschau und
+   der saubere Statuscode kommen erst beim nächsten Hochladen.
 
 **Wichtig:** Lucas kann nicht programmieren. Alles Inhaltliche muss über
 `/admin.html` selbst änderbar sein. Wenn etwas nur im Code änderbar wäre, ist
@@ -75,17 +88,33 @@ Damit hängt zusammen:
 | `/blog/<slug>` | welt.html | Alte Adressen, bleiben gültig |
 | `/admin.html` | admin.html | Verwaltung (Login nötig) |
 
-Umgeschrieben über `_redirects`. **Alle Dateiverweise müssen absolut sein**
-(`/assets/…`) — relative Pfade brechen unter `/welt/…`.
+Keine Umschreibungsregeln im Spiel: GitHub Pages hängt selbst `.html` an.
+**Alle Dateiverweise müssen absolut sein** (`/assets/…`) — relative Pfade
+brechen unter `/welt/…`.
 
 Für jede veröffentlichte Welt liegt zusätzlich eine **vorgebaute Fassung**
-unter `HOCHLADEN/welt/<slug>.html`, und `_redirects` bekommt dafür eine
-ausdrückliche Zeile ÜBER der Sammelregel. Grund: `welt.html` baut ihren
-Inhalt erst im Browser zusammen — im Quelltext steht nur ein leeres `<div>`.
-Google führt JavaScript aus, WhatsApp, LinkedIn, Slack und Twitter **nicht**.
-Ohne die vorgebaute Fassung zeigte jede verschickte Projektadresse nur das
-allgemeine `og-bild.jpg`. Erzeugt von `tests/hochladen.mjs`; unbekannte Slugs
-fallen weiterhin auf die Sammelregel zurück.
+unter `HOCHLADEN/welt/<slug>.html` (und derselbe Inhalt noch einmal unter
+`blog/<slug>.html`). Grund: `welt.html` baut ihren Inhalt erst im Browser
+zusammen — im Quelltext steht nur ein leeres `<div>`. Google führt JavaScript
+aus, WhatsApp, LinkedIn, Slack und Twitter **nicht**. Ohne die vorgebaute
+Fassung zeigte jede verschickte Projektadresse nur das allgemeine
+`og-bild.jpg`. Erzeugt von `tests/hochladen.mjs`. Unbekannte Adressen laufen
+auf `404.html`, die sie an `welt.html?s=<slug>` weiterreicht (siehe oben).
+
+Drei Dinge, die dabei gegen doppelte Inhalte helfen — dieselbe Welt antwortet
+unter `/welt/<slug>`, `/welt/<slug>.html` und `/blog/<slug>`:
+
+- Der **kanonische Verweis ist fest** auf `/welt/<slug>` verdrahtet, nicht aus
+  der gerade aufgerufenen Adresse gebaut. Vorher zeigte er jeweils auf sich
+  selbst, und Google sah drei Seiten statt einer.
+- Jede vorgebaute Welt bekommt eine eigene **`meta description`** aus ihrem
+  Untertitel. Google zieht für den Ausschnitt in den Ergebnissen diese Angabe
+  vor, nicht `og:description`.
+- Das **Vorschaubild wird als JPEG** in 1200×630 nach `HOCHLADEN/vorschau/`
+  gelegt. Die Bilder aus dem Admin liegen als WebP in Supabase, und WhatsApp,
+  Facebook und LinkedIn zeigen WebP als Vorschau unzuverlässig bis gar nicht —
+  also genau dort, wo ein verschickter Projektlink zählt. Auf der Seite selbst
+  bleibt das WebP.
 
 ## Supabase
 
@@ -113,8 +142,10 @@ Schlüssel, das ist so vorgesehen). Zugriffsschutz über RLS: Fremde lesen nur
 
 ```
 HOCHLADEN/
-  index.html   welt.html   admin.html   404.html   _redirects   robots.txt
-  favicon.svg  apple-touch-icon.png  og-bild.jpg
+  index.html   welt.html   admin.html   404.html   robots.txt   sitemap.xml
+  favicon.svg  apple-touch-icon.png  og-bild.jpg   CNAME
+  welt/<slug>.html  blog/<slug>.html   vorgebaute Fassungen (erzeugt)
+  vorschau/<slug>.jpg                  Teilen-Vorschaubilder 1200x630 (erzeugt)
   assets/
     fonts.css      Schriften (Tropi, Space Grotesk, Space Mono) — 171 kB
     site.css       Farben, Grundlagen, Detail-Fenster
@@ -142,15 +173,22 @@ HOCHLADEN/
     tueren.js      Türchen: Brief → Welt
     site.js        Detail-Fenster
     demo-race.js   Werkzeug-Nachbildung (macOS-Stil)
+    katze-<fp>.webp           Die Katze nach dem Absenden (animiert, 139 kB)
+    katze-<fp>-standbild.webp …und ihr Standbild fuer "Bewegung reduzieren"
     anleitung.js   Hilfetexte im Admin
     admin.js       Verwaltung
 docs/
   admin-uebergabe.md                    Was Lucas im Admin tun kann
   scroll-animationen-fuer-ox-alpha.md   Fehlerbericht + Loesung, siehe unten
   designfibel.html
-tests/                                  467 Prüfungen, alle grün
-  nachbau.mjs    erzeugt bewegung-nachbau.css
-  firefox.mjs    Firefox fernsteuern, ohne geckodriver
+quellen/                                NICHT veroeffentlicht
+  maxwell-meme-rainbow.gif              Quelle fuer die Katze (2,3 MB)
+tests/                                  rund 530 Prüfungen
+  server.mjs          bildet GitHub Pages nach (gemessen, nicht geraten)
+  nachbau.mjs         erzeugt bewegung-nachbau.css
+  firefox.mjs         Firefox fernsteuern, ohne geckodriver
+  katze-wandeln.mjs   GIF -> animiertes WebP + Standbild
+  pruefe-kopfzeilen.mjs  misst die ECHTE Seite ueber das Netz
 ```
 
 ## Markdown-Dialekt (in `shared.js`)
@@ -204,10 +242,27 @@ Der ganze Hergang mit allen Messwerten steht in
 
 ## Weitere offene Punkte
 
+- **HSTS fehlt — und nur Lucas kann das ändern.** Im Repo unter
+  Settings → Pages den Haken bei „Enforce HTTPS" setzen. Danach schickt
+  GitHub die Kopfzeile `strict-transport-security` selbst mit, und der
+  allererste Aufruf eines Besuchers kann nicht mehr über unverschlüsseltes
+  `http` umgebogen werden. `tests/pruefe-kopfzeilen.mjs` bleibt bis dahin mit
+  genau dieser einen Prüfung rot — das ist Absicht, kein Fehler im Test.
+- **`404.html` nennt eine andere Mailadresse als der Brief**
+  (`lucasschoenwald03@gmail.com` gegen `hallo@mausemaus.com`). Eine der
+  beiden ist die falsche; Lucas muss sagen, welche.
 - **Formular:** läuft über Formspree (`https://formspree.io/f/xljerkoz`).
   Der kostenlose Tarif deckt 50 Einsendungen im Monat. Geprüft von
   `tests/pruefe-formular.mjs` — dieser Test schickt bewusst **nie** eine echte
   Anfrage ab, sondern ersetzt vorher `window.fetch`.
+  Nach einer erfolgreichen Anfrage erscheint neben dem Bestätigungssatz eine
+  Katze (`assets/katze-<fingerabdruck>.webp`). Sie wird **erst dann**
+  eingehängt — wer nur den Brief liest, holt kein Byte davon. Wer „Bewegung
+  reduzieren" eingeschaltet hat, bekommt ein Standbild, und die bewegte
+  Fassung wird dabei gar nicht erst geladen. Geprüft von
+  `tests/pruefe-katze.mjs`. Austauschen: neues GIF nach `quellen/` legen und
+  `node tests/katze-wandeln.mjs` laufen lassen — der Fingerabdruck im
+  Dateinamen ändert sich dann und muss in `index.html` nachgezogen werden.
 - **Porträtfoto und Showreel-Link** fehlen — im Admin unter „Startseite"
   nachtragbar.
 - **Die Welten** enthalten Platzhaltertexte, die Lucas selbst schreibt.
@@ -355,11 +410,58 @@ Zahlen unter <https://mauselucas.goatcounter.com>.
     was NICHT betroffen ist. Hier war nichts unbetroffen — das hätte die
     Namenstheorie sofort erledigt.
 
-## Testserver, der Netlify nachahmt
+27. **Eine grüne Prüfung auf eine wirkungslose Datei ist schlimmer als gar
+    keine.** `tests/pruefe-tempo.mjs` prüfte acht Mal den Inhalt von
+    `HOCHLADEN/_headers` — Cache-Regeln, `X-Frame-Options`,
+    `X-Content-Type-Options`, `Referrer-Policy`. Alle acht grün, monatelang.
+    Nur ist `_headers` eine **Netlify**-Datei, und die Seite läuft seit dem
+    Umzug auf GitHub Pages, das sie nicht liest. Gemessen an der echten Seite:
+    `cache-control: max-age=600` statt des Jahres, und keine einzige der drei
+    Schutz-Kopfzeilen kommt an. Die Prüfung hat nie etwas geprüft — sie hat
+    Sicherheit behauptet. Lehre: Eine Prüfung muss das messen, was der Besucher
+    bekommt, nicht das, was in einer Datei im Projektordner steht. Ersetzt
+    durch `tests/pruefe-kopfzeilen.mjs`, das per `fetch` an
+    `https://mausemaus.com/` misst. Dasselbe galt für `tests/server.mjs`, der
+    dieselbe tote Datei nachbildete.
+
+28. **`animation`-lastige GIFs sind absurd teuer, und `<video>` ist nicht
+    immer die Antwort.** Das Katzen-GIF im Formular war 2,3 MB für 1,7
+    Sekunden. Die Checkliste sagt „GIF durch Video ersetzen" — hier ging das
+    nicht: das GIF ist zu 58,6 % durchsichtig, und Alpha im Video kann nur
+    VP9 (Chrome, Firefox); Safari bräuchte HEVC mit Alphaebene, und der
+    Versuch, das zu erzeugen, warf die Alphaebene still weg (`pix_fmt` kam
+    als `yuv420p` zurück). Ein Video mit weißem Grund hätte einen sichtbaren
+    Kasten auf dem Papierton ergeben. Antwort war **animiertes WebP**: kann
+    Alpha, können alle drei Browser. Von 2.323.051 auf 139.328 Byte, also ein
+    Siebzehntel — die Hälfte davon allein durch 25 statt 50 Bilder pro
+    Sekunde, was man nicht sieht, aber bezahlt. Skript:
+    `tests/katze-wandeln.mjs`.
+
+29. **Feste Wartezeiten in Prüfungen sind Zeitbomben.** `pruefe-scrollen.mjs`
+    wartete 3000 ms und war einzeln immer grün — im Gesamtlauf, wenn mehrere
+    Chrome-Instanzen um dieselbe Maschine kämpfen, wurde sie sporadisch rot
+    (gemessen: das Fenster scrollte 29922 px, weil der innere Scroller noch
+    nicht griff). Eine Prüfung, die manchmal ohne Grund rot ist, wird bald
+    ignoriert — und dann fällt der echte Fehler auch nicht mehr auf.
+    `chrome.mjs` hat dafür jetzt `bisWahr(ausdruck, frist)`: es wartet auf
+    einen Zustand statt auf die Uhr und wirft, wenn die Frist abläuft, statt
+    still weiterzulaufen. Der richtige Zustand war hier **nicht** „Inhalt ist
+    da", sondern „der Ladeschirm ist weg" — den räumt `index.html` erst ab,
+    wenn Daten, Leiste und Schriften wirklich stehen.
+
+## Testserver, der GitHub Pages nachahmt
 
 ```bash
-node tests/server.mjs        # Port 8901, bildet die _redirects-Regeln nach
+node tests/server.mjs        # Port 8901
 ```
+
+Er bildet die Auflösungsreihenfolge des echten Hosters nach — genaue Datei,
+dann `<pfad>.html`, **dann** erst der Ordner, sonst `404.html` mit Status 404.
+Die Reihenfolge ist an der öffentlichen Seite gemessen, nicht abgeschrieben:
+`/welt` liefert 200 (`welt.html` gewinnt gegen den gleichnamigen Ordner),
+`/welt/` liefert 404, `/blog` leitet mit 301 auf `/blog/` um. Vorher stand
+hier ein Netlify-Nachbau, der `_redirects` auswertete — eine Datei, die der
+echte Hoster nie gelesen hat.
 
 Prüfungen einzeln ausführen, z.B.:
 

@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt von tests/hochladen.mjs — Stand: 27.8.2026.
+   Automatisch erzeugt von tests/hochladen.mjs — Stand: 28.8.2026.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 window.SEED_SETTINGS = {

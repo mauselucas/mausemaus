@@ -150,6 +150,15 @@ html, body { background:#FBFAF6; }
 /* Rueckmeldung des Anfrageformulars. Leer und ohne Klasse ist sie
    unsichtbar -- kein Platzhalter, der Luft frisst, solange nichts passiert
    ist. Die Farben liegen bewusst ueber 4.5:1 Kontrast, wie der Rest. */
+/* Rueckmeldung und Katze stehen nebeneinander. flex-wrap, weil auf einem
+   schmalen Handy beides nebeneinander zu eng wird -- dann rutscht die Katze
+   unter den Satz statt ihn zu quetschen. */
+.br-formular-rueckmeldung { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+/* Solange nichts eingehaengt ist, darf das Feld keinen Platz und keine
+   Luecke erzeugen -- sonst klaffte unter dem Knopf dauerhaft ein Loch. */
+.br-formular-katze:empty { display:none; }
+.br-formular-katze img { display:block; width:160px; height:116px; }
+
 .br-formular-antwort { margin:0; font-size:14px; line-height:1.5;
   color:var(--br-leise); min-height:0; }
 .br-formular-antwort:empty { display:none; }

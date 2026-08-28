@@ -35,6 +35,15 @@
   "address": { "@type": "PostalAddress", "addressLocality": "Köln", "addressCountry": "DE" }
 }
 </script>
+<!-- Der GESAMTE Inhalt der Seite kommt von dieser Adresse, aber der
+     Browser erfaehrt ihren Namen erst, wenn assets/db.js geladen, gelesen
+     und gelaufen ist. Namensaufloesung und Verschluesselungs-Handschlag
+     starten also erst dann. Diese Zeile stellt die Verbindung schon
+     waehrend des Ladens her. crossorigin, weil die Abfragen spaeter mit
+     Kopfzeilen laufen -- ohne das Wort baut der Browser eine ZWEITE
+     Verbindung auf und die erste war umsonst.
+     Die Adresse haelt tests/hochladen.mjs mit assets/config.js gleich. -->
+<link rel="preconnect" href="https://mqkggwvcositmpemtqot.supabase.co" crossorigin id="db-preconnect">
 <!-- Scroll-Animationen fuer Engines, die sie selbst nicht koennen (Firefox).
      Chrome und Safari laufen an dieser Stelle vorbei: Sie holen null Byte
      und animieren wie bisher rein in CSS auf dem Compositor.
@@ -56,12 +65,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1787864752"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1787927033"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1787864752"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787864752">');
+  document.write('<script src="/assets/schriften-retten.js?v=1787927033"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787927033">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -75,12 +84,12 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787864752">
-<link rel="stylesheet" href="/assets/site.css?v=1787864752">
-<link rel="stylesheet" href="/assets/leiste.css?v=1787864752">
-<link rel="stylesheet" href="/assets/brief.css?v=1787864752">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787864752">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787864752">
+<link rel="stylesheet" href="/assets/fonts.css?v=1787927033">
+<link rel="stylesheet" href="/assets/site.css?v=1787927033">
+<link rel="stylesheet" href="/assets/leiste.css?v=1787927033">
+<link rel="stylesheet" href="/assets/brief.css?v=1787927033">
+<link rel="stylesheet" href="/assets/blumen.css?v=1787927033">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1787927033">
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -126,6 +135,16 @@
    <!-- .br-rand schneidet die Deko-Blumen an den Seitenrändern ab, siehe brief.css -->
    <div class="br-rand">
     <div class="br-spalte">
+      <!-- Ohne JavaScript bleibt der Brief leer: er kommt aus der Datenbank.
+           Die Seite soll dann wenigstens sagen, was los ist, und einen Weg
+           lassen -- statt einer weissen Flaeche ohne Erklaerung. -->
+      <noscript>
+        <div class="br-text">
+          <p>Diese Seite baut ihren Inhalt mit JavaScript auf — im Moment ist es
+          abgeschaltet, deshalb steht hier nichts.</p>
+          <p>Schreib mir gern direkt: <a href="mailto:hallo@mausemaus.com">hallo@mausemaus.com</a></p>
+        </div>
+      </noscript>
       <div id="brief"></div>
 
       <!-- Das Formular lief frueher ueber Netlify Forms (data-netlify="true").
@@ -163,22 +182,30 @@
           <textarea name="nachricht" rows="4" placeholder="Worum geht's?" required></textarea></label>
         <button type="submit">Anfrage senden →</button>
         <!-- aria-live: ein Screenreader liest die Rueckmeldung vor, sobald sie
-             erscheint. Ohne das Attribut bliebe sie fuer Blinde stumm. -->
-        <p class="br-formular-antwort" id="anfrage-antwort" role="status" aria-live="polite"></p>
+             erscheint. Ohne das Attribut bliebe sie fuer Blinde stumm.
+             Die Katze steht daneben und ist fuer Screenreader ausdruecklich
+             UNSICHTBAR (aria-hidden): der Satz sagt schon alles, ein zweites
+             Mal vorgelesen zu bekommen "Bild" waere nur Laerm. Sie wird erst
+             BEIM ERFOLG per Skript eingehaengt -- stuende sie hier im HTML,
+             holte jeder Besucher 139 kB, auch wer nie etwas abschickt. -->
+        <div class="br-formular-rueckmeldung">
+          <p class="br-formular-antwort" id="anfrage-antwort" role="status" aria-live="polite"></p>
+          <span class="br-formular-katze" id="anfrage-katze" aria-hidden="true"></span>
+        </div>
       </form>
     </div>
    </div>
   </main>
 </div>
 
-<script src="/assets/config.js?v=1787864752"></script>
-<script src="/assets/shared.js?v=1787864752"></script>
-<script src="/assets/bloecke.js?v=1787864752"></script>
-<script src="/assets/db.js?v=1787864752"></script>
-<script src="/assets/blumen.js?v=1787864752"></script>
-<script src="/assets/leiste.js?v=1787864752"></script>
-<script src="/assets/brief.js?v=1787864752"></script>
-<script src="/assets/tueren.js?v=1787864752"></script>
+<script src="/assets/config.js?v=1787927033"></script>
+<script src="/assets/shared.js?v=1787927033"></script>
+<script src="/assets/bloecke.js?v=1787927033"></script>
+<script src="/assets/db.js?v=1787927033"></script>
+<script src="/assets/blumen.js?v=1787927033"></script>
+<script src="/assets/leiste.js?v=1787927033"></script>
+<script src="/assets/brief.js?v=1787927033"></script>
+<script src="/assets/tueren.js?v=1787927033"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -242,11 +269,33 @@
   var form = document.getElementById('anfragen');
   if (!form || !window.fetch) return;
   var antwort = document.getElementById('anfrage-antwort');
+  var katze = document.getElementById('anfrage-katze');
   var knopf = form.querySelector('button[type=submit]');
+
+  /* Die Katze. Zwei Fassungen derselben Datei:
+       - bewegt, fuer alle
+       - ein Standbild, fuer alle mit "Bewegung reduzieren"
+     <picture> waehlt selbst und holt NUR die gewaehlte -- deshalb steht die
+     Ruecksicht hier im Markup und nicht als zweite Abfrage im Skript.
+     Der Dateiname traegt einen Fingerabdruck des GIFs (tests/katze-wandeln.mjs),
+     darum braucht er keinen ?v=-Stempel: taucht ein anderes GIF auf, heisst
+     die Datei anders. Feste Breite und Hoehe, damit beim Nachladen nichts
+     springt. */
+  function katzeZeigen() {
+    if (!katze || katze.firstChild) return;
+    katze.innerHTML =
+      '<picture>' +
+        '<source media="(prefers-reduced-motion: reduce)" ' +
+                'srcset="/assets/katze-924d154c-standbild.webp">' +
+        '<img src="/assets/katze-924d154c.webp" alt="" ' +
+             'width="160" height="116" decoding="async">' +
+      '</picture>';
+  }
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     antwort.className = 'br-formular-antwort';
     antwort.textContent = 'Wird gesendet …';
+    if (katze) katze.innerHTML = '';
     knopf.disabled = true;
     fetch(form.action, {
       method: 'POST',
@@ -257,6 +306,7 @@
         form.reset();
         antwort.className = 'br-formular-antwort gut';
         antwort.textContent = 'Angekommen! Ich melde mich.';
+        katzeZeigen();
       } else {
         return r.json().then(function (d) {
           throw new Error((d.errors || []).map(function (f) { return f.message; }).join(', ')
@@ -282,6 +332,6 @@
      admin.html bekommt das ausdruecklich NICHT -- Lucas' eigene Arbeit im
      Editor gehoert nicht in die Besucherzahlen. -->
 <script data-goatcounter="https://mauselucas.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+        async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

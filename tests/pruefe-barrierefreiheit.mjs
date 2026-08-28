@@ -126,4 +126,26 @@ const jsF = s.fehlerAufSeite();
 pruefe('keine JavaScript-Fehler auf dem Brief', jsF.length === 0, jsF.join(' | '));
 
 await s.zu(); chrome.beenden(); server.beenden();
+
+/* ---------- Ohne JavaScript ----------
+   Der Brief kommt aus der Datenbank. Ist JavaScript ganz abgeschaltet,
+   bleibt die Seite leer -- kein Wort, keine Erklaerung, kein Ausweg. Die
+   Absicherung im Projekt schuetzt bisher nur gegen Skripte, die ABBRECHEN,
+   nicht gegen Skripte, die gar nicht erst laufen duerfen.
+
+   Hier wird der rohe Quelltext geprueft, nicht das Dokument im Browser:
+   im Browser ist JavaScript ja an, und dann ist <noscript> unsichtbar. */
+{
+  const { readFile } = await import('node:fs/promises');
+  const HOCHL = new URL('../HOCHLADEN/', import.meta.url);
+  for (const name of ['index.html', 'welt.html']) {
+    const roh = await readFile(new URL('./' + name, HOCHL), 'utf8');
+    const block = (roh.match(/<noscript>([\s\S]*?)<\/noscript>/) || [])[1] || '';
+    pruefe(`${name}: sagt ohne JavaScript wenigstens, was los ist`,
+      block.length > 0, block ? block.replace(/\s+/g, ' ').trim().slice(0, 50) : 'kein <noscript>');
+    pruefe(`${name}: …und laesst einen Weg offen`,
+      block.includes('mailto:'), block.includes('mailto:') ? 'mailto vorhanden' : 'keine Adresse');
+  }
+}
+
 bericht();

@@ -1,4 +1,4 @@
-/* Alles, was VOR dem Hochladen auf Netlify passieren muss — ein Befehl.
+/* Alles, was VOR dem Hochladen passieren muss — ein Befehl.
 
        node tests/hochladen.mjs
 
@@ -7,9 +7,12 @@
      2. Daten aus Supabase holen
      3. je veroeffentlichter Welt eine vorgebaute Seite mit echten
         Teilen-Vorschau-Angaben schreiben (HOCHLADEN/welt/<slug>.html)
-     4. _redirects mit ausdruecklichen Zeilen fuer diese Seiten
-     5. assets/seed.js neu schreiben (die Notfall-Daten)
-     6. sitemap.xml schreiben
+     4. assets/seed.js neu schreiben (die Notfall-Daten)
+     5. sitemap.xml schreiben
+
+   KEINE _redirects mehr: GitHub Pages liest die Datei nicht. Die schoenen
+   Adressen /welt/<slug> und /blog/<slug> funktionieren, weil der Hoster von
+   sich aus <name>.html anhaengt -- gemessen, siehe tests/server.mjs.
 
    WARUM die vorgebauten Seiten noetig sind: welt.html baut ihren Inhalt erst
    im Browser zusammen. Im Quelltext steht nur ein leeres <div>. Google fuehrt
@@ -30,6 +33,12 @@
    schlimmer als ein altes. */
 
 import { readFile, writeFile, readdir, mkdir, unlink } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+const lauf = promisify(execFile);
 
 const HOCH = new URL('../HOCHLADEN/', import.meta.url);
 const WELT_ORDNER = new URL('./welt/', HOCH);
@@ -41,6 +50,7 @@ const WELT_ORDNER = new URL('./welt/', HOCH);
    zweite Datei ist Byte fuer Byte dieselbe; welt.html liest den Slug aus
    dem letzten Stueck der Adresse und stoert sich nicht am Ordnernamen. */
 const BLOG_ORDNER = new URL('./blog/', HOCH);
+const VORSCHAU_ORDNER = new URL('./vorschau/', HOCH);
 const BASIS = 'https://mausemaus.com';
 
 /* ---------- 1. Stempel ---------- */
@@ -112,15 +122,27 @@ const esc = (s) => String(s == null ? '' : s)
 function setzeAttribut(html, id, attr, wert) {
   const muster = new RegExp(`(<[^>]*\\bid="${id}"[^>]*>)`);
   const treffer = html.match(muster);
-  if (!treffer) throw new Error(`Tag mit id="${id}" nicht in welt.html gefunden`);
+  if (!treffer) throw new Error(`Tag mit id="${id}" nicht gefunden`);
   const neu = treffer[1].replace(new RegExp(`\\b${attr}="[^"]*"`), `${attr}="${esc(wert)}"`);
   return html.replace(muster, neu);
+}
+
+/* Die preconnect-Zeile mit assets/config.js gleichziehen. Sie nennt dieselbe
+   Datenbankadresse ein zweites Mal -- und zwei Stellen, die dasselbe sagen,
+   laufen frueher oder spaeter auseinander. Hier wird die zweite aus der
+   ersten gesetzt, statt sich darauf zu verlassen, dass jemand daran denkt. */
+for (const name of ['index.html', 'welt.html']) {
+  const pfad = new URL('./' + name, HOCH);
+  const vorher = await readFile(pfad, 'utf8');
+  const nachher = setzeAttribut(vorher, 'db-preconnect', 'href', URL_DB);
+  if (nachher !== vorher) { await writeFile(pfad, nachher); console.log(`   preconnect in ${name} angeglichen`); }
 }
 
 console.log('\n3. Welten vorbauen');
 const vorlage = await readFile(new URL('./welt.html', HOCH), 'utf8');
 await mkdir(WELT_ORDNER, { recursive: true });
 await mkdir(BLOG_ORDNER, { recursive: true });
+await mkdir(VORSCHAU_ORDNER, { recursive: true });
 
 const STANDARD_BILD = `${BASIS}/og-bild.jpg`;
 const STANDARD_TEXT = 'Video Editor und Motion Designer in Köln.';
@@ -145,6 +167,44 @@ function vorschauBild(seite) {
   return STANDARD_BILD;
 }
 
+/* Aus dem Vorschaubild ein JPEG in 1200x630 machen.
+
+   WARUM: Die Bilder aus dem Admin liegen als WebP in Supabase. WhatsApp,
+   Facebook und LinkedIn zeigen WebP als og:image unzuverlaessig bis gar
+   nicht -- und genau das ist das Bild, das Lucas sieht, wenn er einen
+   Projektlink verschickt. Auf der Seite SELBST bleibt das WebP; nur die
+   Teilen-Vorschau bekommt eine JPEG-Fassung.
+
+   1200x630 ist das Format, das alle Dienste erwarten. Zugeschnitten statt
+   verzerrt: erst so weit vergroessern, dass beide Seiten reichen, dann aus
+   der Mitte ausschneiden.
+
+   Faellt ffmpeg aus oder ist das Bild nicht erreichbar, wird die
+   Originaladresse weiterverwendet und eine Warnung gedruckt -- lieber eine
+   WebP-Vorschau als ein Abbruch mitten im Hochladen. */
+let ffmpegDa = true;
+try { await lauf('which', ['ffmpeg']); } catch { ffmpegDa = false; }
+if (!ffmpegDa) console.log('   HINWEIS: ffmpeg fehlt — Vorschaubilder bleiben, wie sie sind (brew install ffmpeg)');
+
+async function vorschauJpeg(slug, quelle) {
+  if (!ffmpegDa || quelle === STANDARD_BILD) return quelle;   /* og-bild.jpg ist schon 1200x630 JPEG */
+  const ziel = new URL(`./${slug}.jpg`, VORSCHAU_ORDNER);
+  try {
+    const a = await fetch(quelle);
+    if (!a.ok) throw new Error('HTTP ' + a.status);
+    const roh = join(tmpdir(), `vorschau-${slug}`);
+    await writeFile(roh, Buffer.from(await a.arrayBuffer()));
+    await lauf('ffmpeg', ['-y', '-v', 'error', '-i', roh,
+      '-vf', 'scale=1200:630:force_original_aspect_ratio=increase,crop=1200:630',
+      '-q:v', '4', ziel.pathname]);
+    await unlink(roh).catch(() => {});
+    return `${BASIS}/vorschau/${slug}.jpg`;
+  } catch (e) {
+    console.log(`   WARNUNG: Vorschaubild fuer ${slug} nicht gewandelt (${e.message}) — nehme das Original`);
+    return quelle;
+  }
+}
+
 for (const w of welten) {
   const titel = `${w.titel} — mausemaus`;
   const adresse = `${BASIS}/welt/${w.slug}`;
@@ -152,7 +212,9 @@ for (const w of welten) {
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(titel)}</title>`);
   html = setzeAttribut(html, 'og-title', 'content', titel);
   html = setzeAttribut(html, 'og-description', 'content', w.untertitel || STANDARD_TEXT);
-  const bild = vorschauBild(w);
+  html = setzeAttribut(html, 'meta-description', 'content', w.untertitel || STANDARD_TEXT);
+  const quelle = vorschauBild(w);
+  const bild = await vorschauJpeg(w.slug, quelle);
   html = setzeAttribut(html, 'og-image', 'content', bild);
   html = setzeAttribut(html, 'og-url', 'content', adresse);
   html = setzeAttribut(html, 'og-canonical', 'href', adresse);
@@ -161,51 +223,27 @@ for (const w of welten) {
   html = setzeAttribut(html, 'tw-image', 'content', bild);
   await writeFile(new URL(`./${w.slug}.html`, WELT_ORDNER), html);
   await writeFile(new URL(`./${w.slug}.html`, BLOG_ORDNER), html);
-  console.log(`   ${w.slug}.html  ${bild === STANDARD_BILD ? '(Ausweichbild — diese Welt hat kein Bild)' : (w.cover_url ? '(Coverbild)' : '(erstes Bild aus dem Inhalt)')}`);
+  const woher = quelle === STANDARD_BILD ? 'Ausweichbild — diese Welt hat kein Bild'
+    : (w.cover_url ? 'Coverbild' : 'erstes Bild aus dem Inhalt');
+  console.log(`   ${w.slug}.html  (${woher}${bild.endsWith('.jpg') && quelle !== STANDARD_BILD ? ', als JPEG fuer die Teilen-Vorschau' : ''})`);
 }
 
 /* Welten, die zurueckgezogen oder umbenannt wurden, duerfen nicht als
    verwaiste Datei liegen bleiben -- sie waeren ueber ihre alte Adresse
    weiter erreichbar, obwohl sie nicht mehr veroeffentlicht sind. */
-const gewollt = new Set(welten.map(w => w.slug + '.html'));
-for (const ordner of [WELT_ORDNER, BLOG_ORDNER]) {
+const gewollt = new Set(welten.flatMap(w => [w.slug + '.html', w.slug + '.jpg']));
+for (const ordner of [WELT_ORDNER, BLOG_ORDNER, VORSCHAU_ORDNER]) {
   for (const name of await readdir(ordner)) {
-    if (name.endsWith('.html') && !gewollt.has(name)) {
+    if (/\.(html|jpg)$/.test(name) && !gewollt.has(name)) {
       await unlink(new URL('./' + name, ordner));
       console.log(`   entfernt (nicht mehr veroeffentlicht): ${name}`);
     }
   }
 }
 
-/* ---------- 4. _redirects ---------- */
+/* ---------- 4. seed.js ---------- */
 
-/* WARUM ausdrueckliche Zeilen statt Verlass auf den Dateivorrang:
-   Netlify bevorzugt zwar eine echte Datei gegenueber einer Umschreibungs-
-   Regel, aber der Nachbau in tests/server.mjs tut das nicht (gemessen) --
-   und damit haetten Test und Wirklichkeit unterschiedlich geantwortet. Eine
-   ausdrueckliche Zeile ueber der Sammelregel wirkt auf BEIDEN gleich und
-   haengt an keiner Feinheit der Vorrangregeln. Unbekannte Slugs fallen
-   weiterhin auf die Sammelregel zurueck: eine im Admin neu angelegte Welt
-   ist also sofort erreichbar, nur eben ohne eigene Teilen-Vorschau. */
-console.log('\n4. _redirects');
-const ANFANG = '# --- vorgebaute Welten (erzeugt von tests/hochladen.mjs) ---';
-const ENDE   = '# --- Ende vorgebaute Welten ---';
-const breite = Math.max(18, ...welten.map(w => w.slug.length + 7));
-const zeilen = welten.flatMap(w => ['welt', 'blog'].map(
-  pfad => `/${pfad}/${w.slug}`.padEnd(breite + 1) + `/welt/${w.slug}.html`.padEnd(breite + 7) + '200'));
-const block = [ANFANG, ...zeilen, ENDE, ''].join('\n');
-
-const pfadR = new URL('./_redirects', HOCH);
-let roh = await readFile(pfadR, 'utf8');
-roh = roh.includes(ANFANG)
-  ? roh.replace(new RegExp(`${ANFANG}[\\s\\S]*?${ENDE}\\n?`), block)
-  : block + roh;
-await writeFile(pfadR, roh);
-console.log(`   ${zeilen.length} Zeilen fuer ${welten.length} Welten`);
-
-/* ---------- 5. seed.js ---------- */
-
-console.log('\n5. seed.js (Notfall-Daten)');
+console.log('\n4. seed.js (Notfall-Daten)');
 const alt = await readFile(new URL('./assets/seed.js', HOCH), 'utf8');
 /* SEED_SETTINGS und SEED_PROJECTS gehoeren zum alten Datenmodell und werden
    von der heutigen Seite nicht mehr gelesen. Sie bleiben trotzdem erhalten:
@@ -225,9 +263,9 @@ ${altteil}window.SEED_SEITEN = ${JSON.stringify({ brief, projekte, welten }, nul
 await writeFile(new URL('./assets/seed.js', HOCH), neu);
 console.log(`   ${Math.round(neu.length / 1024)} kB (vorher ${Math.round(alt.length / 1024)} kB)`);
 
-/* ---------- 6. sitemap.xml ---------- */
+/* ---------- 5. sitemap.xml ---------- */
 
-console.log('\n6. sitemap.xml');
+console.log('\n5. sitemap.xml');
 const eintrag = (ort, wann) => '  <url>\n    <loc>' + esc(ort) + '</loc>\n' +
   (wann ? `    <lastmod>${String(wann).slice(0, 10)}</lastmod>\n` : '') + '  </url>';
 const neueste = [brief, ...projekte].map(s => s.updated_at).filter(Boolean).sort().pop();

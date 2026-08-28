@@ -9,7 +9,9 @@
      2. seed.js (75 kB) lag als festes <script> in jeder Seite, obwohl es
         die dritte und letzte Rueckfallstufe ist und im Normalbetrieb nie
         gebraucht wird.
-     3. Es gab keine Cache-Regeln. Jeder Besuch holte alles neu.
+     3. Es gab keine Cache-Regeln -- und der Versuch, welche zu setzen, lief
+        nach dem Umzug ins Leere. Was der Hoster wirklich liefert, misst
+        tests/pruefe-kopfzeilen.mjs an der oeffentlichen Seite.
 
    Die Zahlen hier sind bewusst GEMESSEN und nicht geschaetzt -- und die
    Obergrenzen sind absichtlich grosszuegig gesetzt: Diese Pruefung soll
@@ -79,32 +81,58 @@ pruefe('keine zwei Schriftdateien sind gleich groß (Hinweis auf Doppelte)',
   new Set(groessen).size === groessen.length || dateien.length <= 4,
   dateien.length + ' Dateien');
 
-/* ---------- 3. Cache-Regeln ---------- */
+/* ---------- 2b. Vorverbindung zur Datenbank ----------
+   Der GESAMTE Inhalt der Seite kommt aus Supabase. Ohne diese Zeile erfaehrt
+   der Browser den Namen erst, wenn assets/db.js geladen, gelesen und
+   gelaufen ist -- Namensaufloesung und Verschluesselungs-Handschlag starten
+   also erst dann, und der Brief steht entsprechend spaeter. */
 
-const kopf = await lies('./_headers');
-pruefe('_headers hält die eigenen Dateien lange fest', /\/assets\/\*[\s\S]*?immutable/.test(kopf));
-/* seed.js traegt KEINEN ?v=-Stempel (es wird nachgeladen) und wird bei jedem
-   Hochladen neu geschrieben -- mit "immutable" bekaeme ein Besucher ein Jahr
-   lang die alten Notfall-Daten. */
-/* ACHTUNG, hier steckte eine Falle, die der Sabotage-Durchlauf gefunden hat:
-   Die erste Fassung lautete
-       kopf.indexOf('/assets/seed.js') < kopf.indexOf('/assets/*')
-   und war GRUEN, auch wenn der Eintrag ganz fehlte -- indexOf liefert dann
-   -1, und -1 ist kleiner als jede echte Stelle. Erst ausdruecklich pruefen,
-   DASS der Eintrag da ist, und dann, dass er vor der Sammelregel steht
-   (Netlify nimmt die erste passende Regel). */
-const seedStelle = kopf.indexOf('/assets/seed.js');
-const sammelStelle = kopf.indexOf('/assets/*');
-pruefe('…nennt seed.js überhaupt', seedStelle !== -1);
-pruefe('…und zwar VOR der Sammelregel, sonst greift sie nie',
-  seedStelle !== -1 && sammelStelle !== -1 && seedStelle < sammelStelle,
-  'seed bei ' + seedStelle + ', Sammelregel bei ' + sammelStelle);
-pruefe('…und nimmt es wirklich vom Festhalten aus',
-  /\/assets\/seed\.js[\s\S]{0,600}?max-age=0/.test(kopf));
-pruefe('_headers hält die HTML-Seiten NICHT fest', /\/\*\.html[\s\S]*?max-age=0/.test(kopf));
-for (const z of ['Referrer-Policy', 'X-Content-Type-Options', 'X-Frame-Options']) {
-  pruefe(`_headers setzt ${z}`, kopf.includes(z));
+const cfg = await lies('./assets/config.js');
+const dbAdresse = (cfg.match(/url:\s*'([^']*)'/) || [])[1];
+pruefe('config.js nennt eine Datenbankadresse',
+  !!dbAdresse && dbAdresse.startsWith('https://'), dbAdresse);
+for (const datei of ['./index.html', './welt.html']) {
+  const h = await lies(datei);
+  const treffer = h.match(/<link rel="preconnect" href="([^"]*)"([^>]*)>/) || [];
+  pruefe(`${datei.slice(2)}: verbindet sich vorab mit der Datenbank`,
+    treffer[1] === dbAdresse, treffer[1] || 'kein preconnect');
+  /* Ohne crossorigin baut der Browser fuer die spaeteren Abfragen eine
+     ZWEITE Verbindung auf -- die erste war dann umsonst. */
+  pruefe(`${datei.slice(2)}: …und zwar mit crossorigin, sonst zaehlt es nicht`,
+    (treffer[2] || '').includes('crossorigin'), treffer[2] || '-');
+  /* Die Zeile muss VOR dem ersten Skript stehen, sonst bringt sie nichts:
+     Sinn ist ja, die Verbindung schon aufzubauen, waehrend der Browser noch
+     mit dem Rest beschaeftigt ist.
+     Der Gewinn selbst laesst sich hier NICHT messen -- gegen einen lokalen
+     Server sind Namensaufloesung und Verbindung laengst warm (gemessen:
+     dns 0 ms, connect 0 ms, mit und ohne die Zeile). Er faellt beim ersten,
+     kalten Aufruf eines fremden Rechners an. Deshalb wird hier die
+     Reihenfolge geprueft und keine Zahl behauptet. */
+  const kopf = h.slice(0, h.indexOf('</head>'));
+  const erstesSkript = kopf.search(/<script[^>]*\ssrc=/);
+  pruefe(`${datei.slice(2)}: …und steht vor dem ersten Skript`,
+    kopf.indexOf('<link rel="preconnect"') !== -1 &&
+    (erstesSkript === -1 || kopf.indexOf('<link rel="preconnect"') < erstesSkript),
+    'preconnect bei ' + kopf.indexOf('<link rel="preconnect"') + ', erstes Skript bei ' + erstesSkript);
 }
+
+/* ---------- 3. Cache-Regeln: stehen NICHT mehr hier ----------
+
+   Hier standen frueher acht Pruefungen auf den Inhalt von HOCHLADEN/_headers.
+   Sie waren alle gruen -- und alle wertlos. _headers ist eine NETLIFY-Datei;
+   seit dem Umzug auf GitHub Pages liest sie niemand mehr. Gemessen an der
+   echten Seite am 28.08.2026:
+
+       curl -sI https://mausemaus.com/assets/site.css | grep -i cache
+       cache-control: max-age=600          <- nicht das Jahr aus _headers
+
+       curl -sI https://mausemaus.com/ | grep -iE "x-frame|nosniff|referrer"
+       (nichts)                            <- keine der drei Kopfzeilen kommt an
+
+   Eine gruene Pruefung auf eine wirkungslose Datei ist schlimmer als gar
+   keine: sie behauptet Sicherheit, die es nicht gibt. Die Datei ist deshalb
+   geloescht, und was der Hoster WIRKLICH liefert, misst jetzt
+   tests/pruefe-kopfzeilen.mjs an der oeffentlichen Seite. */
 
 /* ---------- 3b. Besucherstatistik ----------
    GoatCounter: keine Cookies, keine personenbezogenen Daten, deshalb ohne
