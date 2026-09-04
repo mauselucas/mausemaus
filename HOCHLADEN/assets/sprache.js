@@ -123,26 +123,184 @@
     if (locale) locale.setAttribute('content', 'en_US');
   }
 
-  /* Der Umschalter steht als echtes <a>-Paar im HTML jeder Seite -- damit er
-     schon während des Ladeschirms dasteht und auch ohne JavaScript
-     funktioniert. Hier bekommt er nur die richtigen Adressen (aktueller
-     Pfad, übrige Anhängsel bleiben erhalten) und die Markierung. */
+
+  /* ---------- 6. Der Umschalter ----------
+
+     Im HTML steht ein vollstaendiges <details>: aufklappen kann der
+     Browser selbst, die Auswahl sind echte Links. Alles hier ist
+     Zugabe -- faellt diese Datei aus, bleibt ein bedienbarer Umschalter
+     stehen, nur ohne Feinheiten. */
+
+  const NAMEN = { de: 'Deutsch', en: 'English', nl: 'Nederlands' };
+
+  /* Wie lange der Knopf nach dem ersten Scrollen noch in voller Breite
+     stehen bleibt. Bewusst viel laenger als die Zeitleiste links (die geht
+     nach 760 ms zu): Der Umschalter ist fuer jemanden da, der die Seite
+     nicht lesen kann -- der braucht Zeit, ihn ueberhaupt zu bemerken. */
+  const BLEIBT = 4200;
+  const BLEIBT_NACH_KLICK = 2600;   // nach dem Zuklappen kuerzer
+  const SCHWELLE = 100;             // ab so viel Scrollen faengt die Uhr an
+
+  /* Flagge und Name im Knopf auf die gewaehlte Sprache setzen.
+
+     Das ist eigene Funktion und laeuft ZWEIMAL: einmal sofort, aufgerufen
+     von einer Zeile direkt hinter dem Umschalter im HTML, und noch einmal
+     spaeter mit allem Uebrigen. Grund: Im HTML steht Deutsch. Wartete man
+     bis DOMContentLoaded, saehe ein englischer Besucher fuer den Bruchteil
+     einer Sekunde "Deutsch" aufblitzen -- ausgerechnet er. */
+  let standGesetzt = false;
+  window.mmUmschalterStand = function () {
+    const kasten = document.querySelector('.mm-sprache');
+    if (!kasten || standGesetzt) return;
+    const flagge = kasten.querySelector('.mms-flagge');
+    const name = kasten.querySelector('.mms-name');
+    if (!flagge || !name) return;
+    if (sprache !== 'de') {
+      flagge.src = '/assets/flaggen/' + sprache + '.png';
+      name.textContent = NAMEN[sprache];
+    }
+    standGesetzt = true;
+  };
+
   function umschalterEinrichten() {
     const kasten = document.querySelector('.mm-sprache');
     if (!kasten) return;
-    kasten.setAttribute('aria-label', window.mmText('sprache-gruppe') || 'Sprache');
-    kasten.querySelectorAll('a[hreflang]').forEach(a => {
-      const ziel = a.getAttribute('hreflang');
+    const knopf   = kasten.querySelector('.mms-knopf');
+    const flagge  = kasten.querySelector('.mms-flagge');
+    const name    = kasten.querySelector('.mms-name');
+    const hinweis = kasten.querySelector('.mms-hinweis');
+
+    const sanft = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Stand: welche Sprache steht gerade im Knopf ----
+       Normalerweise hat das die Zeile im HTML schon erledigt; hier steht
+       es fuer den Fall, dass sie fehlt (z.B. eine aeltere Seite). ---- */
+    window.mmUmschalterStand();
+    const wahlText = window.mmText('sprache-waehlen');
+    knopf?.setAttribute('title', wahlText);
+    knopf?.setAttribute('aria-label', wahlText);
+
+    /* ---- Die Auswahl: Adressen und Markierung ---- */
+    kasten.querySelectorAll('.mms-wahl[href]').forEach(a => {
+      const ziel = a.dataset.sprache;
       const adresse = new URL(location.href);
       adresse.searchParams.set('lang', ziel);
       a.href = adresse.pathname + adresse.search + adresse.hash;
       if (ziel === sprache) a.setAttribute('aria-current', 'true');
       else a.removeAttribute('aria-current');
-      a.addEventListener('click', () => {
-        const scroller = document.getElementById('scroller');
-        const amFenster = !scroller || getComputedStyle(scroller).overflowY !== 'auto';
-        scrollMerken(amFenster ? window.scrollY : scroller.scrollTop);
+    });
+
+    /* ---- Zusammenziehen, aber erst spaet ---- */
+    let uhr = null;
+    const klein = () => { if (!kasten.open) kasten.classList.add('mms-klein'); };
+    const gross = () => { clearTimeout(uhr); uhr = null; kasten.classList.remove('mms-klein'); };
+    const uhrStellen = (ms) => { clearTimeout(uhr); uhr = setTimeout(klein, ms); };
+
+    /* Auf dem Brief scrollt ein Kasten, auf einer Welt das Fenster --
+       beide beobachten, statt zu raten, welcher es ist. */
+    const scroller = document.getElementById('scroller');
+    const stand = () => Math.max(window.scrollY,
+      scroller ? scroller.scrollTop : 0);
+    let gestartet = false;
+    function beimScrollen() {
+      if (gestartet || stand() < SCHWELLE) return;
+      gestartet = true;
+      uhrStellen(BLEIBT);
+    }
+    window.addEventListener('scroll', beimScrollen, { passive: true });
+    scroller?.addEventListener('scroll', beimScrollen, { passive: true });
+
+    /* ---- Auf- und Zuklappen ----
+       <details> schaltet `open` von sich aus um. Beim SCHLIESSEN muss das
+       aber warten, bis die Blase ausgeblendet ist -- sonst ist sie
+       schlagartig weg und die Bewegung findet gar nicht statt. */
+    let schliesstGerade = false;
+    knopf?.addEventListener('click', (e) => {
+      if (!kasten.open) { gross(); return; }        // Aufklappen: Browser macht es
+      if (schliesstGerade) return;
+      e.preventDefault();
+      zuklappen();
+    });
+
+    function zuklappen() {
+      if (!kasten.open || schliesstGerade) return;
+      schliesstGerade = true;
+      const fertig = () => {
+        kasten.classList.remove('mms-schliesst');
+        kasten.open = false;
+        schliesstGerade = false;
+        if (gestartet) uhrStellen(BLEIBT_NACH_KLICK);
+      };
+      if (!sanft) return fertig();
+      kasten.classList.add('mms-schliesst');
+      setTimeout(fertig, 220);
+    }
+
+    /* Woanders hinklicken oder Esc: zu. Ohne das bliebe die Blase offen
+       stehen, waehrend man laengst weiterliest. */
+    document.addEventListener('click', (e) => {
+      if (kasten.open && !kasten.contains(e.target)) zuklappen();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && kasten.open) { zuklappen(); knopf?.focus(); }
+    });
+
+    /* ---- Sprache waehlen ----
+       Der Wechsel laedt die Seite neu. Vorher noch kurz den Namen im Knopf
+       umschreiben: die Buchstaben drehen sich heraus und die neuen herein.
+       Das dauert bewusst nur einen Wimpernschlag -- laenger waere keine
+       Bewegung mehr, sondern Warten. Ohne JavaScript oder mit "Bewegung
+       reduzieren" fuehrt derselbe Link ohne Umweg zum Ziel. */
+    kasten.querySelectorAll('.mms-wahl[href]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const ziel = a.dataset.sprache;
+        scrollMerken(scroller && getComputedStyle(scroller).overflowY === 'auto'
+          ? scroller.scrollTop : window.scrollY);
+        if (!sanft || ziel === sprache || e.metaKey || e.ctrlKey || e.shiftKey) return;
+        e.preventDefault();
+        gross();
+        if (flagge) flagge.src = '/assets/flaggen/' + ziel + '.png';
+        namenWechseln(NAMEN[ziel]);
+        setTimeout(() => { location.href = a.href; }, 330);
       });
+    });
+
+    function buchstaben(text) {
+      return [...text].map((z, i) =>
+        '<span class="mms-buchstabe" style="--i:' + i + '">' +
+        (z === ' ' ? '&nbsp;' : z.replace('&', '&amp;').replace('<', '&lt;')) +
+        '</span>').join('');
+    }
+    function namenWechseln(neu) {
+      if (!name) return;
+      name.innerHTML = buchstaben(name.textContent);
+      name.classList.add('mms-raus');
+      setTimeout(() => {
+        name.classList.remove('mms-raus');
+        name.innerHTML = buchstaben(neu);
+        name.classList.add('mms-rein');
+      }, 150);
+    }
+
+    /* ---- Niederlaendisch: noch nicht ----
+       Ein kurzes Wackeln und ein Satz, der von selbst wieder geht. Kein
+       Fenster, kein Wegklicken -- die Antwort auf einen Tipp, mehr nicht. */
+    let hinweisUhr = null;
+    kasten.querySelector('.mms-bald')?.addEventListener('click', () => {
+      kasten.classList.remove('mms-nein');
+      void kasten.offsetWidth;              // Neustart der Bewegung erzwingen
+      kasten.classList.add('mms-nein');
+      if (!hinweis) return;
+      hinweis.textContent = 'nog niet mogelijk :(';
+      requestAnimationFrame(() => hinweis.classList.add('da'));
+      clearTimeout(hinweisUhr);
+      hinweisUhr = setTimeout(() => {
+        hinweis.classList.remove('da');
+        setTimeout(() => { hinweis.textContent = ''; }, 320);
+      }, 1900);
+    });
+    kasten.addEventListener('animationend', (e) => {
+      if (e.animationName === 'mms-wackeln') kasten.classList.remove('mms-nein');
     });
   }
 

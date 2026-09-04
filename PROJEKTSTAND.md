@@ -249,8 +249,38 @@ Der ganze Hergang mit allen Messwerten steht in
 ## Englisch (neu am 04.09.2026)
 
 Lucas hat Kunden, die kein Deutsch sprechen. Die Seite lädt **weiterhin
-standardmäßig auf Deutsch**; oben rechts sitzt auf jeder Seite fest ein
-Umschalter `DE | EN`, und `mausemaus.com/?lang=en` geht direkt englisch auf.
+standardmäßig auf Deutsch**; unten rechts sitzt auf jeder Seite fest ein
+Umschalter, und `mausemaus.com/?lang=en` geht direkt englisch auf.
+
+### Wie sich der Umschalter benimmt
+
+Er ist ein `<details>`: Auf- und Zuklappen kann der Browser selbst, die
+Auswahl sind echte `<a>`-Links. Ohne JavaScript bleibt er damit **voll
+bedienbar** — nur die Feinheiten fallen weg.
+
+| Wann | Was |
+|---|---|
+| beim Laden | volle Breite: Flagge + „Deutsch" |
+| ~4,2 s nach dem ersten Scrollen | zieht sich auf die Flagge zusammen (`.mms-klein`) |
+| Überfahren mit der Maus | kurzes Wackeln, **kein** Aufklappen |
+| Klick | wird wieder groß **und** klappt auf |
+| Sprache wählen | Buchstaben drehen sich um, dann lädt die Seite neu |
+| Klick auf Nederlands | Wackeln + „nog niet mogelijk :(" für 1,9 s |
+
+Die Wartezeit ist mit Absicht viel länger als bei der Zeitleiste links (die
+geht nach 760 ms zu): Der Umschalter ist für jemanden da, der die Seite
+nicht lesen kann — der braucht Zeit, ihn überhaupt zu bemerken.
+
+**Niederländisch steht nur im Knopf.** Es gibt keine Spalte, keinen
+Adressparameter, nichts im Admin. Bewusst so: Lucas wollte es sichtbar
+haben, ohne dass jetzt eine dritte Sprache gebaut wird. Wer es später
+nachrüstet, findet die Stellen über `mms-bald` und `NAMEN` in
+`assets/sprache.js`.
+
+Die Flaggen sind **Apple-Emoji als PNG** (`assets/flaggen/de|en|nl.png`,
+160 px) statt echter Emoji-Zeichen: Windows zeigt Flaggen-Emoji gar nicht
+an, dort stünden nur die Buchstaben „DE". Die beiden nicht gewählten tragen
+`loading="lazy"` — solange niemand aufklappt, werden sie nicht geholt.
 
 **Die Zusage, an der alles hängt:** Englisch ist eine ERGÄNZUNG. Wo keine
 Übersetzung hinterlegt ist, steht der deutsche Text — nie eine Lücke. Für

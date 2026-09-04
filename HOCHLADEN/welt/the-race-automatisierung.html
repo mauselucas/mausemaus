@@ -61,12 +61,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1788532167"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1788536695"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1788532167"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1788532167">');
+  document.write('<script src="/assets/schriften-retten.js?v=1788536695"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1788536695">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -80,28 +80,61 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1788532167">
-<link rel="stylesheet" href="/assets/site.css?v=1788532167">
-<link rel="stylesheet" href="/assets/brief.css?v=1788532167">
-<link rel="stylesheet" href="/assets/blumen.css?v=1788532167">
-<link rel="stylesheet" href="/assets/welt.css?v=1788532167">
-<link rel="stylesheet" href="/assets/inhalt.css?v=1788532167">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1788532167">
+<link rel="stylesheet" href="/assets/fonts.css?v=1788536695">
+<link rel="stylesheet" href="/assets/site.css?v=1788536695">
+<link rel="stylesheet" href="/assets/brief.css?v=1788536695">
+<link rel="stylesheet" href="/assets/blumen.css?v=1788536695">
+<link rel="stylesheet" href="/assets/welt.css?v=1788536695">
+<link rel="stylesheet" href="/assets/inhalt.css?v=1788536695">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1788536695">
 <!-- Sprachwahl, siehe index.html. Im Kopf, damit <html lang> stimmt,
      bevor gezeichnet wird. -->
-<script src="/assets/texte.js?v=1788532167"></script>
-<script src="/assets/sprache.js?v=1788532167"></script>
+<script src="/assets/texte.js?v=1788536695"></script>
+<script src="/assets/sprache.js?v=1788536695"></script>
 </head>
 <body>
 
-<!-- Sprachumschalter, an genau derselben Stelle wie im Brief. sprache.js
-     traegt gleich den richtigen Pfad in die beiden Adressen ein -- hier
-     steht als Rueckfall die Startseite, denn die Datei wird unter vielen
-     Adressen ausgeliefert (/welt/<slug>, /blog/<slug>, ?s=<slug>). -->
-<div class="mm-sprache" role="group" aria-label="Sprache">
-  <a href="/?lang=de" hreflang="de" lang="de">DE</a>
-  <a href="/?lang=en" hreflang="en" lang="en">EN</a>
-</div>
+<!-- Sprachumschalter, unten rechts. Bewusst als fertiges HTML und nicht per
+     Skript erzeugt: So steht er schon da, waehrend der Brief noch laedt --
+     genau fuer den Besucher, der kein Deutsch liest.
+
+     <details> statt Knopf-und-Skript: Das Auf- und Zuklappen kann der
+     Browser von sich aus, und die Auswahl sind echte <a>-Links. Ohne
+     JavaScript funktioniert der Umschalter also vollstaendig -- nur die
+     Feinheiten (Verkleinern nach dem Scrollen, Unschaerfe, Buchstaben)
+     kommen aus sprache.js dazu.
+
+     Die beiden nicht gewaehlten Flaggen tragen loading="lazy": solange
+     niemand aufklappt, holt der Browser sie gar nicht erst. -->
+<details class="mm-sprache" id="mm-sprache">
+  <!-- aria-label statt eines versteckten Textes: .versteckt steht in
+       brief.css, und 404.html laedt die Datei nicht -- der Hinweis staende
+       dort sichtbar mitten im Knopf. -->
+  <summary class="mms-knopf" title="Sprache / Language" aria-label="Sprache wählen · Choose language">
+    <img class="mms-flagge" id="mms-flagge" src="/assets/flaggen/de.png" alt="" width="20" height="20" decoding="async">
+    <span class="mms-name" id="mms-name">Deutsch</span>
+    <svg class="mms-pfeil" viewBox="0 0 12 8" aria-hidden="true" focusable="false"><path d="M1 1.6 6 6.4 11 1.6"/></svg>
+  </summary>
+  <div class="mms-blase">
+    <div class="mms-liste">
+      <a class="mms-wahl" href="/?lang=de" hreflang="de" lang="de" data-sprache="de">
+        <img src="/assets/flaggen/de.png" alt="" width="20" height="20" loading="lazy" decoding="async"><span>Deutsch</span></a>
+      <a class="mms-wahl" href="/?lang=en" hreflang="en" lang="en" data-sprache="en">
+        <img src="/assets/flaggen/en.png" alt="" width="20" height="20" loading="lazy" decoding="async"><span>English</span></a>
+      <!-- Niederlaendisch gibt es noch nicht. Bewusst trotzdem sichtbar,
+           aber als <button disabled>-Ersatz: ein <a> ohne Ziel waere fuer
+           die Tastatur und fuers Vorlesen eine Luege. -->
+      <button class="mms-wahl mms-bald" type="button" lang="nl" data-sprache="nl" aria-disabled="true">
+        <img src="/assets/flaggen/nl.png" alt="" width="20" height="20" loading="lazy" decoding="async"><span>Nederlands</span></button>
+    </div>
+    <p class="mms-hinweis" id="mms-hinweis" role="status" lang="nl"></p>
+  </div>
+</details>
+<!-- Flagge und Name SOFORT auf die gewaehlte Sprache setzen, nicht erst,
+     wenn das Dokument fertig geladen ist. Sonst blitzt bei einem
+     englischen Aufruf kurz "Deutsch" auf -- ausgerechnet bei dem
+     Besucher, fuer den der Umschalter da ist. -->
+<script>window.mmUmschalterStand && window.mmUmschalterStand();</script>
 
 <div class="welt" id="welt">
   <div class="welt-spalte">
@@ -121,14 +154,14 @@
   </div>
 </div>
 
-<script src="/assets/config.js?v=1788532167"></script>
-<script src="/assets/shared.js?v=1788532167"></script>
-<script src="/assets/bloecke.js?v=1788532167"></script>
-<script src="/assets/db.js?v=1788532167"></script>
-<script src="/assets/blumen.js?v=1788532167"></script>
-<script src="/assets/tueren.js?v=1788532167"></script>
-<script src="/assets/demo-race.js?v=1788532167"></script>
-<script src="/assets/inhalt.js?v=1788532167"></script>
+<script src="/assets/config.js?v=1788536695"></script>
+<script src="/assets/shared.js?v=1788536695"></script>
+<script src="/assets/bloecke.js?v=1788536695"></script>
+<script src="/assets/db.js?v=1788536695"></script>
+<script src="/assets/blumen.js?v=1788536695"></script>
+<script src="/assets/tueren.js?v=1788536695"></script>
+<script src="/assets/demo-race.js?v=1788536695"></script>
+<script src="/assets/inhalt.js?v=1788536695"></script>
 <script>
 (async () => {
   /* GitHub Pages liefert /welt/xy aus, weil es von sich aus ".html" anhaengt

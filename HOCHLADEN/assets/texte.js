@@ -12,7 +12,7 @@
 (() => {
   window.MM_TEXTE = {
     /* --- Rahmen --- */
-    'sprache-gruppe':     { de: 'Sprache', en: 'Language' },
+    'sprache-waehlen':    { de: 'Sprache wählen', en: 'Choose language' },
     'sprung':             { de: 'Zum Brief springen', en: 'Skip to the letter' },
 
     /* --- Die Leiste --- */

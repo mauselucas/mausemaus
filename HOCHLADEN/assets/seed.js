@@ -263,9 +263,9 @@ window.SEED_SEITEN = {
     "status": "published",
     "sort_order": 1,
     "created_at": "2026-08-22T17:46:48.907163+00:00",
-    "updated_at": "2026-08-22T17:46:48.907163+00:00",
-    "titel_en": null,
-    "untertitel_en": null,
+    "updated_at": "2026-09-04T15:35:05.78532+00:00",
+    "titel_en": "Hi, I'm",
+    "untertitel_en": "Video Editor & Motion Designer · Cologne",
     "bloecke": [
       {
         "id": "f96b79b6-ff10-4fde-aa3f-0014cc986307",
@@ -280,10 +280,14 @@ window.SEED_SEITEN = {
           "zusatz": "Lucas :)"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Hi, I'm",
+          "kicker": "Video Editor & Motion Designer · Cologne",
+          "zusatz": "Lucas :)"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 10,
-        "updated_at": "2026-08-26T14:58:02.972178+00:00"
+        "updated_at": "2026-09-04T15:35:17.471455+00:00"
       },
       {
         "id": "69222574-03b4-434a-b473-8a50d636d24c",
@@ -296,10 +300,14 @@ window.SEED_SEITEN = {
           "zeile2": "remote möglich"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Based in",
+          "zeile1": "Cologne-Ehrenfeld",
+          "zeile2": "remote possible"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 30,
-        "updated_at": "2026-08-22T17:46:48.907163+00:00"
+        "updated_at": "2026-09-04T15:35:35.453026+00:00"
       },
       {
         "id": "58c2c221-6b71-4de1-b1f0-6d01fde976c3",
@@ -312,10 +320,13 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Status",
+          "zeile1": "Open for projects"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 40,
-        "updated_at": "2026-08-25T07:55:17.422905+00:00"
+        "updated_at": "2026-09-04T15:36:37.545901+00:00"
       },
       {
         "id": "3befa49b-fd39-4b8a-bb14-1ffaacaa5fee",
@@ -328,10 +339,14 @@ window.SEED_SEITEN = {
           "zeile2": "3D in Arbeit"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Focus",
+          "zeile1": "Editing, motion,",
+          "zeile2": "3D in progress"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 50,
-        "updated_at": "2026-08-22T17:46:48.907163+00:00"
+        "updated_at": "2026-09-04T15:37:02.604162+00:00"
       },
       {
         "id": "28c6a424-3068-42bf-82cc-b0758ff1b692",
@@ -344,10 +359,14 @@ window.SEED_SEITEN = {
           "zeile2": "Mediengestalter Bild & Ton"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Education",
+          "zeile1": "Media Design B.A.",
+          "zeile2": "Audiovisual Media Designer"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 60,
-        "updated_at": "2026-08-22T17:46:48.907163+00:00"
+        "updated_at": "2026-09-04T15:37:23.13498+00:00"
       },
       {
         "id": "92e89161-07c9-41ff-938a-39ba7b5dce81",
@@ -361,10 +380,13 @@ window.SEED_SEITEN = {
           "kicker": "Wer schneidet da"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Lucas (22) from Ehrenfeld",
+          "kicker": "Who's doing the editing here"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 70,
-        "updated_at": "2026-08-26T14:56:13.777974+00:00"
+        "updated_at": "2026-09-04T15:37:34.736782+00:00"
       },
       {
         "id": "00739d3e-4948-4d63-8373-c6c91a5f584b",
@@ -374,10 +396,12 @@ window.SEED_SEITEN = {
           "roh": "Das hier ist mein kleines Portfolio wo ich einfach meine Projekte sammle und kurz was dazu erzähle :) Ich sitz den Großteil des Tages in Resolve und After Effects und sonst zeichne ich auch ganz gerne! "
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "roh": "This is my little portfolio where I just collect my projects and say a bit about each of them :) I spend most of the day in Resolve and After Effects, and other than that I really like to draw!"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 80,
-        "updated_at": "2026-08-26T15:19:03.801617+00:00"
+        "updated_at": "2026-09-04T15:37:46.716655+00:00"
       },
       {
         "id": "f4957b13-fe3b-4343-9017-5ddc02c8fe9d",
@@ -388,10 +412,12 @@ window.SEED_SEITEN = {
           "farbe": "salbei"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "roh": "My 16Personalities result is ISFJ-T – if you want to read about what it's like to work with me, check out my post on it [[here|verteidiger-isfj-t]]!"
+        },
         "created_at": "2026-08-26T22:29:15.662511+00:00",
         "sort_order": 85.625,
-        "updated_at": "2026-08-26T22:29:46.451969+00:00"
+        "updated_at": "2026-09-04T15:38:13.343442+00:00"
       },
       {
         "id": "94000ae3-512e-4d80-9379-532f5c86c129",
@@ -401,10 +427,12 @@ window.SEED_SEITEN = {
           "roh": "Mein Skilltree im Schnitt besteht aus so vielen Zweigen weil ich irgendwie alles lernen wollte und bin deshalb gut als allrounder einsetzbar. Am wohlsten fühl ich mich aber in After Effects wo ich animieren kann."
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "roh": "My editing skill tree has so many branches because I somehow wanted to learn everything, which makes me pretty handy as an all-rounder. But I feel most at home in After Effects, where I get to animate."
+        },
         "created_at": "2026-08-26T15:10:49.379514+00:00",
         "sort_order": 87.5,
-        "updated_at": "2026-08-26T15:19:26.069518+00:00"
+        "updated_at": "2026-09-04T15:38:22.956252+00:00"
       },
       {
         "id": "5a9d9e70-1021-40a9-b60f-beb7711bee41",
@@ -414,10 +442,12 @@ window.SEED_SEITEN = {
           "roh": " Mein Traum ist es irgendwann für [kurzgesagt](https://www.youtube.com/@KurzgesagtDE) zu arbeiten!"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "roh": "My dream is to work for [kurzgesagt](https://www.youtube.com/@KurzgesagtDE) someday!"
+        },
         "created_at": "2026-08-26T15:19:13.6591+00:00",
         "sort_order": 89.375,
-        "updated_at": "2026-08-26T15:19:58.715788+00:00"
+        "updated_at": "2026-09-04T15:38:40.425461+00:00"
       },
       {
         "id": "b6376f91-ca76-4acd-93f3-fe8e9057a196",
@@ -427,10 +457,12 @@ window.SEED_SEITEN = {
           "roh": "Bin immer offen für Projekte also hmu falls du einen Editor suchst! 🫶"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "roh": "Always open for projects, so hmu if you're looking for an editor! 🫶"
+        },
         "created_at": "2026-08-26T15:14:41.491829+00:00",
         "sort_order": 91.25,
-        "updated_at": "2026-08-26T15:19:09.821528+00:00"
+        "updated_at": "2026-09-04T15:38:46.907549+00:00"
       },
       {
         "id": "f0516e10-c656-4896-bef3-36ca7db28921",
@@ -443,10 +475,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "daily"
+        },
         "created_at": "2026-08-25T07:55:30.570133+00:00",
         "sort_order": 95,
-        "updated_at": "2026-08-25T07:56:07.002443+00:00"
+        "updated_at": "2026-09-04T15:38:53.195742+00:00"
       },
       {
         "id": "293fbc60-2186-4eb7-b736-d02cfe4de76b",
@@ -459,10 +493,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "daily"
+        },
         "created_at": "2026-08-25T07:56:12.262818+00:00",
         "sort_order": 97.5,
-        "updated_at": "2026-08-25T07:56:17.230511+00:00"
+        "updated_at": "2026-09-04T15:38:56.266225+00:00"
       },
       {
         "id": "52f23d8d-92ec-4045-addb-055c50870a48",
@@ -475,10 +511,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "daily"
+        },
         "created_at": "2026-08-25T07:56:25.432693+00:00",
         "sort_order": 98.75,
-        "updated_at": "2026-08-25T07:56:30.910774+00:00"
+        "updated_at": "2026-09-04T15:39:15.944549+00:00"
       },
       {
         "id": "0c224183-6a6e-41ea-9b97-a2f7e255b2d3",
@@ -491,10 +529,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "leveling up"
+        },
         "created_at": "2026-08-25T07:56:48.688677+00:00",
         "sort_order": 99.375,
-        "updated_at": "2026-08-25T07:56:55.707891+00:00"
+        "updated_at": "2026-09-04T15:39:24.232356+00:00"
       },
       {
         "id": "5cf3dd2f-07bb-44b1-84ab-4ff145c727f1",
@@ -507,10 +547,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "confident"
+        },
         "created_at": "2026-08-25T07:57:01.23856+00:00",
         "sort_order": 99.6875,
-        "updated_at": "2026-08-25T07:57:06.99653+00:00"
+        "updated_at": "2026-09-04T15:39:29.684278+00:00"
       },
       {
         "id": "b6deced3-51c4-42e8-a067-4be7e4a42bf9",
@@ -523,10 +565,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "confident"
+        },
         "created_at": "2026-08-25T07:57:09.83416+00:00",
         "sort_order": 99.84375,
-        "updated_at": "2026-08-25T07:57:13.500573+00:00"
+        "updated_at": "2026-09-04T15:39:37.541597+00:00"
       },
       {
         "id": "8f55397c-a241-48de-a431-1241ab13673d",
@@ -539,10 +583,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "confident"
+        },
         "created_at": "2026-08-25T07:57:16.483414+00:00",
         "sort_order": 99.921875,
-        "updated_at": "2026-08-25T07:57:20.219041+00:00"
+        "updated_at": "2026-09-04T15:40:02.130206+00:00"
       },
       {
         "id": "40d2085a-d8f0-49ff-b969-bb215ba6c50a",
@@ -555,10 +601,12 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "zeile1": "Review"
+        },
         "created_at": "2026-08-25T07:57:24.816136+00:00",
         "sort_order": 99.9609375,
-        "updated_at": "2026-08-25T07:57:39.145267+00:00"
+        "updated_at": "2026-09-04T15:39:49.054464+00:00"
       },
       {
         "id": "30af23a8-3fbd-4b6c-9994-b78e377f60a3",
@@ -573,10 +621,12 @@ window.SEED_SEITEN = {
           "telefon": "0151 68186659"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": null,
+        "inhalt_en": {
+          "titel": "Hit me up!"
+        },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 110,
-        "updated_at": "2026-08-22T17:46:48.907163+00:00"
+        "updated_at": "2026-09-04T15:40:01.640208+00:00"
       }
     ]
   },
@@ -1301,9 +1351,9 @@ window.SEED_SEITEN = {
       "status": "published",
       "sort_order": 1000,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
-      "updated_at": "2026-08-26T18:11:44.273595+00:00",
-      "titel_en": null,
-      "untertitel_en": null,
+      "updated_at": "2026-09-04T15:41:26.206411+00:00",
+      "titel_en": "Defender (ISFJ-T)",
+      "untertitel_en": "My result on the 16Personalities test & what it has to do with the way I work.",
       "bloecke": [
         {
           "id": "dfc33a08-f40b-4de8-9f54-39cfad19a5c9",
@@ -1317,7 +1367,7 @@ window.SEED_SEITEN = {
           "inhalt_en": null,
           "created_at": "2026-08-26T19:11:10.273155+00:00",
           "sort_order": 999,
-          "updated_at": "2026-08-26T19:13:01.294043+00:00"
+          "updated_at": "2026-09-04T15:41:37.058918+00:00"
         },
         {
           "id": "6b155c60-a8a4-4a21-8093-f8018dbdec50",
@@ -1327,10 +1377,12 @@ window.SEED_SEITEN = {
             "roh": "16Personalities hat mich als ISFJ-T eingeordnet – \"Der Verteidiger\", aber in der turbulenten Variante. Die wissenschaftliche Basis bei solchen Tests ist zwar dünn, aber trotzdem standen da ein paar Sachen, bei denen ich mich unangenehm gut wiedererkannt hab (und weil ich den test cool finde🙂‍↕️) also nutze ich das hier mal als Anlass, um zu beschreiben, wie ich tatsächlich arbeite,  inklusive der Stellen, die nicht so schmeichelhaft sind!"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "16Personalities put me down as an ISFJ-T – \"The Defender\", but the turbulent variant. The scientific basis for tests like this is admittedly thin, but there were still a few things in there where I recognized myself uncomfortably well (and because I think the test is cool🙂‍↕️), so I'm using this as an excuse to describe how I actually work, including the parts that aren't so flattering!"
+          },
           "created_at": "2026-08-26T16:09:10.896269+00:00",
           "sort_order": 1000,
-          "updated_at": "2026-08-26T17:12:39.003696+00:00"
+          "updated_at": "2026-09-04T15:42:50.98567+00:00"
         },
         {
           "id": "68e3bf17-d7b0-43d8-8cf4-cd272a3c0127",
@@ -1353,10 +1405,12 @@ window.SEED_SEITEN = {
             "roh": "### Das Detail-Ding"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "### The detail thing"
+          },
           "created_at": "2026-08-26T16:11:53.28108+00:00",
           "sort_order": 1001,
-          "updated_at": "2026-08-26T16:14:23.613888+00:00"
+          "updated_at": "2026-09-04T15:43:08.813456+00:00"
         },
         {
           "id": "28deaca0-86c6-477f-85c9-5061d12f6019",
@@ -1366,10 +1420,12 @@ window.SEED_SEITEN = {
             "roh": "Das \"**S**\" steht für Sensing: Ich denke von konkreten Details aus, nicht von abstrakten Konzepten. In der Praxis heißt das, ich seh den einen Frame, in dem der Cut zu früh sitzt. Ich seh, dass das Lower Third auf Video 12 zwei Pixel weiter links steht als auf Video 11. Das nervt manchmal (auch mich selbst🚬) aber es bedeutet auch, dass niemand hinter mir herräumen muss."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "The \"**S**\" stands for Sensing: I think from concrete details, not from abstract concepts. In practice that means I see the one frame where the cut lands too early. I see that the lower third in video 12 sits two pixels further left than in video 11. That's annoying sometimes (for me too🚬), but it also means nobody has to clean up after me."
+          },
           "created_at": "2026-08-26T16:12:04.302091+00:00",
           "sort_order": 1002,
-          "updated_at": "2026-08-26T16:13:50.723104+00:00"
+          "updated_at": "2026-09-04T15:43:59.676217+00:00"
         },
         {
           "id": "462f6119-8833-499f-960e-9ebb5799c3b2",
@@ -1379,10 +1435,12 @@ window.SEED_SEITEN = {
             "roh": "Das \"**T**\" (turbulent) legt da nochmal einen drauf. Ich geh Sachen lieber doppelt durch, als drauf zu vertrauen, dass es schon passt. Verpasste Deadlines oder Exporte mit falscher Framerate hatte ich in Jahren Freelance-Arbeit nicht."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "The \"**T**\" (turbulent) adds another layer on top. I'd rather go through things twice than trust that it's probably fine. Missed deadlines or exports with the wrong framerate haven't happened to me in years of freelance work."
+          },
           "created_at": "2026-08-26T16:13:09.649064+00:00",
           "sort_order": 1003,
-          "updated_at": "2026-08-26T16:13:58.250794+00:00"
+          "updated_at": "2026-09-04T15:44:24.155875+00:00"
         },
         {
           "id": "96ec3cf3-ba2b-44ec-b8bd-49b9ff9e7732",
@@ -1392,10 +1450,12 @@ window.SEED_SEITEN = {
             "roh": "### Was das für Leute bedeutet, mit denen ich arbeite"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "### What that means for the people I work with"
+          },
           "created_at": "2026-08-26T16:14:11.011612+00:00",
           "sort_order": 1004,
-          "updated_at": "2026-08-26T16:14:21.29481+00:00"
+          "updated_at": "2026-09-04T15:44:28.119615+00:00"
         },
         {
           "id": "963e4975-a5c8-4590-ba65-218bfe4ad00c",
@@ -1405,10 +1465,12 @@ window.SEED_SEITEN = {
             "roh": "Der andere Teil ist das \"**F**\": Ich merk relativ früh, wenn bei einem Kunden was nicht stimmt. Wenn Feedback plötzlich knapper wird oder jemand dreimal um dieselbe Änderung bittet, ist meistens nicht die Änderung das Problem, sondern irgendwas darunter z.B eine Erwartung, die nie ausgesprochen wurde. Ich frag dann lieber einmal zu viel nach, bevor ich drei Versionen in die falsche Richtung baue."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "The other part is the \"**F**\": I notice fairly early when something's off with a client. When feedback suddenly gets shorter or someone asks for the same change three times, the change usually isn't the problem – it's something underneath, like an expectation that was never said out loud. I'd rather ask one time too many than build three versions in the wrong direction."
+          },
           "created_at": "2026-08-26T16:14:19.193458+00:00",
           "sort_order": 1005,
-          "updated_at": "2026-08-26T16:14:50.768436+00:00"
+          "updated_at": "2026-09-04T15:45:03.64098+00:00"
         },
         {
           "id": "1adfe0fb-ea45-42f9-a2af-59604c926d4f",
@@ -1418,10 +1480,12 @@ window.SEED_SEITEN = {
             "roh": "Ich merk mir außerdem, was Leute wollen, ohne dass sie's nochmal sagen müssen. Welcher Kunde keine harten Cuts auf Beat mag, wer Untertitel grundsätzlich zu groß findet. Klingt banal, spart aber jedes Mal eine Feedback-Runde."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "I also remember what people want without them having to say it again. Which client doesn't like hard cuts on the beat, who always thinks subtitles are too big. Sounds trivial, but it saves a feedback round every single time."
+          },
           "created_at": "2026-08-26T16:14:54.691073+00:00",
           "sort_order": 1006,
-          "updated_at": "2026-08-26T22:27:38.600669+00:00"
+          "updated_at": "2026-09-04T15:45:23.20452+00:00"
         },
         {
           "id": "b8603d3f-d005-428d-8b39-a49fb27793ef",
@@ -1432,10 +1496,12 @@ window.SEED_SEITEN = {
             "farbe": "salbei"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "The result also said I'm good at remembering names and birthdays, but that's not true. Don't take it personally if I forget your name🫶"
+          },
           "created_at": "2026-08-26T22:27:17.702643+00:00",
           "sort_order": 1006.25,
-          "updated_at": "2026-08-26T22:27:33.950123+00:00"
+          "updated_at": "2026-09-04T15:45:36.813157+00:00"
         },
         {
           "id": "e598ca0d-c59a-46a5-827a-dd5ce5cf44ac",
@@ -1445,10 +1511,12 @@ window.SEED_SEITEN = {
             "roh": "### Leise heißt nicht unsicher"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "### Quiet doesn't mean unsure"
+          },
           "created_at": "2026-08-26T16:41:39.999796+00:00",
           "sort_order": 1006.5,
-          "updated_at": "2026-08-26T17:22:37.284835+00:00"
+          "updated_at": "2026-09-04T15:45:41.740737+00:00"
         },
         {
           "id": "e957bac7-ef4c-440d-8d09-fd1a9f9092fb",
@@ -1458,10 +1526,12 @@ window.SEED_SEITEN = {
             "roh": "Ich sage nichts, wovon ich keine Ahnung habe. Wenn jemand anderes in einer Sache besser ist als ich, halte ich mein Mund und höre zu"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "I don't talk about things I have no clue about. If someone else is better at something than me, I keep my mouth shut and listen"
+          },
           "created_at": "2026-08-26T16:41:50.613245+00:00",
           "sort_order": 1006.75,
-          "updated_at": "2026-08-26T16:43:43.681102+00:00"
+          "updated_at": "2026-09-04T15:45:57.251116+00:00"
         },
         {
           "id": "6bd50421-e3de-49d4-87db-c7c4fbc380e9",
@@ -1471,10 +1541,12 @@ window.SEED_SEITEN = {
             "roh": "Umgekehrt gilt das aber genauso. Wenn ich sage, dass ein Format nicht laufen wird oder dass ein Weg uns unnötig Zeit kostet, dann ist das kein Bauchgefühl und keine Geschmacksfrage. Dann hab ich das schon dreimal gesehen und weiß, wie es ausgeht."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
+          "inhalt_en": {
+            "roh": "But the reverse is just as true. When I say a format won't work or that a certain route is going to cost us unnecessary time, that's not a gut feeling and not a matter of taste. It means I've seen it three times already and know how it ends."
+          },
           "created_at": "2026-08-26T16:42:24.713513+00:00",
           "sort_order": 1006.875,
-          "updated_at": "2026-08-26T16:43:50.611423+00:00"
+          "updated_at": "2026-09-04T15:45:57.95019+00:00"
         },
         {
           "id": "5fe6383d-2580-4baa-814f-7c53c198dd75",
