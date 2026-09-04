@@ -7,6 +7,9 @@
   const LUFT = 8;          // Mindestabstand zwischen zwei Etiketten
   const LUFT_SEG = 6;      // sichtbarer Abstand zwischen zwei Segmenten (~6 px, s. Vorgaben)
 
+  /* Feste Beschriftungen. Ohne sprache.js bleibt es beim deutschen Wort. */
+  const T = (schluessel, deutsch) => (window.mmText ? window.mmText(schluessel) : '') || deutsch;
+
   window.mmLeiste = function (wurzel, abschnitte, { scroller }) {
     wurzel.className = 'mml';
     wurzel.innerHTML =
@@ -17,10 +20,10 @@
       '<div class="mml-etiketten"></div>' +
       '<div class="mml-kopf"><div class="mml-rund"></div></div>' +
       '<div class="mml-fuss">' +
-        '<div><span style="background:#3E5A78"></span>berufliche Projekte</div>' +
-        '<div><span></span>persönliches</div>' +
+        '<div><span style="background:#3E5A78"></span>' + T('leiste-beruflich', 'berufliche Projekte') + '</div>' +
+        '<div><span></span>' + T('leiste-persoenlich', 'persönliches') + '</div>' +
       '</div>' +
-      '<div class="mml-griff" title="offen halten">‹</div>';
+      '<div class="mml-griff" title="' + T('leiste-griff', 'offen halten') + '">‹</div>';
 
     const gleis = wurzel.querySelector('.mml-gleis'),
           lage  = wurzel.querySelector('.mml-etiketten'),

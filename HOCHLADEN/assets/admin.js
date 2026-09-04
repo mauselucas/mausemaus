@@ -17,6 +17,7 @@ import {
   darfDurchsCanvas, endungFuerMime, endungUndArtFuerBlob,
 } from '/assets/block-modell.js';
 import { mountBlockEditor } from '/assets/blockeditor.js';
+import { mountUebersetzung } from '/assets/uebersetzen.js';
 import { richteAnleitungEin } from '/assets/anleitung.js';
 
 const CFG = window.MM_CONFIG || {};
@@ -316,6 +317,7 @@ async function seitenfeldSofortSpeichern(id, felder) {
 let AKTUELL = null;       // die gerade geöffnete Zeile aus `seiten`
 let EDITOR = null;        // Rückgabe von mountBlockEditor()
 let SEITEN_WARTESCHLANGE = null;
+let UEBERSETZUNG = null;   // Rückgabe von mountUebersetzung(), oder null
 
 /* Der Entwurf fuer die Datenbank -- OHNE `id`, damit die Spalte ihren
    eigenen Vorgabewert erzeugen kann (siehe leerSeitenEntwurf). */
@@ -377,6 +379,7 @@ async function editorSchliessen({ zurZurListe }) {
   EDITOR?.zerstoeren();
   EDITOR = null;
   SEITEN_WARTESCHLANGE = null;
+  await uebersetzungSchliessen();
   panelsSchliessen();
   $('#view-edit').hidden = true;
   if (zurZurListe) { $('#view-list').hidden = false; await listeLaden(); }
@@ -480,6 +483,68 @@ async function oeffneEditor(seite) {
   slugZeile.hidden = AKTUELL.typ !== 'welt';
   slugZeile.textContent = 'Adresse dieser Welt: /welt/' + (AKTUELL.slug || '—');
 }
+
+/* ---------- Die englische Fassung ----------
+   Sie ersetzt im selben Bereich das Dokument. Kein zweiter Modus im
+   Blockeditor -- warum, steht in assets/uebersetzen.js. */
+
+async function uebersetzungSchliessen() {
+  if (!UEBERSETZUNG) return;
+  /* Noch nicht geschriebene Aenderungen abwarten, wie beim Blockeditor
+     auch -- sonst ginge der zuletzt getippte Satz beim Schliessen weg. */
+  while (UEBERSETZUNG.beschaeftigt()) await new Promise(r => setTimeout(r, 30));
+  UEBERSETZUNG = null;
+  $('#speicher-status').onclick = null;
+  $('#view-uebersetzen').hidden = true;
+  $('#view-uebersetzen').innerHTML = '';
+  $('#dokument').hidden = false;
+  document.querySelector('.dok-bereich').classList.remove('breit');
+  $('#btn-uebersetzen').classList.remove('an');
+}
+
+$('#btn-uebersetzen').addEventListener('click', async () => {
+  if (UEBERSETZUNG) { await uebersetzungSchliessen(); return; }
+  if (!AKTUELL) return;
+  panelsSchliessen();
+
+  /* Frisch aus der Datenbank lesen statt den Stand des Blockeditors zu
+     benutzen: Der haelt `inhalt_en` gar nicht -- er kennt die Spalte nicht
+     und soll sie auch nicht kennen. */
+  const { data: bloecke, error } = await sb.from('bloecke')
+    .select('id,typ,inhalt,inhalt_en,sort_order').eq('seite_id', AKTUELL.id).order('sort_order');
+  if (error) { toast('Blöcke konnten nicht geladen werden: ' + error.message, true); return; }
+
+  $('#dokument').hidden = true;
+  $('#view-uebersetzen').hidden = false;
+  /* Nebeneinander braucht Platz: die Dokumentspalte ist auf 768 px
+     ausgelegt, deutsch UND englisch nebeneinander passen da nicht hinein. */
+  document.querySelector('.dok-bereich').classList.add('breit');
+  $('#btn-uebersetzen').classList.add('an');
+
+  const status = $('#speicher-status');
+  UEBERSETZUNG = mountUebersetzung($('#view-uebersetzen'), {
+    sb, seite: AKTUELL, bloecke,
+    statusMelden(art, fehler) {
+      if (art === 'speichert') { status.classList.remove('status-fehler'); status.textContent = 'speichert…'; }
+      else if (art === 'gespeichert') {
+        status.classList.remove('status-fehler');
+        status.textContent = 'gespeichert ' + new Date().toLocaleTimeString('de-DE');
+      } else {
+        status.classList.add('status-fehler');
+        status.textContent = 'nicht gespeichert — klicken zum Wiederholen';
+        toast('Nicht gespeichert: ' + (fehler?.message || fehler), true);
+      }
+    },
+  });
+  UEBERSETZUNG.beiFertig(() => uebersetzungSchliessen());
+
+  /* Ein Klick auf "nicht gespeichert" schickt auch hier den letzten Stand
+     erneut los -- genau wie im Blockeditor. onclick statt addEventListener:
+     so haengt bei jedem Oeffnen genau EIN Handler dran, nicht ein weiterer. */
+  status.onclick = () => {
+    if (UEBERSETZUNG && status.classList.contains('status-fehler')) UEBERSETZUNG.alleWiederholen();
+  };
+});
 
 /* ---------- Die beiden Panels (⚙ Einstellungen, ? Hilfe) ----------
    Sie liegen über dem Dokument und sind immer nur auf Zuruf da -- die

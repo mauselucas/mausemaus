@@ -577,3 +577,68 @@ body.admin {
   box-shadow: 0 0 0 2px var(--flaeche), 0 0 0 4px var(--text);
 }
 .be-farbe:focus-visible { outline: 2px solid var(--akzent); outline-offset: 3px; }
+
+/* ===== Die englische Fassung =====
+   Zwei Spalten: links der deutsche Text zum Abschreiben, rechts das
+   englische Feld. Ein leeres Feld heisst "hier bleibt Deutsch" -- deshalb
+   ist ein ausgefuelltes Feld ruhig markiert und ein leeres KEIN Fehler. */
+.dok-bereich.breit { max-width: 1180px; }
+.stumm.an { background:#f0efee; color:var(--text); }
+
+.uebersetzung { display:flex; flex-direction:column; gap:18px; }
+.ue-kopf {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:20px; flex-wrap:wrap;
+  padding-bottom:16px; border-bottom:1px solid var(--linie);
+}
+.ue-kopf h2 { font-size:20px; font-weight:600; margin:0 0 4px; }
+.ue-kopf p { max-width:44ch; }
+.ue-knoepfe { display:flex; gap:8px; flex-wrap:wrap; }
+
+.ue-meldung { font-size:13px; line-height:1.5; margin:0; }
+.ue-meldung:empty { display:none; }
+.ue-meldung.gut { color:#3f6212; }
+.ue-meldung.schlecht { color:#9f1239; }
+
+.ue-einfuegen { display:flex; flex-direction:column; gap:10px;
+  padding:14px; border:1px solid var(--linie-stark); border-radius:10px; background:var(--hg); }
+.ue-einfuegen textarea, .ue-rohtext {
+  width:100%; font-family:'Space Mono',monospace; font-size:12.5px; line-height:1.6;
+  padding:10px; border:1px solid var(--linie-stark); border-radius:8px; resize:vertical;
+}
+
+.ue-liste { display:flex; flex-direction:column; gap:2px; }
+.ue-zeile {
+  display:grid; grid-template-columns:34px 1fr 1fr; gap:16px; align-items:start;
+  padding:14px 10px; border-radius:10px; border-bottom:1px solid var(--linie);
+}
+.ue-zeile:hover { background:var(--hg); }
+.ue-marke {
+  font-family:'Space Mono',monospace; font-size:11px; color:var(--grau-stark);
+  padding-top:20px; text-align:right;
+}
+.ue-label {
+  display:block; font-family:'Space Mono',monospace; font-size:10px;
+  letter-spacing:1px; text-transform:uppercase; color:var(--grau-stark); margin-bottom:6px;
+}
+/* Der deutsche Text ist ABSICHTLICH kein Eingabefeld: hier wird nicht
+   redigiert. Wer den deutschen Text aendern will, tut das im Dokument. */
+.ue-deutsch {
+  font-size:14px; line-height:1.6; color:var(--grau);
+  white-space:pre-wrap; word-break:break-word;
+}
+.ue-en input, .ue-en textarea {
+  width:100%; font-family:'Manrope',sans-serif; font-size:14px; line-height:1.6;
+  padding:8px 10px; border:1px solid var(--linie-stark); border-radius:8px;
+  background:var(--flaeche); color:var(--text); resize:vertical;
+}
+.ue-en input:focus, .ue-en textarea:focus { outline:2px solid var(--akzent, #7F8F55); outline-offset:-1px; }
+.ue-zeile.ue-fertig .ue-marke { color:#7F8F55; }
+.ue-zeile.ue-fertig .ue-en input,
+.ue-zeile.ue-fertig .ue-en textarea { border-color:#BFCC94; }
+
+@media (max-width: 860px) {
+  .ue-zeile { grid-template-columns:28px 1fr; }
+  .ue-marke { padding-top:18px; }
+  .ue-de, .ue-en { grid-column:2; }
+}

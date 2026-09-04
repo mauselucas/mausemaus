@@ -170,7 +170,9 @@ function renderMarkdown(src) {
         '<figure class="code-block">'
         + '<figcaption class="code-kopf">'
         +   `<span class="code-sprache">${esc(spr.label)}</span>`
-        +   '<button type="button" class="code-kopieren">Kopieren</button>'
+        +   '<button type="button" class="code-kopieren">'
+        +     ((window.mmText && window.mmText('code-kopieren')) || 'Kopieren')
+        +   '</button>'
         + '</figcaption>'
         + `<pre><code class="language-${esc(spr.hl)}">${esc(inhalt.join('\n'))}</code></pre>`
         + '</figure>');

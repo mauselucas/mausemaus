@@ -78,7 +78,12 @@
      "anon" ohnehin per REVOKE gesperrt (siehe Migration), select=* auf den
      eingebetteten Blöcken würde also mit einem Rechte-Fehler scheitern.
      Die Spaltenliste hier ist deshalb Teil des Vertrags, nicht nur Zierde. */
-  const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,breite,sort_order,created_at,updated_at';
+  /* `inhalt_en` traegt die englische Fassung eines Blocks. Sie MUSS hier
+     stehen und in der Datenbank einzeln freigegeben sein
+     (grant select (inhalt_en) ... to anon) -- `bloecke` hat wegen der
+     privaten Spalte `notiz` ein spaltenweises Recht, eine neue Spalte ist
+     darin sonst nicht enthalten und bliebe fuer Besucher unsichtbar. */
+  const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,inhalt_en,breite,sort_order,created_at,updated_at';
   const eingebettet = `select=*,bloecke(${BLOCK_SPALTEN})`;
 
   const sortiereBloecke = (seite) => {

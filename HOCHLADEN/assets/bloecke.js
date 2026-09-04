@@ -28,9 +28,17 @@
   const FARBEN = new Set(['salbei', 'oliv', 'ocker', 'terrakotta', 'violett', 'tiefblau', 'schiefer']);
   const farbeVon = (inh) => (inh && FARBEN.has(inh.farbe) ? inh.farbe : null);
 
+  /* Der Inhalt eines Blocks in der GERADE gewaehlten Sprache. sprache.js
+     verschmilzt dafuer `inhalt_en` feldweise ueber `inhalt` und nimmt nur
+     nicht-leere Werte -- ein nur halb uebersetzter Block behaelt also seine
+     deutschen Reste, statt Luecken zu zeigen. Fehlt sprache.js (Netzfehler,
+     aeltere Pruefung), bleibt es beim deutschen `inhalt`. Diese Datei kennt
+     die Sprache sonst nicht und soll sie auch nicht kennen. */
+  const inhaltVon = (block) => (window.mmInhaltVon ? window.mmInhaltVon(block) : (block.inhalt || {}));
+
   function einhuellen(html, block) {
     if (!html || block.typ === 'randnotiz' || block.typ === 'abschnitt') return html;
-    const inh = block.inhalt || {};
+    const inh = inhaltVon(block);
     const breite = block.breite && block.breite !== 'normal' ? block.breite : null;
     /* Textfarbe nur beim reinen Textblock -- bei Kasten und Zitat traegt das
        Element seine Farbe selbst (Hintergrund bzw. Balken). */
@@ -51,7 +59,7 @@
      Umschließen selbst ändert nichts an dem, was renderMarkdown() erzeugt,
      nur die CSS-Regeln dieser Klasse greifen dann zusätzlich. */
   function render(block, textKlasse) {
-    const typ = block.typ, inh = block.inhalt || {};
+    const typ = block.typ, inh = inhaltVon(block);
     if (ROH_TYPEN.has(typ)) {
       const html = window.mm.renderMarkdown(inh.roh || '');
       const inhalt = textKlasse ? '<div class="' + textKlasse + '">' + html + '</div>' : html;
@@ -65,7 +73,7 @@
           (inh.zeile2 ? '<span>' + window.mm.esc(inh.zeile2) + '</span>' : '') + '</dd></div>';
       case 'tuer':
         return einhuellen('<p class="br-mehr"><a class="mm-tuer" href="' + window.mm.esc(inh.ziel || '#') + '">' +
-          window.mm.esc(inh.text || 'Mehr dazu') + '</a></p>', block);
+          window.mm.esc(inh.text || (window.mmText && window.mmText('tuer-mehr')) || 'Mehr dazu') + '</a></p>', block);
       case 'kasten': {
         const f = farbeVon(inh);
         return einhuellen('<div class="mm-kasten' + (f ? ' mm-farbe-' + f : '') + '">'
@@ -106,7 +114,7 @@
     const gruppen = [];
     sortiert.forEach(b => {
       if (b.typ === 'abschnitt') {
-        const i = b.inhalt || {};
+        const i = inhaltVon(b);
         gruppen.push({
           titel: i.titel || '', art: i.art || 'beruflich', farbe: i.farbe || null,
           inhalt: i, blocks: [],

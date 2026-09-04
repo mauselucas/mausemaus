@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>mausemaus — Verwaltung</title>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787944189">
-<link rel="stylesheet" href="/assets/site.css?v=1787944189">
-<link rel="stylesheet" href="/assets/inhalt.css?v=1787944189">
-<link rel="stylesheet" href="/assets/admin.css?v=1787944189">
+<link rel="stylesheet" href="/assets/fonts.css?v=1788532167">
+<link rel="stylesheet" href="/assets/site.css?v=1788532167">
+<link rel="stylesheet" href="/assets/inhalt.css?v=1788532167">
+<link rel="stylesheet" href="/assets/admin.css?v=1788532167">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -68,6 +68,9 @@
       <button class="stumm" id="btn-zurueck">← Zurück</button>
       <span class="status" id="speicher-status" aria-live="polite"></span>
       <span class="flex"></span>
+      <!-- Die englische Fassung dieser Seite. Eigene Ansicht statt zweiter
+           Modus im Blockeditor -- Begruendung in assets/uebersetzen.js. -->
+      <button class="stumm" id="btn-uebersetzen" title="Die englische Fassung dieser Seite pflegen">EN Englisch</button>
       <button class="stumm" id="btn-einstellungen" aria-expanded="false" aria-controls="panel-einstellungen">⚙︎ Einstellungen</button>
       <button class="stumm" id="btn-anleitung" aria-expanded="false" aria-controls="panel-anleitung">? Hilfe</button>
       <details class="menue" id="seiten-menue">
@@ -93,6 +96,11 @@
         </div>
         <div id="block-editor"></div>
       </article>
+
+      <!-- Die Uebersetzungs-Ansicht liegt IM selben Bereich und ersetzt das
+           Dokument, statt darueber zu schweben: Es ist dieselbe Seite,
+           nur in der anderen Sprache -- kein Nebenschauplatz. -->
+      <section class="uebersetzung" id="view-uebersetzen" hidden></section>
     </div>
   </main>
 
@@ -245,6 +253,23 @@
             <li><code>Esc</code> — Menüs und Panels schließen.</li>
           </ul>
 
+          <h3>Die englische Fassung</h3>
+          <p>Oben rechts sitzt der Knopf <b>EN Englisch</b>. Er zeigt dieselbe Seite noch einmal,
+            nur zum Übersetzen: links steht dein deutscher Text, rechts tippst du das Englische
+            daneben. <b>Was du leer lässt, bleibt auf der Seite deutsch stehen</b> — du kannst also
+            jederzeit aufhören und später weitermachen, es sieht nie kaputt aus.</p>
+          <p>Für eine ganze Seite auf einmal:</p>
+          <ol>
+            <li>„Ganze Seite zum Übersetzen kopieren“ drücken.</li>
+            <li>In ChatGPT einfügen und abschicken — die Anweisung steht schon mit im Text.</li>
+            <li>Die Antwort kopieren, hier auf „Übersetzung einfügen“ drücken, hineinkopieren,
+              „Übernehmen“. Zugeordnet wird über die Nummern in eckigen Klammern; was sich nicht
+              zuordnen lässt, wird nicht angefasst und dir gemeldet.</li>
+          </ol>
+          <p class="klein grau">Bilder, Videos, Code und Trennstriche tauchen dort nicht auf —
+            an denen gibt es nichts zu übersetzen. Besucher stellen die Sprache oben rechts auf
+            der Seite um; der Link <code>mausemaus.com/?lang=en</code> geht direkt englisch auf.</p>
+
           <p class="klein grau">Alles wird laufend automatisch gespeichert, oben steht „speichert…“
             bzw. „gespeichert HH:MM:SS“ — kein Speichern-Knopf nötig. Steht dort rot
             „nicht gespeichert“, kam der letzte Stand nicht an: einmal darauf klicken schickt ihn erneut los.</p>
@@ -257,10 +282,10 @@
 <div class="ladebalken" id="ladebalken" hidden><div></div></div>
 <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-<script src="/assets/config.js?v=1787944189"></script>
-<script src="/assets/shared.js?v=1787944189"></script>
-<script src="/assets/bloecke.js?v=1787944189"></script>
-<script src="/assets/inhalt.js?v=1787944189"></script>
-<script type="module" src="/assets/admin.js?v=1787944189"></script>
+<script src="/assets/config.js?v=1788532167"></script>
+<script src="/assets/shared.js?v=1788532167"></script>
+<script src="/assets/bloecke.js?v=1788532167"></script>
+<script src="/assets/inhalt.js?v=1788532167"></script>
+<script type="module" src="/assets/admin.js?v=1788532167"></script>
 </body>
 </html>

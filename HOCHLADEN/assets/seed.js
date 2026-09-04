@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt von tests/hochladen.mjs — Stand: 28.8.2026.
+   Automatisch erzeugt von tests/hochladen.mjs — Stand: 4.9.2026.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 window.SEED_SETTINGS = {
@@ -264,6 +264,8 @@ window.SEED_SEITEN = {
     "sort_order": 1,
     "created_at": "2026-08-22T17:46:48.907163+00:00",
     "updated_at": "2026-08-22T17:46:48.907163+00:00",
+    "titel_en": null,
+    "untertitel_en": null,
     "bloecke": [
       {
         "id": "f96b79b6-ff10-4fde-aa3f-0014cc986307",
@@ -278,6 +280,7 @@ window.SEED_SEITEN = {
           "zusatz": "Lucas :)"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 10,
         "updated_at": "2026-08-26T14:58:02.972178+00:00"
@@ -293,6 +296,7 @@ window.SEED_SEITEN = {
           "zeile2": "remote möglich"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 30,
         "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -308,6 +312,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 40,
         "updated_at": "2026-08-25T07:55:17.422905+00:00"
@@ -323,6 +328,7 @@ window.SEED_SEITEN = {
           "zeile2": "3D in Arbeit"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 50,
         "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -338,6 +344,7 @@ window.SEED_SEITEN = {
           "zeile2": "Mediengestalter Bild & Ton"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 60,
         "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -354,6 +361,7 @@ window.SEED_SEITEN = {
           "kicker": "Wer schneidet da"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 70,
         "updated_at": "2026-08-26T14:56:13.777974+00:00"
@@ -366,6 +374,7 @@ window.SEED_SEITEN = {
           "roh": "Das hier ist mein kleines Portfolio wo ich einfach meine Projekte sammle und kurz was dazu erzähle :) Ich sitz den Großteil des Tages in Resolve und After Effects und sonst zeichne ich auch ganz gerne! "
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 80,
         "updated_at": "2026-08-26T15:19:03.801617+00:00"
@@ -379,6 +388,7 @@ window.SEED_SEITEN = {
           "farbe": "salbei"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-26T22:29:15.662511+00:00",
         "sort_order": 85.625,
         "updated_at": "2026-08-26T22:29:46.451969+00:00"
@@ -391,6 +401,7 @@ window.SEED_SEITEN = {
           "roh": "Mein Skilltree im Schnitt besteht aus so vielen Zweigen weil ich irgendwie alles lernen wollte und bin deshalb gut als allrounder einsetzbar. Am wohlsten fühl ich mich aber in After Effects wo ich animieren kann."
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-26T15:10:49.379514+00:00",
         "sort_order": 87.5,
         "updated_at": "2026-08-26T15:19:26.069518+00:00"
@@ -403,6 +414,7 @@ window.SEED_SEITEN = {
           "roh": " Mein Traum ist es irgendwann für [kurzgesagt](https://www.youtube.com/@KurzgesagtDE) zu arbeiten!"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-26T15:19:13.6591+00:00",
         "sort_order": 89.375,
         "updated_at": "2026-08-26T15:19:58.715788+00:00"
@@ -415,6 +427,7 @@ window.SEED_SEITEN = {
           "roh": "Bin immer offen für Projekte also hmu falls du einen Editor suchst! 🫶"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-26T15:14:41.491829+00:00",
         "sort_order": 91.25,
         "updated_at": "2026-08-26T15:19:09.821528+00:00"
@@ -430,6 +443,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:55:30.570133+00:00",
         "sort_order": 95,
         "updated_at": "2026-08-25T07:56:07.002443+00:00"
@@ -445,6 +459,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:56:12.262818+00:00",
         "sort_order": 97.5,
         "updated_at": "2026-08-25T07:56:17.230511+00:00"
@@ -460,6 +475,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:56:25.432693+00:00",
         "sort_order": 98.75,
         "updated_at": "2026-08-25T07:56:30.910774+00:00"
@@ -475,6 +491,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:56:48.688677+00:00",
         "sort_order": 99.375,
         "updated_at": "2026-08-25T07:56:55.707891+00:00"
@@ -490,6 +507,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:57:01.23856+00:00",
         "sort_order": 99.6875,
         "updated_at": "2026-08-25T07:57:06.99653+00:00"
@@ -505,6 +523,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:57:09.83416+00:00",
         "sort_order": 99.84375,
         "updated_at": "2026-08-25T07:57:13.500573+00:00"
@@ -520,6 +539,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:57:16.483414+00:00",
         "sort_order": 99.921875,
         "updated_at": "2026-08-25T07:57:20.219041+00:00"
@@ -535,6 +555,7 @@ window.SEED_SEITEN = {
           "zeile2": ""
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-25T07:57:24.816136+00:00",
         "sort_order": 99.9609375,
         "updated_at": "2026-08-25T07:57:39.145267+00:00"
@@ -552,6 +573,7 @@ window.SEED_SEITEN = {
           "telefon": "0151 68186659"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
+        "inhalt_en": null,
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 110,
         "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -577,6 +599,8 @@ window.SEED_SEITEN = {
       "sort_order": 1,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-26T13:38:05.457203+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "5685165e-b8a2-4c4f-bf17-9320c8dfbbca",
@@ -586,6 +610,7 @@ window.SEED_SEITEN = {
             "roh": "Ich arbeite derzeit als freier Video Editor und Motion Designer für den Content Creator *Bastian Keller* im Umfeld von Bitbull. Im Zentrum steht sein Instagram-Hauptaccount, daneben bauen wir aktuell weitere, kleinere Profile für ihn auf. "
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 20,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -598,6 +623,7 @@ window.SEED_SEITEN = {
             "roh": "Zusätzlich unterstütze ich auf seinem YouTube-Kanal bei den täglichen Krypto-News-Updates ebenso wie bei den größeren Dokumentationsvideos, wo ich vor allem bei der Ideenfindung, dem Thumbnail-Design sowie im Schnitt und bei Animationen mitarbeite. Meine Stärken liegen im Schnitt von Motion Graphics und Animationen sowie im Design performancestarker Thumbnails."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -610,6 +636,7 @@ window.SEED_SEITEN = {
             "roh": "In den täglichen Team-Meetings bringe ich außerdem kreative Content-Ideen ein und wirke an der Content-Strategie mit."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -622,6 +649,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -646,6 +674,8 @@ window.SEED_SEITEN = {
       "sort_order": 2,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-22T17:46:48.907163+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "772c5ac9-30b4-42a4-8c8b-c98b55ccd315",
@@ -655,6 +685,7 @@ window.SEED_SEITEN = {
             "roh": "\"The Race\" ist eine deutsche Adventure-Serie für Joyn/ProSieben, in der Teilnehmende ohne Geld und Vorbereitung Tausende Kilometer zu einem Ziel zurücklegen müssen – gefilmt weitgehend von den Teilnehmenden selbst, ohne klassische Regie. Ich war bei 33minutes als Mediengestalter Bild & Ton für Grundschnitt, Feinschnitt und sämtliche Motion Graphics zuständig, sowohl für die reguläre Staffel 3 als auch für die vorgelagerte Wildcard Challenge."
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -667,6 +698,7 @@ window.SEED_SEITEN = {
             "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786804948750-imdb.webp){klein}"
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -679,6 +711,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -691,6 +724,7 @@ window.SEED_SEITEN = {
             "roh": "Ein zentraler Teil der Arbeit waren wiederkehrende Grafikeinblendungen – etwa Kontostand-Animationen, wenn Teilnehmende Geld erhalten oder verloren haben, dazu Uhrzeit-, Temperatur- und Sponsoring-Einblendungen, jeweils in der Teamfarbe der jeweiligen Teilnehmenden. Da ich im Team quasi der Einzige mit After-Effects-Erfahrung war und der Zeitdruck sehr hoch war, habe ich die komplette Pipeline automatisiert: Ein selbstgeschriebenes After-Effects-Script erzeugte die Animationen über ein einfaches Eingabe-Panel statt manueller Einzelbearbeitung. Darauf aufbauend habe ich eine eigene macOS-App entwickelt, die direkt die bestehende Excel-Tabelle mit allen Werten einlas und die Animationen vollautomatisch rendern ließ. "
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 60,
           "updated_at": "2026-08-26T15:22:24.848379+00:00"
@@ -704,6 +738,7 @@ window.SEED_SEITEN = {
             "ziel": "/blog/the-race-automatisierung"
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 75,
           "updated_at": "2026-08-26T15:22:47.282715+00:00"
@@ -716,6 +751,7 @@ window.SEED_SEITEN = {
             "roh": "Bei einzelnen Folgen war ich zudem an der Storyplanung beteiligt und praktisch für den kompletten Schnitt verantwortlich. Als konkrete Referenz eignet sich besonders Folge 3, bei der ich den Großteil eigenständig übernommen habe: von der Storyline über das Verweben des Teilnehmenden-Footage zu einer spannungsreichen Erzählung bis hin zur kompletten Animation."
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 90,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -729,6 +765,7 @@ window.SEED_SEITEN = {
             "ziel": "https://www.youtube.com/watch?v=a852kZ4VCgk"
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 95,
           "updated_at": "2026-08-26T15:41:35.656101+00:00"
@@ -741,6 +778,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 100,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -765,6 +803,8 @@ window.SEED_SEITEN = {
       "sort_order": 3,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-22T17:46:48.907163+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "f65e423a-6e10-4ac8-a790-ea84b48f5736",
@@ -774,6 +814,7 @@ window.SEED_SEITEN = {
             "roh": "Für den YouTube-Kanal von Jules war ich Teil eines fünfköpfigen Editing-Teams. Die Arbeitsweise: Wir bekamen jeweils nur die fertige Tonspur eines Videos und die Aufgabe, uns kreativ frei zu entfalten – innerhalb des etablierten Jules-Stils, aber ohne festes Skript für den visuellen Teil. Jeder im Team suchte sich einen Abschnitt aus, schnitt ihn, baute Animationen und wählte passende Memes und Footage aus."
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 20,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -786,6 +827,7 @@ window.SEED_SEITEN = {
             "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786805044507-cleanshot-2026-08-15-at-16-06-55-2x.webp){mittel}"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -798,6 +840,7 @@ window.SEED_SEITEN = {
             "roh": "Der Prozess lief iterativ: Erst ein grober Schnitt mit Grundkonzept und Platzhaltern, dann Verfeinerung. Stellen, für die noch keine passende Idee oder kein passendes Material da war, blieben zunächst offen und wurden in wöchentlichen Feedback-Runden mit dem ganzen Team weiterentwickelt – dort wurde gegenseitig geholfen, Ideen ausgetauscht und Jules selbst gab regelmäßig Input. Am Ende entscheidet Jules, was im finalen Video wie verwendet wird; Teile werden verschoben, angepasst oder von ihm selbst nachbearbeitet, da der Kanal seiner ist."
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -810,6 +853,7 @@ window.SEED_SEITEN = {
             "roh": "Weil in einem Team-Editing-Prozess mit mehreren Überarbeitungsschritten kein einzelnes Video eindeutig einer Person zuzuordnen ist, hier stattdessen konkrete Timestamps, an denen mein Schnitt im finalen Video zu sehen ist:"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 70,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -822,6 +866,7 @@ window.SEED_SEITEN = {
             "roh": "\"**Das Scheitern von Walmart in Deutschland**\" – 0:55–1:54, 5:19–5:42, 7:19–7:35"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:31:45.614961+00:00",
           "sort_order": 107.5,
           "updated_at": "2026-08-26T22:31:52.226238+00:00"
@@ -834,6 +879,7 @@ window.SEED_SEITEN = {
             "roh": "\"**Eine Anleitung für die Autobahn**\" – 11:36–13:09"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:31:52.015779+00:00",
           "sort_order": 108.75,
           "updated_at": "2026-08-26T22:31:56.150704+00:00"
@@ -846,6 +892,7 @@ window.SEED_SEITEN = {
             "roh": "\"**Ein Video über die Deutsche Bahn**\" – 4:58–5:15, 6:48–7:59"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:31:55.916616+00:00",
           "sort_order": 109.375,
           "updated_at": "2026-08-26T22:32:00.613617+00:00"
@@ -858,6 +905,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 110,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -882,6 +930,8 @@ window.SEED_SEITEN = {
       "sort_order": 4,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-22T17:46:48.907163+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "ed279988-233e-4c5a-82d9-d2c88b1c9b04",
@@ -891,6 +941,7 @@ window.SEED_SEITEN = {
             "roh": "Bei Simplicissimus war ich Teil eines rund 45-köpfigen Teams, das Dokumentationsvideos im bekannten Simplicissimus Stil produziert. Anders als bei kleineren Projekten gibt es hier mehr Vorgaben: Neben der zugewiesenen Tonspur bekommt man ein Skript mit Anweisungen zur groben Bildsprache und meist auch passendes Footage. Meine Aufgabe ist es, aus den groben Ideen der Creative Direction einen stimmigen Schnitt zu bauen – hauptsächlich verantwortlich bin ich für Feinschnitt, 2D-Animationen und Effekte, unterstütze aber auch dort, wo gerade Bedarf ist."
           },
           "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 20,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -903,6 +954,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -915,6 +967,7 @@ window.SEED_SEITEN = {
             "roh": "Im Laufe der Zeit habe ich mir aus eigenem Interesse und mit Unterstützung der Animator:innen im Team 3D-Animation angeeignet – von einfachen bis hin zu komplexeren Szenen, die auch teilweise in den Videos zum Einsatz kommen. Auch wenn die Struktur bei Simplicissimus enger ist als etwa bei Jules, ist sie keineswegs starr: Eigene Ideen einzubringen ist ausdrücklich erwünscht, teils sogar bevorzugt. Wie bei Teamproduktionen üblich lässt sich auch hier kein Video eindeutig \"das habe ich gemacht\" zuordnen, da man parallel an mehreren Projekten mitarbeitet."
           },
           "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
           "updated_at": "2026-08-26T15:30:28.018539+00:00"
@@ -927,6 +980,7 @@ window.SEED_SEITEN = {
             "roh": "Als Referenz eignet sich das Video \"The CIA's Scariest Weapon\", bei dem ich größtenteils den Feinschnitt sowie mehrere 3D-Animationen übernommen habe – darunter die 3D-Animation des Röhrenfernsehers, während komplexere 3D-Szenen im Video von anderen Teammitgliedern stammen."
           },
           "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -939,6 +993,7 @@ window.SEED_SEITEN = {
             "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786801627043-simpli2.webp)"
           },
           "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 60,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -951,6 +1006,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "f72fe01f-6080-479d-ae6d-22d395db6ba9",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 70,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -975,6 +1031,8 @@ window.SEED_SEITEN = {
       "sort_order": 5,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-22T17:46:48.907163+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "223c4f66-6728-48eb-ab9f-4c4672230b13",
@@ -984,6 +1042,7 @@ window.SEED_SEITEN = {
             "roh": "Kilian, besser bekannt als Musiker Absent, kannte ich bereits aus einer früheren Zusammenarbeit (und weil ich großer fan bin jaja), bei der ich YouTube-Videos aus seinen Twitch-Highlights geschnitten hatte. Nach einigen Monaten ohne Kontakt meldete er sich spontan per FaceTime: Er brauchte kurzfristig ein Musikvideo zu seinem Song \"Rockstar Selfish\", hatte aber kein professionelles Kameramaterial – nur den Wunsch, aktuelle Bilder und Videos von seiner Tour einzubauen."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 20,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -996,6 +1055,7 @@ window.SEED_SEITEN = {
             "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786803223741-cleanshot-2026-08-15-at-16-13-25-2x.webp){klein}"
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1008,6 +1068,7 @@ window.SEED_SEITEN = {
             "roh": "Da der Release-Tag für Musik freitags ist und er sich erst zwei Tage vorher gemeldet hatte (ganz viel liebe), blieb kaum Zeit."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1020,6 +1081,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1032,6 +1094,7 @@ window.SEED_SEITEN = {
             "roh": "Aus früheren Streams wusste ich, dass Kilian einen iMac nutzt, und wollte ohnehin mal etwas im macOS-Look ausprobieren. Daraus entstand das Konzept: Ich bat ihn lediglich um eine Bildschirmaufnahme mit Photo Booth in drei verschiedenen Takes – mehr Rohmaterial gab es nicht. Aus diesem einfachen Ausgangsmaterial habe ich das komplette Video geschnitten, mit Effekten und eigenen Animationen versehen und die gewünschten Tour-Aufnahmen eingebaut. Kilian war von der Idee direkt überzeugt, eine Feedbackschleife war nicht nötig."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 60,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1044,6 +1107,7 @@ window.SEED_SEITEN = {
             "roh": "Auf den ersten Blick wirkt das Konzept simpel – im Kontext von Absent als Künstler und einigen anderen Musikvideos passt der reduzierte, direkte macOS-Look aber bewusst zu seiner Ästhetik. Angesichts der extrem kurzen Produktionszeit und des minimalen Ausgangsmaterials ist das Ergebnis ein rundes, in sich stimmiges Musikvideo."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 70,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1057,6 +1121,7 @@ window.SEED_SEITEN = {
             "farbe": "salbei"
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:32:34.237043+00:00",
           "sort_order": 77.5,
           "updated_at": "2026-08-26T22:32:44.355291+00:00"
@@ -1069,6 +1134,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 80,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1095,6 +1161,8 @@ window.SEED_SEITEN = {
       "sort_order": 1000,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-26T14:43:38.811635+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "034fd7ce-ad8f-4e2f-bb4c-45453322d420",
@@ -1105,6 +1173,7 @@ window.SEED_SEITEN = {
             "farbe": "salbei"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:25:45.646597+00:00",
           "sort_order": 19.75,
           "updated_at": "2026-08-26T22:25:55.704026+00:00"
@@ -1117,6 +1186,7 @@ window.SEED_SEITEN = {
             "roh": "## Das Werkzeug"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 20,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1129,6 +1199,7 @@ window.SEED_SEITEN = {
             "roh": "So sah das Eingabe-Panel ungefähr aus. Teilnehmer wählen, Animationsart wählen, Beträge eintragen — die Euro-Summe rechnet sich selbst. Die Teams und ihre Farben sind die aus der Serie."
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-08-26T14:43:38.811635+00:00"
@@ -1141,6 +1212,7 @@ window.SEED_SEITEN = {
             "roh": "::demo the-race-pipeline"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1153,6 +1225,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1165,6 +1238,7 @@ window.SEED_SEITEN = {
             "roh": "## Die Anbindung an After Effects"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 60,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1177,6 +1251,7 @@ window.SEED_SEITEN = {
             "roh": "Jede Einblendung ist eine Komposition mit benannten Textebenen. Das Skript sucht sie über den Namen, setzt die Werte und legt die Komposition in die Renderliste. Der Code unten ist neu geschrieben und generisch gehalten — er zeigt das Prinzip, nicht das Original."
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 70,
           "updated_at": "2026-08-26T14:43:38.811635+00:00"
@@ -1189,6 +1264,7 @@ window.SEED_SEITEN = {
             "roh": "```jsx\nfunction baueEinblendung(daten) {\n    var vorlage = findeComp(\"TPL_Betrag\");\n    var comp    = vorlage.duplicate();\n    comp.name   = daten.teilnehmer + \"_\" + daten.szene;\n\n    setzeText(comp, \"Summe\",  formatEuro(daten.eur));\n    setzeText(comp, \"Delta\",  (daten.delta > 0 ? \"+\" : \"\") + kurz(daten.delta));\n\n    var farbe = comp.layer(\"BG_Form\").property(\"Contents\")\n                    .property(\"Fill 1\").property(\"Color\");\n    farbe.setValue(hexZuRgb(daten.teamfarbe));\n\n    var eintrag = app.project.renderQueue.items.add(comp);\n    eintrag.outputModule(1).file = new File(daten.ziel);\n    return comp;\n}\n```"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 80,
           "updated_at": "2026-08-26T14:43:38.811635+00:00"
@@ -1201,6 +1277,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "8fe7621a-03f5-4341-87c0-93d543e2c013",
+          "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 90,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
@@ -1225,6 +1302,8 @@ window.SEED_SEITEN = {
       "sort_order": 1000,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
       "updated_at": "2026-08-26T18:11:44.273595+00:00",
+      "titel_en": null,
+      "untertitel_en": null,
       "bloecke": [
         {
           "id": "dfc33a08-f40b-4de8-9f54-39cfad19a5c9",
@@ -1235,6 +1314,7 @@ window.SEED_SEITEN = {
             "ohne_rahmen": true
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T19:11:10.273155+00:00",
           "sort_order": 999,
           "updated_at": "2026-08-26T19:13:01.294043+00:00"
@@ -1247,6 +1327,7 @@ window.SEED_SEITEN = {
             "roh": "16Personalities hat mich als ISFJ-T eingeordnet – \"Der Verteidiger\", aber in der turbulenten Variante. Die wissenschaftliche Basis bei solchen Tests ist zwar dünn, aber trotzdem standen da ein paar Sachen, bei denen ich mich unangenehm gut wiedererkannt hab (und weil ich den test cool finde🙂‍↕️) also nutze ich das hier mal als Anlass, um zu beschreiben, wie ich tatsächlich arbeite,  inklusive der Stellen, die nicht so schmeichelhaft sind!"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:09:10.896269+00:00",
           "sort_order": 1000,
           "updated_at": "2026-08-26T17:12:39.003696+00:00"
@@ -1259,6 +1340,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:47:02.537266+00:00",
           "sort_order": 1000.5,
           "updated_at": "2026-08-26T16:47:05.486499+00:00"
@@ -1271,6 +1353,7 @@ window.SEED_SEITEN = {
             "roh": "### Das Detail-Ding"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:11:53.28108+00:00",
           "sort_order": 1001,
           "updated_at": "2026-08-26T16:14:23.613888+00:00"
@@ -1283,6 +1366,7 @@ window.SEED_SEITEN = {
             "roh": "Das \"**S**\" steht für Sensing: Ich denke von konkreten Details aus, nicht von abstrakten Konzepten. In der Praxis heißt das, ich seh den einen Frame, in dem der Cut zu früh sitzt. Ich seh, dass das Lower Third auf Video 12 zwei Pixel weiter links steht als auf Video 11. Das nervt manchmal (auch mich selbst🚬) aber es bedeutet auch, dass niemand hinter mir herräumen muss."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:12:04.302091+00:00",
           "sort_order": 1002,
           "updated_at": "2026-08-26T16:13:50.723104+00:00"
@@ -1295,6 +1379,7 @@ window.SEED_SEITEN = {
             "roh": "Das \"**T**\" (turbulent) legt da nochmal einen drauf. Ich geh Sachen lieber doppelt durch, als drauf zu vertrauen, dass es schon passt. Verpasste Deadlines oder Exporte mit falscher Framerate hatte ich in Jahren Freelance-Arbeit nicht."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:13:09.649064+00:00",
           "sort_order": 1003,
           "updated_at": "2026-08-26T16:13:58.250794+00:00"
@@ -1307,6 +1392,7 @@ window.SEED_SEITEN = {
             "roh": "### Was das für Leute bedeutet, mit denen ich arbeite"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:14:11.011612+00:00",
           "sort_order": 1004,
           "updated_at": "2026-08-26T16:14:21.29481+00:00"
@@ -1319,6 +1405,7 @@ window.SEED_SEITEN = {
             "roh": "Der andere Teil ist das \"**F**\": Ich merk relativ früh, wenn bei einem Kunden was nicht stimmt. Wenn Feedback plötzlich knapper wird oder jemand dreimal um dieselbe Änderung bittet, ist meistens nicht die Änderung das Problem, sondern irgendwas darunter z.B eine Erwartung, die nie ausgesprochen wurde. Ich frag dann lieber einmal zu viel nach, bevor ich drei Versionen in die falsche Richtung baue."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:14:19.193458+00:00",
           "sort_order": 1005,
           "updated_at": "2026-08-26T16:14:50.768436+00:00"
@@ -1331,6 +1418,7 @@ window.SEED_SEITEN = {
             "roh": "Ich merk mir außerdem, was Leute wollen, ohne dass sie's nochmal sagen müssen. Welcher Kunde keine harten Cuts auf Beat mag, wer Untertitel grundsätzlich zu groß findet. Klingt banal, spart aber jedes Mal eine Feedback-Runde."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:14:54.691073+00:00",
           "sort_order": 1006,
           "updated_at": "2026-08-26T22:27:38.600669+00:00"
@@ -1344,6 +1432,7 @@ window.SEED_SEITEN = {
             "farbe": "salbei"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:27:17.702643+00:00",
           "sort_order": 1006.25,
           "updated_at": "2026-08-26T22:27:33.950123+00:00"
@@ -1356,6 +1445,7 @@ window.SEED_SEITEN = {
             "roh": "### Leise heißt nicht unsicher"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:41:39.999796+00:00",
           "sort_order": 1006.5,
           "updated_at": "2026-08-26T17:22:37.284835+00:00"
@@ -1368,6 +1458,7 @@ window.SEED_SEITEN = {
             "roh": "Ich sage nichts, wovon ich keine Ahnung habe. Wenn jemand anderes in einer Sache besser ist als ich, halte ich mein Mund und höre zu"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:41:50.613245+00:00",
           "sort_order": 1006.75,
           "updated_at": "2026-08-26T16:43:43.681102+00:00"
@@ -1380,6 +1471,7 @@ window.SEED_SEITEN = {
             "roh": "Umgekehrt gilt das aber genauso. Wenn ich sage, dass ein Format nicht laufen wird oder dass ein Weg uns unnötig Zeit kostet, dann ist das kein Bauchgefühl und keine Geschmacksfrage. Dann hab ich das schon dreimal gesehen und weiß, wie es ausgeht."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:42:24.713513+00:00",
           "sort_order": 1006.875,
           "updated_at": "2026-08-26T16:43:50.611423+00:00"
@@ -1392,6 +1484,7 @@ window.SEED_SEITEN = {
             "roh": "Nur klingt es bei mir nicht so. Der Test hat dafür das \"**F**\", im Detail extravertiertes Fühlen: Ich krieg die Stimmung im Raum mit und gehe automatisch auf Harmonie. Widerspruch fühlt sich für mich an, als würde ich jemanden bloßstellen, deshalb verpacke ich ihn weich. Dazu kommt der turbulente Anteil, das \"**T**\": Wenn ich einmal Gegenwind kriege, ist mein erster Reflex, mich selbst zu hinterfragen statt nachzulegen. Zusammen sorgt das dafür, dass ich eine Warnung ausspreche und beim Gegenüber ein unverbindlicher Vorschlag ankommt. Also wird der Weg genommen, vor dem ich gewarnt habe. Und irgendwann doch der, den ich von Anfang an gemeint habe. "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:42:36.166039+00:00",
           "sort_order": 1006.9375,
           "updated_at": "2026-08-26T16:45:00.701647+00:00"
@@ -1405,6 +1498,7 @@ window.SEED_SEITEN = {
             "farbe": ""
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T22:28:03.840891+00:00",
           "sort_order": 1006.9609375,
           "updated_at": "2026-08-26T22:28:13.647255+00:00"
@@ -1417,6 +1511,7 @@ window.SEED_SEITEN = {
             "roh": "Ich hab trotzdem nicht vor, das zu ändern, indem ich lauter werde. Wer im Meeting am längsten redet, hat nicht recht, sondern nur geredet. Was ich stattdessen mache: Ich liefere die Begründung gleich mit und einen Weg, wie man mich schnell überprüfen kann. Zwei Wochen testen, Zahlen anschauen, danach entscheiden."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:45:00.944085+00:00",
           "sort_order": 1006.96875,
           "updated_at": "2026-08-26T16:46:28.072079+00:00"
@@ -1429,6 +1524,7 @@ window.SEED_SEITEN = {
             "roh": "---"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:46:33.288256+00:00",
           "sort_order": 1006.984375,
           "updated_at": "2026-08-26T16:46:39.08916+00:00"
@@ -1441,6 +1537,7 @@ window.SEED_SEITEN = {
             "roh": "### Wo es hakt"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:16:48.111948+00:00",
           "sort_order": 1007,
           "updated_at": "2026-08-26T16:17:01.751425+00:00"
@@ -1453,6 +1550,7 @@ window.SEED_SEITEN = {
             "roh": "Wenn ich das hier ehrlich machen will, gehört der Teil dazu:"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:17:03.249549+00:00",
           "sort_order": 1008,
           "updated_at": "2026-08-26T16:17:12.136833+00:00"
@@ -1465,6 +1563,7 @@ window.SEED_SEITEN = {
             "roh": "Ich sag zu schnell ja. Wenn jemand fragt, ob noch was mehr geht, ist meine erste Reaktion \"safeee kriegen wir hin\" – und dann überarbeite ich mich. Ich arbeite dran, inzwischen erst zu rechnen und dann zu antworten. Wer mich also fragt, ob was bis Freitag geht, kriegt manchmal eine Stunde später die Antwort statt sofort. Das ist Absicht."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:17:15.21056+00:00",
           "sort_order": 1009,
           "updated_at": "2026-08-26T16:18:35.622395+00:00"
@@ -1477,6 +1576,7 @@ window.SEED_SEITEN = {
             "roh": "Und ich neige dazu, auch bei Sachen 110 % zu geben, wo 85 % völlig gereicht hätten. Bei einem Hero-Video ist das richtig. Bei der dritten Variante eines Social-Cutdowns ist es einfach nur Zeit, die woanders fehlt. Diese Grenze zu ziehen ist Übungssache, und ich bin noch nicht fertig damit."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:19:09.867162+00:00",
           "sort_order": 1010,
           "updated_at": "2026-08-26T16:19:10.588806+00:00"
@@ -1489,6 +1589,7 @@ window.SEED_SEITEN = {
             "roh": "### Der Widerspruch, den ich mitnehme"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:19:56.903375+00:00",
           "sort_order": 1012,
           "updated_at": "2026-08-26T16:20:05.976202+00:00"
@@ -1501,6 +1602,7 @@ window.SEED_SEITEN = {
             "roh": "Laut Test sollen ISFJ-Ts chaotische Umgebungen und schnelle Kurswechsel meiden. Ich arbeite freelance an Content in einem Feld, in dem sich die Nachrichtenlage täglich dreht und Themen manchmal innerhalb von Stunden erledigt sind."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:20:06.643724+00:00",
           "sort_order": 1013,
           "updated_at": "2026-08-26T16:20:11.776155+00:00"
@@ -1513,6 +1615,7 @@ window.SEED_SEITEN = {
             "roh": "Das war anfangs anstrengend. Was funktioniert hat, war nicht, das Chaos zu akzeptieren, sondern mir darin eigene Struktur zu bauen: feste Templates, wiederverwendbare Setups, eigene Skripte für alles, was ich mehr als dreimal mache. Ich kann mit Tempo umgehen. Ich brauch nur ein System darunter, das nicht jedes Mal neu erfunden wird."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:20:24.481493+00:00",
           "sort_order": 1014,
           "updated_at": "2026-08-26T16:20:25.080606+00:00"
@@ -1525,6 +1628,7 @@ window.SEED_SEITEN = {
             "roh": "Wenn du dir überlegst, mit mir zu arbeiten: Du kriegst jemanden, der Dinge zu Ende bringt, mitdenkt und Bescheid sagt, bevor was schiefgeht. Was du nicht kriegst, ist jemand, der bei \"mach mal irgendwas Cooles\" ohne Rückfrage losläuft. "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
           "created_at": "2026-08-26T16:20:38.748924+00:00",
           "sort_order": 1015,
           "updated_at": "2026-08-26T16:20:51.605035+00:00"

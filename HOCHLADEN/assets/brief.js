@@ -7,12 +7,15 @@
   /* window.mm.videoEmbed() liefert nur den Bauplan ({kind, id, src}), keine
      fertige Einbettung — genauso, wie renderMarkdown() ihn intern selbst
      zu einem <iframe> zusammensetzt. Hier dasselbe für den Brief. */
+  /* Feste Beschriftungen. Ohne sprache.js bleibt es beim deutschen Wort. */
+  const T = (schluessel, deutsch) => (window.mmText ? window.mmText(schluessel) : '') || deutsch;
+
   const einbettung = (url) => {
     const v = window.mm.videoEmbed(url);
     if (!v) return '';
     return '<iframe src="' + window.mm.esc(v.src) + '" loading="lazy" allowfullscreen ' +
       'allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" ' +
-      'referrerpolicy="strict-origin-when-cross-origin" title="Video"></iframe>';
+      'referrerpolicy="strict-origin-when-cross-origin" title="' + T('video', 'Video') + '"></iframe>';
   };
 
   /* briefBloecke: alle Blöcke der EINEN Seite vom Typ "brief" (Hallo, Profil,
@@ -86,11 +89,16 @@
     /* ---- Ein Abschnitt je veröffentlichtem Projekt ---- */
     projekte.forEach((p) => {
       const seite = p.seite;
-      const s = neuerAbschnitt(seite.titel, 'beruflich', seite.farbe);
+      /* Titel und Untertitel koennen im Admin uebersetzt sein (Spalten
+         titel_en / untertitel_en). Ohne Uebersetzung -- und ohne
+         sprache.js -- kommt woertlich der deutsche Wert zurueck. */
+      const F = (feld) => (window.mmFeldVon ? window.mmFeldVon(seite, feld) : (seite[feld] || ''));
+      const titel = F('titel'), untertitel = F('untertitel');
+      const s = neuerAbschnitt(titel, 'beruflich', seite.farbe);
       let h = '';
-      if (seite.untertitel) h += '<p class="br-rolle">' + window.mm.esc(seite.untertitel) + '</p>';
-      h += '<h2 class="br-titel">' + window.mm.esc(seite.titel) +
-           (seite.ist_aktuell ? '<span class="br-laeuft">läuft aktuell</span>' : '') + '</h2>';
+      if (untertitel) h += '<p class="br-rolle">' + window.mm.esc(untertitel) + '</p>';
+      h += '<h2 class="br-titel">' + window.mm.esc(titel) +
+           (seite.ist_aktuell ? '<span class="br-laeuft">' + T('laeuft-aktuell', 'läuft aktuell') + '</span>' : '') + '</h2>';
 
       /* Das Coverbild ist immer sichtbar und dient als Vorschaubild.
          Einbettbare Videos laden erst beim Klick — sonst holt die Startseite
@@ -101,10 +109,10 @@
         const einbettbar = seite.video_url && seite.embed_ok !== false;
         h += '<figure class="br-bild' + (einbettbar ? ' br-spielbar' : '') + '"' +
              (einbettbar ? ' data-video="' + window.mm.esc(seite.video_url) + '"' : '') + '>' +
-             '<img src="' + window.mm.esc(seite.cover_url) + '" alt="' + window.mm.esc(seite.titel) +
+             '<img src="' + window.mm.esc(seite.cover_url) + '" alt="' + window.mm.esc(titel) +
              '" loading="lazy" style="object-position:' +
              window.mm.esc(seite.cover_pos || '50% 50%') + '">' +
-             (einbettbar ? '<button class="br-play" type="button" aria-label="Video abspielen">▶</button>' : '') +
+             (einbettbar ? '<button class="br-play" type="button" aria-label="' + T('video-abspielen', 'Video abspielen') + '">▶</button>' : '') +
              '</figure>';
       } else if (seite.video_url && seite.embed_ok !== false) {
         h += '<div class="br-film">' + einbettung(seite.video_url) + '</div>';

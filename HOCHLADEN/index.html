@@ -13,6 +13,12 @@
 <meta property="og:url" content="https://mausemaus.com/">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://mausemaus.com/">
+<!-- Dieselbe Seite in zwei Sprachen unter zwei Adressen. Ohne diese Zeilen
+     haelt Google beide fuer doppelten Inhalt statt fuer Uebersetzungen.
+     x-default zeigt auf die deutsche Fassung -- die ist der Standard. -->
+<link rel="alternate" hreflang="de" href="https://mausemaus.com/">
+<link rel="alternate" hreflang="en" href="https://mausemaus.com/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://mausemaus.com/">
 <meta property="og:site_name" content="mausemaus">
 <meta property="og:locale" content="de_DE">
 <meta name="theme-color" content="#F0F4EF">
@@ -65,12 +71,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1787944189"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1788532167"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1787944189"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787944189">');
+  document.write('<script src="/assets/schriften-retten.js?v=1788532167"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1788532167">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -84,12 +90,18 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787944189">
-<link rel="stylesheet" href="/assets/site.css?v=1787944189">
-<link rel="stylesheet" href="/assets/leiste.css?v=1787944189">
-<link rel="stylesheet" href="/assets/brief.css?v=1787944189">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787944189">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787944189">
+<link rel="stylesheet" href="/assets/fonts.css?v=1788532167">
+<link rel="stylesheet" href="/assets/site.css?v=1788532167">
+<link rel="stylesheet" href="/assets/leiste.css?v=1788532167">
+<link rel="stylesheet" href="/assets/brief.css?v=1788532167">
+<link rel="stylesheet" href="/assets/blumen.css?v=1788532167">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1788532167">
+<!-- Sprachwahl. Steht im KOPF, damit <html lang> richtig ist, bevor
+     irgendetwas gezeichnet wird. Die Arbeit am Dokument selbst wartet auf
+     DOMContentLoaded. Deutsch bleibt der Standard: ohne ?lang=en und ohne
+     frueher getroffene Wahl aendern diese beiden Dateien gar nichts. -->
+<script src="/assets/texte.js?v=1788532167"></script>
+<script src="/assets/sprache.js?v=1788532167"></script>
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -125,12 +137,23 @@
 <!-- Sprungmarke: Wer mit der Tastatur ankommt, landet sonst zuerst in der
      Zeitleiste und muss sich durch alle Abschnitte tabben, bevor der Brief
      anfaengt. Der Link ist unsichtbar, bis er den Fokus bekommt. -->
-<a class="br-sprung" href="#brief">Zum Brief springen</a>
+<a class="br-sprung" href="#brief" data-mm-t="sprung">Zum Brief springen</a>
+
+<!-- Sprachumschalter. Bewusst als fertiges HTML und nicht per Skript
+     erzeugt: So steht er schon da, waehrend der Brief noch geladen wird --
+     genau fuer den Besucher, der kein Deutsch liest und sonst vor einer
+     unverstaendlichen Seite sitzt. Die Adressen traegt sprache.js nach
+     (aktueller Pfad); ohne JavaScript bleiben es diese hier, und die
+     stimmen auf der Startseite. -->
+<div class="mm-sprache" role="group" aria-label="Sprache">
+  <a href="/?lang=de" hreflang="de" lang="de">DE</a>
+  <a href="/?lang=en" hreflang="en" lang="en">EN</a>
+</div>
 
 <div class="br-buehne">
   <!-- <nav> statt <div>: die Leiste IST die Navigation dieser Seite. Ohne
        diese Auszeichnung findet ein Screenreader sie gar nicht als solche. -->
-  <nav id="leiste" aria-label="Abschnitte des Briefs"></nav>
+  <nav id="leiste" aria-label="Abschnitte des Briefs" data-mm-t-aria-label="leiste-nav"></nav>
   <main class="br-scroller" id="scroller">
    <!-- .br-rand schneidet die Deko-Blumen an den Seitenrändern ab, siehe brief.css -->
    <div class="br-rand">
@@ -140,9 +163,16 @@
            lassen -- statt einer weissen Flaeche ohne Erklaerung. -->
       <noscript>
         <div class="br-text">
+          <!-- Zweisprachig ausgeschrieben statt uebersetzt: Was in <noscript>
+               steht, ist bei eingeschaltetem JavaScript gar kein DOM, sondern
+               roher Text -- kein Skript kann es austauschen. Und ist
+               JavaScript aus, laeuft sprache.js ohnehin nicht. Zwei Saetze
+               sind hier also der einzige Weg, der wirklich traegt. -->
           <p>Diese Seite baut ihren Inhalt mit JavaScript auf — im Moment ist es
           abgeschaltet, deshalb steht hier nichts.</p>
-          <p>Schreib mir gern direkt: <a href="mailto:lucasschoenwald03@gmail.com">lucasschoenwald03@gmail.com</a></p>
+          <p lang="en">This page builds its content with JavaScript — it is switched
+          off right now, so there is nothing here.</p>
+          <p>Schreib mir gern direkt / just write to me: <a href="mailto:lucasschoenwald03@gmail.com">lucasschoenwald03@gmail.com</a></p>
         </div>
       </noscript>
       <div id="brief"></div>
@@ -165,22 +195,22 @@
         <!-- Formspree wirft eine Einsendung weg, sobald das Feld _gotcha
              gefuellt ist. Menschen sehen es nicht, automatische Ausfueller
              schon. Der Name ist von Formspree vorgegeben. -->
-        <p class="versteckt"><label>Bitte leer lassen: <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
+        <p class="versteckt"><label><span data-mm-t="form-leer-lassen">Bitte leer lassen:</span> <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
         <!-- Betreffzeile der Mail, die bei Lucas ankommt. -->
-        <input type="hidden" name="_subject" value="Neue Anfrage über mausemaus.com">
+        <input type="hidden" name="_subject" value="Neue Anfrage über mausemaus.com" data-mm-t-value="form-betreff">
         <!-- Die Beschriftung stand vorher NUR im placeholder. Der verschwindet,
              sobald jemand zu tippen anfaengt -- wer dann den Faden verliert,
              sieht nicht mehr, welches Feld welches ist, und ein Screenreader
              liest ein unbeschriftetes Feld vor. Der Text steht jetzt im
              <label> und ist mit .versteckt nur optisch ausgeblendet: fuer
              Auge und Aussehen aendert sich nichts, fuer Vorlesen alles. -->
-        <label><span class="versteckt">Dein Name</span>
-          <input type="text" name="name" placeholder="Dein Name" required></label>
-        <label><span class="versteckt">Deine E-Mail-Adresse</span>
-          <input type="email" name="email" placeholder="Deine E-Mail" required></label>
-        <label><span class="versteckt">Worum geht's?</span>
-          <textarea name="nachricht" rows="4" placeholder="Worum geht's?" required></textarea></label>
-        <button type="submit">Anfrage senden →</button>
+        <label><span class="versteckt" data-mm-t="form-name">Dein Name</span>
+          <input type="text" name="name" placeholder="Dein Name" data-mm-t-placeholder="form-name" required></label>
+        <label><span class="versteckt" data-mm-t="form-email-lang">Deine E-Mail-Adresse</span>
+          <input type="email" name="email" placeholder="Deine E-Mail" data-mm-t-placeholder="form-email" required></label>
+        <label><span class="versteckt" data-mm-t="form-nachricht">Worum geht's?</span>
+          <textarea name="nachricht" rows="4" placeholder="Worum geht's?" data-mm-t-placeholder="form-nachricht" required></textarea></label>
+        <button type="submit" data-mm-t="form-senden">Anfrage senden →</button>
         <!-- aria-live: ein Screenreader liest die Rueckmeldung vor, sobald sie
              erscheint. Ohne das Attribut bliebe sie fuer Blinde stumm.
              Die Katze steht daneben und ist fuer Screenreader ausdruecklich
@@ -198,14 +228,14 @@
   </main>
 </div>
 
-<script src="/assets/config.js?v=1787944189"></script>
-<script src="/assets/shared.js?v=1787944189"></script>
-<script src="/assets/bloecke.js?v=1787944189"></script>
-<script src="/assets/db.js?v=1787944189"></script>
-<script src="/assets/blumen.js?v=1787944189"></script>
-<script src="/assets/leiste.js?v=1787944189"></script>
-<script src="/assets/brief.js?v=1787944189"></script>
-<script src="/assets/tueren.js?v=1787944189"></script>
+<script src="/assets/config.js?v=1788532167"></script>
+<script src="/assets/shared.js?v=1788532167"></script>
+<script src="/assets/bloecke.js?v=1788532167"></script>
+<script src="/assets/db.js?v=1788532167"></script>
+<script src="/assets/blumen.js?v=1788532167"></script>
+<script src="/assets/leiste.js?v=1788532167"></script>
+<script src="/assets/brief.js?v=1788532167"></script>
+<script src="/assets/tueren.js?v=1788532167"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -246,6 +276,13 @@
   window.mmLadeschirmWeg();
   window.mmTueren(document.getElementById('brief'));
 
+  /* Nach einem Sprachwechsel dorthin zurueck, wo man vorher stand. Erst
+     HIER, denn vorher hat der Brief noch nicht seine endgueltige Hoehe --
+     ein frueherer Sprung liefe ins Leere. Beim normalen Aufruf liegt
+     nichts gemerkt vor und die Zeile tut nichts. */
+  const bereich = bruch.matches ? document.scrollingElement : document.getElementById('scroller');
+  window.mmScrollWiederherstellen?.(bereich);
+
   let ruhe = null;
   new ResizeObserver(() => {
     clearTimeout(ruhe);
@@ -254,7 +291,9 @@
 
   if (new URLSearchParams(location.search).has('danke')) {
     const f = document.getElementById('anfragen');
-    f.innerHTML = '<p class="br-text">Angekommen — ich melde mich, meistens noch am selben Tag.</p>';
+    f.innerHTML = '<p class="br-text">'
+      + ((window.mmText && window.mmText('form-danke'))
+         || 'Angekommen — ich melde mich, meistens noch am selben Tag.') + '</p>';
   }
 })();
 </script>
@@ -268,6 +307,12 @@
 (function () {
   var form = document.getElementById('anfragen');
   if (!form || !window.fetch) return;
+  /* Faellt sprache.js aus (Netz, Adblocker), ist window.mmText nicht da.
+     Dann bleibt der deutsche Text stehen -- nie eine leere Meldung. */
+  var T = function (schluessel, deutsch) {
+    return (window.mmText ? window.mmText(schluessel) : '') || deutsch;
+  };
+
   var antwort = document.getElementById('anfrage-antwort');
   var katze = document.getElementById('anfrage-katze');
   var knopf = form.querySelector('button[type=submit]');
@@ -294,7 +339,7 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     antwort.className = 'br-formular-antwort';
-    antwort.textContent = 'Wird gesendet …';
+    antwort.textContent = T('form-sendet', 'Wird gesendet …');
     if (katze) katze.innerHTML = '';
     knopf.disabled = true;
     fetch(form.action, {
@@ -305,20 +350,20 @@
       if (r.ok) {
         form.reset();
         antwort.className = 'br-formular-antwort gut';
-        antwort.textContent = 'Angekommen! Ich melde mich.';
+        antwort.textContent = T('form-gut', 'Angekommen! Ich melde mich.');
         katzeZeigen();
       } else {
         return r.json().then(function (d) {
           throw new Error((d.errors || []).map(function (f) { return f.message; }).join(', ')
-            || 'Das hat nicht geklappt.');
+            || T('form-schlecht', 'Das hat nicht geklappt.'));
         });
       }
     }).catch(function (err) {
       antwort.className = 'br-formular-antwort schlecht';
       /* Bewusst mit Ausweg: wer hier haengenbleibt, soll trotzdem
          schreiben koennen, statt einfach abzuspringen. */
-      antwort.textContent = (err.message || 'Das hat nicht geklappt.')
-        + ' Schreib mir sonst direkt an lucasschoenwald03@gmail.com.';
+      antwort.textContent = (err.message || T('form-schlecht', 'Das hat nicht geklappt.'))
+        + T('form-schlecht-zusatz', ' Schreib mir sonst direkt an lucasschoenwald03@gmail.com.');
     }).then(function () { knopf.disabled = false; });
   });
 })();

@@ -17,6 +17,10 @@
 <meta property="og:image" content="https://mausemaus.com/og-bild.jpg" id="og-image">
 <meta property="og:url" content="https://mausemaus.com/welt/" id="og-url">
 <link rel="canonical" href="https://mausemaus.com/welt/" id="og-canonical">
+<!-- Dieselbe Welt auf Deutsch und Englisch. Die Adressen traegt das Skript
+     unten nach, sobald der Slug feststeht (der steht erst dann fest). -->
+<link rel="alternate" hreflang="de" href="https://mausemaus.com/welt/" id="alt-de">
+<link rel="alternate" hreflang="en" href="https://mausemaus.com/welt/?lang=en" id="alt-en">
 <meta property="og:locale" content="de_DE">
 <meta name="theme-color" content="#F0F4EF">
 <!-- Twitter/X liest die og-Angaben NICHT vollstaendig mit: ohne diese vier
@@ -57,12 +61,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1787944189"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1788532167"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1787944189"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1787944189">');
+  document.write('<script src="/assets/schriften-retten.js?v=1788532167"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1788532167">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -76,37 +80,55 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1787944189">
-<link rel="stylesheet" href="/assets/site.css?v=1787944189">
-<link rel="stylesheet" href="/assets/brief.css?v=1787944189">
-<link rel="stylesheet" href="/assets/blumen.css?v=1787944189">
-<link rel="stylesheet" href="/assets/welt.css?v=1787944189">
-<link rel="stylesheet" href="/assets/inhalt.css?v=1787944189">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1787944189">
+<link rel="stylesheet" href="/assets/fonts.css?v=1788532167">
+<link rel="stylesheet" href="/assets/site.css?v=1788532167">
+<link rel="stylesheet" href="/assets/brief.css?v=1788532167">
+<link rel="stylesheet" href="/assets/blumen.css?v=1788532167">
+<link rel="stylesheet" href="/assets/welt.css?v=1788532167">
+<link rel="stylesheet" href="/assets/inhalt.css?v=1788532167">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1788532167">
+<!-- Sprachwahl, siehe index.html. Im Kopf, damit <html lang> stimmt,
+     bevor gezeichnet wird. -->
+<script src="/assets/texte.js?v=1788532167"></script>
+<script src="/assets/sprache.js?v=1788532167"></script>
 </head>
 <body>
+
+<!-- Sprachumschalter, an genau derselben Stelle wie im Brief. sprache.js
+     traegt gleich den richtigen Pfad in die beiden Adressen ein -- hier
+     steht als Rueckfall die Startseite, denn die Datei wird unter vielen
+     Adressen ausgeliefert (/welt/<slug>, /blog/<slug>, ?s=<slug>). -->
+<div class="mm-sprache" role="group" aria-label="Sprache">
+  <a href="/?lang=de" hreflang="de" lang="de">DE</a>
+  <a href="/?lang=en" hreflang="en" lang="en">EN</a>
+</div>
+
 <div class="welt" id="welt">
   <div class="welt-spalte">
-    <a class="welt-zurueck" href="/">← zurück in den Brief</a>
+    <a class="welt-zurueck" href="/" data-mm-t="welt-zurueck">← zurück in den Brief</a>
     <noscript>
       <div class="welt-text">
+        <!-- Zweisprachig ausgeschrieben statt uebersetzt -- siehe index.html:
+             was in <noscript> steht, kann kein Skript austauschen. -->
         <p>Diese Seite baut ihren Inhalt mit JavaScript auf — im Moment ist es
         abgeschaltet, deshalb steht hier nichts.</p>
-        <p>Schreib mir gern direkt: <a href="mailto:lucasschoenwald03@gmail.com">lucasschoenwald03@gmail.com</a></p>
+        <p lang="en">This page builds its content with JavaScript — it is switched
+        off right now, so there is nothing here.</p>
+        <p>Schreib mir gern direkt / just write to me: <a href="mailto:lucasschoenwald03@gmail.com">lucasschoenwald03@gmail.com</a></p>
       </div>
     </noscript>
     <div id="inhalt"></div>
   </div>
 </div>
 
-<script src="/assets/config.js?v=1787944189"></script>
-<script src="/assets/shared.js?v=1787944189"></script>
-<script src="/assets/bloecke.js?v=1787944189"></script>
-<script src="/assets/db.js?v=1787944189"></script>
-<script src="/assets/blumen.js?v=1787944189"></script>
-<script src="/assets/tueren.js?v=1787944189"></script>
-<script src="/assets/demo-race.js?v=1787944189"></script>
-<script src="/assets/inhalt.js?v=1787944189"></script>
+<script src="/assets/config.js?v=1788532167"></script>
+<script src="/assets/shared.js?v=1788532167"></script>
+<script src="/assets/bloecke.js?v=1788532167"></script>
+<script src="/assets/db.js?v=1788532167"></script>
+<script src="/assets/blumen.js?v=1788532167"></script>
+<script src="/assets/tueren.js?v=1788532167"></script>
+<script src="/assets/demo-race.js?v=1788532167"></script>
+<script src="/assets/inhalt.js?v=1788532167"></script>
 <script>
 (async () => {
   /* GitHub Pages liefert /welt/xy aus, weil es von sich aus ".html" anhaengt
@@ -127,6 +149,9 @@
      hat. Ohne diesen Weg waere eine neue Welt bis zum naechsten Hochladen
      nicht erreichbar, obwohl sie im Brief schon verlinkt ist.
      Die haessliche Adresse wird gleich danach wieder gerade gezogen. */
+  /* Feste Beschriftungen. Ohne sprache.js bleibt der deutsche Text stehen. */
+  const T = (schluessel, deutsch) => (window.mmText ? window.mmText(schluessel) : '') || deutsch;
+
   const ausAbfrage = new URLSearchParams(location.search).get('s');
   const roherSlug = ausAbfrage
     || (location.pathname.split('/').filter(Boolean).pop() || '').replace(/\.html$/, '');
@@ -138,18 +163,29 @@
 
   const seite = await window.mmLoadSeite('welt', slug);
   if (!seite) {
-    document.title = 'Nicht gefunden — mausemaus';
-    ziel.innerHTML = '<h1 class="welt-titel">Hier ist nichts.</h1>' +
-      '<p class="welt-text">Diese Tür führt ins Leere. Zurück in den Brief?</p>';
+    document.title = T('welt-nicht-gefunden', 'Nicht gefunden') + ' — mausemaus';
+    ziel.innerHTML = '<h1 class="welt-titel">' + T('welt-nichts-titel', 'Hier ist nichts.') + '</h1>' +
+      '<p class="welt-text">' + T('welt-nichts-text', 'Diese Tür führt ins Leere. Zurück in den Brief?') + '</p>';
     return;
   }
 
   /* Die Adresse auf die schoene Form bringen, falls wir ueber ?s= hereinkamen.
      replaceState statt pushState: der Zurueck-Knopf soll nicht auf die
      Umleitung zeigen, sonst kaeme man beim Zurueckgehen wieder hierher. */
-  if (ausAbfrage) history.replaceState(null, '', '/welt/' + encodeURIComponent(slug));
+  /* ?lang= MUSS dabei erhalten bleiben: Sonst zeigt die Adresszeile nach
+     dem Geradeziehen eine deutsche Adresse, waehrend englisch dasteht --
+     und wer sie kopiert und verschickt, verschickt die deutsche Fassung. */
+  if (ausAbfrage) {
+    const anhang = window.mmSprache === 'en' ? '?lang=en' : '';
+    history.replaceState(null, '', '/welt/' + encodeURIComponent(slug) + anhang);
+  }
 
-  document.title = seite.titel + ' — mausemaus';
+  /* Titel und Untertitel koennen im Admin uebersetzt sein (Spalten
+     titel_en / untertitel_en). mmFeldVon faellt auf Deutsch zurueck. */
+  const F = (feld) => (window.mmFeldVon ? window.mmFeldVon(seite, feld) : (seite[feld] || ''));
+  const titel = F('titel'), untertitel = F('untertitel');
+
+  document.title = titel + ' — mausemaus';
 
   /* Teilen-Vorschau (WhatsApp, Twitter/X, …) aus den echten Daten der Welt
      nachtragen -- die feststehenden Werte im <head> sind nur der
@@ -159,8 +195,8 @@
     const el = document.getElementById(id);
     if (el && wert) el.setAttribute(attr, wert);
   };
-  setzeMeta('og-title', 'content', seite.titel + ' — mausemaus');
-  if (seite.untertitel) setzeMeta('og-description', 'content', seite.untertitel);
+  setzeMeta('og-title', 'content', titel + ' — mausemaus');
+  if (untertitel) setzeMeta('og-description', 'content', untertitel);
   /* Das Vorschaubild NUR nachtragen, wenn im <head> noch das allgemeine
      Ausweichbild steht. Sonst hat tests/hochladen.mjs hier schon eine
      JPEG-Fassung eingesetzt (1200x630) -- und die ist besser als das, was
@@ -184,9 +220,11 @@
   const kanonisch = 'https://mausemaus.com/welt/' + slug;
   setzeMeta('og-url', 'content', kanonisch);
   setzeMeta('og-canonical', 'href', kanonisch);
-  if (seite.untertitel) setzeMeta('meta-description', 'content', seite.untertitel);
-  setzeMeta('tw-title', 'content', seite.titel + ' — mausemaus');
-  if (seite.untertitel) setzeMeta('tw-description', 'content', seite.untertitel);
+  setzeMeta('alt-de', 'href', kanonisch);
+  setzeMeta('alt-en', 'href', kanonisch + '?lang=en');
+  if (untertitel) setzeMeta('meta-description', 'content', untertitel);
+  setzeMeta('tw-title', 'content', titel + ' — mausemaus');
+  if (untertitel) setzeMeta('tw-description', 'content', untertitel);
   if (seite.cover_url && nochAusweichbild('tw-image')) setzeMeta('tw-image', 'content', seite.cover_url);
   if (seite.farbe) {
     welt.style.setProperty('--welt', seite.farbe);
@@ -199,8 +237,8 @@
   }
 
   ziel.innerHTML =
-    (seite.untertitel ? '<p class="welt-kicker">' + window.mm.esc(seite.untertitel) + '</p>' : '') +
-    '<h1 class="welt-titel">' + window.mm.esc(seite.titel) + '</h1>' +
+    (untertitel ? '<p class="welt-kicker">' + window.mm.esc(untertitel) + '</p>' : '') +
+    '<h1 class="welt-titel">' + window.mm.esc(titel) + '</h1>' +
     (seite.cover_url ? '<img class="welt-cover" src="' + window.mm.esc(seite.cover_url) +
       '" alt="" style="object-position:' + window.mm.esc(seite.cover_pos || '50% 50%') + '">' : '') +
     '<div class="welt-text">' + window.mmBloecke.seite(seite.bloecke) + '</div>';

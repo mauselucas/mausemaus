@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/fonts.css?v=1787944189">
-<link rel="stylesheet" href="/assets/site.css?v=1787944189">
+<link rel="stylesheet" href="/assets/fonts.css?v=1788532167">
+<link rel="stylesheet" href="/assets/site.css?v=1788532167">
 <style>
   .verirrt { text-align: center; padding: 90px 24px 70px; position: relative; z-index: 2; }
   .verirrt .zahl { font-family: 'TropiWeb', sans-serif; font-size: clamp(90px, 20vw, 180px);
@@ -46,7 +46,11 @@
 <script>
 (function () {
   var t = location.pathname.match(/^\/(?:welt|blog)\/([^/]+?)(?:\.html)?\/?$/);
-  if (t && t[1]) location.replace('/welt.html?s=' + encodeURIComponent(t[1]));
+  /* ?lang= mitnehmen: Ein englischer Link auf eine noch nicht vorgebaute
+     Welt soll auch englisch ankommen. */
+  var spr = new URLSearchParams(location.search).get('lang');
+  var anhang = (spr === 'en' || spr === 'de') ? '&lang=' + spr : '';
+  if (t && t[1]) location.replace('/welt.html?s=' + encodeURIComponent(t[1]) + anhang);
 })();
 </script>
 
@@ -58,17 +62,25 @@
   <div class="flower f5"><svg viewBox="0 0 349.23 339.2"><use href="#bl-b"/></svg></div>
 </div>
 
+<!-- Sprachumschalter, siehe index.html. Auch hier: wer auf einer
+     Fehlerseite landet und kein Deutsch liest, soll trotzdem wissen,
+     wo er hinkommt. -->
+<div class="mm-sprache" role="group" aria-label="Sprache">
+  <a href="/?lang=de" hreflang="de" lang="de">DE</a>
+  <a href="/?lang=en" hreflang="en" lang="en">EN</a>
+</div>
+
 <div class="wrap">
   <div class="verirrt">
     <div class="blume"><svg viewBox="0 0 303.13 275.3"><use href="#bl-a"/></svg></div>
     <div class="zahl">404<span>.</span></div>
-    <h1>Diese Seite gibt es nicht</h1>
-    <p>Vielleicht vertippt, vielleicht ist sie umgezogen.
+    <h1 data-mm-t="404-titel">Diese Seite gibt es nicht</h1>
+    <p data-mm-t="404-text">Vielleicht vertippt, vielleicht ist sie umgezogen.
        Von hier kommst du wieder rein:</p>
     <div class="meta">
-      <a href="/">← Zur Startseite</a>
-      <a href="/">Arbeiten ansehen</a>
-      <a href="mailto:lucasschoenwald03@gmail.com">Schreib mir</a>
+      <a href="/" data-mm-t="404-start">← Zur Startseite</a>
+      <a href="/" data-mm-t="404-arbeiten">Arbeiten ansehen</a>
+      <a href="mailto:lucasschoenwald03@gmail.com" data-mm-t="404-schreib">Schreib mir</a>
     </div>
   </div>
 </div>
@@ -81,12 +93,14 @@
       <div class="foot-links">
         <a href="mailto:lucasschoenwald03@gmail.com">lucasschoenwald03@gmail.com</a>
         <a href="tel:+4915168186659">0151 68186659</a>
-        <span style="color:rgba(240,244,239,0.6)">Köln · offen für Projekte</span>
+        <span style="color:rgba(240,244,239,0.6)" data-mm-t="404-ort">Köln · offen für Projekte</span>
       </div>
     </div>
     <div class="foot-note">© 2026 Lucas Schönwald — Video Editor &amp; Motion Designer</div>
   </div>
 </footer>
-<script src="/assets/shared.js?v=1787944189"></script>
+<script src="/assets/texte.js?v=1788532167"></script>
+<script src="/assets/sprache.js?v=1788532167"></script>
+<script src="/assets/shared.js?v=1788532167"></script>
 </body>
 </html>

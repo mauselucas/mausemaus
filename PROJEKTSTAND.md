@@ -87,6 +87,7 @@ Damit hängt zusammen:
 | `/welt/<slug>` | welt.html | Eine Welt (einzelnes Projekt) |
 | `/blog/<slug>` | welt.html | Alte Adressen, bleiben gültig |
 | `/admin.html` | admin.html | Verwaltung (Login nötig) |
+| `…?lang=en` | dieselben | Dieselbe Seite auf Englisch |
 
 Keine Umschreibungsregeln im Spiel: GitHub Pages hängt selbst `.html` an.
 **Alle Dateiverweise müssen absolut sein** (`/assets/…`) — relative Pfade
@@ -126,7 +127,9 @@ Schlüssel, das ist so vorgesehen). Zugriffsschutz über RLS: Fremde lesen nur
   `titel`, `status`, `sort_order`. Der Brief ist die eine Zeile mit
   `typ=brief, slug=brief`.
 - **`bloecke`** — die Inhalte, an einer Seite hängend.
-  `id, seite_id, typ, inhalt, breite, sort_order, created_at, updated_at`
+  `id, seite_id, typ, inhalt, inhalt_en, breite, sort_order, created_at, updated_at`
+  ⚠️ **`inhalt_en`** trägt dasselbe Objekt wie `inhalt`, nur englisch, und muss in der
+  Spaltenliste des `grant` stehen — siehe den Abschnitt „Englisch“ weiter unten.
   ⚠️ Die Spalte **`notiz`** ist für `anon` per REVOKE gesperrt. Deshalb steht in
   `db.js` eine **ausgeschriebene Spaltenliste** (`BLOCK_SPALTEN`) statt
   `select=*` — sonst scheitert die Abfrage mit einem Rechte-Fehler. Das ist
@@ -159,6 +162,8 @@ HOCHLADEN/
     inhalt.css     Blöcke im Fließtext
     admin.css
 
+    sprache.js     Deutsch/Englisch: Sprachwahl, Umschalter, Rückfall
+    texte.js       die festen Oberflächentexte in beiden Sprachen
     config.js      Supabase-Adresse und öffentlicher Schlüssel
     db.js          Laden mit Zwischenspeicher + Rückfall auf seed.js
     seed.js        Notfall-Daten (aus der Datenbank erzeugt, Stand 22.08.2026)
@@ -175,6 +180,7 @@ HOCHLADEN/
     demo-race.js   Werkzeug-Nachbildung (macOS-Stil)
     katze-<fp>.webp           Die Katze nach dem Absenden (animiert, 139 kB)
     katze-<fp>-standbild.webp …und ihr Standbild fuer "Bewegung reduzieren"
+    uebersetzen.js Die englische Fassung pflegen (nur Admin)
     anleitung.js   Hilfetexte im Admin
     admin.js       Verwaltung
 docs/
@@ -239,6 +245,84 @@ nachgewiesen.
 
 Der ganze Hergang mit allen Messwerten steht in
 [`docs/scroll-animationen-fuer-ox-alpha.md`](docs/scroll-animationen-fuer-ox-alpha.md).
+
+## Englisch (neu am 04.09.2026)
+
+Lucas hat Kunden, die kein Deutsch sprechen. Die Seite lädt **weiterhin
+standardmäßig auf Deutsch**; oben rechts sitzt auf jeder Seite fest ein
+Umschalter `DE | EN`, und `mausemaus.com/?lang=en` geht direkt englisch auf.
+
+**Die Zusage, an der alles hängt:** Englisch ist eine ERGÄNZUNG. Wo keine
+Übersetzung hinterlegt ist, steht der deutsche Text — nie eine Lücke. Für
+einen deutschen Besucher ändert sich kein Byte. `tests/pruefe-sprache.mjs`
+weist das nach, indem es den englischen Brief zurückübersetzt und Zeichen
+für Zeichen mit dem deutschen vergleicht.
+
+### Wie die Sprache gewählt wird
+
+1. `?lang=en` / `?lang=de` in der Adresse — das ist der Link zum Verschicken
+2. sonst die zuletzt selbst getroffene Wahl (`localStorage['mm.sprache']`)
+3. sonst Deutsch
+
+Die **Browsersprache wird bewusst nicht ausgewertet**. Wer die Adresse ohne
+Anhängsel aufruft, bekommt Deutsch.
+
+⚠️ Folge davon, die beim Prüfen zweimal zugeschlagen hat: Wer einmal EN
+geklickt hat, sieht die Seite auch unter `mausemaus.com/` weiter englisch.
+Das ist gewollt (ein Kunde soll nicht bei jedem Klick neu umstellen), aber
+in Prüfungen muss `localStorage` vorher ausgeräumt werden — Chrome läuft
+dort mit einem bleibenden Profil.
+
+### Wo was steht
+
+| Was | Wo |
+|---|---|
+| Sprachwahl, Umschalter, Rückfall auf Deutsch | `assets/sprache.js` |
+| feste Oberflächentexte (Formular, Leiste, Fehlerseite …) | `assets/texte.js` |
+| Inhalte (Brief, Welten) | Datenbank: `bloecke.inhalt_en`, `seiten.titel_en`, `seiten.untertitel_en` |
+| Pflege im Admin | `assets/uebersetzen.js`, Knopf „EN Englisch“ im Editor |
+
+Im HTML tragen feste Texte ein `data-mm-t="schluessel"` (bzw.
+`data-mm-t-placeholder` / `-title` / `-aria-label` / `-value`). Bei Deutsch
+passiert nichts — der deutsche Text steht ausgeschrieben im HTML. In den
+Skripten steht überall ein Wächter der Form
+`(window.mmText ? window.mmText(k) : '') || 'deutscher Text'`: Fällt
+`sprache.js` aus, bleibt Deutsch stehen statt einer leeren Stelle.
+
+`inhalt_en` überschreibt `inhalt` **feldweise** und nur mit nicht-leeren
+Werten. Eine Randnotiz mit englischem Titel behält so Zeile 1, Zeile 2 und
+den grünen Punkt; ein Türchen behält sein Ziel.
+
+### ⚠️ Der Fallstrick bei der Datenbank
+
+`bloecke` hat wegen der privaten Spalte `notiz` ein **spaltenweises**
+Leserecht. Eine neu angelegte Spalte ist darin NICHT enthalten und bleibt
+für Besucher unsichtbar — und zwar lautlos: die Seite zeigt weiter Deutsch,
+ohne dass irgendwo ein Fehler auftaucht. Deshalb gehört zu jeder neuen
+Spalte auf `bloecke` zwingend:
+
+```sql
+grant select (neue_spalte) on public.bloecke to anon;
+```
+
+Dieselbe Spalte muss außerdem in `BLOCK_SPALTEN` stehen — in
+`assets/db.js` UND in `tests/hochladen.mjs` (sonst fehlt sie in `seed.js`,
+und bei einem Datenbankausfall fiele die Seite auf Deutsch zurück).
+
+### Was bewusst deutsch bleibt
+
+- Die **Teilen-Vorschau** (Titel und Beschreibung in WhatsApp, LinkedIn).
+  Eine englische Vorschau bräuchte einen zweiten Satz vorgebauter Dateien
+  und wäre die erste Stelle, die still veraltet. Der Seiteninhalt ist
+  englisch, die Vorschau deutsch.
+- Der **`<noscript>`-Text**. Bei eingeschaltetem JavaScript ist sein Inhalt
+  gar kein DOM, sondern roher Text — kein Skript kann ihn austauschen; und
+  ist JavaScript aus, läuft `sprache.js` ohnehin nicht. Dort stehen deshalb
+  beide Sprachen ausgeschrieben.
+- **Alt-Texte in Bildern.** Sie stecken im Markdown eines Bild-Blocks, und
+  Bild-Blöcke tauchen in der Übersetzungs-Ansicht absichtlich nicht auf —
+  ein versehentlich zerschossener Bildpfad wäre teurer als ein deutscher
+  Alt-Text.
 
 ## Weitere offene Punkte
 

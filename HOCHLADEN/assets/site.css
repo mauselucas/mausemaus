@@ -237,3 +237,50 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
 @media (prefers-reduced-motion: reduce) {
   .mm-kasten, .mm-zitat { transition: none; }
 }
+
+/* ---- Sprachumschalter DE | EN ----------------------------------------
+   Fest oben rechts, auf JEDER Seite an derselben Stelle. Wer kein Deutsch
+   liest, soll ihn finden, ohne zu suchen -- deshalb liegt er ueber ALLEM,
+   auch ueber dem Ladeschirm (z-index 200 in brief.css): er steht schon im
+   HTML und ist damit da, bevor der erste Buchstabe aus der Datenbank
+   kommt.
+
+   Es sind zwei echte Links, kein Schalter: so funktioniert der Wechsel
+   auch ohne JavaScript, und die englische Adresse laesst sich mit
+   Rechtsklick kopieren und verschicken. */
+.mm-sprache {
+  position: fixed; top: 14px; right: 16px; z-index: 300;
+  display: flex; align-items: stretch; overflow: hidden;
+  border: 1px solid #DCD8CC; border-radius: 99px;
+  background: rgba(251,250,246,0.94);
+  /* Der leichte Schatten ist nicht Zierde: die Pille liegt an manchen
+     Scrollstaenden ueber einer Deko-Blume, und die ist salbeigruen wie die
+     markierte Haelfte. Ohne Abhebung verschwaemme die Kante. */
+  box-shadow: 0 1px 6px rgba(13,24,33,.07);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1.5px;
+}
+.mm-sprache a {
+  /* 11 px Schrift, aber eine Trefferflaeche, die man auf dem Handy auch
+     trifft: die Polsterung macht die Haelfte rund 34 px hoch, zusammen mit
+     dem Abstand nach oben genuegt das bequem. */
+  display: flex; align-items: center; padding: 9px 13px; min-height: 34px;
+  color: #6E7873; text-decoration: none; line-height: 1;
+  transition: background .18s var(--mm-kurve), color .18s var(--mm-kurve);
+}
+.mm-sprache a + a { border-left: 1px solid #EDEAE1; }
+.mm-sprache a:hover { color: #0D1821; background: rgba(191,204,148,0.28); }
+.mm-sprache a[aria-current="true"] { background: var(--sage); color: #0D1821; }
+.mm-sprache a:focus-visible { outline: 2px solid #0D1821; outline-offset: -2px; }
+
+/* Unter 760 px legt sich die Leiste quer und ihr Griff sitzt oben rechts
+   (leiste.css: top 18px, right 14px). Ohne diese Zeile lägen beide
+   uebereinander -- der Umschalter rueckt daneben. */
+@media (max-width: 760px) {
+  .mm-sprache { top: 15px; right: 58px; }
+  .mm-sprache a { padding: 8px 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-sprache a { transition: none; }
+}

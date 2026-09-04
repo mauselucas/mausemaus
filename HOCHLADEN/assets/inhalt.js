@@ -13,6 +13,9 @@
   const HLJS = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.12.0/build/highlight.min.js';
   const HLJS_HASH = 'sha384-wjfDDhOPPdjtva8vWBhWeVprSpmxisEu5aYT3q1JyACqXpdKpo3PWZTMVq24MBix';
 
+  /* Feste Beschriftungen. Ohne sprache.js bleibt es beim deutschen Wort. */
+  const T = (schluessel, deutsch) => (window.mmText ? window.mmText(schluessel) : '') || deutsch;
+
   function einfaerben(wurzel) {
     const bloecke = wurzel.querySelectorAll('.code-block code');
     if (!bloecke.length) return;                 // ohne Code kein Nachladen
@@ -32,7 +35,7 @@
     wurzel.querySelectorAll('.mm-demo').forEach(el => {
       const bauen = (window.MM_DEMOS || {})[el.dataset.demo];
       if (bauen) bauen(el);
-      else el.innerHTML = '<p class="leer">Diese Einlage ist nicht hinterlegt.</p>';
+      else el.innerHTML = '<p class="leer">' + T('demo-fehlt', 'Diese Einlage ist nicht hinterlegt.') + '</p>';
     });
 
     wurzel.querySelectorAll('.code-kopieren').forEach(knopf => {
@@ -42,9 +45,9 @@
         const code = knopf.closest('.code-block').querySelector('code').textContent;
         try {
           await navigator.clipboard.writeText(code);
-          knopf.textContent = 'Kopiert!'; knopf.classList.add('fertig');
-        } catch { knopf.textContent = 'Ging nicht'; }
-        setTimeout(() => { knopf.textContent = 'Kopieren'; knopf.classList.remove('fertig'); }, 1800);
+          knopf.textContent = T('code-kopiert', 'Kopiert!'); knopf.classList.add('fertig');
+        } catch { knopf.textContent = T('code-ging-nicht', 'Ging nicht'); }
+        setTimeout(() => { knopf.textContent = T('code-kopieren', 'Kopieren'); knopf.classList.remove('fertig'); }, 1800);
       });
     });
 

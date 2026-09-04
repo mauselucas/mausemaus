@@ -72,7 +72,7 @@ if (!URL_DB || !KEY || URL_DB.startsWith('HIER_')) {
 /* Dieselbe Spaltenliste wie assets/db.js -- `notiz` ist fuer "anon" per
    REVOKE gesperrt, ein select=* auf den Bloecken liefert einen Rechtefehler.
    Diese Liste ist Teil des Vertrags mit der Datenbank, nicht nur Zierde. */
-const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,breite,sort_order,created_at,updated_at';
+const BLOCK_SPALTEN = 'id,seite_id,typ,inhalt,inhalt_en,breite,sort_order,created_at,updated_at';
 const EINGEBETTET = `select=*,bloecke(${BLOCK_SPALTEN})`;
 
 async function frage(suchteil) {
