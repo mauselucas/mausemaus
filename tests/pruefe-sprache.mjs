@@ -191,9 +191,24 @@ await rollen.werte(`document.getElementById('scroller').scrollTop = 400`);
 await rollen.warte(900);
 const standVorher = await rollen.werte(`document.getElementById('scroller').scrollTop`);
 await rollen.werte(`document.querySelector('.mms-wahl[hreflang=en]').click()`);
-await rollen.warte(400);
-await rollen.bisWahr(`!!document.querySelector('.mml-fuss')`);
-await rollen.bisWahr(`document.getElementById('scroller').scrollTop > 0`, 5000);
+/* NICHT auf die Uhr warten, sondern auf Zustaende, und zwar auf drei
+   nacheinander. Eine feste Pause war hier zweimal die Ursache fuer eine
+   Pruefung, die mal gruen und mal rot war:
+
+   1. Der Klick laedt die Seite erst NACH der Buchstaben-Bewegung neu
+      (380 ms, siehe WECHSEL_DAUER in sprache.js). Wer frueher misst,
+      erwischt noch die ALTE Seite -- und die steht natuerlich richtig.
+   2. Danach muss der Brief erst wieder aufgebaut sein.
+   3. Und erst dann kann die Rettung des Scrollstands greifen.
+
+   wirdWahr statt bisWahr: bisWahr WIRFT bei Fristablauf und reisst die
+   ganze Pruefdatei mit -- eine wacklige Erwartung loeschte damit auch
+   alle Pruefungen danach aus. */
+const gewechselt = await wirdWahr(rollen, `location.search === '?lang=en'`, 8000);
+const briefWiederDa = gewechselt
+  && await wirdWahr(rollen, `!!document.querySelector('.mml-fuss')`, 15000);
+const zurueckgesprungen = briefWiederDa
+  && await wirdWahr(rollen, `document.getElementById('scroller').scrollTop > 0`, 8000);
 /* Nach dem Sprung noch kurz zur Ruhe kommen lassen -- Schriften und Bilder
    koennen die Hoehe danach noch einmal aendern. */
 await rollen.warte(600);
@@ -205,7 +220,10 @@ const g3b = JSON.parse(await rollen.werte(`JSON.stringify({
 pruefe('Klick auf EN schaltet wirklich um', g3b.lang === 'en' && g3b.such === '?lang=en',
   g3b.lang + ' ' + g3b.such);
 pruefe('der Scrollstand überlebt den Sprachwechsel',
-  standVorher > 0 && Math.abs(g3b.y - standVorher) < 5, standVorher + ' → ' + g3b.y);
+  zurueckgesprungen && standVorher > 0 && Math.abs(g3b.y - standVorher) < 5,
+  zurueckgesprungen ? standVorher + ' → ' + g3b.y
+    : 'kein Rücksprung' + (gewechselt ? '' : ' — der Wechsel selbst kam nicht an')
+      + (briefWiederDa ? '' : ' — der Brief stand nicht wieder'));
 await rollen.zu();
 
 /* ---------- 4. Verschmelzung Feld für Feld ----------
@@ -346,6 +364,53 @@ pruefe('…und ändert dabei wirklich nichts',
 /* Und er geht von selbst wieder weg -- kein Fenster zum Wegklicken. */
 pruefe('der Hinweis verschwindet von selbst wieder',
   await wirdWahr(knopf, `!document.querySelector('.mms-hinweis').classList.contains('da')`, 4000));
+
+/* ---------- 6a. Die gleitende Karte ----------
+   Die weisse Karte in der grauen Schiene ist ZIERDE -- sie wird von
+   sprache.js erzeugt. Geprueft wird nicht, dass sie huebsch ist, sondern
+   dass sie das Richtige AUSSAGT: Hier stehst du gerade. Liegt sie an der
+   falschen Stelle, zeigt die Seite auf die falsche Sprache. */
+const g6a1 = JSON.parse(await knopf.werte(`(() => {
+  const k = document.querySelector('.mms-karte');
+  if (!k) return JSON.stringify({ da: false });
+  const rk = k.getBoundingClientRect();
+  const rw = document.querySelector('.mms-wahl[aria-current]').getBoundingClientRect();
+  return JSON.stringify({ da: true,
+    links: Math.round(rk.left - rw.left), oben: Math.round(rk.top - rw.top),
+    breit: Math.round(rk.width - rw.width), hoch: Math.round(rk.height - rw.height) });
+})()`));
+pruefe('die Karte liegt genau unter der gewählten Sprache',
+  g6a1.da && Math.abs(g6a1.links) <= 1 && Math.abs(g6a1.oben) <= 1 &&
+  Math.abs(g6a1.breit) <= 1 && Math.abs(g6a1.hoch) <= 1,
+  g6a1.da ? JSON.stringify(g6a1) : 'gar keine Karte da');
+
+/* Sie soll dem Zeiger folgen -- UND der Tastatur. Ein Umschalter, der nur
+   auf die Maus reagiert, laesst jeden stehen, der mit Tab navigiert. */
+await knopf.werte(`document.querySelector('.mms-wahl[hreflang=en]')
+  .dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))`);
+await knopf.warte(500);
+const g6a2 = JSON.parse(await knopf.werte(`(() => {
+  const rk = document.querySelector('.mms-karte').getBoundingClientRect();
+  const re = document.querySelector('.mms-wahl[hreflang=en]').getBoundingClientRect();
+  return JSON.stringify({ diff: Math.round(rk.left - re.left), breit: Math.round(rk.width - re.width) });
+})()`));
+pruefe('die Karte gleitet zur überfahrenen Sprache',
+  Math.abs(g6a2.diff) <= 1 && Math.abs(g6a2.breit) <= 1, JSON.stringify(g6a2));
+
+await knopf.werte(`document.querySelector('.mms-wahl[hreflang=en]').focus()`);
+await knopf.warte(500);
+await knopf.werte(`document.querySelector('.mms-wahl[hreflang=de]').focus()`);
+await knopf.warte(500);
+const g6a3 = JSON.parse(await knopf.werte(`(() => {
+  const rk = document.querySelector('.mms-karte').getBoundingClientRect();
+  const rd = document.querySelector('.mms-wahl[hreflang=de]').getBoundingClientRect();
+  return JSON.stringify({ diff: Math.round(rk.left - rd.left) });
+})()`));
+pruefe('…und folgt auch der Tastatur', Math.abs(g6a3.diff) <= 1, JSON.stringify(g6a3));
+/* ERST HIER schliessen. Stand das zu frueh, benutzte 6a einen bereits
+   geschlossenen Tab -- und ein Aufruf an einen geschlossenen Tab kommt nie
+   zurueck. Die Pruefdatei haengt dann still, ohne Fehlermeldung, bis jemand
+   sie abbricht. Genau das ist am 05.09.2026 zweimal passiert. */
 await knopf.zu();
 
 /* ---------- 6b. Handy ----------
@@ -384,6 +449,49 @@ const g6d = JSON.parse(await handy.werte(`(() => {
 pruefe('die Auswahl passt auch auf ein schmales Gerät ins Bild',
   g6d.imBild, 'links ' + g6d.rect[0] + ', breit ' + g6d.rect[1]);
 await handy.zu();
+
+/* ---------- 6c. Ohne JavaScript ----------
+   Die gleitende Karte kommt aus dem Skript. Faellt es aus, darf die
+   Auswahl nicht unmarkiert dastehen -- dann muesste man raten, welche
+   Sprache gerade laeuft.
+
+   Zwei Haelften, weil beide fuer sich nichts beweisen:
+   1. Im ausgelieferten HTML -- roh ueber das Netz geholt, ohne Browser --
+      muss das aria-current schon DRINSTEHEN. Setzte es nur das Skript,
+      waere ohne Skript nichts markiert.
+   2. Im Browser: nimmt man der Liste die Klasse, die das Skript ihr gibt,
+      muss die CSS-Regel einspringen und die Karte starr zeichnen.
+
+   (Chrome wirklich ohne JavaScript laufen zu lassen ginge ueber
+   Emulation.setScriptExecutionDisabled -- dann laesst sich aber auch
+   nichts mehr auslesen, denn das Auslesen ist selbst JavaScript.) */
+const roh = await (await fetch(ADR + '/')).text();
+const stelle = roh.slice(roh.indexOf('class="mms-wahl"'), roh.indexOf('hreflang="en"'));
+pruefe('das aria-current steht schon im ausgelieferten HTML',
+  /hreflang="de"[^>]*aria-current="true"|aria-current="true"[^>]*hreflang="de"/.test(roh),
+  stelle.replace(/\s+/g, ' ').slice(0, 90));
+pruefe('…und die Auswahl sind echte Links, kein onclick',
+  /<a class="mms-wahl" href="\/\?lang=de"/.test(roh) && !/onclick/.test(roh));
+
+/* Eigener Tab: der aus Abschnitt 6 ist da schon geschlossen. */
+const ohne = await auf('/');
+await ohne.bisWahr(`!!document.querySelector('.mms-liste')`);
+await ohne.warte(500);
+const gOhne = JSON.parse(await ohne.werte(`(() => {
+  const liste = document.querySelector('.mms-liste');
+  liste.classList.remove('mms-hat-karte');          // so saehe es ohne Skript aus
+  const de = liste.querySelector('.mms-wahl[aria-current]');
+  const st = getComputedStyle(de);
+  const zurueck = () => liste.classList.add('mms-hat-karte');
+  const erg = { markiert: de.textContent.trim(), hintergrund: st.backgroundColor,
+                schatten: st.boxShadow !== 'none', gewicht: st.fontWeight };
+  zurueck();
+  return JSON.stringify(erg);
+})()`));
+pruefe('ohne die Skript-Klasse zeichnet CSS die Karte starr',
+  gOhne.hintergrund !== 'rgba(0, 0, 0, 0)' && gOhne.hintergrund !== 'transparent' && gOhne.schatten,
+  JSON.stringify(gOhne));
+await ohne.zu();
 
 /* ---------- 7. Der Weg über die Zwischenablage im Admin ----------
    Text erzeugen lassen, durch die Einfüge-Funktion schicken, nachsehen ob

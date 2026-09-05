@@ -134,20 +134,21 @@
   const NAMEN = { de: 'Deutsch', en: 'English', nl: 'Nederlands' };
 
   /* Wie lange der Knopf nach dem ersten Scrollen noch in voller Breite
-     stehen bleibt. Bewusst viel laenger als die Zeitleiste links (die geht
-     nach 760 ms zu): Der Umschalter ist fuer jemanden da, der die Seite
-     nicht lesen kann -- der braucht Zeit, ihn ueberhaupt zu bemerken. */
+     stehen bleibt. Bewusst viel laenger als die Zeitleiste links (760 ms):
+     Der Umschalter ist fuer jemanden da, der die Seite nicht lesen kann. */
   const BLEIBT = 4200;
   const BLEIBT_NACH_KLICK = 2600;   // nach dem Zuklappen kuerzer
   const SCHWELLE = 100;             // ab so viel Scrollen faengt die Uhr an
+  /* Wie lange nach der Sprachwahl die Adresse wechselt. Kein Warten: der
+     Browser zeigt die alte Seite weiter, bis die neue antwortet. Die
+     380 ms sorgen nur dafuer, dass der letzte Buchstabe gelandet ist. */
+  const WECHSEL_DAUER = 380;
+  const ZU_DAUER = 220;             // muss zu mms-zu in site.css passen
 
   /* Flagge und Name im Knopf auf die gewaehlte Sprache setzen.
-
-     Das ist eigene Funktion und laeuft ZWEIMAL: einmal sofort, aufgerufen
-     von einer Zeile direkt hinter dem Umschalter im HTML, und noch einmal
-     spaeter mit allem Uebrigen. Grund: Im HTML steht Deutsch. Wartete man
-     bis DOMContentLoaded, saehe ein englischer Besucher fuer den Bruchteil
-     einer Sekunde "Deutsch" aufblitzen -- ausgerechnet er. */
+     Laeuft ZWEIMAL: sofort (Zeile direkt hinter dem Markup) und spaeter
+     mit allem Uebrigen -- sonst blitzt bei einem englischen Aufruf kurz
+     "Deutsch" auf. */
   let standGesetzt = false;
   window.mmUmschalterStand = function () {
     const kasten = document.querySelector('.mm-sprache');
@@ -168,13 +169,12 @@
     const knopf   = kasten.querySelector('.mms-knopf');
     const flagge  = kasten.querySelector('.mms-flagge');
     const name    = kasten.querySelector('.mms-name');
+    const liste   = kasten.querySelector('.mms-liste');
     const hinweis = kasten.querySelector('.mms-hinweis');
 
     const sanft = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---- Stand: welche Sprache steht gerade im Knopf ----
-       Normalerweise hat das die Zeile im HTML schon erledigt; hier steht
-       es fuer den Fall, dass sie fehlt (z.B. eine aeltere Seite). ---- */
+    /* ---- Stand: welche Sprache steht gerade im Knopf ---- */
     window.mmUmschalterStand();
     const wahlText = window.mmText('sprache-waehlen');
     knopf?.setAttribute('title', wahlText);
@@ -190,17 +190,66 @@
       else a.removeAttribute('aria-current');
     });
 
+    /* ---- Die gleitende Karte ----
+       Eine weisse Karte in der grauen Schiene, die unter dem gewaehlten
+       Eintrag liegt und beim Ueberfahren (Maus UND Tastatur) zum Eintrag
+       gleitet. Wird hier erzeugt, nicht im HTML: sie ist Zierde. Kommt ans
+       ENDE der Liste, damit die Eintraege ihre nth-child-Nummern behalten.
+       mms-hat-karte schaltet den CSS-Fallback (starre Karte) ab. */
+    let karte = null;
+    if (liste) {
+      karte = document.createElement('span');
+      karte.className = 'mms-karte';
+      karte.setAttribute('aria-hidden', 'true');
+      liste.appendChild(karte);
+      liste.classList.add('mms-hat-karte');
+    }
+    const gewaehlt = () => liste?.querySelector('.mms-wahl[aria-current="true"]');
+    function karteZu(el, sofort) {
+      if (!karte || !el) return;
+      if (sofort) karte.classList.add('mms-sofort');
+      karte.style.left   = el.offsetLeft   + 'px';
+      karte.style.top    = el.offsetTop    + 'px';
+      karte.style.width  = el.offsetWidth  + 'px';
+      karte.style.height = el.offsetHeight + 'px';
+      karte.classList.toggle('mms-blass', el.classList.contains('mms-bald'));
+      if (sofort) { void karte.offsetWidth; karte.classList.remove('mms-sofort'); }
+    }
+    /* Beim Oeffnen liegt die Blase erst jetzt im Layout -- also erst jetzt
+       messen und die Karte ohne Bewegung hinlegen. */
+    kasten.addEventListener('toggle', () => { if (kasten.open) karteZu(gewaehlt(), true); });
+    window.addEventListener('resize', () => { if (kasten.open) karteZu(gewaehlt(), true); });
+    liste?.addEventListener('mouseover', e => {
+      const w = e.target.closest('.mms-wahl'); if (w) karteZu(w);
+    });
+    liste?.addEventListener('mouseleave', () => karteZu(gewaehlt()));
+    liste?.addEventListener('focusin', e => {
+      const w = e.target.closest('.mms-wahl'); if (w) karteZu(w);
+    });
+    liste?.addEventListener('focusout', e => {
+      if (!liste.contains(e.relatedTarget)) karteZu(gewaehlt());
+    });
+
     /* ---- Zusammenziehen, aber erst spaet ---- */
     let uhr = null;
-    const klein = () => { if (!kasten.open) kasten.classList.add('mms-klein'); };
+    const klein = () => {
+      if (kasten.open) return;
+      kasten.classList.add('mms-klein');
+      /* Die Flagge "schluckt" den Namen. Per Klasse, nicht per .mms-klein
+         im CSS -- siehe Kommentar dort. */
+      if (sanft && flagge) {
+        flagge.classList.remove('mms-schluckt');
+        void flagge.offsetWidth;
+        flagge.classList.add('mms-schluckt');
+      }
+    };
     const gross = () => { clearTimeout(uhr); uhr = null; kasten.classList.remove('mms-klein'); };
     const uhrStellen = (ms) => { clearTimeout(uhr); uhr = setTimeout(klein, ms); };
 
     /* Auf dem Brief scrollt ein Kasten, auf einer Welt das Fenster --
        beide beobachten, statt zu raten, welcher es ist. */
     const scroller = document.getElementById('scroller');
-    const stand = () => Math.max(window.scrollY,
-      scroller ? scroller.scrollTop : 0);
+    const stand = () => Math.max(window.scrollY, scroller ? scroller.scrollTop : 0);
     let gestartet = false;
     function beimScrollen() {
       if (gestartet || stand() < SCHWELLE) return;
@@ -212,8 +261,7 @@
 
     /* ---- Auf- und Zuklappen ----
        <details> schaltet `open` von sich aus um. Beim SCHLIESSEN muss das
-       aber warten, bis die Blase ausgeblendet ist -- sonst ist sie
-       schlagartig weg und die Bewegung findet gar nicht statt. */
+       warten, bis die Blase ausgeblendet ist. */
     let schliesstGerade = false;
     knopf?.addEventListener('click', (e) => {
       if (!kasten.open) { gross(); return; }        // Aufklappen: Browser macht es
@@ -233,11 +281,10 @@
       };
       if (!sanft) return fertig();
       kasten.classList.add('mms-schliesst');
-      setTimeout(fertig, 220);
+      setTimeout(fertig, ZU_DAUER);
     }
 
-    /* Woanders hinklicken oder Esc: zu. Ohne das bliebe die Blase offen
-       stehen, waehrend man laengst weiterliest. */
+    /* Woanders hinklicken oder Esc: zu. */
     document.addEventListener('click', (e) => {
       if (kasten.open && !kasten.contains(e.target)) zuklappen();
     });
@@ -246,11 +293,10 @@
     });
 
     /* ---- Sprache waehlen ----
-       Der Wechsel laedt die Seite neu. Vorher noch kurz den Namen im Knopf
-       umschreiben: die Buchstaben drehen sich heraus und die neuen herein.
-       Das dauert bewusst nur einen Wimpernschlag -- laenger waere keine
-       Bewegung mehr, sondern Warten. Ohne JavaScript oder mit "Bewegung
-       reduzieren" fuehrt derselbe Link ohne Umweg zum Ziel. */
+       Der Wechsel laedt die Seite neu. Vorher: Flagge dreht sich um, der
+       Name kippt Buchstabe fuer Buchstabe um, die Pille faehrt auf die neue
+       Breite. Ohne JavaScript oder mit "Bewegung reduzieren" fuehrt
+       derselbe Link ohne Umweg zum Ziel. */
     kasten.querySelectorAll('.mms-wahl[href]').forEach(a => {
       a.addEventListener('click', (e) => {
         const ziel = a.dataset.sprache;
@@ -259,39 +305,77 @@
         if (!sanft || ziel === sprache || e.metaKey || e.ctrlKey || e.shiftKey) return;
         e.preventDefault();
         gross();
-        if (flagge) flagge.src = '/assets/flaggen/' + ziel + '.png';
+        flaggeTauschen(ziel);
         namenWechseln(NAMEN[ziel]);
-        setTimeout(() => { location.href = a.href; }, 330);
+        setTimeout(() => { location.href = a.href; }, WECHSEL_DAUER);
       });
     });
+
+    function flaggeTauschen(ziel) {
+      if (!flagge) return;
+      flagge.classList.remove('mms-tausch');
+      void flagge.offsetWidth;
+      flagge.classList.add('mms-tausch');
+      /* Bild im tiefsten Punkt der Drehung tauschen (45 % von 380 ms).
+         Das PNG ist schon da: es stand eben noch in der offenen Liste. */
+      setTimeout(() => { flagge.src = '/assets/flaggen/' + ziel + '.png'; }, 150);
+    }
 
     function buchstaben(text) {
       return [...text].map((z, i) =>
         '<span class="mms-buchstabe" style="--i:' + i + '">' +
-        (z === ' ' ? '&nbsp;' : z.replace('&', '&amp;').replace('<', '&lt;')) +
+        (z === ' ' ? '&nbsp;' : z.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')) +
         '</span>').join('');
     }
+
+    /* Zwei Ebenen: die alten Buchstaben liegen absolut obenauf und kippen
+       weg, die neuen stehen im Fluss und kippen herein. Gleichzeitig faehrt
+       .mms-name von der alten auf die neue Breite -- dafuer wird die neue
+       an einer unsichtbaren Kopie gemessen. Danach wieder schlichter Text. */
     function namenWechseln(neu) {
-      if (!name) return;
-      name.innerHTML = buchstaben(name.textContent);
-      name.classList.add('mms-raus');
-      setTimeout(() => {
-        name.classList.remove('mms-raus');
-        name.innerHTML = buchstaben(neu);
-        name.classList.add('mms-rein');
-      }, 150);
+      if (!name || !knopf) return;
+      const alt = name.textContent;
+      const breiteAlt = name.getBoundingClientRect().width;
+
+      const mess = document.createElement('span');
+      mess.className = 'mms-name mms-mess';
+      mess.textContent = neu;
+      knopf.appendChild(mess);
+      const breiteNeu = mess.getBoundingClientRect().width;
+      mess.remove();
+
+      name.style.width = breiteAlt + 'px';
+      name.innerHTML =
+        '<span class="mms-alt mms-raus" aria-hidden="true">' + buchstaben(alt) + '</span>' +
+        '<span class="mms-rein">' + buchstaben(neu) + '</span>';
+      void name.offsetWidth;                  // alte Breite festnageln, dann fahren
+      name.style.width = breiteNeu + 'px';
+
+      /* Aufraeumen -- erreicht der Neulade-Aufruf die Seite vorher, ist es
+         egal; bleibt sie (z.B. Abbruch), steht wieder schlichter Text. */
+      setTimeout(() => { name.textContent = neu; name.style.width = ''; }, 600);
     }
 
     /* ---- Niederlaendisch: noch nicht ----
-       Ein kurzes Wackeln und ein Satz, der von selbst wieder geht. Kein
-       Fenster, kein Wegklicken -- die Antwort auf einen Tipp, mehr nicht. */
+       Ein kurzes Wackeln und ein Satz, der von selbst wieder geht. Der Text
+       kommt aus texte.js (Schluessel 'sprache-bald'), solange es ihn dort
+       noch nicht gibt aus dem festen Wert hier. */
+    const baldText = (() => {
+      try {
+        const t = window.mmText('sprache-bald');
+        if (t && t !== 'sprache-bald') return t;
+      } catch (_) {}
+      return 'nog niet mogelijk :(';
+    })();
     let hinweisUhr = null;
     kasten.querySelector('.mms-bald')?.addEventListener('click', () => {
       kasten.classList.remove('mms-nein');
       void kasten.offsetWidth;              // Neustart der Bewegung erzwingen
       kasten.classList.add('mms-nein');
+      /* Sicherheitsnetz: bei "Bewegung reduzieren" kommt kein animationend. */
+      setTimeout(() => kasten.classList.remove('mms-nein'), 1000);
       if (!hinweis) return;
-      hinweis.textContent = 'nog niet mogelijk :(';
+      hinweis.textContent = baldText;
       requestAnimationFrame(() => hinweis.classList.add('da'));
       clearTimeout(hinweisUhr);
       hinweisUhr = setTimeout(() => {
@@ -299,8 +383,12 @@
         setTimeout(() => { hinweis.textContent = ''; }, 320);
       }, 1900);
     });
+
+    /* Aufraeumen nach einmaligen Bewegungen. */
     kasten.addEventListener('animationend', (e) => {
       if (e.animationName === 'mms-wackeln') kasten.classList.remove('mms-nein');
+      if (e.animationName === 'mms-schluck') flagge?.classList.remove('mms-schluckt');
+      if (e.animationName === 'mms-flagge-tausch') flagge?.classList.remove('mms-tausch');
     });
   }
 
