@@ -398,7 +398,10 @@ function feldSichtbarkeit(typ) {
      Unterschied. */
   $('#titel-hinweis').hidden = typ !== 'brief';
   $('#nur-projekt').hidden = typ !== 'projekt';
-  $('#nur-welt').hidden = typ !== 'welt';
+  /* Die Farbstimmung gilt fuer Welt UND Projekt: bei der Welt faerbt sie die
+     Seite, beim Projekt den Abschnitt der Zeitleiste im Brief (brief.js liest
+     seiten.farbe). Nur der Brief selbst hat keine eigene Farbe. */
+  $('#nur-farbe').hidden = typ === 'brief';
   $('#mit-bild').hidden = typ === 'brief';
   $('#bild-titel').textContent = typ === 'welt' ? 'Titelbild' : 'Kachelbild im Brief';
 }
