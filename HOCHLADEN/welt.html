@@ -61,12 +61,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1788536695"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1788563828"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1788536695"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1788536695">');
+  document.write('<script src="/assets/schriften-retten.js?v=1788563828"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1788563828">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -80,17 +80,17 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1788536695">
-<link rel="stylesheet" href="/assets/site.css?v=1788536695">
-<link rel="stylesheet" href="/assets/brief.css?v=1788536695">
-<link rel="stylesheet" href="/assets/blumen.css?v=1788536695">
-<link rel="stylesheet" href="/assets/welt.css?v=1788536695">
-<link rel="stylesheet" href="/assets/inhalt.css?v=1788536695">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1788536695">
+<link rel="stylesheet" href="/assets/fonts.css?v=1788563828">
+<link rel="stylesheet" href="/assets/site.css?v=1788563828">
+<link rel="stylesheet" href="/assets/brief.css?v=1788563828">
+<link rel="stylesheet" href="/assets/blumen.css?v=1788563828">
+<link rel="stylesheet" href="/assets/welt.css?v=1788563828">
+<link rel="stylesheet" href="/assets/inhalt.css?v=1788563828">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1788563828">
 <!-- Sprachwahl, siehe index.html. Im Kopf, damit <html lang> stimmt,
      bevor gezeichnet wird. -->
-<script src="/assets/texte.js?v=1788536695"></script>
-<script src="/assets/sprache.js?v=1788536695"></script>
+<script src="/assets/texte.js?v=1788563828"></script>
+<script src="/assets/sprache.js?v=1788563828"></script>
 </head>
 <body>
 
@@ -117,7 +117,7 @@
   </summary>
   <div class="mms-blase">
     <div class="mms-liste">
-      <a class="mms-wahl" href="/?lang=de" hreflang="de" lang="de" data-sprache="de">
+      <a class="mms-wahl" href="/?lang=de" hreflang="de" lang="de" data-sprache="de" aria-current="true">
         <img src="/assets/flaggen/de.png" alt="" width="20" height="20" loading="lazy" decoding="async"><span>Deutsch</span></a>
       <a class="mms-wahl" href="/?lang=en" hreflang="en" lang="en" data-sprache="en">
         <img src="/assets/flaggen/en.png" alt="" width="20" height="20" loading="lazy" decoding="async"><span>English</span></a>
@@ -154,14 +154,14 @@
   </div>
 </div>
 
-<script src="/assets/config.js?v=1788536695"></script>
-<script src="/assets/shared.js?v=1788536695"></script>
-<script src="/assets/bloecke.js?v=1788536695"></script>
-<script src="/assets/db.js?v=1788536695"></script>
-<script src="/assets/blumen.js?v=1788536695"></script>
-<script src="/assets/tueren.js?v=1788536695"></script>
-<script src="/assets/demo-race.js?v=1788536695"></script>
-<script src="/assets/inhalt.js?v=1788536695"></script>
+<script src="/assets/config.js?v=1788563828"></script>
+<script src="/assets/shared.js?v=1788563828"></script>
+<script src="/assets/bloecke.js?v=1788563828"></script>
+<script src="/assets/db.js?v=1788563828"></script>
+<script src="/assets/blumen.js?v=1788563828"></script>
+<script src="/assets/tueren.js?v=1788563828"></script>
+<script src="/assets/demo-race.js?v=1788563828"></script>
+<script src="/assets/inhalt.js?v=1788563828"></script>
 <script>
 (async () => {
   /* GitHub Pages liefert /welt/xy aus, weil es von sich aus ".html" anhaengt

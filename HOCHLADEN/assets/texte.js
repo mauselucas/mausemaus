@@ -13,6 +13,9 @@
   window.MM_TEXTE = {
     /* --- Rahmen --- */
     'sprache-waehlen':    { de: 'Sprache wählen', en: 'Choose language' },
+    /* Bewusst in BEIDEN Sprachen niederlaendisch: der Satz ist die
+       Antwort auf einen Klick auf "Nederlands". */
+    'sprache-bald':       { de: 'nog niet mogelijk :(', en: 'nog niet mogelijk :(' },
     'sprung':             { de: 'Zum Brief springen', en: 'Skip to the letter' },
 
     /* --- Die Leiste --- */

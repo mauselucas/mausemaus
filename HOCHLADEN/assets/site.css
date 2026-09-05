@@ -242,26 +242,44 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
    Sitzt fest unten rechts und bleibt beim Scrollen stehen.
 
    Der Ablauf, den er erzaehlt: Beim Laden steht er in voller Breite da
-   (Flagge + "Deutsch"), damit ihn auch jemand bemerkt, der ihn nicht
-   sucht. Erst ein paar Sekunden NACH dem ersten Scrollen zieht er sich
-   auf die Flagge zusammen -- bewusst deutlich spaeter als die Zeitleiste
-   links, die schon nach 760 ms zugeht. Beim Klick wird er wieder gross
-   UND klappt auf; beim blossen Ueberfahren wackelt er nur kurz.
+   (Flagge + "Deutsch"). Erst ein paar Sekunden NACH dem ersten Scrollen
+   zieht er sich auf die Flagge zusammen -- bewusst spaeter als die
+   Zeitleiste links. Beim Klick wird er wieder gross UND klappt auf; beim
+   blossen Ueberfahren wackelt er nur kurz.
 
    Das Ganze ist ein <details>: Auf- und Zuklappen kann der Browser
    selbst, die Auswahl sind echte Links. Faellt sprache.js aus, bleibt ein
-   vollstaendig bedienbarer Umschalter uebrig -- nur eben ohne die
-   Feinheiten. */
+   vollstaendig bedienbarer Umschalter uebrig -- nur ohne Feinheiten.
+
+   Zwei Kurven: --mm-kurve (vom Auftraggeber) fuer alles Grosse.
+   --mms-feder fuer die kleinen "physischen" Momente -- Karte gleitet,
+   Bluete waechst, Buchstaben landen. Sie schwingt leicht ueber und
+   faellt ohne linear()-Unterstuetzung auf --mm-kurve zurueck. */
 .mm-sprache {
   position: fixed; right: 26px; bottom: 26px; z-index: 300;
   font-family: 'Manrope', system-ui, sans-serif;
+  --mms-feder:   var(--mm-kurve);
+  --mms-schiene: #E7EAE4;   /* die graue Schiene, in der die Karte liegt  */
+  --mms-karte:   #FBFAF6;   /* die weisse Karte, dieselbe Flaeche wie Karten auf der Seite */
+  /* Die Bluete am zusammengezogenen Knopf. PLATZHALTER: fuenf leicht
+     verdrehte Ellipsen. Hier Lucas' eigene Blume als SVG einsetzen --
+     nur diese eine Zeile tauschen. */
+  --mms-bluete: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><g fill='%23BFCC94'><ellipse cx='10' cy='4.6' rx='3.1' ry='3.6' transform='rotate(-8 10 4.6)'/><ellipse cx='15.4' cy='8.4' rx='3.1' ry='3.6' transform='rotate(64 15.4 8.4)'/><ellipse cx='13.4' cy='14.7' rx='3.1' ry='3.6' transform='rotate(136 13.4 14.7)'/><ellipse cx='6.6' cy='14.7' rx='3.1' ry='3.6' transform='rotate(-136 6.6 14.7)'/><ellipse cx='4.6' cy='8.4' rx='3.1' ry='3.6' transform='rotate(-64 4.6 8.4)'/></g><circle cx='10' cy='10' r='2' fill='%230D1821'/></svg>");
 }
-/* Das Dreieck, das der Browser vor eine <summary> setzt, muss in BEIDEN
-   Schreibweisen weg -- ohne die zweite Zeile bleibt es in Safari stehen. */
+@supports (animation-timing-function: linear(0, 1)) {
+  .mm-sprache {
+    --mms-feder: linear(0, .14 4%, .52 10%, .9 17%, 1.08 24%, 1.13 28%,
+                        1.09 35%, 1.02 44%, .985 52%, .99 62%, 1.004 74%, 1);
+  }
+}
+
+/* Das Dreieck vor <summary> muss in BEIDEN Schreibweisen weg (Safari). */
 .mm-sprache > summary { list-style: none; }
 .mm-sprache > summary::-webkit-details-marker { display: none; }
 
+/* ---- Die Pille ---- */
 .mms-knopf {
+  position: relative;               /* fuer die Bluete (::after)          */
   display: flex; align-items: center; gap: 9px;
   height: 42px; padding: 0 15px 0 13px;
   border-radius: 99px; cursor: pointer;
@@ -273,117 +291,226 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
   box-shadow: 0 2px 10px rgba(13,24,33,.08);
   color: #0D1821; font-size: 13.5px; font-weight: 500; line-height: 1;
   white-space: nowrap; user-select: none;
-  transition: padding .42s var(--mm-kurve), box-shadow .25s var(--mm-kurve),
-              background .25s var(--mm-kurve), transform .25s var(--mm-kurve);
+  /* Drehpunkt unten: das Wackeln wirkt dann, als stuende die Pille auf
+     etwas, statt um ihre Mitte zu kreiseln. */
+  transform-origin: 50% 70%;
+  /* gap animiert mit -- sonst springt der Abstand, waehrend Name und
+     Pfeil noch ausfahren. */
+  transition: padding .46s var(--mm-kurve), gap .46s var(--mm-kurve),
+              box-shadow .25s var(--mm-kurve), background .25s var(--mm-kurve),
+              border-color .3s var(--mm-kurve), transform .25s var(--mm-kurve);
 }
 .mms-knopf:hover { box-shadow: 0 3px 14px rgba(13,24,33,.12); }
 .mm-sprache > summary:focus-visible { outline: 2px solid #0D1821; outline-offset: 3px; border-radius: 99px; }
 
-.mms-flagge { width: 20px; height: 20px; display: block; flex: none; }
-
-/* Der Name faehrt seitlich ein und aus. max-width statt display:none,
-   damit es eine Bewegung gibt und nicht ein Sprung. */
-.mms-name {
-  overflow: hidden; max-width: 9em;
-  transition: max-width .42s var(--mm-kurve), opacity .26s var(--mm-kurve);
+.mms-flagge {
+  width: 20px; height: 20px; display: block; flex: none;
+  transform-origin: 50% 60%;
 }
+
+/* Der Name. overflow:hidden fuer die Breitenblende; das Polster mit
+   negativem Rand gibt den kippenden Buchstaben oben und unten 4 px Luft,
+   ohne die Hoehe der Pille zu veraendern (overflow-clip-margin kann
+   Safari nicht). */
+.mms-name {
+  position: relative; overflow: hidden; max-width: 9em;
+  padding: 4px 0; margin: -4px 0;
+  transform-origin: 0 50%;
+  /* Beim Grosswerden: erst faehrt die Breite auf, dann (120 ms spaeter)
+     stellt sich der Name scharf. */
+  transition: max-width .46s var(--mm-kurve),
+              width .38s var(--mm-kurve),
+              opacity .26s var(--mm-kurve) .12s,
+              filter .26s var(--mm-kurve) .12s,
+              transform .42s var(--mms-feder) .08s;
+}
+/* Messhilfe fuer sprache.js: unsichtbare Kopie zum Breitemessen. Die
+   !important sind noetig, weil .mms-klein .mms-name spezifischer ist. */
+.mms-mess {
+  position: absolute !important; visibility: hidden; pointer-events: none;
+  max-width: none !important; width: auto !important;
+  transform: none !important; transition: none !important;
+  overflow: visible; white-space: nowrap;
+}
+
 .mms-pfeil {
-  width: 11px; height: 8px; flex: none;
+  width: 11px; height: 8px; flex: none; max-width: 11px;
   fill: none; stroke: #6E7873; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  transition: transform .34s var(--mm-kurve), opacity .26s var(--mm-kurve), max-width .42s var(--mm-kurve);
-  max-width: 11px;
+  transition: transform .34s var(--mm-kurve), opacity .2s var(--mm-kurve) .14s,
+              max-width .46s var(--mm-kurve);
 }
 .mm-sprache[open] .mms-pfeil { transform: rotate(180deg); }
 
-/* ---- zusammengezogen: nur noch die Flagge ---- */
-/* gap mit auf 0: sonst bleibt rechts von der Flagge Luft stehen, wo eben
-   noch der Name war. */
+/* ---- zusammengezogen: nur noch die Flagge ----
+   Der Name wird nicht abgeschnitten, sondern WEICHT: in 160 ms blass,
+   unscharf und ein Stueck nach links -- die Kante des Ausschnitts kommt
+   erst danach bei ihm an. */
 .mm-sprache.mms-klein .mms-knopf { padding: 0 11px; gap: 0; }
-.mm-sprache.mms-klein .mms-name,
-.mm-sprache.mms-klein .mms-pfeil { max-width: 0; opacity: 0; }
+.mm-sprache.mms-klein .mms-name {
+  max-width: 0; opacity: 0; filter: blur(3px);
+  transform: translateX(-6px) scale(.9);
+  transition: max-width .46s var(--mm-kurve) .06s, opacity .16s var(--mm-kurve),
+              filter .16s var(--mm-kurve), transform .3s var(--mm-kurve);
+}
+.mm-sprache.mms-klein .mms-pfeil {
+  max-width: 0; opacity: 0;
+  transition: max-width .46s var(--mm-kurve), opacity .14s var(--mm-kurve);
+}
+/* Die Flagge "schluckt" den Namen: kurz kleiner, dann ein Tick groesser
+   als vorher, dann normal. Kommt per Klasse aus sprache.js, nicht ueber
+   .mms-klein direkt -- sonst liefe es nach jedem Hover neu an, weil das
+   Hover-Huepfen die animation-Eigenschaft ueberschreibt. */
+@keyframes mms-schluck {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(.86); }
+  70%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.mms-flagge.mms-schluckt { animation: mms-schluck .6s var(--mm-kurve) .1s both; }
+
+/* Im kleinen Zustand ein Hauch Salbei beim Ueberfahren. */
+.mm-sprache.mms-klein .mms-knopf:hover {
+  border-color: #BFCC94;
+  box-shadow: 0 3px 14px rgba(13,24,33,.12), 0 0 0 3px rgba(191,204,148,.25);
+}
+
+/* ---- Die Bluete ----
+   Waechst oben rechts aus der zusammengezogenen Pille, 300 ms nachdem
+   sie zu ist. Beim Ueberfahren dreht sie sich. Offen oder gross: weg.
+   Absolut positioniert, also weder in der Breite noch in der Trefferflaeche
+   -- die Pruefungen messen sie nicht mit. */
+.mms-knopf::after {
+  content: ''; position: absolute; top: -5px; right: -2px;
+  width: 13px; height: 13px; pointer-events: none;
+  background: var(--mms-bluete) center / contain no-repeat;
+  transform: scale(0) rotate(-50deg); transform-origin: 50% 60%;
+  transition: transform .5s var(--mms-feder);
+}
+.mm-sprache.mms-klein .mms-knopf::after { transform: scale(1) rotate(0deg); transition-delay: .3s; }
+.mm-sprache.mms-klein .mms-knopf:hover::after { transform: scale(1.08) rotate(24deg); transition-delay: 0s; }
 
 /* ---- Ueberfahren: ein kurzes Wackeln, mehr nicht ----
-   Ausdruecklich KEIN Aufklappen beim Hovern: wer mit der Maus nur
-   vorbeifaehrt, soll nichts ausloesen. Und nicht im offenen Zustand --
-   dann waere es Unruhe unter einem Menue. */
+   Ausdruecklich KEIN Aufklappen beim Hovern. Und nicht im offenen Zustand.
+
+   Gedaempfte Schwingung: fuenf Ausschlaege, jeder etwa 60 % des vorigen,
+   Drehpunkt unten. Die Flagge schwingt GEGENLAEUFIG und huepft dabei --
+   wie eine Muenze in einer Schale, die man anstoesst. */
 @keyframes mms-wackeln {
   0%   { transform: rotate(0deg); }
-  22%  { transform: rotate(-2.6deg) translateY(-1px); }
-  48%  { transform: rotate(2deg); }
-  72%  { transform: rotate(-1.1deg); }
+  14%  { transform: rotate(-3.4deg) translateY(-1.5px); }
+  32%  { transform: rotate(2.6deg)  translateY(-.5px); }
+  50%  { transform: rotate(-1.6deg); }
+  66%  { transform: rotate(.9deg); }
+  80%  { transform: rotate(-.4deg); }
+  92%  { transform: rotate(.15deg); }
   100% { transform: rotate(0deg); }
 }
-.mm-sprache:not([open]) > .mms-knopf:hover { animation: mms-wackeln .62s var(--mm-kurve); }
-/* Dasselbe Wackeln auf Zuruf -- fuer den Klick auf eine Sprache, die es
-   noch nicht gibt. */
-.mm-sprache.mms-nein > .mms-knopf { animation: mms-wackeln .62s var(--mm-kurve); }
+@keyframes mms-hopser {
+  0%   { transform: none; }
+  18%  { transform: translateY(-3px) rotate(9deg)  scale(1.12); }
+  40%  { transform: translateY(0)    rotate(-5deg) scale(.96); }
+  62%  { transform: translateY(-1px) rotate(2.5deg) scale(1.03); }
+  82%  { transform: rotate(-1deg); }
+  100% { transform: none; }
+}
+.mm-sprache:not([open]) > .mms-knopf:hover,
+.mm-sprache.mms-nein > .mms-knopf { animation: mms-wackeln .9s ease-in-out; }
+.mm-sprache:not([open]) > .mms-knopf:hover .mms-flagge,
+.mm-sprache.mms-nein > .mms-knopf .mms-flagge { animation: mms-hopser .8s ease-in-out; }
 
 /* ---- Die aufgeklappte Blase ---- */
 .mms-blase {
   position: absolute; right: 0; bottom: calc(100% + 12px);
   /* column-REVERSE: In der Datei steht erst die Liste, dann der Hinweis --
-     angezeigt gehoert der Hinweis aber DARUEBER. Unter der Liste sitzt die
-     Spitze zum Knopf, da waere er im Weg. */
+     angezeigt gehoert der Hinweis DARUEBER. Unter der Liste sitzt die Spitze. */
   display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 8px;
+  /* Die Blase waechst aus der Ecke ueber dem Knopf, nicht aus ihrer Mitte. */
+  transform-origin: 85% 100%;
 }
-/* Die kleine Spitze, die zum Knopf zeigt. Ein gedrehtes Quadrat mit
-   derselben Kontur. Sie haengt an der Blase, NICHT an der Liste: die
-   schneidet mit overflow:hidden ab, was ueber ihre runden Ecken
-   hinausragt -- die Spitze waere dort unsichtbar. */
+/* Die Spitze zum Knopf: gedrehtes Quadrat in der Farbe der Schiene, mit
+   derselben Kontur. Sie haengt an der Blase, NICHT an der Liste (die
+   schneidet mit overflow:hidden ab). */
 .mms-blase::after {
   content: ''; position: absolute; right: 24px; bottom: -5px;
   width: 9px; height: 9px; transform: rotate(45deg);
-  background: rgba(251,250,246,0.97);
+  background: var(--mms-schiene);
   border-right: 1px solid #DCD8CC; border-bottom: 1px solid #DCD8CC;
 }
+
+/* Die Schiene. position:relative, damit die Karte sich an ihr ausrichtet
+   (offsetLeft/offsetTop in sprache.js). */
 .mms-liste {
-  display: flex; align-items: stretch;
-  background: rgba(251,250,246,0.97);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  position: relative;
+  display: flex; align-items: stretch; gap: 2px; padding: 4px;
+  background: var(--mms-schiene);
   border: 1px solid #DCD8CC; border-radius: 99px;
   box-shadow: 0 8px 26px rgba(13,24,33,.11);
   overflow: hidden;
 }
+/* Die weisse Karte, die unter dem gewaehlten Eintrag liegt und beim
+   Ueberfahren zum naechsten gleitet. Wird von sprache.js erzeugt und ans
+   ENDE der Liste gehaengt -- so behalten die Eintraege ihre nth-child-
+   Nummern fuer die Staffelung. Liegt per z-index UNTER den Eintraegen. */
+.mms-karte {
+  position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 0;
+  border-radius: 99px; background: var(--mms-karte);
+  box-shadow: 0 1px 2px rgba(13,24,33,.10), 0 0 0 1px rgba(13,24,33,.045);
+  pointer-events: none;
+  transition: left .34s var(--mms-feder), top .34s var(--mms-feder),
+              width .34s var(--mms-feder), height .34s var(--mms-feder),
+              opacity .2s var(--mm-kurve);
+}
+.mms-karte.mms-sofort { transition: none; }   /* erstes Hinlegen beim Oeffnen */
+.mms-karte.mms-blass  { opacity: .55; }       /* ueber Niederlaendisch: halbherzig */
+
 .mms-wahl {
+  position: relative; z-index: 1;             /* ueber der Karte */
   display: flex; align-items: center; gap: 8px;
-  padding: 11px 16px; border: 0; background: transparent;
+  padding: 10px 15px; border: 0; border-radius: 99px; background: transparent;
   font-family: inherit; font-size: 13.5px; line-height: 1;
   color: #6E7873; text-decoration: none; white-space: nowrap; cursor: pointer;
-  transition: background .2s var(--mm-kurve), color .2s var(--mm-kurve);
+  transition: color .2s var(--mm-kurve), background .2s var(--mm-kurve);
 }
-.mms-wahl + .mms-wahl { border-left: 1px solid #EDEAE1; }
 .mms-wahl img { width: 20px; height: 20px; display: block; flex: none;
   transition: filter .2s var(--mm-kurve), opacity .2s var(--mm-kurve); }
-.mms-wahl:hover { background: rgba(191,204,148,.22); color: #0D1821; }
+.mms-wahl:hover { color: #0D1821; }
 .mms-wahl:focus-visible { outline: 2px solid #0D1821; outline-offset: -2px; }
-/* Die gewaehlte Sprache: kraeftiger als die uebrigen, aber nicht laut. */
-.mms-wahl[aria-current="true"] {
-  background: rgba(191,204,148,.34); color: #0D1821; font-weight: 600;
+/* Die gewaehlte Sprache: kraeftiger, aber nicht laut. Das Gewicht wechselt
+   NUR hier, nicht beim Hovern -- sonst wuerde der Eintrag breiter und die
+   Karte muesste hinterherrutschen. */
+.mms-wahl[aria-current="true"] { color: #0D1821; font-weight: 600; }
+/* OHNE JavaScript gibt es keine gleitende Karte: dann liegt sie starr
+   unter dem markierten Eintrag und erscheint unter dem, den man ueberfaehrt. */
+.mms-liste:not(.mms-hat-karte) .mms-wahl[aria-current="true"],
+.mms-liste:not(.mms-hat-karte) .mms-wahl:hover {
+  background: var(--mms-karte);
+  box-shadow: 0 1px 2px rgba(13,24,33,.10), 0 0 0 1px rgba(13,24,33,.045);
 }
-/* Noch nicht verfuegbar: sichtbar, aber erkennbar zurueckgenommen --
-   auch die Flagge selbst wird blass, sonst leuchtet sie kraeftiger als
-   die Sprache daneben, die es wirklich gibt. */
+/* Noch nicht verfuegbar: sichtbar, aber erkennbar zurueckgenommen. */
 .mms-bald { color: #B4B3AA; }
 .mms-bald img { filter: grayscale(.75); opacity: .55; }
-.mms-bald:hover { background: rgba(13,24,33,.035); color: #B4B3AA; }
+.mms-bald:hover { color: #B4B3AA; }
 
 /* Der kurze Satz, wenn jemand Niederlaendisch antippt. */
 .mms-hinweis {
   margin: 0; padding: 6px 12px; border-radius: 99px;
   background: rgba(13,24,33,.86); color: #F0F4EF;
   font-size: 12px; line-height: 1.3; white-space: nowrap;
-  opacity: 0; transform: translateY(-4px);
-  transition: opacity .3s var(--mm-kurve), transform .3s var(--mm-kurve);
+  opacity: 0; transform: translateY(-4px) scale(.96); transform-origin: 80% 100%;
+  transition: opacity .3s var(--mm-kurve), transform .36s var(--mms-feder);
   pointer-events: none;
 }
 .mms-hinweis:empty { display: none; }
 .mms-hinweis.da { opacity: 1; transform: none; }
 
 /* ---- Die Bewegung beim Auf- und Zuklappen ----
-   Die Unschaerfe ist das, was die Bewegung weich macht: die Blase kommt
-   nicht einfach eingeblendet, sondern faehrt scharfstellend heran. */
+   Drei Schichten, die sich ueberlappen:
+     1. die Blase faehrt scharfstellend heran (wie bisher),
+     2. die drei Eintraege kommen um je 42 ms gestaffelt aus der Unschaerfe,
+     3. die Spitze waechst 120 ms spaeter aus dem Nichts.
+   Beim Zuklappen geht die Spitze zuerst, dann die Blase. */
 @keyframes mms-auf {
-  from { opacity: 0; transform: translateY(10px) scale(.93); filter: blur(9px); }
+  from { opacity: 0; transform: translateY(12px) scale(.9); filter: blur(8px); }
   60%  { opacity: 1; }
   to   { opacity: 1; transform: none; filter: blur(0); }
 }
@@ -391,51 +518,97 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
   from { opacity: 1; transform: none; filter: blur(0); }
   to   { opacity: 0; transform: translateY(8px) scale(.95); filter: blur(7px); }
 }
-.mm-sprache[open] .mms-blase { animation: mms-auf .34s var(--mm-kurve) both; }
-.mm-sprache.mms-schliesst .mms-blase { animation: mms-zu .22s var(--mm-kurve) both; }
-
-/* ---- Der Namenswechsel im Knopf ----
-   Beim Wechsel drehen sich die Buchstaben einzeln heraus und die neuen
-   herein, leicht versetzt. sprache.js zerlegt den Namen dafuer in
-   <span>s und setzt --i je Buchstabe. */
-.mms-buchstabe { display: inline-block; }
-@keyframes mms-buchstabe-rein {
-  from { opacity: 0; transform: translateY(7px) rotate(-16deg); filter: blur(3px); }
+@keyframes mms-eintrag {
+  from { opacity: 0; transform: translateY(7px) scale(.96); filter: blur(3px); }
   to   { opacity: 1; transform: none; filter: blur(0); }
 }
+@keyframes mms-karte-auf {
+  from { transform: scale(.85); }
+  to   { transform: none; }
+}
+@keyframes mms-spitze-auf {
+  from { transform: scale(0) rotate(45deg); }
+  to   { transform: scale(1) rotate(45deg); }
+}
+@keyframes mms-spitze-zu {
+  from { transform: scale(1) rotate(45deg); }
+  to   { transform: scale(0) rotate(45deg); }
+}
+.mms-wahl:nth-child(1) { --n: 0; }
+.mms-wahl:nth-child(2) { --n: 1; }
+.mms-wahl:nth-child(3) { --n: 2; }
+.mm-sprache[open] .mms-blase { animation: mms-auf .36s var(--mm-kurve) both; }
+.mm-sprache[open] .mms-wahl {
+  animation: mms-eintrag .34s var(--mm-kurve) both;
+  animation-delay: calc(50ms + var(--n) * 42ms);
+}
+.mm-sprache[open] .mms-karte { animation: mms-karte-auf .32s var(--mms-feder) 30ms both; }
+.mm-sprache[open] .mms-blase::after { animation: mms-spitze-auf .32s var(--mms-feder) .12s both; }
+/* Diese beiden MUESSEN nach den [open]-Regeln stehen: gleiche Spezifitaet,
+   die spaetere gewinnt. */
+.mm-sprache.mms-schliesst .mms-blase { animation: mms-zu .22s var(--mm-kurve) both; }
+.mm-sprache.mms-schliesst .mms-blase::after { animation: mms-spitze-zu .16s var(--mm-kurve) both; }
+
+/* ---- Der Namenswechsel im Knopf ----
+   Zwei Ebenen uebereinander statt eines Austauschs: die alten Buchstaben
+   (.mms-alt, absolut) kippen um ihre Querachse nach hinten weg, die neuen
+   kippen von unten herein -- versetzt um 40 ms, also ueberlappend. Kein
+   Moment, in dem nichts dasteht. Die Feder-Kurve laesst die neuen minimal
+   ueber Null hinausschwingen, wie eine Fallblatt-Anzeige, die einrastet.
+   sprache.js zerlegt den Namen in <span>s und setzt --i je Buchstabe. */
+.mms-buchstabe { display: inline-block; backface-visibility: hidden; transform-origin: 50% 55%; }
+.mms-alt { position: absolute; left: 0; top: 4px; white-space: nowrap; pointer-events: none; }
 @keyframes mms-buchstabe-raus {
   from { opacity: 1; transform: none; filter: blur(0); }
-  to   { opacity: 0; transform: translateY(-7px) rotate(14deg); filter: blur(3px); }
+  to   { opacity: 0; transform: perspective(180px) rotateX(82deg) translateY(-4px); filter: blur(1.5px); }
 }
-.mms-rein .mms-buchstabe {
-  animation: mms-buchstabe-rein .30s var(--mm-kurve) both;
-  animation-delay: calc(var(--i) * 22ms);
+@keyframes mms-buchstabe-rein {
+  from { opacity: 0; transform: perspective(180px) rotateX(-82deg) translateY(4px); filter: blur(1.5px); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: none; filter: blur(0); }
 }
 .mms-raus .mms-buchstabe {
-  animation: mms-buchstabe-raus .22s var(--mm-kurve) both;
+  animation: mms-buchstabe-raus .24s var(--mm-kurve) both;
   animation-delay: calc(var(--i) * 16ms);
 }
+.mms-rein .mms-buchstabe {
+  animation: mms-buchstabe-rein .28s var(--mms-feder) both;
+  animation-delay: calc(40ms + var(--i) * 18ms);
+}
+/* Die Flagge im Knopf beim Wechsel: dreht sich klein, sprache.js tauscht
+   im tiefsten Punkt das Bild, dann kommt sie wieder gross. */
+@keyframes mms-flagge-tausch {
+  0%   { transform: none; opacity: 1; filter: blur(0); }
+  45%  { transform: scale(.4) rotate(-30deg); opacity: .2; filter: blur(2px); }
+  100% { transform: none; opacity: 1; filter: blur(0); }
+}
+.mms-flagge.mms-tausch { animation: mms-flagge-tausch .38s var(--mms-feder) both; }
 
 /* ---- Handy ----
-   Schmaler Bildschirm: die drei Sprachen untereinander statt nebeneinander.
-   Nebeneinander waeren es rund 330 px -- auf einem 375-px-Geraet stiesse
-   die Blase an beide Raender. */
+   Schmaler Bildschirm: die drei Sprachen untereinander. Die Karte gleitet
+   dann senkrecht -- derselbe Code, offsetTop statt offsetLeft. */
 @media (max-width: 560px) {
   .mm-sprache { right: 16px; bottom: 16px; }
-  .mms-liste { flex-direction: column; border-radius: 20px; }
-  .mms-wahl { padding: 12px 18px; }
-  .mms-wahl + .mms-wahl { border-left: 0; border-top: 1px solid #EDEAE1; }
+  .mms-liste { flex-direction: column; border-radius: 22px; }
+  .mms-wahl { padding: 11px 17px; border-radius: 18px; }
+  .mms-karte { border-radius: 18px; }
   .mms-blase::after { right: 22px; }
 }
 
 /* ---- "Bewegung reduzieren" ----
-   Alles Zappelnde faellt weg. Was bleibt, ist ein Umschalter, der
-   auf- und zugeht -- die Aussage der Bewegung, ohne die Bewegung. */
+   Alles Zappelnde faellt weg: Wackeln, Huepfen, Schluck, Bluete-Drehung,
+   Unschaerfe, Staffelung, Buchstaben, gleitende Karte. Was bleibt, ist
+   ein Umschalter, der auf- und zugeht. */
 @media (prefers-reduced-motion: reduce) {
-  .mms-knopf, .mms-name, .mms-pfeil, .mms-wahl, .mms-wahl img, .mms-hinweis { transition: none; }
+  .mms-knopf, .mms-knopf::after, .mms-name, .mms-pfeil,
+  .mms-wahl, .mms-wahl img, .mms-karte, .mms-hinweis { transition: none; }
   .mm-sprache:not([open]) > .mms-knopf:hover,
-  .mm-sprache.mms-nein > .mms-knopf { animation: none; }
-  .mm-sprache[open] .mms-blase,
-  .mm-sprache.mms-schliesst .mms-blase { animation: none; }
+  .mm-sprache.mms-nein > .mms-knopf,
+  .mm-sprache:not([open]) > .mms-knopf:hover .mms-flagge,
+  .mm-sprache.mms-nein > .mms-knopf .mms-flagge,
+  .mms-flagge.mms-schluckt, .mms-flagge.mms-tausch,
+  .mm-sprache[open] .mms-blase, .mm-sprache.mms-schliesst .mms-blase,
+  .mm-sprache[open] .mms-blase::after, .mm-sprache.mms-schliesst .mms-blase::after,
+  .mm-sprache[open] .mms-wahl, .mm-sprache[open] .mms-karte,
   .mms-rein .mms-buchstabe, .mms-raus .mms-buchstabe { animation: none; }
 }
