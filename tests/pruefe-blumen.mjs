@@ -73,7 +73,12 @@ const TEXT_MESSUNG = `(() => {
     return JSON.stringify({
       anzahl: blumen.length,
       abschnitte: abschnitte.length,
-      ohneBlume: abschnitte.filter(a => !a.querySelector(':scope > .mm-blume')).length,
+      /* Direkt im Abschnitt ODER direkt in seiner Projekt-Huelle
+         (.br-projekt-rest, brief.js) -- dort haengen die Blumen, seit das
+         Titelbild aus der Spalte ausbricht. Bewusst NICHT jede beliebige
+         Tiefe: eine Blume, die irgendwo in einem Block steckt, zaehlt nicht. */
+      ohneBlume: abschnitte.filter(a =>
+        !a.querySelector(':scope > .mm-blume, :scope > .br-projekt-rest > .mm-blume')).length,
       /* Form und viewBox jeder einzelnen Blume, so wie sie WIRKLICH im
          Dokument steht -- nicht so, wie sie im Quelltext aussieht. */
       formen: blumen.map(el => ({

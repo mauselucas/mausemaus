@@ -111,6 +111,13 @@ pruefe('nach dem Bereich ist er voll da (Deckkraft 1, keine Unschärfe, kein Ver
   p[4].deckkraft === 1 && /blur\(0px\)|none/.test(p[4].unschaerfe),
   `${p[4].deckkraft} / ${p[4].unschaerfe} / ${p[4].versatz}`);
 
+/* Scroll-Einblendungen bleiben stehen, wo man aufhört zu scrollen. Die
+   Unschärfe darf darum nur im ersten Drittel laufen -- sonst steht ein Titel
+   verschwommen im Bild und sieht aus wie ein Ladefehler (bewegung.css). */
+pruefe('ab der Hälfte ist der Titel schon scharf, auch wenn er noch einblendet',
+  /blur\(0px\)|none/.test(p[2].unschaerfe) && p[2].deckkraft < 0.95,
+  `${p[2].deckkraft} / ${p[2].unschaerfe}`);
+
 /* DAS ist Lucas' eigentlicher Wunsch: zurückscrollen dreht die Bewegung
    zurück. Eine Animation auf einer Uhr wäre hier längst durchgelaufen und
    bliebe bei 1 stehen. */

@@ -238,5 +238,28 @@ pruefe('ohne Datenbank kommen die Einstellungen aus seed.js', notfall.da);
 pruefe('und sie sind vollständig', notfall.intro && notfall.werkzeuge,
   'intro=' + notfall.intro + ' werkzeuge=' + notfall.werkzeuge);
 
+/* Das Titelbild/Video jedes Projekts bricht aus der Lesespalte aus
+   (--mm-ausbruch in site.css). Bei 1280px Fensterbreite rechnet sich das auf
+   900px statt 508px -- gemessen wird "deutlich breiter als der Text" und
+   "ragt nicht aus dem Fenster", nicht die genaue Zahl. */
+/* Die Einblendung beim Scrollen verkleinert Bilder auf 96,5 % (bewegung.css)
+   -- wer mitten darin misst, bekommt 490 statt 508. Darum fuer die Messung
+   abschalten und danach wieder freigeben. */
+const ausbruch = JSON.parse(await s.werte(`(() => {
+  const text = document.querySelector('.br-text p').getBoundingClientRect().width;
+  const els = [...document.querySelectorAll('.br-bild:not(.br-klein), .br-film')];
+  els.forEach(b => b.style.animation = 'none');
+  const bilder = els.map(b => b.getBoundingClientRect());
+  els.forEach(b => b.style.animation = '');
+  return JSON.stringify({ text: Math.round(text), fenster: innerWidth,
+    breiten: bilder.map(r => Math.round(r.width)),
+    rechts: Math.round(Math.max(...bilder.map(r => r.right))) });
+})()`));
+pruefe('Projektvideos sind breiter als die Textspalte',
+  ausbruch.breiten.length > 0 && ausbruch.breiten.every(b => b >= ausbruch.text + 300),
+  'Text ' + ausbruch.text + ', Videos ' + ausbruch.breiten.join('/'));
+pruefe('…und ragen trotzdem nicht aus dem Fenster',
+  ausbruch.rechts <= ausbruch.fenster, ausbruch.rechts + ' von ' + ausbruch.fenster);
+
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();

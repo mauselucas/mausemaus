@@ -154,8 +154,17 @@
   }
 }
 
+/* Die Unschaerfe ist nach 35 % des Bereichs weg, Deckkraft und Versatz
+   laufen weiter bis zum Ende. Frueher lief sie ueber den ganzen Bereich --
+   und weil diese Einblendungen am SCROLLEN haengen, nicht an der Uhr, bleibt
+   ein Element genau so stehen, wie es gerade ist, sobald man aufhoert zu
+   scrollen. In einem kleineren Fenster stand dadurch eine Ueberschrift
+   minutenlang verschwommen mitten im Bild und sah aus wie ein Ladefehler.
+   Jetzt ist sie nur noch im untersten Streifen unscharf, wo sie ohnehin
+   gerade erst auftaucht. */
 @keyframes mm-auf-titel {
-  from { opacity: 0; transform: translateY(26px); filter: blur(7px); }
+  from { opacity: 0; transform: translateY(26px); filter: blur(4px); }
+  35%  {                                          filter: blur(0);   }
   to   { opacity: 1; transform: none;             filter: blur(0);   }
 }
 @keyframes mm-auf-text {
@@ -163,8 +172,9 @@
   to   { opacity: 1; transform: none; }
 }
 @keyframes mm-auf-bild {
-  from { opacity: 0; transform: scale(.965); filter: blur(10px); }
-  to   { opacity: 1; transform: none;        filter: blur(0);    }
+  from { opacity: 0; transform: scale(.965); filter: blur(6px); }
+  35%  {                                     filter: blur(0);   }
+  to   { opacity: 1; transform: none;        filter: blur(0);   }
 }
 @keyframes mm-auf-zeile {
   from { opacity: 0; transform: translateY(12px); }

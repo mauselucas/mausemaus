@@ -69,6 +69,12 @@ html, body { background:#FBFAF6; }
 .br-bild { position:relative; margin:24px 0; }
 .br-bild img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
 .br-bild.br-klein { max-width:260px; }
+/* Das Titelbild bzw. Video eines Projekts bricht aus der Lesespalte aus --
+   genauso weit wie ein Block mit "Volle Breite" (--mm-ausbruch, site.css).
+   Die Videos SIND bei einem Video Editor die Arbeit; in Textbreite (508px
+   auf einem 1440er Bildschirm) wirkten sie wie Randnotizen. Der Text bleibt
+   schmal, weil er sich so besser liest. */
+.br-film, .br-bild:not(.br-klein) { margin-inline:var(--mm-ausbruch); }
 
 /* Bilder INNERHALB von Fließtext (renderMarkdown() in .br-text, z. B. mitten
    im Projekttext). site.css begrenzt sowas nur unter .prose (dem alten

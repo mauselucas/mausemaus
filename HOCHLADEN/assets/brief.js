@@ -118,8 +118,14 @@
         h += '<div class="br-film">' + einbettung(seite.video_url) + '</div>';
       }
 
-      h += p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order)
-        .map(b => window.mmBloecke.render(b, 'br-text')).join('\n');
+      /* Eigene Huelle fuer alles UNTER dem Titelbild -- nur als Anker fuer
+         die Deko-Blumen (siehe unten). Das Titelbild bricht weit aus der
+         Spalte aus (--mm-ausbruch); hingen die Blumen am ganzen Abschnitt,
+         laegen die oberen genau dahinter und schauten nur mit einem Zipfel
+         heraus. An dieser Huelle beginnen sie erst unter dem Bild. */
+      h += '<div class="br-projekt-rest">' +
+        p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order)
+          .map(b => window.mmBloecke.render(b, 'br-text')).join('\n') + '</div>';
       s.innerHTML = h;
     });
 
@@ -158,7 +164,8 @@
       }
     }
 
-    if (window.mmBlumen) window.mmBlumen(abschnitte.map(a => a.element));
+    if (window.mmBlumen) window.mmBlumen(abschnitte.map(a =>
+      a.element.querySelector(':scope > .br-projekt-rest') || a.element));
 
     return abschnitte;
   };

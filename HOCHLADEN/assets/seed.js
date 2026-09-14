@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt von tests/hochladen.mjs — Stand: 5.9.2026.
+   Automatisch erzeugt von tests/hochladen.mjs — Stand: 14.9.2026.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 window.SEED_SETTINGS = {
@@ -643,12 +643,12 @@ window.SEED_SEITEN = {
       "cover_pos": "50% 50%",
       "video_url": null,
       "embed_ok": false,
-      "farbe": null,
+      "farbe": "#669bbc",
       "ist_aktuell": false,
       "status": "published",
       "sort_order": 0,
       "created_at": "2026-09-04T17:48:51.017177+00:00",
-      "updated_at": "2026-09-04T22:54:20.365609+00:00",
+      "updated_at": "2026-09-05T02:57:16.360811+00:00",
       "titel_en": "",
       "untertitel_en": "",
       "bloecke": [

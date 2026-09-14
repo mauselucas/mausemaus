@@ -162,16 +162,18 @@ footer .flower svg { fill: rgba(240,244,239,0.07); }
    Auf einem 1280er Bildschirm werden aus 508px Textbreite so 900px; auf
    einem knappen Fenster schrumpft der Ausbruch von selbst auf null, statt
    ueber den Rand zu schiessen. */
-.mm-breite-voll {
-  max-width: none;
-  margin-inline: calc(-26px - clamp(0px, (100vw - 812px) / 2 - 32px, 170px));
-}
+/* Die Rechnung steht als Variable, weil sie zweimal gebraucht wird: hier
+   fuer Bloecke mit "Volle Breite" und in brief.css fuer das Titelbild bzw.
+   Video jedes Projekts (das kein Block ist und darum keine Breite waehlen
+   kann). */
+:root { --mm-ausbruch: calc(-26px - clamp(0px, (100vw - 812px) / 2 - 32px, 170px)); }
 /* Unter 760px liegt die Zeitleiste unten statt links -- dann steht die
    volle Fensterbreite zur Verfuegung und die Rechnung oben passt nicht mehr. */
 @media (max-width: 760px) {
-  .mm-breite-voll { margin-inline: calc(-26px - clamp(0px, (100vw - 560px) / 2 - 20px, 90px)); }
+  :root { --mm-ausbruch: calc(-26px - clamp(0px, (100vw - 560px) / 2 - 20px, 90px)); }
 }
-@media (max-width: 620px) { .mm-breite-voll { margin-inline: -20px; } }
+@media (max-width: 620px) { :root { --mm-ausbruch: -20px; } }
+.mm-breite-voll { max-width: none; margin-inline: var(--mm-ausbruch); }
 
 /* ===== Farben für Blöcke =====
    Ein Ton je Farbe, alles andere wird daraus abgeleitet: der Kasten mischt
