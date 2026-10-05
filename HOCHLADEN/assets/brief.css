@@ -185,7 +185,7 @@ html, body { background:#FBFAF6; }
 .br-mehr { margin:18px 0 0; font-family:'Manrope',sans-serif; font-size:15px; }
 
 .br-kontakt { display:flex; flex-direction:column; gap:6px; margin:18px 0 0; }
-.br-kontakt a { font-family:'Manrope',sans-serif; font-size:17px; color:#0D1821; }
+.br-kontakt a { font-family:'Manrope',sans-serif; font-size:17px; color:#0D1821; align-self:flex-start; }
 
 /* Links im Text: Salbei-Streifen statt Browser-Blau, nach draussen ein ↗.
    Tuerchen (.mm-tuer, ❀) bleiben -- "geht raus" vs. "geht in eine Welt". */

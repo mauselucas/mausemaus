@@ -23,7 +23,12 @@
 /* Die Deko-Blumen der Karte liegen HINTER ihrer Flaeche (-1) und schauen
    seitlich hervor -- wie Papier, das hinter einer Karte steckt. */
 .br-karte > .mm-blume { z-index:-2; }
-.br-karte .br-kopfbild { margin-top:-6px; }
+/* Kopfbild buendig oben in der Karte, so breit wie ihre Flaeche: Das Bild
+   hat einen eigenen Cremegrund -- mit Luft darueber stand ein weisser
+   Streifen ueber dem Banner. Jetzt ist es der Kopf der Karte. */
+.br-karte .br-kopfbild { margin:-30px calc(var(--mm-ausbruch) - 22px) -18px; }
+.br-karte .br-kopfbild img { border-radius:24px 24px 0 0; }
+@media (max-width:760px) { .br-karte .br-kopfbild { margin-inline:-14px; } .br-karte .br-kopfbild img { border-radius:20px 20px 0 0; } }
 /* Der Anfang des Textes: drei Zeilen, dann blendet er aus. */
 .br-anriss { max-height:calc(1.8em * 3.4); overflow:hidden; font-size:16.5px;
   -webkit-mask-image:linear-gradient(#000 40%, transparent);
@@ -104,6 +109,7 @@ html:active-view-transition .bu[open] { animation:none; }
    kurz uebereinander (grid-area 1/1), darum ein Grid statt absolut. */
 .bu-flaeche { flex:1; min-height:0; display:grid; position:relative; overflow:hidden; touch-action:pan-y; }
 .bu-kapitel { grid-area:1/1; min-height:0; display:grid; grid-template-columns:minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-rows:minmax(0, 1fr);
   gap:40px; align-items:center; padding:22px 30px; }
 .bu-ohne-medium { grid-template-columns:minmax(0, 640px); justify-content:center; }
 .bu-ohne-text { grid-template-columns:minmax(0, 1fr); }
@@ -114,7 +120,9 @@ html:active-view-transition .bu[open] { animation:none; }
 .bu-text { transition-delay:.06s; }
 .bu-geht .bu-text { transition-delay:0s; }
 .bu-medium { min-width:0; align-self:center; }
-.bu-text { max-height:100%; overflow-y:auto; padding-right:6px; align-self:stretch; display:flex; flex-direction:column;
+.bu-text { max-height:100%; overflow-y:auto; padding-right:6px;
+  /* Nur noch Notbehelf, falls EIN Absatz allein nicht passt -- dann dezent. */
+  scrollbar-width:thin; scrollbar-color:#DAD7CD transparent; align-self:stretch; display:flex; flex-direction:column;
   justify-content:center; }
 .bu-text > :first-child { margin-top:auto; }
 .bu-text > :last-child { margin-bottom:auto; }
@@ -125,14 +133,18 @@ html:active-view-transition .bu[open] { animation:none; }
 .bu-nach-links  .bu-medium, .bu-nach-links  .bu-text { opacity:0; translate:-40px 0; filter:blur(2px); }
 .bu-nach-rechts .bu-medium, .bu-nach-rechts .bu-text { opacity:0; translate:40px 0; filter:blur(2px); }
 .bu-geht { pointer-events:none; }
+/* Unsichtbare Messflaeche fuers Umbrechen in Seiten (buehne.js) */
+.bu-messen { position:absolute; inset:0; display:grid; visibility:hidden; pointer-events:none; }
 /* Bewegung reduzieren: nur ueberblenden */
 .bu-blende .bu-medium, .bu-blende .bu-text { opacity:0; }
 
 /* Inhalte in der Buehne: keine Scroll-Einblendungen (sie wuerden sich an
    der falschen Scrollflaeche orientieren und koennten unsichtbar bleiben),
    kein Ausbrechen aus der Spalte, Medien fuellen ihre Haelfte. */
-.bu .br-text, .bu .br-text * { animation:none !important; }
-html.mm-bewegung .bu .br-text, html.mm-bewegung .bu .br-text * { animation:none !important; }
+/* ALLES in der Buehne -- auch Zitate, Kaesten, Tuerchen, die nicht in
+   .br-text stecken. Die standen sonst halb durchsichtig da. */
+.bu * { animation:none !important; }
+html.mm-bewegung .bu * { animation:none !important; }
 .bu-medium .br-text > .md-gallery, .bu-medium .br-text > .md-video,
 .bu-medium .br-bild, .bu-medium .br-film { margin:0 !important; }
 .bu-medium .mm-baustein { margin:0 !important; max-width:none; }
@@ -141,6 +153,8 @@ html.mm-bewegung .bu .br-text, html.mm-bewegung .bu .br-text * { animation:none 
 .bu-medium figcaption { margin-top:10px; }
 .bu-text > :last-child p:last-child { margin-bottom:0; }
 .bu-text .md-gallery, .bu-text .md-video { margin-inline:0 !important; }
+/* Tuerchen ("Wie das Werkzeug funktioniert") mit Luft zum Absatz danach */
+.bu-text .br-mehr { margin:2px 0 22px; }
 
 /* Fuss: Zurueck / Weiter */
 .bu-fuss { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 30px 24px; }

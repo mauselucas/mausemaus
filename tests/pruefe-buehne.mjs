@@ -131,6 +131,80 @@ const stand = `JSON.stringify({
   await s.zu();
 }
 
+/* ================= Lucas' Screenshots vom 05.10.: kein Rollbalken, nichts verblasst ================= */
+for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
+  const s = await oeffne(ADR, { port: 9371, breite, hoehe });
+  await bereit(s);
+  const r = JSON.parse(await s.werte(`(async () => {
+    const warte = ms => new Promise(x => setTimeout(x, ms));
+    const raus = { rollt: [], blass: [], seiten: {}, text: {} };
+    for (let n = 0; n < window.mmProjekte.length; n++) {
+      const p = window.mmProjekte[n];
+      window.mmBuehneOeffnen(n, 0, { ohneAdresse: true });
+      await warte(450);
+      let gesamt = '';
+      for (let i = 0; i < 40; i++) {
+        const k = document.querySelector('.bu-kapitel:not(.bu-geht)');
+        const t = k.querySelector('.bu-text');
+        if (t && t.scrollHeight > t.clientHeight + 2)
+          raus.rollt.push(p.slug + ' S.' + (i + 1) + ': ' + t.scrollHeight + '>' + t.clientHeight);
+        k.querySelectorAll('.bu-text > *').forEach(el => {
+          const o = Number(getComputedStyle(el).opacity);
+          if (o < 0.7) raus.blass.push(p.slug + ' ' + el.className + ' ' + o);
+        });
+        gesamt += t ? t.textContent : '';
+        const z = document.querySelector('.bu-zaehler').textContent.match(/(\\d+)\\D+(\\d+)/);
+        if (z[1] === z[2]) { raus.seiten[p.slug] = Number(z[2]); break; }
+        document.querySelector('.bu-weiter').click();
+        await warte(450);
+      }
+      /* Kein Satz darf beim Umbrechen verlorengehen: aller Text der Bloecke
+         muss ueber die Seiten verteilt wieder auftauchen. */
+      const soll = window.mmKapitel(p.bloecke, !!p.coverHtml).flatMap(k => k.texte)
+        .map(b => { const d = document.createElement('div'); d.innerHTML = window.mmBloecke.render(b, 'br-text'); return d.textContent; })
+        .join('').replace(/\\s+/g, '');
+      raus.text[p.slug] = soll === gesamt.replace(/\\s+/g, '') ? 'ok' : soll.length + ' vs ' + gesamt.replace(/\\s+/g, '').length;
+      window.mmBuehneSchliessen();
+      await warte(400);
+    }
+    return JSON.stringify(raus);
+  })()`));
+  pruefe(`${breite}×${hoehe}: kein Kapitel braucht einen Rollbalken`, r.rollt.length === 0,
+    r.rollt.slice(0, 4).join(' | ') || JSON.stringify(r.seiten));
+  pruefe(`${breite}×${hoehe}: nichts in der Bühne steht verblasst da (Zitate, Türchen)`, r.blass.length === 0,
+    r.blass.slice(0, 4).join(' | '));
+  pruefe(`${breite}×${hoehe}: beim Umbrechen in Seiten geht kein Text verloren`,
+    Object.values(r.text).every(x => x === 'ok'), JSON.stringify(r.text));
+  await s.zu();
+}
+
+/* Kontakt-Links: Salbei-Streifen nur unter dem Text, nicht über die ganze
+   Breite. Kopfbild: bündig oben in der Karte, kein weißer Streifen darüber. */
+{
+  const s = await oeffne(ADR, { port: 9371, breite: 1280, hoehe: 900 });
+  await bereit(s);
+  const r = JSON.parse(await s.werte(`(() => {
+    /* Scroll-Einblendungen aus: sonst misst man das Kopfbild mitten in
+       seiner Einblendung (leicht verkleinert, ein paar px tiefer). */
+    const st = document.createElement('style');
+    st.textContent = '*{animation:none !important}';
+    document.head.appendChild(st);
+    const a = document.querySelector('.br-kontakt a');
+    const k = document.querySelector('.br-karte[data-slug="seite"]');
+    const kb = k && k.querySelector('.br-kopfbild');
+    const cs = getComputedStyle(k, '::before');
+    return JSON.stringify({
+      linkBreite: a ? Math.round(a.getBoundingClientRect().width) : -1,
+      spalte: a ? Math.round(a.parentElement.getBoundingClientRect().width) : -1,
+      luftUeberKopfbild: kb ? Math.round(kb.getBoundingClientRect().top - (k.getBoundingClientRect().top + parseFloat(cs.top))) : 'kein Kopfbild' });
+  })()`));
+  pruefe('Kontakt: der Link ist nur so breit wie sein Text', r.linkBreite > 0 && r.linkBreite < r.spalte * 0.8,
+    r.linkBreite + ' von ' + r.spalte + ' px');
+  pruefe('Kopfbild sitzt bündig oben in der Karte (kein weißer Streifen)', r.luftUeberKopfbild === 0,
+    String(r.luftUeberKopfbild));
+  await s.zu();
+}
+
 /* ================= Direkt verlinkt: /#slug/2 ================= */
 {
   const s = await oeffne(ADR + '#istanbul-katzen/3', { port: 9371, breite: 1440, hoehe: 900 });

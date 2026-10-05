@@ -118,11 +118,75 @@
     });
   }
 
-  function kapitelHtml(p, k) {
+  /* Text eines Kapitels in einzelne Stuecke zerlegen -- Absatz fuer Absatz.
+     Ein Textblock mit mehreren Absaetzen wird dabei aufgeteilt (jeder Absatz
+     in eigener .br-text-Huelle, die Abstaende bleiben gleich); Zitate,
+     Kaesten und Tuerchen bleiben ganz. */
+  function stuecke(texte) {
+    var teile = [];
+    texte.forEach(function (b) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = window.mmBloecke.render(b, 'br-text');
+      Array.prototype.forEach.call(tmp.children, function (el) {
+        if (el.className === 'br-text' && el.children.length > 1) {
+          Array.prototype.forEach.call(el.children, function (c) {
+            teile.push('<div class="br-text">' + c.outerHTML + '</div>');
+          });
+        } else {
+          teile.push(el.outerHTML);
+        }
+      });
+    });
+    return teile;
+  }
+
+  /* Seiten statt Rollbalken. Lucas: "dieses Scrollen stoert sehr" -- langer
+     Text stand in einem Kasten mit eigenem Rollbalken und war oben und unten
+     abgeschnitten. Jetzt wird auf DIESEM Bildschirm gemessen, wie viel Text
+     neben das Medium passt; was nicht passt, wandert als Fortsetzung auf
+     eine eigene Seite (ohne Medium, mit breiterer Textspalte). Man blaettert
+     nur noch mit "Weiter". Auf dem Handy bleibt es beim Blatt, das man von
+     oben nach unten liest -- dort ist Scrollen das Normale. */
+  function umbrechen(seiten) {
+    if (window.innerWidth <= 760) return seiten;
+    var flaeche = dialog.querySelector('.bu-flaeche');
+    var mess = document.createElement('div');
+    mess.className = 'bu-messen';
+    mess.setAttribute('aria-hidden', 'true');
+    flaeche.appendChild(mess);
+    var passt = function (s) {
+      mess.innerHTML = '';
+      var el = kapitelHtml(zustand.p, s, true);
+      mess.appendChild(el);
+      var t = el.querySelector('.bu-text');
+      return !t || t.scrollHeight <= t.clientHeight + 2;
+    };
+    var raus = [];
+    seiten.forEach(function (s) {
+      var cur = { medium: s.medium, teile: [] };
+      s.teile.forEach(function (t) {
+        cur.teile.push(t);
+        if (cur.teile.length > 1 && !passt(cur)) {
+          cur.teile.pop();
+          raus.push(cur);
+          cur = { medium: null, teile: [t] };
+        }
+      });
+      raus.push(cur);
+    });
+    mess.remove();
+    return raus;
+  }
+
+  /* nurMessen: das Medium bleibt ein leerer Platzhalter. Die Hoehe der
+     Textspalte haengt nicht davon ab, und so laedt das Messen keine Bilder
+     und keine fremden Video-Abspieler. */
+  function kapitelHtml(p, k, nurMessen) {
     var medium = '';
-    if (k.medium === 'cover') medium = p.coverHtml;
+    if (nurMessen && k.medium) medium = ' ';
+    else if (k.medium === 'cover') medium = p.coverHtml;
     else if (k.medium) medium = window.mmBloecke.render(k.medium, 'br-text');
-    var text = k.texte.map(function (b) { return window.mmBloecke.render(b, 'br-text'); }).join('\n');
+    var text = k.teile.join('\n');
     var el = document.createElement('div');
     el.className = 'bu-kapitel' + (medium ? '' : ' bu-ohne-medium') + (text ? '' : ' bu-ohne-text');
     el.innerHTML = (medium ? '<div class="bu-medium">' + medium + '</div>' : '') +
@@ -198,7 +262,11 @@
 
   function fuellen(nr, i) {
     var p = window.mmProjekte[nr];
-    zustand = { nr: nr, p: p, i: i, kapitel: window.mmKapitel(p.bloecke, !!p.coverHtml) };
+    zustand = { nr: nr, p: p, i: i, kapitel: window.mmKapitel(p.bloecke, !!p.coverHtml)
+      .map(function (k) { return { medium: k.medium, teile: stuecke(k.texte) }; }) };
+    /* Umbrechen braucht ein sichtbares Fenster zum Messen -- beim ersten
+       Oeffnen holt mmBuehneOeffnen das nach dem showModal() nach. */
+    if (dialog.open) zustand.kapitel = umbrechen(zustand.kapitel);
     dialog.querySelector('.bu-rolle').textContent = p.untertitel || '';
     dialog.querySelector('.bu-titel').textContent = p.titel;
     dialog.style.setProperty('--bu-farbe', p.farbe || '#BFCC94');
@@ -225,20 +293,23 @@
     if (!dialog) bauen();
     optionen = optionen || {};
     karteZuletzt = optionen.knopf || null;
-    fuellen(nr, Math.min(kapitel || 0, 999));
-    zustand.i = Math.min(zustand.i, zustand.kapitel.length - 1);
+    var gewuenscht = Math.max(0, kapitel || 0);
+    fuellen(nr, 0);
     var quelle = vorschauVon(nr);
     var aufziehen = function () {
-      zeigeKapitel(0);
-      if (quelle) quelle.style.viewTransitionName = '';
-      var ziel = dialog.querySelector('.bu-medium');
-      if (ziel && quelle) ziel.style.viewTransitionName = 'bu-medium';
-      /* Der Vorschaukasten der Türchen hängt sonst UNTER dem modalen
-         Fenster (oberste Ebene) und bliebe unsichtbar. */
+      /* Erst sichtbar machen, dann messen und in Seiten umbrechen. */
       var kasten = document.getElementById('mm-vorschau-kasten');
       if (kasten) dialog.appendChild(kasten);
       dialog.showModal();
       document.documentElement.classList.add('bu-offen');
+      zustand.kapitel = umbrechen(zustand.kapitel);
+      zustand.i = Math.min(gewuenscht, zustand.kapitel.length - 1);
+      zeigeKapitel(0);
+      if (quelle) quelle.style.viewTransitionName = '';
+      var ziel = dialog.querySelector('.bu-medium');
+      if (ziel && quelle) ziel.style.viewTransitionName = 'bu-medium';
+      /* (Der Vorschaukasten der Türchen hängt oben in der Bühne -- sonst
+         läge er UNTER dem modalen Fenster und bliebe unsichtbar.) */
       dialog.querySelector('.bu-titel').focus({ preventScroll: true });
     };
     if (document.startViewTransition && !ruhig() && quelle) {
@@ -282,6 +353,20 @@
     else if (!ausVerlauf && location.hash) history.replaceState(null, '', location.pathname + location.search);
   }
   window.mmBuehneSchliessen = schliessen;
+
+  /* Fenster wird groesser/kleiner, waehrend die Buehne offen ist: neu
+     umbrechen. Man bleibt ungefaehr an derselben Stelle im Projekt. */
+  var ruhe = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(ruhe);
+    ruhe = setTimeout(function () {
+      if (!dialog || !dialog.open || !zustand) return;
+      var anteil = zustand.i / Math.max(1, zustand.kapitel.length - 1);
+      fuellen(zustand.nr, 0);
+      zustand.i = Math.round(anteil * (zustand.kapitel.length - 1));
+      zeigeKapitel(0);
+    }, 200);
+  });
 
   window.addEventListener('popstate', function () {
     if (dialog && dialog.open && !/^#[a-z0-9-]+/.test(location.hash)) {

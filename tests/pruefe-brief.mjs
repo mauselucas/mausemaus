@@ -281,7 +281,9 @@ const schliff = JSON.parse(await s.werte(`(() => {
   st.textContent = '*{animation:none !important; transition:none !important}';
   document.head.appendChild(st);
   const gross = [...document.querySelectorAll(
-    '.br-karte-medium, .br-bild:not(.br-klein), .br-film, .br-kopfbild, .br-projekt-rest > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel)), .br-projekt-rest > .br-text > .md-video, .br-projekt-rest > .mm-baustein:not(.mm-breite-schmal):not(.mm-breite-randnotiz) > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel))')]
+    /* Ohne .br-kopfbild: das ist seit dem 05.10. der Kopf der KARTE und
+       genau so breit wie deren Flaeche (Medienbreite + 2x22px), kein Medium. */
+    '.br-karte-medium, .br-bild:not(.br-klein), .br-film, .br-projekt-rest > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel)), .br-projekt-rest > .br-text > .md-video, .br-projekt-rest > .mm-baustein:not(.mm-breite-schmal):not(.mm-breite-randnotiz) > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel))')]
     .map(e => Math.round(e.getBoundingClientRect().width));
   /* Abstand Text -> Medium und Medium -> Text, ueberall im Brief */
   /* Seit den Karten steht im Brief je Projekt EIN Medium und darunter der
