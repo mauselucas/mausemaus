@@ -14,6 +14,13 @@ const chrome = await starteChrome({ port: 9371 });
 const ADR = 'http://127.0.0.1:8931/';
 
 const bereit = (s) => s.bisWahr(`!document.getElementById('mm-laden') && !!window.mmProjekte`, 20000);
+/* Wartet, bis die Bühne fertig hochgeglitten ist. Feste 700 ms reichten auf
+   einem langsamen Rechner nicht (gemessen: 3–10 px zu tief). Wirft nicht:
+   läuft die Frist ab, misst die Prüfung trotzdem und wird ehrlich rot. */
+const aufgeglitten = (s) => s.bisWahr(
+  `(() => { const d = document.querySelector('dialog.bu');
+     return !!d && d.open && d.getAnimations().every(a => a.playState === 'finished'); })()`, 5000)
+  .then(() => true, () => false);
 const nr = (slug) => `window.mmProjekte.findIndex(p => p.slug === '${slug}')`;
 const stand = `JSON.stringify({
   offen: !!document.querySelector('dialog.bu')?.open,
@@ -140,7 +147,7 @@ const stand = `JSON.stringify({
   const s = await oeffne(ADR, { port: 9371, breite: 520, hoehe: 900 });
   await bereit(s);
   await s.werte(`document.querySelector('.br-karte[data-slug="istanbul-katzen"] .br-mehr-ansehen').click()`);
-  await s.warte(700);
+  await aufgeglitten(s);
   const m = JSON.parse(await s.werte(`(() => {
     const d = document.querySelector('dialog.bu').getBoundingClientRect();
     const w = document.querySelector('.bu-weiter').getBoundingClientRect();
