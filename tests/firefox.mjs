@@ -104,8 +104,15 @@ const deck = el => +(+getComputedStyle(el).opacity).toFixed(3);
     const bez = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
     const doktop = el.getBoundingClientRect().top - bez + sc.scrollTop;
     const A = Math.round(doktop - sc.clientHeight + 20);
-    const B = Math.round(doktop - sc.clientHeight + 190);
-    const C = Math.round(doktop - sc.clientHeight + 260);
+    /* B und C lagen bei 190/260 px. Seit die Cover breiter (und damit
+       hoeher) sind, beginnt das Polyfill die Bild-Einblendung spaeter als
+       Chrome: bei 190 px stand sie noch auf 0, der Test war rot, obwohl
+       sich das Bild sichtbar einblendet (0 -> 0,2 -> 1). Schon vorher lag
+       der Wert dort nur knapp ueber 0 (0,056). 240/320 liegen fuer alle
+       drei Proben sicher INNERHALB ihrer Bereiche (Titel 90-330, Text
+       60-280, Bild 40-340). */
+    const B = Math.round(doktop - sc.clientHeight + 240);
+    const C = Math.round(doktop - sc.clientHeight + 320);
     const D = Math.round(doktop - sc.clientHeight + 600);
     await fahre(A); const davor = deck(el);
     await fahre(B); const mitte = deck(el);

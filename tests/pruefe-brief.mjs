@@ -264,5 +264,42 @@ pruefe('Projektvideos sind breiter als die Textspalte',
 pruefe('…und ragen trotzdem nicht aus dem Fenster',
   ausbruch.rechts <= ausbruch.fenster, ausbruch.rechts + ' von ' + ausbruch.fenster);
 
+/* ---------- Feinschliff: zwei Breiten, ein Abstand, eigene Links ----------
+   Lucas: "die Größen sind sehr unterschiedlich", "der Abstand zwischen Text
+   und Foto ist manchmal viel zu nah", Links "blau und unterstrichen".
+   Animationen fuer die Messung aus, sonst misst man eine Zwischenstufe. */
+const schliff = JSON.parse(await s.werte(`(() => {
+  const st = document.createElement('style');
+  st.textContent = '*{animation:none !important; transition:none !important}';
+  document.head.appendChild(st);
+  const gross = [...document.querySelectorAll(
+    '.br-bild:not(.br-klein), .br-film, .br-kopfbild, .br-projekt-rest > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel)), .br-projekt-rest > .br-text > .md-video, .br-projekt-rest > .mm-baustein:not(.mm-breite-schmal):not(.mm-breite-randnotiz) > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel))')]
+    .map(e => Math.round(e.getBoundingClientRect().width));
+  /* Abstand Text -> Medium und Medium -> Text, ueberall im Brief */
+  const abstaende = [];
+  document.querySelectorAll('.br-projekt-rest .md-gallery, .br-projekt-rest .md-video').forEach(m => {
+    if (m.closest('.mm-breite-randnotiz')) return;
+    const r = m.getBoundingClientRect();
+    const huelle = m.closest('.mm-baustein') || m.closest('.br-text');
+    const vor = huelle.previousElementSibling, nach = huelle.nextElementSibling;
+    if (vor && vor.querySelector('p:last-child')) abstaende.push(Math.round(r.top - vor.querySelector('p:last-child').getBoundingClientRect().bottom));
+    if (nach && nach.querySelector('p:first-child')) abstaende.push(Math.round(nach.querySelector('p:first-child').getBoundingClientRect().top - r.bottom));
+  });
+  const link = [...document.querySelectorAll('.br-text a:not(.mm-tuer)')][0];
+  const ls = link ? getComputedStyle(link) : null;
+  st.remove();
+  return JSON.stringify({ gross, abstaende,
+    link: ls ? { farbe: ls.color, linie: ls.textDecorationLine, text: link.textContent } : null });
+})()`));
+pruefe('alle großen Medien im Brief haben DIESELBE Breite',
+  schliff.gross.length > 5 && Math.max(...schliff.gross) - Math.min(...schliff.gross) <= 1,
+  schliff.gross.join(' / '));
+pruefe('Text -> Medium und Medium -> Text: überall 36 px Luft (±2)',
+  schliff.abstaende.length > 3 && schliff.abstaende.every(a => Math.abs(a - 36) <= 2),
+  schliff.abstaende.join(', '));
+pruefe('Links im Text sind weder Browser-blau noch unterstrichen',
+  !!schliff.link && schliff.link.linie === 'none' && schliff.link.farbe === 'rgb(13, 24, 33)',
+  JSON.stringify(schliff.link));
+
 await s.zu(); chrome.beenden(); server.beenden();
 bericht();

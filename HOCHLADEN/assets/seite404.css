@@ -1,0 +1,59 @@
+/* mausemaus — nur fuer die Fehlerseite 404.html.
+
+   Aus site.css hierher umgezogen: Deko-Blumen-Ebene, .wrap, .meta und der
+   Footer gibt es NUR auf der 404-Seite. In site.css lagen sie im
+   blockierenden Ladepfad jeder Seite (pruefe-tempo.mjs: der Brief muss
+   unter 100 kB blockierend bleiben). */
+.wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+
+/* ===== Deko-Blumen ===== */
+/* body positioniert -> der Deko-Layer erstreckt sich über die GANZE Seitenhöhe,
+   nicht nur über den ersten Bildschirm. */
+.deko { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.flower { position: absolute; z-index: 1; pointer-events: none; }
+.flower svg { width: 100%; height: 100%; display: block; }
+
+/* Positionen als Klassen statt Inline-Styles — nur so können Media Queries greifen.
+   (Genau daran scheiterte vorher die Verkleinerung auf dem Handy.) */
+.f1 { top:  2%; right: -2vw;   width: 120px; rotate: -12deg; }
+.f2 { top: 24%; left:  -3.5vw; width: 140px; rotate:  18deg; }
+.f3 { top: 50%; right: -3vw;   width: 100px; rotate:   8deg; }
+.f4 { top: 72%; left:  -3vw;   width:  96px; rotate: -20deg; }
+.f5 { top: 89%; right: -2vw;   width: 110px; rotate:  24deg; }
+
+
+.meta {
+  margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px;
+}
+.meta a, .meta span {
+  font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.5px;
+  text-decoration: none; color: var(--ink);
+  border: 1.5px solid var(--ink); border-radius: 40px; padding: 7px 15px;
+  transition: all .15s ease;
+}
+.meta a:hover { background: var(--ink); color: var(--paper); }
+
+/* ===== Footer ===== */
+footer {
+  background: var(--ink); color: var(--paper); margin-top: 30px;
+  padding: 60px 0; position: relative; overflow: hidden;
+}
+.foot-grid { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2; }
+.foot-brand { font-family: 'TropiWeb', sans-serif; font-size: 44px; color: var(--paper); }
+.foot-brand .dot { color: var(--sky); }
+.foot-links { display: flex; flex-direction: column; gap: 8px; font-family: 'Space Mono', monospace; font-size: 13px; }
+.foot-links a { color: rgba(240,244,239,0.85); text-decoration: none; }
+.foot-links a:hover { color: var(--sky); }
+.foot-note { margin-top: 26px; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; color: rgba(240,244,239,0.5); position: relative; z-index: 2; }
+/* Footer-Blume: hell und zart statt schwarz-auf-schwarz (war vorher unsichtbar) */
+footer .flower svg { fill: rgba(240,244,239,0.07); }
+
+
+@media (max-width: 720px) {
+  /* Blumen deutlich kleiner und halb aus dem Bild, sonst überdecken sie den Text */
+  .f1 { width: 74px; top: 1%;  right: -7vw; }
+  .f2 { width: 80px; top: 18%; left:  -9vw; }
+  .f3 { width: 66px; top: 46%; right: -8vw; }
+  .f4 { width: 62px; top: 70%; left:  -8vw; }
+  .f5 { width: 70px; top: 90%; right: -7vw; }
+}

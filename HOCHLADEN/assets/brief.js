@@ -95,7 +95,29 @@
       const F = (feld) => (window.mmFeldVon ? window.mmFeldVon(seite, feld) : (seite[feld] || ''));
       const titel = F('titel'), untertitel = F('untertitel');
       const s = neuerAbschnitt(titel, 'beruflich', seite.farbe);
+      let bloecke = p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order);
       let h = '';
+
+      /* Kopfbild: Ist der ERSTE Block ein Bild in voller Breite ohne Rahmen
+         und hat das Projekt kein Cover (so beim Simplicissimus-Kanalbanner),
+         steht dieses Bild als Kopf des Eintrags VOR Rolle und Titel und
+         laeuft unten weich in den Seitengrund aus. Sonst saehe es aus wie
+         ein eingeklebtes Bild mitten im Text. Im Admin aendert sich nichts. */
+      const erster = bloecke[0];
+      if (!seite.cover_url && erster && erster.typ === 'bild' && erster.breite === 'voll') {
+        const inh = window.mmInhaltVon ? window.mmInhaltVon(erster) : erster.inhalt;
+        const m = inh && inh.ohne_rahmen === true &&
+          /^!\[([^\]]*)\]\(([^)\s]+)\)/.exec((inh.roh || '').trim());
+        if (m) {
+          /* Masse aus dem Dateinamen (masseVon, shared.js), damit der Platz
+             von Anfang an freigehalten wird -- sonst springt beim Nachladen
+             alles darunter, und die Zeitleiste rechnet mit falschen Hoehen. */
+          const masse = typeof masseVon === 'function' ? masseVon(m[2]) : '';
+          h += '<figure class="br-kopfbild"><img src="' + window.mm.esc(m[2]) + '" alt="' +
+               window.mm.esc(m[1] || titel) + '" loading="lazy"' + masse + '></figure>';
+          bloecke = bloecke.slice(1);
+        }
+      }
       if (untertitel) h += '<p class="br-rolle">' + window.mm.esc(untertitel) + '</p>';
       h += '<h2 class="br-titel">' + window.mm.esc(titel) +
            (seite.ist_aktuell ? '<span class="br-laeuft">' + T('laeuft-aktuell', 'läuft aktuell') + '</span>' : '') + '</h2>';
@@ -124,8 +146,7 @@
          laegen die oberen genau dahinter und schauten nur mit einem Zipfel
          heraus. An dieser Huelle beginnen sie erst unter dem Bild. */
       h += '<div class="br-projekt-rest">' +
-        p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order)
-          .map(b => window.mmBloecke.render(b, 'br-text')).join('\n') + '</div>';
+        bloecke.map(b => window.mmBloecke.render(b, 'br-text')).join('\n') + '</div>';
       s.innerHTML = h;
     });
 

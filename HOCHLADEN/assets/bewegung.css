@@ -120,7 +120,7 @@
     }
 
     /* ---- Bilder und Videos: wachsen leicht auf, mit Unschärfe ---- */
-    .br-bild, .br-film, .welt-cover,
+    .br-bild, .br-film, .br-kopfbild, .welt-cover,
     .br-text > figure, .welt-text > figure {
       animation: mm-auf-bild linear both;
       animation-timeline: view();
