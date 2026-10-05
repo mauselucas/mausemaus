@@ -5,7 +5,12 @@
 (() => {
   const fokussierbar = () => [...document.querySelectorAll(
       'a[href], button, input:not([type=hidden]), textarea, select, [tabindex]:not([tabindex="-1"])')]
-    .filter(el => !el.disabled);
+    .filter(el => !el.disabled)
+    /* Was gar nicht gezeichnet wird (display:none irgendwo darueber, z. B.
+       die gerade nicht offenen Fragen der Anfrage), ist auch NICHT in der
+       Tabfolge -- der Browser ueberspringt es. Eine Falle ist nur, was
+       angesprungen wird und trotzdem unsichtbar ist. */
+    .filter(el => !el.checkVisibility || el.checkVisibility());
   const sichtbar = (el) => {
     const r = el.getBoundingClientRect(), st = getComputedStyle(el);
     return st.visibility !== 'hidden' && st.display !== 'none' && (r.width > 0 || r.height > 0);

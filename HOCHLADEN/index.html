@@ -71,12 +71,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1789324161"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1791223803"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1789324161"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1789324161">');
+  document.write('<script src="/assets/schriften-retten.js?v=1791223803"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1791223803">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -90,18 +90,23 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1789324161">
-<link rel="stylesheet" href="/assets/site.css?v=1789324161">
-<link rel="stylesheet" href="/assets/leiste.css?v=1789324161">
-<link rel="stylesheet" href="/assets/brief.css?v=1789324161">
-<link rel="stylesheet" href="/assets/blumen.css?v=1789324161">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1789324161">
+<link rel="stylesheet" href="/assets/fonts.css?v=1791223803">
+<link rel="stylesheet" href="/assets/site.css?v=1791223803">
+<link rel="stylesheet" href="/assets/leiste.css?v=1791223803">
+<link rel="stylesheet" href="/assets/brief.css?v=1791223803">
+<link rel="stylesheet" href="/assets/blumen.css?v=1791223803">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1791223803">
+<!-- Das Formular liegt ganz unten: seine Gestaltung darf das erste Zeichnen
+     nicht aufhalten. media="print" laedt sie nebenher, onload schaltet sie
+     scharf. Ohne JavaScript bleibt sie aus -- dann steht ohnehin nur der
+     Hinweis aus <noscript> da, und das Formular funktioniert auch schlicht. -->
+<link rel="stylesheet" href="/assets/anfrage.css?v=1791223803" media="print" onload="this.media='all'">
 <!-- Sprachwahl. Steht im KOPF, damit <html lang> richtig ist, bevor
      irgendetwas gezeichnet wird. Die Arbeit am Dokument selbst wartet auf
      DOMContentLoaded. Deutsch bleibt der Standard: ohne ?lang=en und ohne
      frueher getroffene Wahl aendern diese beiden Dateien gar nichts. -->
-<script src="/assets/texte.js?v=1789324161"></script>
-<script src="/assets/sprache.js?v=1789324161"></script>
+<script src="/assets/texte.js?v=1791223803"></script>
+<script src="/assets/sprache.js?v=1791223803"></script>
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -223,50 +228,180 @@
       <form name="anfrage" method="POST"
             action="https://formspree.io/f/xljerkoz"
             class="br-formular" id="anfragen">
+        <!-- Die gefuehrte Anfrage (Ablauf in assets/anfrage.js).
+             Ohne Skript stehen alle Fragen untereinander und der Knopf
+             "Anfrage senden" am Ende schickt ganz normal ab. Mit Skript
+             kommt immer nur EINE Frage, je nach Antwort auf die erste ein
+             anderer Pfad, und am Schluss die Anfrage als kleiner Brief.
+             Felder fremder Pfade werden beim Absenden abgeschaltet und
+             gehen deshalb nicht mit. -->
         <!-- Formspree wirft eine Einsendung weg, sobald das Feld _gotcha
              gefuellt ist. Menschen sehen es nicht, automatische Ausfueller
              schon. Der Name ist von Formspree vorgegeben. -->
         <p class="versteckt"><label><span data-mm-t="form-leer-lassen">Bitte leer lassen:</span> <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
-        <!-- Betreffzeile der Mail, die bei Lucas ankommt. -->
+        <!-- Betreffzeile der Mail. Das Skript ersetzt sie beim Absenden durch
+             eine sprechende, z. B. "[Auftrag] · Videoschnitt · 300–1.000 € · Name". -->
         <input type="hidden" name="_subject" value="Neue Anfrage über mausemaus.com" data-mm-t-value="form-betreff">
-        <!-- Die Beschriftung stand vorher NUR im placeholder. Der verschwindet,
-             sobald jemand zu tippen anfaengt -- wer dann den Faden verliert,
-             sieht nicht mehr, welches Feld welches ist, und ein Screenreader
-             liest ein unbeschriftetes Feld vor. Der Text steht jetzt im
-             <label> und ist mit .versteckt nur optisch ausgeblendet: fuer
-             Auge und Aussehen aendert sich nichts, fuer Vorlesen alles. -->
-        <label><span class="versteckt" data-mm-t="form-name">Dein Name</span>
-          <input type="text" name="name" placeholder="Dein Name" data-mm-t-placeholder="form-name" required></label>
-        <label><span class="versteckt" data-mm-t="form-email-lang">Deine E-Mail-Adresse</span>
-          <input type="email" name="email" placeholder="Deine E-Mail" data-mm-t-placeholder="form-email" required></label>
-        <label><span class="versteckt" data-mm-t="form-nachricht">Worum geht's?</span>
-          <textarea name="nachricht" rows="4" placeholder="Worum geht's?" data-mm-t-placeholder="form-nachricht" required></textarea></label>
-        <button type="submit" data-mm-t="form-senden">Anfrage senden →</button>
+        <input type="hidden" name="sprache" value="de">
+
+        <p class="anf-einleitung" data-mm-t="anf-einleitung">Ein paar kurze Fragen, damit ich gleich weiß, worum es geht. Dauert keine zwei Minuten.</p>
+
+        <div class="anf-gleis" aria-hidden="true"><span class="anf-kopf"><svg viewBox="0 0 303.13 275.3" aria-hidden="true"><path fill="currentColor" d="M133.16,237.99c-27.41,30.79-70.23,50.09-108.82,27.42-52.03-30.05-9.9-88.95,26.67-111.64,13.68-9.57-3.11-19.24-9.83-27.25-22.29-22.11-15.89-64.81,14.36-76.37,19.47-7.55,41.05-1.43,59.19,7.2,30.33,16.74,20.74-31.04,56.28-50.89,20.6-12.12,49.99-6.68,64.78,12.11,21.92,29.53-20.36,62.52,7.41,59.6,63.44-16.1,84.14,47.01,24.47,73.12-25.08,15.3,28.46,25.23,33.07,68.9,1.88,50.65-67.55,63.04-101.36,36.42-31.17-16.42-35.94-52.26-66.21-18.63ZM181.49,172.16c25.07-7.83,36.49-38.21,21.19-60.04-21.35-29.92-69.93-20.46-76.64,16.25-4.81,30.78,27.11,53.37,55.45,43.78Z"/></svg></span></div>
+
+        <!-- 1 · Worum geht's -->
+        <fieldset class="anf-schritt" data-schritt="art">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-art-frage">Worum geht’s?</span></legend>
+          <div class="anf-pillen anf-gross">
+            <label class="anf-pille"><input type="radio" name="kategorie" value="Auftrag"><span data-mm-t="anf-art-auftrag">Ich hab einen Auftrag für dich</span></label>
+            <label class="anf-pille"><input type="radio" name="kategorie" value="Zusammenarbeit"><span data-mm-t="anf-art-kollab">Lass uns was zusammen machen</span></label>
+            <label class="anf-pille"><input type="radio" name="kategorie" value="Job-Angebot"><span data-mm-t="anf-art-job">Ich hab ein Job-Angebot</span></label>
+            <label class="anf-pille"><input type="radio" name="kategorie" value="Was anderes"><span data-mm-t="anf-art-anders">Was anderes</span></label>
+          </div>
+        </fieldset>
+
+        <!-- Auftrag 1 -->
+        <fieldset class="anf-schritt" data-schritt="a-was" data-pfad="Auftrag">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-was-frage">Was soll entstehen?</span></legend>
+          <p class="anf-hinweis" data-mm-t="anf-was-hinweis">Mehrere gehen.</p>
+          <div class="anf-pillen">
+            <label class="anf-pille"><input type="checkbox" name="arten" value="Videoschnitt"><span data-mm-t="anf-was-schnitt">Videoschnitt</span></label>
+            <label class="anf-pille"><input type="checkbox" name="arten" value="Motion Graphics"><span data-mm-t="anf-was-motion">Motion Graphics &amp; Animation</span></label>
+            <label class="anf-pille"><input type="checkbox" name="arten" value="Intro/Branding"><span data-mm-t="anf-was-intro">Intro &amp; Branding</span></label>
+            <label class="anf-pille"><input type="checkbox" name="arten" value="Doku/Longform"><span data-mm-t="anf-was-doku">Doku &amp; Longform</span></label>
+            <label class="anf-pille"><input type="checkbox" name="arten" value="Shorts/Reels"><span data-mm-t="anf-was-shorts">Shorts &amp; Reels</span></label>
+          </div>
+        </fieldset>
+
+        <!-- Auftrag 2 -->
+        <fieldset class="anf-schritt" data-schritt="a-umfang" data-pfad="Auftrag">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-umfang-frage">Wie viel und bis wann?</span></legend>
+          <div class="anf-gruppe">
+            <span class="anf-etikett" data-mm-t="anf-umfang-art">Umfang</span>
+            <div class="anf-pillen">
+              <label class="anf-pille"><input type="radio" name="umfang" value="einmalig"><span data-mm-t="anf-umfang-einmal">Einmaliges Projekt</span></label>
+              <label class="anf-pille"><input type="radio" name="umfang" value="regelmäßig"><span data-mm-t="anf-umfang-regel">Regelmäßig</span></label>
+            </div>
+          </div>
+          <label class="anf-feld"><span data-mm-t="anf-menge">Ungefähr wie viel? (optional)</span>
+            <input type="text" name="menge" placeholder="z. B. 3 Videos à 10 Minuten" data-mm-t-placeholder="anf-menge-ph"></label>
+          <div class="anf-gruppe">
+            <span class="anf-etikett" data-mm-t="anf-frist">Bis wann</span>
+            <div class="anf-pillen">
+              <label class="anf-pille"><input type="radio" name="frist" value="so schnell wie möglich"><span data-mm-t="anf-frist-asap">So schnell wie möglich</span></label>
+              <label class="anf-pille"><input type="radio" name="frist" value="2–4 Wochen"><span data-mm-t="anf-frist-wochen">In 2–4 Wochen</span></label>
+              <label class="anf-pille"><input type="radio" name="frist" value="1–3 Monate"><span data-mm-t="anf-frist-monate">In 1–3 Monaten</span></label>
+              <label class="anf-pille"><input type="radio" name="frist" value="kein fester Termin"><span data-mm-t="anf-frist-offen">Kein fester Termin</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Auftrag 3 -->
+        <fieldset class="anf-schritt" data-schritt="a-budget" data-pfad="Auftrag">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-budget-frage">Welches Budget hast du im Kopf?</span></legend>
+          <p class="anf-hinweis" data-mm-t="anf-budget-hinweis">Eine grobe Richtung reicht. So kann ich dir direkt etwas Passendes vorschlagen.</p>
+          <div class="anf-pillen anf-gruppe">
+            <label class="anf-pille"><input type="radio" name="budget" value="unter 300 €"><span data-mm-t="anf-b1">Unter 300 €</span></label>
+            <label class="anf-pille"><input type="radio" name="budget" value="300–1.000 €"><span data-mm-t="anf-b2">300–1.000 €</span></label>
+            <label class="anf-pille"><input type="radio" name="budget" value="1.000–3.000 €"><span data-mm-t="anf-b3">1.000–3.000 €</span></label>
+            <label class="anf-pille"><input type="radio" name="budget" value="über 3.000 €"><span data-mm-t="anf-b4">Über 3.000 €</span></label>
+            <label class="anf-pille"><input type="radio" name="budget" value="noch offen"><span data-mm-t="anf-b5">Weiß ich noch nicht</span></label>
+          </div>
+          <label class="anf-feld"><span data-mm-t="anf-links">Link zu deinem Kanal oder Beispielen (optional)</span>
+            <input type="text" name="links" inputmode="url" placeholder="youtube.com/@…"></label>
+          <label class="anf-feld"><span data-mm-t="anf-noch">Sonst noch was, das ich wissen sollte? (optional)</span>
+            <textarea name="nachricht_auftrag" rows="3"></textarea></label>
+        </fieldset>
+
+        <!-- Zusammenarbeit -->
+        <fieldset class="anf-schritt" data-schritt="kollab" data-pfad="Zusammenarbeit">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-kollab-frage">Erzähl mir von deiner Idee.</span></legend>
+          <label class="anf-feld"><span data-mm-t="anf-kollab-kanal">Link zu deinem Kanal oder Profil (optional)</span>
+            <input type="text" name="kanal" inputmode="url" placeholder="instagram.com/…"></label>
+          <label class="anf-feld"><span data-mm-t="anf-kollab-idee">Was schwebt dir vor?</span>
+            <textarea name="idee" rows="4"></textarea></label>
+        </fieldset>
+
+        <!-- Job -->
+        <fieldset class="anf-schritt" data-schritt="job" data-pfad="Job-Angebot">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-job-frage">Erzähl mir vom Job.</span></legend>
+          <label class="anf-feld"><span data-mm-t="anf-job-firma">Firma oder Kanal</span>
+            <input type="text" name="firma"></label>
+          <label class="anf-feld"><span data-mm-t="anf-job-rolle">Um welche Rolle geht’s? (optional)</span>
+            <input type="text" name="rolle" placeholder="z. B. Video Editor" data-mm-t-placeholder="anf-job-rolle-ph"></label>
+          <div class="anf-gruppe">
+            <span class="anf-etikett" data-mm-t="anf-job-art">Art</span>
+            <div class="anf-pillen">
+              <label class="anf-pille"><input type="radio" name="jobart" value="Freelance"><span data-mm-t="anf-job-free">Freelance</span></label>
+              <label class="anf-pille"><input type="radio" name="jobart" value="Teilzeit"><span data-mm-t="anf-job-teil">Teilzeit</span></label>
+              <label class="anf-pille"><input type="radio" name="jobart" value="Vollzeit"><span data-mm-t="anf-job-voll">Vollzeit</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Was anderes -->
+        <fieldset class="anf-schritt" data-schritt="anders" data-pfad="Was anderes">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-anders-frage">Was liegt dir auf dem Herzen?</span></legend>
+          <label class="anf-feld"><span class="versteckt" data-mm-t="anf-anders-feld">Deine Nachricht</span>
+            <textarea name="nachricht" rows="5"></textarea></label>
+        </fieldset>
+
+        <!-- Über dich -->
+        <fieldset class="anf-schritt" data-schritt="du">
+          <legend tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-du-frage">Und wer bist du?</span></legend>
+          <label class="anf-feld"><span data-mm-t="anf-du-name">Dein Name</span>
+            <input type="text" name="name" autocomplete="name" required></label>
+          <label class="anf-feld"><span data-mm-t="anf-du-mail">Deine E-Mail</span>
+            <input type="email" name="email" autocomplete="email" required></label>
+          <div class="anf-gruppe">
+            <span class="anf-etikett" data-mm-t="anf-du-gefunden">Wie bist du auf mich gestoßen? (optional)</span>
+            <div class="anf-pillen">
+              <label class="anf-pille"><input type="radio" name="gefunden" value="Instagram"><span>Instagram</span></label>
+              <label class="anf-pille"><input type="radio" name="gefunden" value="YouTube"><span>YouTube</span></label>
+              <label class="anf-pille"><input type="radio" name="gefunden" value="Empfehlung"><span data-mm-t="anf-g-empf">Empfehlung</span></label>
+              <label class="anf-pille"><input type="radio" name="gefunden" value="Google"><span>Google</span></label>
+              <label class="anf-pille"><input type="radio" name="gefunden" value="anders"><span data-mm-t="anf-g-anders">Anders</span></label>
+            </div>
+          </div>
+          <!-- Nur ohne Skript sichtbar: dann ist DAS der Weg zum Absenden. -->
+          <button type="submit" class="anf-knopf anf-nojs" data-mm-t="anf-senden">Anfrage senden</button>
+        </fieldset>
+
+        <!-- Letzter Blick: entsteht erst mit Skript -->
+        <section class="anf-brief" data-schritt="brief" hidden>
+          <h3 class="anf-frage" tabindex="-1"><span class="anf-nummer"></span><span data-mm-t="anf-brief-frage">Passt das so?</span></h3>
+          <p class="anf-hinweis" data-mm-t="anf-brief-hinweis">So kommt deine Anfrage bei mir an.</p>
+          <div class="anf-papier"></div>
+        </section>
+
+        <p class="anf-fehler" role="alert"></p>
+
+        <div class="anf-leiste" hidden>
+          <button type="submit" class="anf-knopf" id="anf-weiter" data-mm-t="anf-weiter">Weiter</button>
+          <button type="button" class="anf-zurueck" data-mm-t="anf-zurueck">Zurück</button>
+        </div>
         <!-- aria-live: ein Screenreader liest die Rueckmeldung vor, sobald sie
-             erscheint. Ohne das Attribut bliebe sie fuer Blinde stumm.
-             Die Katze steht daneben und ist fuer Screenreader ausdruecklich
-             UNSICHTBAR (aria-hidden): der Satz sagt schon alles, ein zweites
-             Mal vorgelesen zu bekommen "Bild" waere nur Laerm. Sie wird erst
-             BEIM ERFOLG per Skript eingehaengt -- stuende sie hier im HTML,
-             holte jeder Besucher 139 kB, auch wer nie etwas abschickt. -->
+             erscheint. Die Katze ist fuer Screenreader ausdruecklich
+             UNSICHTBAR (aria-hidden) und wird erst BEIM ERFOLG eingehaengt --
+             stuende sie hier im HTML, holte jeder Besucher 139 kB. -->
         <div class="br-formular-rueckmeldung">
-          <p class="br-formular-antwort" id="anfrage-antwort" role="status" aria-live="polite"></p>
+          <p class="br-formular-antwort" id="anfrage-antwort" role="status" aria-live="polite" tabindex="-1"></p>
           <span class="br-formular-katze" id="anfrage-katze" aria-hidden="true"></span>
         </div>
+        <button type="button" class="anf-zurueck anf-neu" hidden data-mm-t="anf-neu">Noch eine Anfrage schreiben</button>
       </form>
     </div>
    </div>
   </main>
 </div>
 
-<script src="/assets/config.js?v=1789324161"></script>
-<script src="/assets/shared.js?v=1789324161"></script>
-<script src="/assets/bloecke.js?v=1789324161"></script>
-<script src="/assets/db.js?v=1789324161"></script>
-<script src="/assets/blumen.js?v=1789324161"></script>
-<script src="/assets/leiste.js?v=1789324161"></script>
-<script src="/assets/brief.js?v=1789324161"></script>
-<script src="/assets/tueren.js?v=1789324161"></script>
+<script src="/assets/config.js?v=1791223803"></script>
+<script src="/assets/shared.js?v=1791223803"></script>
+<script src="/assets/bloecke.js?v=1791223803"></script>
+<script src="/assets/db.js?v=1791223803"></script>
+<script src="/assets/blumen.js?v=1791223803"></script>
+<script src="/assets/leiste.js?v=1791223803"></script>
+<script src="/assets/brief.js?v=1791223803"></script>
+<script src="/assets/tueren.js?v=1791223803"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -329,76 +464,10 @@
 })();
 </script>
 
-<!-- Anfrageformular ohne Seitenwechsel abschicken. Faellt dieses Skript
-     aus, bleibt das action-Attribut im <form> uebrig und der Browser schickt
-     ganz normal ab -- die Anfrage kommt trotzdem an, nur mit Seitenwechsel
-     auf Formsprees eigene Dankeseite. Deshalb wird preventDefault() erst
-     INNERHALB des Handlers aufgerufen und nicht das action-Attribut entfernt. -->
-<script>
-(function () {
-  var form = document.getElementById('anfragen');
-  if (!form || !window.fetch) return;
-  /* Faellt sprache.js aus (Netz, Adblocker), ist window.mmText nicht da.
-     Dann bleibt der deutsche Text stehen -- nie eine leere Meldung. */
-  var T = function (schluessel, deutsch) {
-    return (window.mmText ? window.mmText(schluessel) : '') || deutsch;
-  };
-
-  var antwort = document.getElementById('anfrage-antwort');
-  var katze = document.getElementById('anfrage-katze');
-  var knopf = form.querySelector('button[type=submit]');
-
-  /* Die Katze. Zwei Fassungen derselben Datei:
-       - bewegt, fuer alle
-       - ein Standbild, fuer alle mit "Bewegung reduzieren"
-     <picture> waehlt selbst und holt NUR die gewaehlte -- deshalb steht die
-     Ruecksicht hier im Markup und nicht als zweite Abfrage im Skript.
-     Der Dateiname traegt einen Fingerabdruck des GIFs (tests/katze-wandeln.mjs),
-     darum braucht er keinen ?v=-Stempel: taucht ein anderes GIF auf, heisst
-     die Datei anders. Feste Breite und Hoehe, damit beim Nachladen nichts
-     springt. */
-  function katzeZeigen() {
-    if (!katze || katze.firstChild) return;
-    katze.innerHTML =
-      '<picture>' +
-        '<source media="(prefers-reduced-motion: reduce)" ' +
-                'srcset="/assets/katze-924d154c-standbild.webp">' +
-        '<img src="/assets/katze-924d154c.webp" alt="" ' +
-             'width="160" height="116" decoding="async">' +
-      '</picture>';
-  }
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    antwort.className = 'br-formular-antwort';
-    antwort.textContent = T('form-sendet', 'Wird gesendet …');
-    if (katze) katze.innerHTML = '';
-    knopf.disabled = true;
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'application/json' }
-    }).then(function (r) {
-      if (r.ok) {
-        form.reset();
-        antwort.className = 'br-formular-antwort gut';
-        antwort.textContent = T('form-gut', 'Angekommen! Ich melde mich.');
-        katzeZeigen();
-      } else {
-        return r.json().then(function (d) {
-          throw new Error((d.errors || []).map(function (f) { return f.message; }).join(', ')
-            || T('form-schlecht', 'Das hat nicht geklappt.'));
-        });
-      }
-    }).catch(function (err) {
-      antwort.className = 'br-formular-antwort schlecht';
-      /* Bewusst mit Ausweg: wer hier haengenbleibt, soll trotzdem
-         schreiben koennen, statt einfach abzuspringen. */
-      antwort.textContent = (err.message || T('form-schlecht', 'Das hat nicht geklappt.'))
-        + T('form-schlecht-zusatz', ' Schreib mir sonst direkt an lucasschoenwald03@gmail.com.');
-    }).then(function () { knopf.disabled = false; });
-  });
-})();
-</script>
+<!-- Die gefuehrte Anfrage: Ablauf, Absenden ohne Seitenwechsel, Katze.
+     Faellt das Skript aus, bleibt das action-Attribut im <form> uebrig und
+     der Browser schickt ganz normal ab -- die Anfrage kommt trotzdem an. -->
+<script src="/assets/anfrage.js?v=1791223803"></script>
 
 <!-- Besucherstatistik (GoatCounter). Bewusst so und nicht anders:
      keine Cookies, keine personenbezogenen Daten, nichts, was ueber

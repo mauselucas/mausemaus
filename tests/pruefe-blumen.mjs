@@ -257,7 +257,12 @@ const TEXT_MESSUNG = `(() => {
     const vorher = sc.scrollHeight;
     const letzter = [...document.querySelectorAll('.br-abschnitt')].pop();
     const b = letzter.querySelector('.mm-blume');
-    b.style.bottom = '-900px';                            // hängt unter den Anker
+    /* So weit unter den Anker, dass sie sicher ueber das Seitenende ragt.
+       Fest -900px reichte nicht mehr, seit unter dem letzten Abschnitt die
+       gefuehrte Anfrage steht -- sie ist hoeher als das alte Formular, die
+       Blume blieb INNERHALB der Seite, und der Gegenbeweis war blind. */
+    const ankerUnten = letzter.getBoundingClientRect().bottom - sc.getBoundingClientRect().top + sc.scrollTop;
+    b.style.bottom = -(sc.scrollHeight - ankerUnten + 400) + 'px';   // hängt unter den Anker
     void sc.offsetHeight;
     const nachher = sc.scrollHeight;
     b.style.bottom = '';

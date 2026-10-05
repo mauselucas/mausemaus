@@ -30,7 +30,10 @@ const gibtEs = (p) => existsSync(new URL('.' + p, HOCH).pathname);
 /* ---------- 1. Der blockierende Pfad ---------- */
 
 const seite = await lies('./index.html');
-const stylesheets = [...seite.matchAll(/<link rel="stylesheet" href="(\/assets\/[^"?]+)/g)].map(m => m[1]);
+/* media="print" blockiert das Zeichnen NICHT -- so wird anfrage.css
+   nebenher geladen und erst per onload scharfgeschaltet. Die zaehlt nicht. */
+const stylesheets = [...seite.matchAll(/<link rel="stylesheet" href="(\/assets\/[^"?]+)[^>]*>/g)]
+  .filter(m => !m[0].includes('media="print"')).map(m => m[1]);
 let blockierend = Buffer.byteLength(seite);
 for (const s of stylesheets) blockierend += (await stat(new URL('.' + s, HOCH).pathname)).size;
 

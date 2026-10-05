@@ -1,0 +1,110 @@
+/* mausemaus — Gestaltung der geführten Anfrage (Kontaktformular).
+
+   Eigene Datei und NICHT blockierend geladen (media="print" -> "all", siehe
+   index.html): Das Formular steht ganz unten im Brief. Bis jemand dort
+   ankommt, ist diese Datei laengst da -- sie muss das erste Zeichnen der
+   Seite nicht aufhalten (pruefe-tempo.mjs: unter 100 kB blockierend). */
+/* ===== Die geführte Anfrage (Kontaktformular) =====
+   Markup in index.html, Ablauf in assets/anfrage.js. Alle Klassen tragen
+   "anf-" vorneweg: Namen wie .leiste, .knopf oder .feld gibt es auf der
+   Seite schon (die Zeitleiste heisst #leiste) -- ohne Vorsilbe griffe eine
+   Regel von hier dort mit. Ohne Skript (keine Klasse .anf-js) stehen alle
+   Fragen untereinander. */
+.br-formular { margin:26px 0 0; --anf-kante:#E2DFD3; --anf-tinte:#0D1821; --anf-salbei:#BFCC94;
+  --anf-leise:#6D7571; --anf-kurve:cubic-bezier(.50,0,.12,1); }
+.anf-einleitung { font-size:16.5px; line-height:1.8; color:#232c31; margin:0 0 30px; max-width:46ch; }
+
+/* Fortschritt im Stil der Zeitleiste, mit der Blume als Kopf */
+.anf-gleis { display:none; position:relative; height:8px; margin:0 0 26px; }
+.anf-js .anf-gleis { display:flex; gap:4px; }
+.anf-gleis i { flex:1; height:8px; border-radius:99px; background:var(--anf-kante);
+  transition:background-color .34s var(--anf-kurve); }
+.anf-gleis i.fertig { background:var(--anf-salbei); }
+.anf-kopf { position:absolute; top:50%; width:24px; height:22px; color:var(--anf-tinte);
+  transform:translate(-50%,-50%); transition:left .42s var(--anf-kurve); pointer-events:none; }
+.anf-kopf svg { width:100%; height:100%; display:block; }
+
+.br-formular fieldset { border:0; margin:0 0 48px; padding:0; min-width:0; }
+.anf-js .anf-schritt { display:none; margin:0; }
+.anf-js .anf-schritt.aktiv { display:block; animation:anf-rein .32s var(--anf-kurve) both; }
+@keyframes anf-rein { from { opacity:0; transform:translateY(12px); filter:blur(2px); }
+                      to   { opacity:1; transform:none; filter:none; } }
+
+.anf-nummer { display:block; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--anf-leise); margin:0 0 12px; line-height:1.4; }
+.anf-nummer:empty { display:none; }
+.br-formular legend, .anf-frage { font-family:'TropiWeb','Manrope',sans-serif; font-weight:400; font-size:30px;
+  line-height:1.1; color:var(--anf-tinte); padding:0; margin:0 0 10px; }
+.br-formular legend:focus, .anf-frage:focus { outline:none; }
+.anf-hinweis { font-size:15px; line-height:1.6; color:var(--anf-leise); margin:0 0 20px; }
+
+.anf-gruppe { margin:0 0 26px; }
+.anf-etikett { display:block; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--anf-leise); margin:0 0 10px; }
+
+/* Auswahl als Pillen. Das echte Eingabefeld bleibt da (Tastatur,
+   Screenreader, Absenden), nur unsichtbar -- gezeichnet wird das <span>. */
+.anf-pillen { display:flex; flex-wrap:wrap; gap:8px; }
+.anf-pille { position:relative; cursor:pointer; }
+.anf-pille input { position:absolute; opacity:0; width:1px; height:1px; margin:0; }
+.anf-pille span { display:inline-flex; align-items:center; gap:8px; padding:11px 18px; border-radius:99px;
+  border:1.5px solid var(--anf-kante); background:#fff; font-size:15px; line-height:1.3; color:#232c31;
+  transition:border-color .18s, background-color .2s var(--anf-kurve), color .2s var(--anf-kurve), transform .16s ease-out; }
+@media (hover:hover) and (pointer:fine) { .anf-pille:hover span { border-color:var(--anf-tinte); } }
+.anf-pille:active span { transform:scale(.97); }
+.anf-pille input:checked + span { background:var(--anf-tinte); border-color:var(--anf-tinte); color:#F0F4EF; }
+.anf-pille input:checked + span::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--anf-salbei); }
+.anf-pille input:focus-visible + span { outline:2px solid var(--anf-tinte); outline-offset:3px; }
+.anf-pillen.anf-gross { flex-direction:column; align-items:flex-start; }
+.anf-gross .anf-pille span { font-size:16.5px; padding:14px 22px; }
+
+.anf-feld { display:block; margin:0 0 18px; }
+.anf-feld > span { display:block; font-size:14px; color:var(--anf-leise); margin:0 0 6px; }
+.br-formular input[type=text], .br-formular input[type=email], .br-formular textarea {
+  font:400 15px/1.5 'Manrope',sans-serif; padding:12px 14px; border:1px solid var(--anf-kante);
+  border-radius:14px; background:#fff; color:var(--anf-tinte); width:100%; transition:border-color .18s; }
+.br-formular input::placeholder, .br-formular textarea::placeholder { color:var(--anf-leise); opacity:.8; }
+.br-formular input:focus-visible, .br-formular textarea:focus-visible {
+  outline:2px solid var(--anf-tinte); outline-offset:2px; border-color:var(--anf-tinte); }
+.br-formular textarea { resize:vertical; min-height:110px; }
+
+.anf-fehler { font-size:14px; color:#96341F; margin:-6px 0 18px; }
+.anf-fehler:empty { display:none; }
+
+.anf-leiste { display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-top:30px; }
+.anf-leiste[hidden] { display:none; }
+.anf-knopf { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  padding:14px 22px; border:0; border-radius:99px; background:var(--anf-tinte); color:#F0F4EF; cursor:pointer;
+  transition:transform .16s ease-out; }
+.anf-knopf:active { transform:scale(.97); }
+.anf-knopf:focus-visible { outline:2px solid var(--anf-tinte); outline-offset:3px; }
+.anf-knopf[disabled] { opacity:.55; cursor:progress; }
+.anf-js .anf-nojs { display:none; }
+.anf-zurueck { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  background:none; border:0; padding:6px 0; color:var(--anf-leise); cursor:pointer; text-decoration:underline;
+  text-underline-offset:4px; text-decoration-color:var(--anf-kante); }
+.anf-zurueck:hover { color:var(--anf-tinte); }
+.anf-zurueck:focus-visible { outline:2px solid var(--anf-tinte); outline-offset:3px; border-radius:4px; }
+.anf-zurueck[hidden] { display:none; }
+
+/* Der fertige Brief vor dem Absenden */
+.anf-papier { background:#F1F1EC; border-radius:14px; padding:28px 26px 24px; margin:6px 0 18px; }
+.anf-anrede { font-family:'TropiWeb','Manrope',sans-serif; font-size:26px; line-height:1.1; color:var(--anf-tinte); margin:0 0 14px; }
+.anf-papier p:not(.anf-anrede) { font-size:16px; line-height:1.75; margin:0 0 12px; overflow-wrap:anywhere; }
+.anf-papier .anf-gruss { margin-top:18px; }
+.anf-leise { color:var(--anf-leise); }
+
+/* Nach dem Absenden: nur noch Satz, Katze und "Noch eine Anfrage". */
+.anf-fertig .anf-schritt, .anf-fertig .anf-gleis, .anf-fertig .anf-leiste,
+.anf-fertig .anf-fehler, .anf-fertig .anf-einleitung { display:none !important; }
+.anf-neu { margin-top:14px; }
+
+@media (max-width:520px) {
+  .br-formular legend, .anf-frage { font-size:27px; }
+  .anf-papier { padding:22px 18px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anf-js .anf-schritt.aktiv { animation:none; }
+  .anf-kopf, .anf-gleis i { transition:none; }
+}
+

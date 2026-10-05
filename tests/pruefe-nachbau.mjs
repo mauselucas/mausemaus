@@ -25,6 +25,13 @@ const A = (p) => new URL('../HOCHLADEN/' + p, import.meta.url);
 
 const bewegung = await readFile(A('assets/bewegung.css'), 'utf8');
 const nachbau  = await readFile(A('assets/bewegung-nachbau.css'), 'utf8');
+/* Wie viele eigene Stylesheets die Startseite hat, steht in index.html --
+   nicht fest hier. Fest stand einmal "6", und mit anfrage.css (dem
+   Kontaktformular) wurden alle drei Firefox-Pruefungen rot, ohne dass am
+   Nachbau etwas kaputt war. Der Nachbau selbst wird per document.write
+   eingehaengt und zaehlt hier nicht mit. */
+const EIGENE = [...(await readFile(A('index.html'), 'utf8'))
+  .matchAll(/<link rel="stylesheet" href="\/assets\/(?!bewegung-nachbau)/g)].length;
 
 pruefe('bewegung-nachbau.css ist noch das, was aus bewegung.css folgt',
   nachbau === baueNachbau(bewegung),
@@ -114,8 +121,8 @@ if (!firefoxDa()) {
     d.kannSelbst === true,
     'nach dem Nachladen meldet das Polyfill selbst true; ohne es wäre es false');
   pruefe('Firefox: die Klasse mm-bewegung ist gesetzt', d.klasse === true);
-  pruefe('Firefox: das Nachbau-Stylesheet ist dazugekommen', d.blaetter === 7,
-    d.blaetter + ' Stylesheets (6 eigene + Nachbau; das Polyfill schreibt sie auf blob: um)');
+  pruefe('Firefox: das Nachbau-Stylesheet ist dazugekommen', d.blaetter === EIGENE + 1,
+    d.blaetter + ' Stylesheets (' + EIGENE + ' eigene + Nachbau; das Polyfill schreibt sie auf blob: um)');
 
   for (const p of d.proben) {
     if (p.fehlt) { pruefe(`Firefox: ${p.s} ist da`, false, 'Element fehlt'); continue; }
@@ -143,7 +150,7 @@ if (!firefoxDa()) {
   const totBeiOhne = ohne.proben.every(p => p.fehlt ||
     (p.davor === 1 && p.mitte === 1 && p.spaet === 1 && p.fertig === 1));
   pruefe('GEGENBEWEIS: ohne das Nachbau-Stylesheet animiert Firefox nichts',
-    totBeiOhne && ohne.blaetter === 6,
+    totBeiOhne && ohne.blaetter === EIGENE,
     `${ohne.blaetter} Stylesheets, Deckkraft durchweg 1 — genau der Zustand, den Lucas gemeldet hat`);
   /* …und zwar auf der SICHEREN Seite: alles voll sichtbar, nichts hängt
      halbdurchsichtig. Das ist die eigentliche Zusage des Entwurfs. */
@@ -158,7 +165,7 @@ if (!firefoxDa()) {
       `<head><script>const _m=matchMedia;matchMedia=q=>q.includes('reduce')?{matches:true,addEventListener(){}}:_m(q);</script>`),
   });
   pruefe('GEGENBEWEIS: bei „Bewegung reduzieren“ lädt Firefox das Polyfill gar nicht erst',
-    reduziert.klasse === false && reduziert.kannSelbst === false && reduziert.blaetter === 6,
+    reduziert.klasse === false && reduziert.kannSelbst === false && reduziert.blaetter === EIGENE,
     `Klasse ${reduziert.klasse}, kannSelbst ${reduziert.kannSelbst}, ${reduziert.blaetter} Stylesheets`);
   pruefe('…und alles ist von Anfang an sichtbar',
     reduziert.proben.every(p => p.fehlt || (p.davor === 1 && p.fertig === 1)));

@@ -21,6 +21,20 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
+
+/* Die Anfrage ist gefuehrt: Absenden heisst Frage fuer Frage durchgehen.
+   Der kuerzeste Pfad ist "Was anderes" -> Nachricht -> Name/E-Mail -> Brief.
+   Steht noch die Erfolgsmeldung vom letzten Mal da, erst neu anfangen. */
+const DURCHKLICKEN = (name = 'Test', mail = 'test@example.com', text = 'Hallo') => `
+  if (f.classList.contains('anf-fertig')) f.querySelector('.anf-neu').click();
+  f.querySelector('[name=kategorie][value="Was anderes"]').click();
+  f.requestSubmit();
+  f.querySelector('[name=nachricht]').value = '${text}';
+  f.requestSubmit();
+  f.querySelector('[name=name]').value = '${name}';
+  f.querySelector('[name=email]').value = '${mail}';
+  f.requestSubmit();
+  f.requestSubmit();`;
 import { messeInFirefox, firefoxDa } from './firefox.mjs';
 
 const HOCH = new URL('../HOCHLADEN/', import.meta.url);
@@ -30,9 +44,10 @@ const chrome = await starteChrome({ port: 9351 });
 
 /* ---------- 1. Die Dateien gibt es, und die Seite meint dieselben ---------- */
 
-const seite = await readFile(new URL('./index.html', HOCH), 'utf8');
+/* Seit der gefuehrten Anfrage steht die Katze in assets/anfrage.js, nicht mehr im Inline-Skript von index.html. */
+const seite = await readFile(new URL('./assets/anfrage.js', HOCH), 'utf8');
 const adressen = [...seite.matchAll(/\/assets\/(katze-[A-Za-z0-9-]+\.webp)/g)].map(m => m[1]);
-pruefe('index.html nennt zwei Katzen-Dateien (bewegt und Standbild)',
+pruefe('anfrage.js nennt zwei Katzen-Dateien (bewegt und Standbild)',
   new Set(adressen).size === 2, [...new Set(adressen)].join(', ') || 'keine');
 for (const name of new Set(adressen)) {
   pruefe(`…und ${name} liegt wirklich da`,
@@ -71,10 +86,7 @@ pruefe('…und der leere Platz nimmt keine Hoehe weg',
 const nach = JSON.parse(await s.werte(`(async () => {
   window.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
   const f = document.getElementById('anfragen');
-  f.querySelector('[name=name]').value = 'Test';
-  f.querySelector('[name=email]').value = 'test@example.com';
-  f.querySelector('[name=nachricht]').value = 'Hallo';
-  f.requestSubmit();
+  ${DURCHKLICKEN('Test', 'test@example.com', 'Hallo')}
   await new Promise(r => setTimeout(r, 700));
   const bild = document.querySelector('#anfrage-katze img');
   if (bild && !bild.complete) await new Promise(r => bild.addEventListener('load', r, {once:true}));
@@ -118,10 +130,7 @@ pruefe('GEGENBEWEIS: nach dem Absenden ist sehr wohl etwas geholt worden',
 const beiFehler = JSON.parse(await s.werte(`(async () => {
   window.fetch = () => Promise.resolve({ ok: false, json: () => Promise.resolve({ errors: [{ message: 'Feld fehlt' }] }) });
   const f = document.getElementById('anfragen');
-  f.querySelector('[name=name]').value = 'Test';
-  f.querySelector('[name=email]').value = 'test@example.com';
-  f.querySelector('[name=nachricht]').value = 'Hallo';
-  f.requestSubmit();
+  ${DURCHKLICKEN('Test', 'test@example.com', 'Hallo')}
   await new Promise(r => setTimeout(r, 500));
   return JSON.stringify({ bilder: document.querySelectorAll('#anfrage-katze img').length,
     text: document.getElementById('anfrage-antwort').textContent });
@@ -142,10 +151,7 @@ await r.warte(2500);
 const ruhig = JSON.parse(await r.werte(`(async () => {
   window.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
   const f = document.getElementById('anfragen');
-  f.querySelector('[name=name]').value = 'Test';
-  f.querySelector('[name=email]').value = 'test@example.com';
-  f.querySelector('[name=nachricht]').value = 'Hallo';
-  f.requestSubmit();
+  ${DURCHKLICKEN('Test', 'test@example.com', 'Hallo')}
   await new Promise(r2 => setTimeout(r2, 700));
   const bild = document.querySelector('#anfrage-katze img');
   if (bild && !bild.complete) await new Promise(r2 => bild.addEventListener('load', r2, {once:true}));
@@ -183,10 +189,7 @@ if (!firefoxDa()) {
     await new Promise(r => setTimeout(r, 4000));
     window.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
     const f = document.getElementById('anfragen');
-    f.querySelector('[name=name]').value = 'T';
-    f.querySelector('[name=email]').value = 't@e.de';
-    f.querySelector('[name=nachricht]').value = 'H';
-    f.requestSubmit();
+    ${DURCHKLICKEN('T', 't@e.de', 'H')}
     await new Promise(r => setTimeout(r, 3000));
     const b = document.querySelector('#anfrage-katze img');
     echtesFetch('/ergebnis', { method: 'POST', body: JSON.stringify({

@@ -147,19 +147,16 @@ html, body { background:#FBFAF6; }
 .br-kontakt { display:flex; flex-direction:column; gap:6px; margin:18px 0 0; }
 .br-kontakt a { font-family:'Manrope',sans-serif; font-size:17px; color:#0D1821; }
 
-/* Das Anfrageformular bleibt fest im HTML — Netlify durchsucht die
-   hochgeladenen Dateien und findet nur, was dort wirklich steht. */
-.br-formular { margin:26px 0 0; display:grid; gap:12px; max-width:440px; }
-.br-formular input, .br-formular textarea { font:400 15px/1.5 'Manrope',sans-serif;
-  padding:12px 14px; border:1px solid #E2DFD3; border-radius:8px; background:#fff;
-  color:#0D1821; width:100%; }
+/* Die geführte Anfrage selbst steht in assets/anfrage.css -- nicht hier,
+   weil brief.css das erste Zeichnen blockiert und das Formular ganz unten
+   liegt. Hier bleibt nur die Rueckmeldung mit der Katze. */
 /* Rueckmeldung des Anfrageformulars. Leer und ohne Klasse ist sie
    unsichtbar -- kein Platzhalter, der Luft frisst, solange nichts passiert
    ist. Die Farben liegen bewusst ueber 4.5:1 Kontrast, wie der Rest. */
 /* Rueckmeldung und Katze stehen nebeneinander. flex-wrap, weil auf einem
    schmalen Handy beides nebeneinander zu eng wird -- dann rutscht die Katze
    unter den Satz statt ihn zu quetschen. */
-.br-formular-rueckmeldung { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.br-formular-rueckmeldung { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
 /* Solange nichts eingehaengt ist, darf das Feld keinen Platz und keine
    Luecke erzeugen -- sonst klaffte unter dem Knopf dauerhaft ein Loch. */
 .br-formular-katze:empty { display:none; }
@@ -167,13 +164,10 @@ html, body { background:#FBFAF6; }
 
 .br-formular-antwort { margin:0; font-size:14px; line-height:1.5;
   color:var(--br-leise); min-height:0; }
+.br-formular-antwort:focus { outline:none; }
 .br-formular-antwort:empty { display:none; }
 .br-formular-antwort.gut { color:#3F6B45; }
 .br-formular-antwort.schlecht { color:#96341F; }
-.br-formular button[disabled] { opacity:.55; cursor:progress; }
-.br-formular button { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em;
-  text-transform:uppercase; padding:14px 20px; border:0; border-radius:99px;
-  background:#0D1821; color:#F0F4EF; cursor:pointer; justify-self:start; }
 /* Spamfalle: muss ein echtes, ausfuellbares Feld bleiben (Netlify erkennt
    Bots daran, dass sie es ausfuellen), darf aber weder sichtbar sein noch
    irgendwo Platz beanspruchen. "left:-9999px" allein reichte nicht -- es

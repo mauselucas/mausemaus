@@ -53,7 +53,7 @@ const d1 = await de.werte(`JSON.stringify({
   flagge: document.querySelector('.mms-flagge').getAttribute('src'),
   fuss: document.querySelector('.mml-fuss').innerText.replace(/\\s+/g, ' ').trim(),
   sprung: (document.querySelector('.br-sprung') || {}).textContent || '',
-  knopf: (document.querySelector('#anfragen button[type=submit]') || {}).textContent || '',
+  knopf: (document.getElementById('anf-weiter') || {}).textContent || '',
   echteLinks: [...document.querySelectorAll('.mms-wahl[href]')].map(a => a.getAttribute('href')),
   auswahl: [...document.querySelectorAll('.mms-wahl')].map(a => a.textContent.trim()),
 })`);
@@ -68,7 +68,7 @@ pruefe('drei Sprachen zur Auswahl, Niederländisch dabei',
   g1.auswahl.join('|') === 'Deutsch|English|Nederlands', g1.auswahl.join(' | '));
 pruefe('Leisten-Beschriftung deutsch', g1.fuss.includes('berufliche Projekte'), g1.fuss);
 pruefe('Sprungmarke deutsch', g1.sprung === 'Zum Brief springen', g1.sprung);
-pruefe('Sendeknopf deutsch', g1.knopf.includes('Anfrage senden'), g1.knopf);
+pruefe('Weiter-Knopf im Formular deutsch', g1.knopf === 'Weiter', g1.knopf);
 /* Ohne JavaScript bliebe nur das href übrig -- es MUSS also eines geben,
    und zwar ein echtes, nicht "#" oder "javascript:". */
 pruefe('Umschalter sind echte Links mit Ziel',
@@ -92,8 +92,11 @@ const g2 = JSON.parse(await en.werte(`JSON.stringify({
   flagge: document.querySelector('.mms-flagge').getAttribute('src'),
   fuss: document.querySelector('.mml-fuss').innerText.replace(/\\s+/g, ' ').trim(),
   sprung: (document.querySelector('.br-sprung') || {}).textContent || '',
-  knopf: (document.querySelector('#anfragen button[type=submit]') || {}).textContent || '',
-  platzhalter: (document.querySelector('#anfragen input[name=name]') || {}).placeholder || '',
+  knopf: (document.getElementById('anf-weiter') || {}).textContent || '',
+  /* Name-Feld: seit der gefuehrten Anfrage eine sichtbare Beschriftung statt Platzhalter */
+  platzhalter: (document.querySelector('#anfragen [data-mm-t="anf-du-name"]') || {}).textContent || '',
+  ersteFrage: (document.querySelector('#anfragen [data-mm-t="anf-art-frage"]') || {}).textContent || '',
+  zaehler: (document.querySelector('#anfragen .anf-schritt.aktiv .anf-nummer') || {}).textContent || '',
   betreff: (document.querySelector('#anfragen input[name=_subject]') || {}).value || '',
   locale: (document.querySelector('meta[property="og:locale"]') || {}).content || '',
   navName: (document.getElementById('leiste') || {}).ariaLabel || '',
@@ -104,8 +107,10 @@ pruefe('im Knopf steht English mit der passenden Flagge',
   g2.imKnopf === 'English' && g2.flagge === '/assets/flaggen/en.png', g2.imKnopf + ' ' + g2.flagge);
 pruefe('Leisten-Beschriftung englisch', g2.fuss.includes('client work'), g2.fuss);
 pruefe('Sprungmarke englisch', g2.sprung === 'Skip to the letter', g2.sprung);
-pruefe('Sendeknopf englisch', g2.knopf.includes('Send enquiry'), g2.knopf);
-pruefe('Platzhalter im Formular englisch', g2.platzhalter === 'Your name', g2.platzhalter);
+pruefe('Weiter-Knopf im Formular englisch', g2.knopf === 'Next', g2.knopf);
+pruefe('Beschriftung im Formular englisch', g2.platzhalter === 'Your name', g2.platzhalter);
+pruefe('erste Frage englisch', g2.ersteFrage === 'What’s it about?', g2.ersteFrage);
+pruefe('Fragen-Zaehler englisch (kommt aus dem Skript)', g2.zaehler === 'Question 1 of 3', g2.zaehler);
 /* Die Betreffzeile landet in Lucas' Postfach -- die soll mitziehen. */
 pruefe('Betreff der Mail englisch', g2.betreff === 'New enquiry via mausemaus.com', g2.betreff);
 pruefe('og:locale englisch', g2.locale === 'en_US', g2.locale);
@@ -417,7 +422,7 @@ await knopf.zu();
    Unten rechts darf er nichts verdecken, was man braucht. Gemessen,
    nicht angesehen. Nie schmaler als 520 px pruefen (siehe chrome.mjs). */
 const handy = await auf('/', { breite: 520, hoehe: 820 });
-await handy.bisWahr(`!!document.querySelector('#anfragen button[type=submit]')`);
+await handy.bisWahr(`!!document.getElementById('anf-weiter')`);
 await handy.warte(900);
 /* Ans Ende scrollen, wo Formular und Knopf zusammentreffen. Mehrfach,
    weil nachladende Bilder die Seite waehrenddessen laenger machen. */
@@ -428,8 +433,9 @@ for (let i = 0; i < 6; i++) {
 const g6c = JSON.parse(await handy.werte(`(() => {
   const k = document.querySelector('.mms-knopf').getBoundingClientRect();
   const trifft = (r) => k.left < r.right && r.left < k.right && k.top < r.bottom && r.top < k.bottom;
-  const senden = document.querySelector('#anfragen button[type=submit]').getBoundingClientRect();
-  const feld = document.querySelector('#anfragen textarea').getBoundingClientRect();
+  /* Gefuehrte Anfrage: der sichtbare Knopf ist "Weiter", das Feld ist die gerade offene Frage. */
+  const senden = document.getElementById('anf-weiter').getBoundingClientRect();
+  const feld = document.querySelector('#anfragen .anf-schritt.aktiv').getBoundingClientRect();
   return JSON.stringify({ ueberSenden: trifft(senden), ueberTextfeld: trifft(feld),
     imBild: k.right <= innerWidth && k.left >= 0 && k.bottom <= innerHeight,
     sendenSichtbar: senden.top > 0 && senden.bottom < innerHeight });
@@ -437,7 +443,7 @@ const g6c = JSON.parse(await handy.werte(`(() => {
 pruefe('auf dem Handy verdeckt er den Sendeknopf nicht',
   !g6c.ueberSenden && g6c.sendenSichtbar,
   g6c.sendenSichtbar ? '' : 'Sendeknopf war nicht im Bild — Messung wertlos');
-pruefe('…und auch nicht das Textfeld', !g6c.ueberTextfeld);
+pruefe('…und auch nicht die offene Frage', !g6c.ueberTextfeld);
 pruefe('…und ragt nicht aus dem Bild', g6c.imBild);
 
 const g6d = JSON.parse(await handy.werte(`(() => {

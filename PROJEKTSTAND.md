@@ -148,6 +148,7 @@ HOCHLADEN/
   index.html   welt.html   admin.html   404.html   robots.txt   sitemap.xml
   favicon.svg  apple-touch-icon.png  og-bild.jpg   CNAME
   welt/<slug>.html  blog/<slug>.html   vorgebaute Fassungen (erzeugt)
+  medien/<projekt>/   Bilder, die ohne Admin-Login hochgeladen wurden (z. B. istanbul-katzen)
   vorschau/<slug>.jpg                  Teilen-Vorschaubilder 1200x630 (erzeugt)
   assets/
     fonts.css      Schriften (Tropi, Space Grotesk, Space Mono) — 171 kB
@@ -164,6 +165,9 @@ HOCHLADEN/
 
     sprache.js     Deutsch/Englisch: Sprachwahl, Umschalter, Rückfall
     texte.js       die festen Oberflächentexte in beiden Sprachen
+    anfrage.js     Kontaktformular als geführte Anfrage (Frage für Frage, Brief zum Schluss).
+                   Fragen/Antworten stehen in index.html, Englisch in texte.js ("anf-…").
+                   Nicht im Admin änderbar.
     config.js      Supabase-Adresse und öffentlicher Schlüssel
     db.js          Laden mit Zwischenspeicher + Rückfall auf seed.js
     seed.js        Notfall-Daten (aus der Datenbank erzeugt, Stand 22.08.2026)

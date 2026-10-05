@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt von tests/hochladen.mjs — Stand: 14.9.2026.
+   Automatisch erzeugt von tests/hochladen.mjs — Stand: 5.10.2026.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 window.SEED_SETTINGS = {
@@ -930,16 +930,16 @@ window.SEED_SEITEN = {
       "untertitel": "Freelance Video Editor & Motion Designer",
       "kunde": null,
       "jahr": null,
-      "cover_url": "https://i.ytimg.com/vi/Wzo-lFwZndw/maxresdefault.jpg",
+      "cover_url": null,
       "cover_pos": "50% 50%",
-      "video_url": "https://www.youtube.com/watch?v=Wzo-lFwZndw&t=101s",
-      "embed_ok": true,
+      "video_url": "https://www.youtube.com/watch?v=PzPW-uKpbW4",
+      "embed_ok": false,
       "farbe": "#3E5A78",
       "ist_aktuell": true,
       "status": "published",
       "sort_order": 1,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
-      "updated_at": "2026-09-04T17:54:22.501434+00:00",
+      "updated_at": "2026-09-25T13:00:45.125783+00:00",
       "titel_en": null,
       "untertitel_en": null,
       "bloecke": [
@@ -948,45 +948,86 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Ich arbeite derzeit als freier Video Editor und Motion Designer für den Content Creator *Bastian Keller* im Umfeld von Bitbull. Im Zentrum steht sein Instagram-Hauptaccount, daneben bauen wir aktuell weitere, kleinere Profile für ihn auf. "
+            "roh": "Ich arbeite als freier Video Editor und Motion Designer für den Content Creator *Bastian Keller* im Umfeld von Bitbull. Angefangen habe ich mit Instagram-Reels für seinen Hauptaccount, inzwischen schneide ich auch die großen YouTube-Videos."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": {
-            "roh": "I'm currently working as a freelance video editor and motion designer for the content creator Bastian Keller in the Bitbull orbit. The focus is his main Instagram account, and alongside that we're currently building up more, smaller profiles for him."
+            "roh": "I work as a freelance video editor and motion designer for the content creator Bastian Keller in the Bitbull orbit. I started out with Instagram Reels for his main account, and now I also edit the big YouTube videos."
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
-          "sort_order": 20,
-          "updated_at": "2026-09-04T15:54:10.899597+00:00"
+          "sort_order": 24,
+          "updated_at": "2026-09-25T13:01:28.560473+00:00"
+        },
+        {
+          "id": "af55ea4e-2378-4116-8611-77edb28930db",
+          "typ": "gif",
+          "breite": "voll",
+          "inhalt": {
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1790341118605-mausdemaus2-ezgif-com-video-to-gif-converter-800x450.gif){gross}{Wenn ich als Trader neu starten müsste, würde ich DAS machen}"
+          },
+          "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
+          "created_at": "2026-09-25T12:58:15.752992+00:00",
+          "sort_order": 25,
+          "updated_at": "2026-09-25T13:00:19.928012+00:00"
         },
         {
           "id": "005f30e0-2eae-4e4c-845f-dedd91e95525",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Zusätzlich unterstütze ich auf seinem YouTube-Kanal bei den täglichen Krypto-News-Updates ebenso wie bei den größeren Dokumentationsvideos, wo ich vor allem bei der Ideenfindung, dem Thumbnail-Design sowie im Schnitt und bei Animationen mitarbeite. Meine Stärken liegen im Schnitt von Motion Graphics und Animationen sowie im Design performancestarker Thumbnails."
+            "roh": "Mit „Wenn ich als Trader neu starten müsste, würde ich DAS machen“ hat Bitbull mir zum ersten Mal ein Longform-Video überlassen, und ich hatte die Leitung: Ich habe den Schnitt gemacht, die Animationen gebaut und Musik und Sounddesign übernommen. Zwei weitere Cutter haben mich dabei unterstützt und ebenfalls Animationen beigesteuert."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": {
-            "roh": "On top of that, I help out on his YouTube channel with the daily crypto news updates as well as the documentary videos, where I mainly contribute to ideation, thumbnail design, editing and animation."
+            "roh": "With “Wenn ich als Trader neu starten müsste, würde ich DAS machen” (“If I had to start over as a trader, this is what I'd do”), Bitbull handed me a long-form video for the first time, and I led it: I did the edit, built the animations and took care of music and sound design. Two other editors supported me and contributed animations as well."
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
-          "updated_at": "2026-09-04T15:54:57.309226+00:00"
+          "updated_at": "2026-09-25T12:52:10.197696+00:00"
         },
         {
           "id": "7ebb452f-8650-4869-b8d0-e6d0b494a801",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "In den täglichen Team-Meetings bringe ich außerdem kreative Content-Ideen ein und wirke an der Content-Strategie mit."
+            "roh": "Das Video hatte in weniger als 24 Stunden über 10.000 Aufrufe und ist damit das bisher erfolgreichste auf dem Kanal – Tendenz steigend. In den Kommentaren werden vor allem die Animationen und das Sounddesign gelobt. Bei den nächsten Longform-Videos bin ich wieder mit dabei."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": {
-            "roh": "In the daily team meetings I also pitch creative content ideas and contribute to the content strategy. "
+            "roh": "The video passed 10,000 views in under 24 hours, making it the best-performing video on the channel so far, and it's still climbing. The comments especially praise the animations and the sound design. I'm on board for the next long-form videos too."
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
+          "sort_order": 32.5,
+          "updated_at": "2026-09-25T13:06:59.451074+00:00"
+        },
+        {
+          "id": "acb7c33d-c384-4489-8042-14830a144708",
+          "typ": "video",
+          "breite": "schmal",
+          "inhalt": {
+            "roh": "https://www.youtube.com/watch?v=PzPW-uKpbW4"
+          },
+          "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
+          "created_at": "2026-09-25T13:01:33.44958+00:00",
+          "sort_order": 35,
+          "updated_at": "2026-09-25T13:01:51.469274+00:00"
+        },
+        {
+          "id": "17e05551-f8bc-4771-bb5e-6142510cf246",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Außerdem führe ich den Account [bastiankeller.clips](https://www.instagram.com/bastiankeller.clips/) komplett selbst: Dort laden wir täglich Reels hoch, die ich alle selbst erstelle. Der Account ist noch ganz frisch und wächst gerade."
+          },
+          "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": {
+            "roh": "I also run the account [bastiankeller.clips](https://www.instagram.com/bastiankeller.clips/) entirely on my own: we post Reels there every day, all of them made by me. The account is still brand new and growing."
+          },
+          "created_at": "2026-09-25T13:06:59.451074+00:00",
           "sort_order": 40,
-          "updated_at": "2026-09-04T15:55:06.507497+00:00"
+          "updated_at": "2026-09-25T13:06:59.451074+00:00"
         },
         {
           "id": "32893fba-7ce0-45cc-a549-1405df370275",
@@ -1000,6 +1041,209 @@ window.SEED_SEITEN = {
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
+        }
+      ]
+    },
+    {
+      "id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+      "slug": "istanbul-katzen",
+      "typ": "projekt",
+      "titel": "Intro & Grafiken für Travell4llove",
+      "untertitel": "Freelance Motion Designer · Travell4llove",
+      "kunde": "Travell4llove",
+      "jahr": "2026",
+      "cover_url": "https://i.ytimg.com/vi/xelwbWPUmEo/maxresdefault.jpg",
+      "cover_pos": "50% 50%",
+      "video_url": "https://www.youtube.com/watch?v=xelwbWPUmEo",
+      "embed_ok": true,
+      "farbe": "#C0603A",
+      "ist_aktuell": false,
+      "status": "published",
+      "sort_order": 2,
+      "created_at": "2026-10-05T10:27:14.803521+00:00",
+      "updated_at": "2026-10-05T10:31:07.262934+00:00",
+      "titel_en": "Intro & graphics for Travell4llove",
+      "untertitel_en": "Freelance Motion Designer · Travell4llove",
+      "bloecke": [
+        {
+          "id": "b197c68b-a7b6-437c-8963-10e29539fabf",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "**Travell4llove** macht Reisevideos, und für die Folge „Tote Katzen im Müll? Was in Istanbul wirklich passiert“ kam Josu mit zwei Wünschen zu mir: ein Intro, das sofort nach Istanbul und zum Thema passt, und Motion Graphics, die sein Team später selbst in Premiere Pro befüllen kann – ohne jedes Mal bei mir anzuklopfen."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "**Travell4llove** makes travel videos, and for the episode “Tote Katzen im Müll? Was in Istanbul wirklich passiert” (“Dead cats in the trash? What's really happening in Istanbul”), Josu came to me with two wishes: an intro that instantly says Istanbul and fits the topic, and motion graphics his team could fill in themselves in Premiere Pro later – without knocking on my door every time."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 10,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "b90f510a-5d86-438a-a638-fd287342c233",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Bevor ich irgendwas animiert habe, hab ich mir den Rohschnitt angeschaut. Das Thema ist eigentlich schwer – Straßenkatzen, die im Müll landen –, aber Josus Videos leben von Wärme und Neugier. Das Intro sollte also nicht düster werden, sondern einladen: Istanbul im Abendlicht, überall Katzen, und mittendrin Josu auf seinem Koffer. Die Idee hab ich zuerst gezeichnet, Bild für Bild und mit Zeitmarken. So konnten wir uns über den Ablauf einig werden, bevor in After Effects eine einzige Ebene existierte."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "Before animating anything, I watched the rough cut. The topic is actually a heavy one – street cats ending up in the trash – but Josu's videos live on warmth and curiosity. So the intro shouldn't be gloomy, it should invite you in: Istanbul in the evening light, cats everywhere, and Josu right in the middle, sitting on his suitcase. I drew the idea first, frame by frame and with timecodes. That way we could agree on the flow before a single layer existed in After Effects."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 20,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "d081f8d8-4288-4c57-b18d-b11844809fe9",
+          "typ": "bild",
+          "breite": "voll",
+          "inhalt": {
+            "roh": "![Storyboard für das Intro](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196338785-storyboard-1536x864.webp){mittel}{Das Storyboard: Josu fällt auf den Koffer, die Katzen springen auf, der Sticker klebt – danach läuft alles in einer Schleife.}",
+            "ohne_rahmen": true
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "![Storyboard for the intro](/medien/istanbul-katzen/storyboard.webp){gross}{The storyboard: Josu drops onto the suitcase, the cats jump up, the sticker lands – then everything runs in a loop.}",
+            "ohne_rahmen": true
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 30,
+          "updated_at": "2026-10-05T10:32:24.828204+00:00"
+        },
+        {
+          "id": "20c82315-62b5-4cae-995d-6de2b3f44a4c",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Aus der Skizze wurde in Photoshop eine Collage: der Bosporus im Sonnenuntergang als Hintergrund, davor jede Katze, jede Möwe, der Koffer und Josu einzeln freigestellt – damit sich in After Effects alles unabhängig voneinander bewegen lässt. Vorne die Mauer, hinten die Stadt: Weil alles auf eigenen Ebenen liegt, entsteht beim Bewegen echte Tiefe."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "In Photoshop, the sketch turned into a collage: the Bosphorus at sunset as the background, and in front of it every cat, every seagull, the suitcase and Josu, each cut out on its own – so everything could move independently in After Effects. The wall up front, the city behind: because everything sits on its own layer, the movement creates real depth."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 40,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "a13fe154-bb0a-4d40-87f2-cb25b798f5f0",
+          "typ": "bild",
+          "breite": "voll",
+          "inhalt": {
+            "roh": "![Die Intro-Collage in Photoshop](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196390318-photoshop-1600x835.webp){mittel}{Die Intro-Collage in Photoshop – jedes Element auf seiner eigenen Ebene.}"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "![The intro collage in Photoshop](/medien/istanbul-katzen/photoshop.webp){gross}{The intro collage in Photoshop – every element on its own layer.}"
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 50,
+          "updated_at": "2026-10-05T10:33:13.473418+00:00"
+        },
+        {
+          "id": "727be1b3-7575-4dcf-8d66-8eba769778a2",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "In After Effects kam dann das Timing dazu: Josu fällt in die Szene und landet mit einem kleinen Squash auf dem Koffer und zum Schluss klebt der Travel-4-Love-Sticker ins Bild. Danach geht das Intro in eine ruhige Schleife über, sodass der Titel so lange stehen bleiben kann, wie der Schnitt es braucht."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "After Effects is where the timing came in: Josu drops into the scene and lands on the suitcase with a little squash, the cats get startled, and finally the Travel 4 Love sticker slaps onto the frame. After that the intro settles into a calm loop, so the title can stay up for as long as the edit needs."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 60,
+          "updated_at": "2026-10-05T10:34:15.127475+00:00"
+        },
+        {
+          "id": "b6fd7a5e-8be6-4b93-bb11-c3593104e633",
+          "typ": "gif",
+          "breite": "voll",
+          "inhalt": {
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196402621-intro-800x450.gif){gross}{Das fertige Intro}"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "![The finished intro](/medien/istanbul-katzen/intro.webp){gross}{The finished intro}"
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 70,
+          "updated_at": "2026-10-05T10:33:36.585859+00:00"
+        },
+        {
+          "id": "46c496b8-111d-4b43-869e-b74f6a076b1d",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Der zweite Teil waren acht Grafiken für das Video: Bauchbinde, Ortsmarke, Quellenangabe, eine Einblendung für heimlich gefilmte Szenen, eine große Zahl und drei Rahmen für Fremdmaterial – Tape, Pin und Handy. Der Look kommt aus demselben Gedanken wie das Intro: Papier, Stempel und Sticker, in den Farben vom Sonnenuntergang über dem Bosporus."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "The second part was eight graphics for the video: a lower third, a location stamp, a source credit, an overlay for secretly filmed scenes, a big number and three frames for third-party footage – tape, pin and phone. The look comes from the same idea as the intro: paper, stamps and stickers, in the colours of the sunset over the Bosphorus."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 80,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "165e5c35-1103-48d9-bd40-eb5c46184d0f",
+          "typ": "bild",
+          "breite": "voll",
+          "inhalt": {
+            "roh": "![Motion-Graphics-Vorlage mit der Zahl 750.000](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196416335-motion-graphics-1600x922.webp){mittel}{Eine der acht Vorlagen: die große Zahl.}"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "![Motion graphics template showing the number 750,000](/medien/istanbul-katzen/motion-graphics.webp){gross}{One of the eight templates: the big number.}"
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 90,
+          "updated_at": "2026-10-05T10:33:48.057993+00:00"
+        },
+        {
+          "id": "66404ca9-1f75-40fc-b713-771c1fb6470b",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Der eigentliche Aufwand steckt aber in dem, was man nicht sieht. Gebaut habe ich alles in After Effects, ausgeliefert als Vorlagen für Premiere Pro. Das Team tippt Namen und Orte einfach ein, zieht Clips in die Rahmen, und die Grafik passt sich selbst an: Lange Texte werden kleiner, die Ortsmarke füllt ihren Stempel immer aus, und egal wie lang man die Grafik in der Timeline zieht – Ein- und Ausblendung bleiben gleich schnell, nur die Standzeit dazwischen wächst mit."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "The real work, though, is in what you don't see. I built everything in After Effects and delivered it as templates for Premiere Pro. The team just types in names and places, drags clips into the frames, and the graphic adapts on its own: long texts get smaller, the location stamp always fills its frame, and no matter how long you stretch the graphic on the timeline, the in and out animations stay just as fast – only the hold time in between grows."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 100,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "117b5690-1be2-4b02-96b3-d71e2382369f",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Dazu gab es eine elfseitige Anleitung: vom Installieren über das Austauschen von Clips bis zu dem, was man im After-Effects-Projekt besser nicht anfasst. Mein Ziel war, dass das Team mich für diese Grafiken nie wieder braucht – und trotzdem weiß, wo es mich findet, wenn es neue will."
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": {
+            "roh": "On top of that came an eleven-page guide: from installing the templates to swapping in clips to what you'd better not touch in the After Effects project. My goal was for the team to never need me for these graphics again – and still know where to find me when they want new ones."
+          },
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 110,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "1376bade-c47b-4d06-87c0-e580f94f6f67",
+          "typ": "trenner",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "---"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": null,
+          "created_at": "2026-10-05T10:27:14.803521+00:00",
+          "sort_order": 120,
+          "updated_at": "2026-10-05T10:27:14.803521+00:00"
         }
       ]
     },
