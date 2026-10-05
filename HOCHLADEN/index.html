@@ -101,6 +101,9 @@
      scharf. Ohne JavaScript bleibt sie aus -- dann steht ohnehin nur der
      Hinweis aus <noscript> da, und das Formular funktioniert auch schlicht. -->
 <link rel="stylesheet" href="/assets/anfrage.css?v=1791223803" media="print" onload="this.media='all'">
+<!-- Karten und Buehne: ebenfalls nebenher geladen. Der Ladeschirm wartet
+     aber auf diese Datei (Skript unten), man sieht die Karten nie ungestaltet. -->
+<link rel="stylesheet" href="/assets/buehne.css?v=1791223803" media="print" onload="this.media='all'" id="mm-buehne-css">
 <!-- Sprachwahl. Steht im KOPF, damit <html lang> richtig ist, bevor
      irgendetwas gezeichnet wird. Die Arbeit am Dokument selbst wartet auf
      DOMContentLoaded. Deutsch bleibt der Standard: ohne ?lang=en und ohne
@@ -402,6 +405,7 @@
 <script src="/assets/leiste.js?v=1791223803"></script>
 <script src="/assets/brief.js?v=1791223803"></script>
 <script src="/assets/tueren.js?v=1791223803"></script>
+<script src="/assets/buehne.js?v=1791223803"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -434,6 +438,16 @@
      neu rechnen, sooft sich etwas ändert. Das deckt Schriften, Bilder,
      Videofenster und alles Spätere ab. */
   await document.fonts.ready.catch(() => {});
+  /* Auf die Gestaltung der Karten warten (buehne.css laedt nicht
+     blockierend) -- sonst vermisst die Leiste ungestaltete Abschnitte.
+     Laengstens 4 s: haengt die Datei, kommt der Brief trotzdem. */
+  await new Promise(fertig => {
+    const l = document.getElementById('mm-buehne-css');
+    if (!l || l.media === 'all') return fertig();
+    l.addEventListener('load', fertig, { once: true });
+    l.addEventListener('error', fertig, { once: true });
+    setTimeout(fertig, 4000);
+  });
   leiste.neuBerechnen();
 
   /* Jetzt steht wirklich alles: Daten da, Leiste vermessen, Schriften
@@ -441,6 +455,8 @@
      Nachrutschen beim Schriftwechsel. */
   window.mmLadeschirmWeg();
   window.mmTueren(document.getElementById('brief'));
+  /* Mit #slug in der Adresse (geteilter Link): gleich die Buehne oeffnen. */
+  window.mmBuehneAusAdresse?.();
 
   /* Nach einem Sprachwechsel dorthin zurueck, wo man vorher stand. Erst
      HIER, denn vorher hat der Brief noch nicht seine endgueltige Hoehe --

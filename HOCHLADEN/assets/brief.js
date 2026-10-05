@@ -17,6 +17,8 @@
       'allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" ' +
       'referrerpolicy="strict-origin-when-cross-origin" title="' + T('video', 'Video') + '"></iframe>';
   };
+  /* Die Buehne (buehne.js) braucht denselben Abspieler fuer Cover mit ▶. */
+  window.mmEinbettung = einbettung;
 
   /* briefBloecke: alle Blöcke der EINEN Seite vom Typ "brief" (Hallo, Profil,
      Kontakt -- markiert durch abschnitt-Blöcke).
@@ -25,6 +27,9 @@
   window.mmBrief = function (ziel, { briefBloecke, projekte }) {
     const gruppen = window.mmBloecke.gruppieren(briefBloecke);
     const abschnitte = [];
+    /* Die Projekte als Daten fuer die Buehne (buehne.js): je Projekt die
+       Bloecke, das Cover und der Abschnitt im Brief. */
+    window.mmProjekte = [];
     ziel.innerHTML = '';
 
     const neuerAbschnitt = (titel, art, farbe) => {
@@ -122,14 +127,14 @@
       h += '<h2 class="br-titel">' + window.mm.esc(titel) +
            (seite.ist_aktuell ? '<span class="br-laeuft">' + T('laeuft-aktuell', 'läuft aktuell') + '</span>' : '') + '</h2>';
 
-      /* Das Coverbild ist immer sichtbar und dient als Vorschaubild.
-         Einbettbare Videos laden erst beim Klick — sonst holt die Startseite
-         fünf fremde Abspieler auf einmal. Nicht einbettbare (z. B. "The Race"
-         bei Joyn, embed_ok = false) verweisen stattdessen über einen eigenen
-         tuer-Block in den Blöcken selbst nach außen. */
+      /* Das Coverbild ist das Vorschau-Medium der Karte. Einbettbare Videos
+         laden erst beim Klick auf ▶ -- sonst holt die Startseite fünf fremde
+         Abspieler auf einmal. Nicht einbettbare (z. B. "The Race" bei Joyn,
+         embed_ok = false) verweisen über einen tuer-Block nach außen. */
+      let coverHtml = '';
       if (seite.cover_url) {
         const einbettbar = seite.video_url && seite.embed_ok !== false;
-        h += '<figure class="br-bild' + (einbettbar ? ' br-spielbar' : '') + '"' +
+        coverHtml = '<figure class="br-bild' + (einbettbar ? ' br-spielbar' : '') + '"' +
              (einbettbar ? ' data-video="' + window.mm.esc(seite.video_url) + '"' : '') + '>' +
              '<img src="' + window.mm.esc(seite.cover_url) + '" alt="' + window.mm.esc(titel) +
              '" loading="lazy" style="object-position:' +
@@ -137,17 +142,45 @@
              (einbettbar ? '<button class="br-play" type="button" aria-label="' + T('video-abspielen', 'Video abspielen') + '">▶</button>' : '') +
              '</figure>';
       } else if (seite.video_url && seite.embed_ok !== false) {
-        h += '<div class="br-film">' + einbettung(seite.video_url) + '</div>';
+        coverHtml = '<div class="br-film">' + einbettung(seite.video_url) + '</div>';
       }
 
-      /* Eigene Huelle fuer alles UNTER dem Titelbild -- nur als Anker fuer
-         die Deko-Blumen (siehe unten). Das Titelbild bricht weit aus der
-         Spalte aus (--mm-ausbruch); hingen die Blumen am ganzen Abschnitt,
-         laegen die oberen genau dahinter und schauten nur mit einem Zipfel
-         heraus. An dieser Huelle beginnen sie erst unter dem Bild. */
+      /* ---- Die Karte (zugeklappt) ----
+         Zu sehen: Cover -- oder ohne Cover das erste Bild/GIF/Video --, der
+         Anfang des ersten Textes und "Mehr ansehen". Der ganze Rest steht
+         NICHT im Dokument, sondern kommt erst beim Öffnen in die Bühne
+         (buehne.js). So gibt es keine versteckten Tab-Fallen, und der Brief
+         zeigt auf den ersten Blick nur das Wichtigste. */
+      const vorschauBlock = coverHtml ? null : bloecke.find(b => b.typ === 'bild' || b.typ === 'gif' || b.typ === 'video');
+      const anrissBlock = bloecke.find(b => b.typ === 'text');
+      h += '<div class="br-karte-vorschau">' +
+           (coverHtml || (vorschauBlock ? window.mmBloecke.render(vorschauBlock, 'br-text') : '')) + '</div>';
+      /* Eigene Huelle fuer alles UNTER dem Vorschau-Medium -- Anker fuer die
+         Deko-Blumen (blumen.js): am ganzen Abschnitt laegen die oberen
+         hinter dem breiten Cover und schauten nur mit einem Zipfel heraus. */
       h += '<div class="br-projekt-rest">' +
-        bloecke.map(b => window.mmBloecke.render(b, 'br-text')).join('\n') + '</div>';
+           (anrissBlock ? '<div class="br-anriss">' + window.mmBloecke.render(anrissBlock, 'br-text') + '</div>' : '') +
+           '<button type="button" class="br-mehr-ansehen" aria-haspopup="dialog">' +
+             T('bu-mehr', 'Mehr ansehen') + ' <span aria-hidden="true">→</span></button>' +
+           '</div>';
       s.innerHTML = h;
+      s.classList.add('br-karte');
+      s.dataset.slug = seite.slug || '';
+      /* Das Element, das sich beim Öffnen in die Bühne verwandelt
+         (View Transition, buehne.js): das sichtbare Medium der Karte. */
+      const medium = s.querySelector('.br-karte-vorschau .md-gallery, .br-karte-vorschau .md-video, .br-karte-vorschau .br-bild, .br-karte-vorschau .br-film');
+      if (medium) medium.classList.add('br-karte-medium');
+
+      const nr = window.mmProjekte.length;
+      window.mmProjekte.push({ slug: seite.slug || '', titel, untertitel, farbe: seite.farbe,
+        coverHtml, bloecke, element: s });
+      /* Öffnen: Knopf, Titel, Text, Medium -- alles außer Links und dem ▶,
+         das das Video weiterhin direkt in der Karte abspielt. */
+      s.addEventListener('click', (e) => {
+        if (e.target.closest('a, .br-play, .br-spielbar, iframe')) return;
+        if (!window.mmBuehneOeffnen) return;
+        window.mmBuehneOeffnen(nr, 0, { knopf: s.querySelector('.br-mehr-ansehen') });
+      });
     });
 
     nachProjekten.forEach(renderGruppe);
@@ -185,8 +218,10 @@
       }
     }
 
-    if (window.mmBlumen) window.mmBlumen(abschnitte.map(a =>
-      a.element.querySelector(':scope > .br-projekt-rest') || a.element));
+    /* Bei Projekt-Karten haengen die Blumen an der ganzen Karte und liegen
+       HINTER deren Flaeche (buehne.css): Sie schauen seitlich hervor, statt
+       auf Cover oder Text zu liegen. */
+    if (window.mmBlumen) window.mmBlumen(abschnitte.map(a => a.element));
 
     return abschnitte;
   };

@@ -24,6 +24,14 @@
     'leiste-persoenlich': { de: 'persönliches', en: 'personal' },
     'leiste-griff':       { de: 'offen halten', en: 'keep open' },
 
+    /* --- Karten und Buehne (assets/buehne.js) --- */
+    'bu-mehr':            { de: 'Mehr ansehen', en: 'See more' },
+    'bu-kapitel':         { de: 'Kapitel {a} von {b}', en: 'Chapter {a} of {b}' },
+    'bu-weiter':          { de: 'Weiter', en: 'Next' },
+    'bu-zurueck':         { de: 'Zurück', en: 'Back' },
+    'bu-zu':              { de: 'Schließen', en: 'Close' },
+    'bu-naechstes':       { de: 'Nächstes Projekt', en: 'Next project' },
+
     /* --- Die gefuehrte Anfrage (assets/anfrage.js) --- */
     'anf-einleitung':      { de: 'Ein paar kurze Fragen, damit ich gleich weiß, worum es geht. Dauert keine zwei Minuten.', en: 'A few quick questions so I know what it’s about right away. Takes less than two minutes.' },
     'anf-art-frage':       { de: 'Worum geht’s?', en: 'What’s it about?' },

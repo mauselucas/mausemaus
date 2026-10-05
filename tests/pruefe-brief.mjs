@@ -124,7 +124,15 @@ pruefe('jedes Projekt hat eine eigene Farbe',
 /* --- Blumenformen (Rückfall aus Aufgabe 5) --- */
 const blume = JSON.parse(await s.werte(`(() => {
   const def = document.querySelector('#mm-blumen #bl-a');
+  /* Seit die Projekte als Karten stehen, endet keins mehr mit einem
+     sichtbaren Trenner im Brief (die Buehne laesst den letzten weg). Damit
+     diese Pruefung nicht leer durchlaeuft, zeichnet sie selbst einen --
+     ueber denselben Weg wie jeder Block. */
+  const probe = document.createElement('div');
+  probe.innerHTML = window.mmBloecke.render({ typ: 'trenner', inhalt: { roh: '---' } }, 'br-text');
+  document.getElementById('brief').appendChild(probe);
   const benutzt = [...document.querySelectorAll('.md-rule use')];
+  setTimeout(() => probe.remove(), 0);
   const sichtbar = benutzt.filter(u => u.getBoundingClientRect().width > 4).length;
   return JSON.stringify({ def: !!def, benutzt: benutzt.length, sichtbar });
 })()`));
@@ -273,17 +281,15 @@ const schliff = JSON.parse(await s.werte(`(() => {
   st.textContent = '*{animation:none !important; transition:none !important}';
   document.head.appendChild(st);
   const gross = [...document.querySelectorAll(
-    '.br-bild:not(.br-klein), .br-film, .br-kopfbild, .br-projekt-rest > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel)), .br-projekt-rest > .br-text > .md-video, .br-projekt-rest > .mm-baustein:not(.mm-breite-schmal):not(.mm-breite-randnotiz) > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel))')]
+    '.br-karte-medium, .br-bild:not(.br-klein), .br-film, .br-kopfbild, .br-projekt-rest > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel)), .br-projekt-rest > .br-text > .md-video, .br-projekt-rest > .mm-baustein:not(.mm-breite-schmal):not(.mm-breite-randnotiz) > .br-text > .md-gallery:not(:has(.mm-klein,.mm-mittel))')]
     .map(e => Math.round(e.getBoundingClientRect().width));
   /* Abstand Text -> Medium und Medium -> Text, ueberall im Brief */
+  /* Seit den Karten steht im Brief je Projekt EIN Medium und darunter der
+     Anfang des Textes -- gemessen wird dieser Abstand. */
   const abstaende = [];
-  document.querySelectorAll('.br-projekt-rest .md-gallery, .br-projekt-rest .md-video').forEach(m => {
-    if (m.closest('.mm-breite-randnotiz')) return;
-    const r = m.getBoundingClientRect();
-    const huelle = m.closest('.mm-baustein') || m.closest('.br-text');
-    const vor = huelle.previousElementSibling, nach = huelle.nextElementSibling;
-    if (vor && vor.querySelector('p:last-child')) abstaende.push(Math.round(r.top - vor.querySelector('p:last-child').getBoundingClientRect().bottom));
-    if (nach && nach.querySelector('p:first-child')) abstaende.push(Math.round(nach.querySelector('p:first-child').getBoundingClientRect().top - r.bottom));
+  document.querySelectorAll('.br-karte').forEach(k => {
+    const m = k.querySelector('.br-karte-medium'), a = k.querySelector('.br-anriss p');
+    if (m && a) abstaende.push(Math.round(a.getBoundingClientRect().top - m.getBoundingClientRect().bottom));
   });
   const link = [...document.querySelectorAll('.br-text a:not(.mm-tuer)')][0];
   const ls = link ? getComputedStyle(link) : null;
@@ -292,7 +298,7 @@ const schliff = JSON.parse(await s.werte(`(() => {
     link: ls ? { farbe: ls.color, linie: ls.textDecorationLine, text: link.textContent } : null });
 })()`));
 pruefe('alle großen Medien im Brief haben DIESELBE Breite',
-  schliff.gross.length > 5 && Math.max(...schliff.gross) - Math.min(...schliff.gross) <= 1,
+  schliff.gross.length >= 4 && Math.max(...schliff.gross) - Math.min(...schliff.gross) <= 1,
   schliff.gross.join(' / '));
 pruefe('Text -> Medium und Medium -> Text: überall 36 px Luft (±2)',
   schliff.abstaende.length > 3 && schliff.abstaende.every(a => Math.abs(a - 36) <= 2),

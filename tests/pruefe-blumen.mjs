@@ -38,7 +38,28 @@ const FORMEN = {
 /* Was als "Text" gilt. Ein <figure> mit Bild ist bewusst NICHT dabei: ein
    Bild in voller Breite darf eine Blume verdecken (sie liegt dahinter),
    das stört niemanden. Lesbarkeit ist die Frage, nicht Überlappung. */
+/* Blumen an Projekt-Karten liegen HINTER der deckenden Kartenflaeche
+   (buehne.css). Sichtbar ist nur, was seitlich hervorschaut -- das
+   Rechteck der Blume MINUS die Flaeche ihrer Karte. Nur dieser Teil kann
+   Text verdecken oder auf einer anderen Blume liegen. */
+const SICHTBAR = `const sichtbar = (el) => {
+  const r = el.getBoundingClientRect();
+  const k = el.parentElement && el.parentElement.closest('.br-karte');
+  const R = { l: r.left, r: r.right, o: r.top, u: r.bottom };
+  if (!k || el.parentElement !== k) return [R];
+  const kr = k.getBoundingClientRect(), cs = getComputedStyle(k, '::before');
+  const f = { l: kr.left + parseFloat(cs.left), r: kr.right - parseFloat(cs.right),
+              o: kr.top + parseFloat(cs.top), u: kr.bottom - parseFloat(cs.bottom) };
+  const teile = [
+    { l: R.l, r: R.r, o: R.o, u: Math.min(R.u, f.o) },
+    { l: R.l, r: R.r, o: Math.max(R.o, f.u), u: R.u },
+    { l: R.l, r: Math.min(R.r, f.l), o: Math.max(R.o, f.o), u: Math.min(R.u, f.u) },
+    { l: Math.max(R.l, f.r), r: R.r, o: Math.max(R.o, f.o), u: Math.min(R.u, f.u) },
+  ];
+  return teile.filter(t => t.r - t.l > 0 && t.u - t.o > 0);
+};`;
 const TEXT_MESSUNG = `(() => {
+  ${SICHTBAR}
   const textig = [...document.querySelectorAll('#brief *, #inhalt *')].filter(el => {
     if (!el.offsetWidth || !el.offsetHeight) return false;
     if (el.closest('.mm-blume')) return false;
@@ -49,13 +70,10 @@ const TEXT_MESSUNG = `(() => {
     return { l: r.left, r: r.right, o: r.top, u: r.bottom,
              wer: el.tagName + '.' + (el.className || ''), text: el.textContent.trim().slice(0, 30) }; });
 
-  const blumen = [...document.querySelectorAll('.mm-blume')].map(el => {
-    const r = el.getBoundingClientRect();
-    return { l: r.left, r: r.right, o: r.top, u: r.bottom, breite: r.width, hoehe: r.height };
-  });
+  const blumen = [...document.querySelectorAll('.mm-blume')].map(sichtbar);
 
   const treffer = [];
-  for (const b of blumen) for (const t of textig) {
+  for (const teile of blumen) for (const b of teile) for (const t of textig) {
     if (b.r > t.l && b.l < t.r && b.u > t.o && b.o < t.u)
       treffer.push(t.wer + ' „' + t.text + '“');
   }
@@ -123,20 +141,18 @@ const TEXT_MESSUNG = `(() => {
      von zwei möglichen Überlappungen kennt, ist keine halbe Prüfung,
      sondern eine, der man nicht ansieht, was sie NICHT abdeckt. */
   const UEBEREINANDER = `(() => {
-    const b = [...document.querySelectorAll('.mm-blume')].map(el => {
-      const r = el.getBoundingClientRect();
-      return { l: r.left, r: r.right, o: r.top, u: r.bottom,
-               wer: el.className.replace('mm-blume ', '') + ' ' + el.style.width };
-    });
+    ${SICHTBAR}
+    const b = [...document.querySelectorAll('.mm-blume')].map(el => ({ teile: sichtbar(el),
+               wer: el.className.replace('mm-blume ', '') + ' ' + el.style.width }));
     const paare = [];
-    for (let i = 0; i < b.length; i++) for (let k = i + 1; k < b.length; k++) {
-      const a = b[i], c = b[k];
+    for (let i = 0; i < b.length; i++) for (let k = i + 1; k < b.length; k++)
+    for (const a of b[i].teile) for (const c of b[k].teile) {
       const quer = Math.min(a.r, c.r) - Math.max(a.l, c.l);
       const hoch = Math.min(a.u, c.u) - Math.max(a.o, c.o);
       /* Ein paar Pixel Berührung an den Ecken sind bei gedrehten Formen
          kaum zu sehen. Erst eine echte gemeinsame Fläche zählt. */
       if (quer > 12 && hoch > 12)
-        paare.push(\`\${i}(\${a.wer}) × \${k}(\${c.wer}): \${Math.round(quer)}×\${Math.round(hoch)}px\`);
+        paare.push(\`\${i}(\${b[i].wer}) × \${k}(\${b[k].wer}): \${Math.round(quer)}×\${Math.round(hoch)}px\`);
     }
     return JSON.stringify({ anzahl: b.length, paare });
   })()`;
@@ -148,6 +164,19 @@ const TEXT_MESSUNG = `(() => {
     pruefe(`bei ${breite}px liegt KEINE Blume auf einer anderen`,
       u.paare.length === 0, u.paare.slice(0, 4).join(' | ') || u.anzahl + ' Blumen geprüft');
   }
+
+  /* Die Rechnung oben zieht die Kartenflaeche von der Blume ab -- das
+     stimmt nur, solange die Blume wirklich DAHINTER liegt. */
+  const hinten = JSON.parse(await s.werte(`(() => {
+    const b = [...document.querySelectorAll('.br-karte > .mm-blume')];
+    const k = document.querySelector('.br-karte');
+    return JSON.stringify({ anzahl: b.length,
+      blume: b.map(x => getComputedStyle(x).zIndex),
+      flaeche: getComputedStyle(k, '::before').zIndex, eigeneEbene: getComputedStyle(k).isolation });
+  })()`));
+  pruefe('Blumen an Projekt-Karten liegen HINTER der Kartenfläche',
+    hinten.anzahl > 0 && hinten.eigeneEbene === 'isolate'
+      && hinten.blume.every(z => Number(z) < Number(hinten.flaeche)), JSON.stringify(hinten));
 
   /* GEGENBEWEIS: zwei Blumen absichtlich übereinanderlegen. */
   {

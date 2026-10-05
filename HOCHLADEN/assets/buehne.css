@@ -1,0 +1,179 @@
+/* mausemaus — Karten (zugeklappte Projekte) und die Bühne (aufgeklappt).
+
+   Nicht blockierend geladen (media="print" -> "all", index.html), damit
+   das erste Zeichnen unter 100 kB bleibt (pruefe-tempo.mjs). Der Ladeschirm
+   wartet aber auf diese Datei, bevor er den Brief zeigt -- man sieht die
+   Karten also nie ungestaltet. */
+
+/* ===================== Die Karte ===================== */
+
+/* Eine helle, leicht erhabene Flaeche hinter dem ganzen Eintrag. Sie reicht
+   so weit wie die Medien (--mm-ausbruch) plus 22px Luft. isolation, damit
+   die Flaeche (z-index -1) VOR dem Seitengrund liegt, nicht dahinter. */
+.br-karte { position:relative; isolation:isolate; cursor:pointer;
+  padding:30px 0 34px; margin:0 0 56px; }
+.br-karte::before { content:''; position:absolute; z-index:-1;
+  inset:0 calc(var(--mm-ausbruch) - 22px);
+  background:linear-gradient(180deg, #FFFFFF 0%, #FDFCF8 100%);
+  border-radius:24px;
+  box-shadow:0 1px 2px rgba(13,24,33,.05), 0 18px 40px -22px rgba(13,24,33,.22),
+    inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(13,24,33,.045);
+  transition:box-shadow .25s cubic-bezier(.23,1,.32,1); }
+.br-karte > :first-child { margin-top:0; }
+/* Die Deko-Blumen der Karte liegen HINTER ihrer Flaeche (-1) und schauen
+   seitlich hervor -- wie Papier, das hinter einer Karte steckt. */
+.br-karte > .mm-blume { z-index:-2; }
+.br-karte .br-kopfbild { margin-top:-6px; }
+/* Der Anfang des Textes: drei Zeilen, dann blendet er aus. */
+.br-anriss { max-height:calc(1.8em * 3.4); overflow:hidden; font-size:16.5px;
+  -webkit-mask-image:linear-gradient(#000 40%, transparent);
+  mask-image:linear-gradient(#000 40%, transparent); }
+.br-anriss .br-text p { margin:0; }
+.br-karte-vorschau .md-gallery, .br-karte-vorschau .md-video { margin-bottom:var(--abstand-medium); }
+.br-karte-vorschau .br-bild, .br-karte-vorschau .br-film { margin-top:22px; }
+
+.br-mehr-ansehen { margin-top:14px; display:inline-flex; align-items:center; gap:10px;
+  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  padding:13px 20px; border:0; border-radius:99px; cursor:pointer;
+  background:#0D1821; color:#F0F4EF;
+  box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 6px 16px -6px rgba(13,24,33,.5);
+  transition:transform .16s ease-out; }
+.br-mehr-ansehen span { transition:translate .2s cubic-bezier(.23,1,.32,1); }
+.br-mehr-ansehen:active { transform:scale(.97); }
+.br-mehr-ansehen:focus-visible { outline:2px solid #0D1821; outline-offset:3px; }
+@media (hover:hover) and (pointer:fine) {
+  .br-karte:hover::before { box-shadow:0 2px 4px rgba(13,24,33,.06), 0 26px 52px -24px rgba(13,24,33,.30),
+    inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(13,24,33,.05); }
+  .br-karte:hover .br-mehr-ansehen span { translate:4px 0; }
+}
+@media (max-width:760px) {
+  .br-karte::before { inset:0 -14px; border-radius:20px; }
+}
+
+/* ===================== Die Bühne ===================== */
+
+/* Der Brief dahinter: wie eine Kamera, die auf den Eintrag zufaehrt. */
+.br-scroller { transition:transform .5s cubic-bezier(.23,1,.32,1), filter .5s cubic-bezier(.23,1,.32,1); }
+html.bu-offen .br-scroller { transform:scale(.985); filter:saturate(.85); }
+html.bu-offen { overflow:hidden; }
+
+/* margin:auto zentriert das modale Fenster -- site.css setzt sonst fuer
+   ALLES margin:0, und das <dialog> klebte oben links. */
+.bu { margin:auto; width:min(1180px, 94vw); height:min(780px, 90dvh); max-width:none; max-height:none;
+  padding:0; border:0; border-radius:26px; overflow:hidden;
+  background:#FBFAF6; color:#232c31;
+  box-shadow:0 2px 6px rgba(13,24,33,.10), 0 40px 90px -30px rgba(13,24,33,.55),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  display:none; flex-direction:column; }
+.bu[open] { display:flex; animation:bu-auf .32s cubic-bezier(.23,1,.32,1) both; }
+@keyframes bu-auf { from { opacity:0; transform:translateY(14px) scale(.97); } to { opacity:1; transform:none; } }
+.bu::backdrop { background:rgba(13,24,33,.38); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  animation:bu-grund .32s ease-out both; }
+@keyframes bu-grund { from { opacity:0; } to { opacity:1; } }
+/* Waehrend die Verwandlung (View Transition) laeuft, macht SIE die Bewegung --
+   die eigene Einblende-Animation waere dann doppelt. */
+html:active-view-transition .bu[open] { animation:none; }
+::view-transition-group(bu-medium) { animation-duration:.46s; animation-timing-function:cubic-bezier(.23,1,.32,1); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration:.32s; }
+
+/* Kopf */
+.bu-kopf { display:flex; align-items:flex-start; gap:16px; padding:26px 30px 0; }
+.bu-kopf-text { flex:1; min-width:0; }
+.bu-rolle { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+  color:#6D7571; margin:0 0 6px; }
+.bu-rolle:empty { display:none; }
+.bu-titel { font-family:'TropiWeb','Manrope',sans-serif; font-weight:400; font-size:30px; line-height:1.1;
+  color:#0D1821; margin:0; }
+.bu-titel:focus { outline:none; }
+.bu-zu { flex:none; width:40px; height:40px; border-radius:50%; border:0; cursor:pointer;
+  background:#EFEEE7; color:#0D1821; font-size:15px; transition:background-color .15s, transform .16s ease-out; }
+.bu-zu:hover { background:#E4E2D8; }
+.bu-zu:active { transform:scale(.95); }
+.bu-zu:focus-visible { outline:2px solid #0D1821; outline-offset:2px; }
+
+/* Fortschritt: das Gleis im Stil der Zeitleiste, in der Projektfarbe */
+.bu-fortschritt { display:flex; align-items:center; gap:16px; padding:18px 30px 0; }
+.bu-gleis { flex:1; display:flex; gap:4px; }
+.bu-gleis i { flex:1; height:6px; border-radius:99px; background:#E7E4DA;
+  transition:background-color .34s cubic-bezier(.23,1,.32,1); }
+.bu-gleis i.fertig { background:var(--bu-farbe, #BFCC94); }
+.bu-zaehler { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:#6D7571; margin:0; white-space:nowrap; }
+
+/* Die Flaeche, in der die Kapitel gleiten. Alte und neue Kapitel liegen
+   kurz uebereinander (grid-area 1/1), darum ein Grid statt absolut. */
+.bu-flaeche { flex:1; min-height:0; display:grid; position:relative; overflow:hidden; touch-action:pan-y; }
+.bu-kapitel { grid-area:1/1; min-height:0; display:grid; grid-template-columns:minmax(0, 1.35fr) minmax(0, 1fr);
+  gap:40px; align-items:center; padding:22px 30px; }
+.bu-ohne-medium { grid-template-columns:minmax(0, 640px); justify-content:center; }
+.bu-ohne-text { grid-template-columns:minmax(0, 1fr); }
+.bu-medium, .bu-text { transition:opacity .38s cubic-bezier(.23,1,.32,1), translate .38s cubic-bezier(.23,1,.32,1),
+  filter .38s cubic-bezier(.23,1,.32,1); }
+/* Stagger: der Text folgt dem Medium 60 ms spaeter -- wie versetzte
+   Ebenen in After Effects. */
+.bu-text { transition-delay:.06s; }
+.bu-geht .bu-text { transition-delay:0s; }
+.bu-medium { min-width:0; align-self:center; }
+.bu-text { max-height:100%; overflow-y:auto; padding-right:6px; align-self:stretch; display:flex; flex-direction:column;
+  justify-content:center; }
+.bu-text > :first-child { margin-top:auto; }
+.bu-text > :last-child { margin-bottom:auto; }
+
+/* Rein von rechts / raus nach links (und umgekehrt) */
+.bu-von-rechts .bu-medium, .bu-von-rechts .bu-text { opacity:0; translate:40px 0; filter:blur(2px); }
+.bu-von-links  .bu-medium, .bu-von-links  .bu-text { opacity:0; translate:-40px 0; filter:blur(2px); }
+.bu-nach-links  .bu-medium, .bu-nach-links  .bu-text { opacity:0; translate:-40px 0; filter:blur(2px); }
+.bu-nach-rechts .bu-medium, .bu-nach-rechts .bu-text { opacity:0; translate:40px 0; filter:blur(2px); }
+.bu-geht { pointer-events:none; }
+/* Bewegung reduzieren: nur ueberblenden */
+.bu-blende .bu-medium, .bu-blende .bu-text { opacity:0; }
+
+/* Inhalte in der Buehne: keine Scroll-Einblendungen (sie wuerden sich an
+   der falschen Scrollflaeche orientieren und koennten unsichtbar bleiben),
+   kein Ausbrechen aus der Spalte, Medien fuellen ihre Haelfte. */
+.bu .br-text, .bu .br-text * { animation:none !important; }
+html.mm-bewegung .bu .br-text, html.mm-bewegung .bu .br-text * { animation:none !important; }
+.bu-medium .br-text > .md-gallery, .bu-medium .br-text > .md-video,
+.bu-medium .br-bild, .bu-medium .br-film { margin:0 !important; }
+.bu-medium .mm-baustein { margin:0 !important; max-width:none; }
+.bu-medium img { max-height:calc(90dvh - 230px); object-fit:contain; }
+.bu-medium .br-bild img { object-fit:cover; max-height:none; }
+.bu-medium figcaption { margin-top:10px; }
+.bu-text > :last-child p:last-child { margin-bottom:0; }
+.bu-text .md-gallery, .bu-text .md-video { margin-inline:0 !important; }
+
+/* Fuss: Zurueck / Weiter */
+.bu-fuss { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 30px 24px; }
+.bu-zurueck, .bu-weiter { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  border:0; border-radius:99px; cursor:pointer; padding:13px 20px; transition:transform .16s ease-out, opacity .2s; }
+.bu-zurueck { background:none; color:#6D7571; padding-inline:6px; }
+.bu-zurueck:hover { color:#0D1821; }
+.bu-zurueck:disabled { opacity:0; pointer-events:none; }
+.bu-weiter { background:#0D1821; color:#F0F4EF; max-width:62%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 6px 16px -6px rgba(13,24,33,.5); }
+.bu-weiter.bu-naechstes { background:var(--bu-farbe, #0D1821); }
+.bu-weiter:active, .bu-zurueck:active { transform:scale(.97); }
+.bu-weiter:focus-visible, .bu-zurueck:focus-visible { outline:2px solid #0D1821; outline-offset:3px; }
+
+/* Handy: Vollbild-Blatt, Medium oben, Text darunter */
+@media (max-width:760px) {
+  .bu { width:100vw; height:100dvh; border-radius:0; }
+  .bu[open] { animation-name:bu-blatt; }
+  @keyframes bu-blatt { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
+  .bu-kopf { padding:18px 18px 0; }
+  .bu-titel { font-size:25px; }
+  .bu-fortschritt { padding:14px 18px 0; }
+  .bu-kapitel { grid-template-columns:minmax(0, 1fr); align-items:start; align-content:start; gap:20px;
+    padding:16px 18px; overflow-y:auto; }
+  .bu-text { overflow:visible; max-height:none; justify-content:flex-start; }
+  .bu-text > :first-child, .bu-text > :last-child { margin-block:0; }
+  .bu-medium img { max-height:46dvh; }
+  .bu-fuss { padding:10px 18px calc(16px + env(safe-area-inset-bottom, 0px)); border-top:1px solid #ECEAE2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .br-scroller, html.bu-offen .br-scroller { transition:none; transform:none; }
+  .bu[open], .bu::backdrop { animation:none; }
+  .bu-medium, .bu-text { transition:opacity .2s linear; filter:none !important; translate:none !important; }
+  .br-karte::before, .br-mehr-ansehen, .br-mehr-ansehen span { transition:none; }
+}

@@ -165,6 +165,7 @@ HOCHLADEN/
 
     sprache.js     Deutsch/Englisch: Sprachwahl, Umschalter, Rückfall
     texte.js       die festen Oberflächentexte in beiden Sprachen
+    buehne.js/.css Projekte als Karten + "Bühne mit Kapiteln" (siehe Abschnitt unten)
     anfrage.js     Kontaktformular als geführte Anfrage (Frage für Frage, Brief zum Schluss).
                    Fragen/Antworten stehen in index.html, Englisch in texte.js ("anf-…").
                    Nicht im Admin änderbar.
@@ -592,3 +593,28 @@ Screenshots über Chrome im Kopflos-Betrieb (das Vorschau-Panel ist unzuverläss
   --headless=new --disable-gpu --hide-scrollbars --virtual-time-budget=25000 \
   --window-size=1280,4900 --screenshot=bild.png "http://localhost:8901/"
 ```
+
+
+## Projekte: Karten und Bühne (neu am 05.10.2026)
+
+Im Brief steht jedes Projekt **zugeklappt als Karte**: Rolle, Titel, das
+Cover (oder ohne Cover das erste Bild/GIF/Video), der Anfang des ersten
+Textes und „Mehr ansehen“. Ein Klick öffnet die **Bühne** (`buehne.js`):
+ein modales Fenster, der Brief dahinter wird dunkler und unscharf.
+
+**Kapitel entstehen automatisch aus den Blöcken** — im Admin ändert sich
+nichts:
+
+- Jedes Bild, GIF oder Video beginnt ein neues Kapitel; Text gehört zum
+  Medium davor.
+- Hat das Projekt ein Cover, ist es das Medium von Kapitel 1.
+- Ohne Cover gehört der Text vor dem ersten Medium zu dessen Kapitel.
+- Ein Trenner mitten im Projekt erzwingt einen Kapitelbruch; der letzte fällt weg.
+- Ist der erste Block ein rahmenloses Vollbreite-Bild und es gibt kein
+  Cover, wird es zum **Kopfbild** der Karte (Simplicissimus-Banner).
+
+Wer die Kapitel anders haben will, ändert die **Reihenfolge der Blöcke**.
+
+Adresse: `mausemaus.com/#slug` öffnet die Bühne direkt, `#slug/3` das
+dritte Kapitel — zum Verschicken einzelner Projekte. „Zurück“ im Browser
+schließt sie. Geprüft in `tests/pruefe-buehne.mjs`.

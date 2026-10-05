@@ -118,6 +118,12 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
       return pfad;
     },
     /* Alles, was die Seite an Fehlern gemeldet hat, seit sie geöffnet wurde. */
+    /* Ein ECHTER Tastendruck (nicht dispatchEvent): nur der loest z. B. beim
+       <dialog> mit Esc das "cancel" aus. code/keyCode wie im Browser. */
+    async taste(key, code = key, keyCode = 0) {
+      for (const type of ['keyDown', 'keyUp'])
+        await ruf('Input.dispatchKeyEvent', { type, key, code, windowsVirtualKeyCode: keyCode });
+    },
     fehlerAufSeite() { return fehler.slice(); },
     async zu() { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${ziel.id}`); },
   };
