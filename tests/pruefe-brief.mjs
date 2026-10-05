@@ -57,7 +57,10 @@ const d = JSON.parse(await s.werte(`(async () => {
   });
 })()`));
 
-pruefe('fünf veröffentlichte Projekte gefunden', d.projekte === 5, String(d.projekte));
+/* "mindestens", nicht "genau": Die Zahl kommt aus der LEBENDEN Datenbank,
+   und Lucas legt neue Projekte an. Mit "=== 5" wurde die Pruefung bei jedem
+   neuen Projekt rot, ohne dass etwas kaputt war. */
+pruefe('mindestens fünf veröffentlichte Projekte gefunden', d.projekte >= 5, String(d.projekte));
 pruefe('Abschnitte = Einstieg + Profil + Projekte + Kontakt', d.abschnitte === d.projekte + 3, String(d.abschnitte));
 pruefe('KEIN Projekttext wurde verändert', d.fehlendeTexte.length === 0, d.fehlendeTexte.join(','));
 pruefe('KEIN Projekttitel wurde verändert', d.fehlendeTitel.length === 0, d.fehlendeTitel.join(','));
