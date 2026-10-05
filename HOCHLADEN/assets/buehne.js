@@ -52,6 +52,17 @@
 
   var dialog = null, zustand = null;
 
+  /* Verwandlung starten. Der Browser darf sie abbrechen (z. B. wenn der Tab
+     gerade nicht sichtbar ist) -- dann laeuft die Aenderung trotzdem, nur
+     ohne Animation. Die abgelehnten Versprechen ready/finished muessen
+     aufgefangen werden, sonst steht "Transition was aborted" als Fehler in
+     der Konsole (live auf mausemaus.com gesehen). */
+  function verwandeln(aenderung, danach) {
+    var vt = document.startViewTransition(aenderung);
+    vt.ready.catch(function () {});
+    vt.finished.then(danach, danach);
+  }
+
   function bauen() {
     dialog = document.createElement('dialog');
     dialog.className = 'bu';
@@ -232,7 +243,7 @@
     };
     if (document.startViewTransition && !ruhig() && quelle) {
       quelle.style.viewTransitionName = 'bu-medium';
-      document.startViewTransition(aufziehen).finished.then(function () {
+      verwandeln(aufziehen, function () {
         var z = dialog.querySelector('.bu-medium'); if (z) z.style.viewTransitionName = '';
       });
     } else {
@@ -257,7 +268,7 @@
     var quelle = dialog.querySelector('.bu-kapitel:not(.bu-geht) .bu-medium');
     if (document.startViewTransition && !ruhig() && ziel && quelle && zustand.i === 0) {
       quelle.style.viewTransitionName = 'bu-medium';
-      document.startViewTransition(zumachen).finished.then(function () { ziel.style.viewTransitionName = ''; });
+      verwandeln(zumachen, function () { ziel.style.viewTransitionName = ''; });
     } else {
       zumachen();
       if (ziel) ziel.style.viewTransitionName = '';
