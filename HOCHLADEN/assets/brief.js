@@ -160,7 +160,12 @@
       /* Eckdaten wie im Profil oben: Kunde und Jahr, beide im Admin pflegbar
          (Felder "Kunde" und "Jahr"). Leere Angaben fallen weg; fehlen beide,
          gibt es gar keine Tabelle. */
-      const fakten = [[T('bu-kunde', 'Kunde'), seite.kunde], [T('bu-jahr', 'Jahr'), seite.jahr]]
+      /* Kunde und Jahr haben keine englische Spalte. Das einzige deutsche
+         Wort, das dort vorkommt, ist "seit" (Bitbull: "seit 2026") -- auf
+         Englisch wird daraus "since". */
+      const jahr = window.mmSprache === 'en' && seite.jahr
+        ? String(seite.jahr).replace(/^\s*seit\b/i, 'since') : seite.jahr;
+      const fakten = [[T('bu-kunde', 'Kunde'), seite.kunde], [T('bu-jahr', 'Jahr'), jahr]]
         .filter(([, w]) => w && String(w).trim());
       /* Karte nach Lucas' Wahl aus den Entwuerfen (05.10.): auf dem Rechner
          "2C Geteilt" -- Medium links, Text und Eckdaten rechts --, auf dem

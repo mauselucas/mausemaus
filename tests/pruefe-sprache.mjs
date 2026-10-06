@@ -54,6 +54,7 @@ const d1 = await de.werte(`JSON.stringify({
   fuss: document.querySelector('.mml-fuss').innerText.replace(/\\s+/g, ' ').trim(),
   sprung: (document.querySelector('.br-sprung') || {}).textContent || '',
   knopf: (document.getElementById('anf-weiter') || {}).textContent || '',
+  fakten: [...document.querySelectorAll('.br-fakten dd')].map(d => d.textContent).join(' | '),
   echteLinks: [...document.querySelectorAll('.mms-wahl[href]')].map(a => a.getAttribute('href')),
   auswahl: [...document.querySelectorAll('.mms-wahl')].map(a => a.textContent.trim()),
 })`);
@@ -93,6 +94,7 @@ const g2 = JSON.parse(await en.werte(`JSON.stringify({
   fuss: document.querySelector('.mml-fuss').innerText.replace(/\\s+/g, ' ').trim(),
   sprung: (document.querySelector('.br-sprung') || {}).textContent || '',
   knopf: (document.getElementById('anf-weiter') || {}).textContent || '',
+  fakten: [...document.querySelectorAll('.br-fakten dd')].map(d => d.textContent).join(' | '),
   /* Name-Feld: seit der gefuehrten Anfrage eine sichtbare Beschriftung statt Platzhalter */
   platzhalter: (document.querySelector('#anfragen [data-mm-t="anf-du-name"]') || {}).textContent || '',
   ersteFrage: (document.querySelector('#anfragen [data-mm-t="anf-art-frage"]') || {}).textContent || '',
@@ -113,6 +115,12 @@ pruefe('erste Frage englisch', g2.ersteFrage === 'What’s it about?', g2.ersteF
 pruefe('Fragen-Zaehler englisch (kommt aus dem Skript)', g2.zaehler === 'Question 1 of 3', g2.zaehler);
 /* Die Betreffzeile landet in Lucas' Postfach -- die soll mitziehen. */
 pruefe('Betreff der Mail englisch', g2.betreff === 'New enquiry via mausemaus.com', g2.betreff);
+/* Kunde/Jahr haben keine englische Spalte; "seit 2026" wird auf Englisch zu
+   "since 2026" (brief.js). Geprueft gegen die echten Daten -- steht bei
+   keinem Projekt mehr "seit", pruefen die beiden Zeilen nichts mehr und
+   sagen das auch. */
+pruefe('Eckdaten deutsch: „seit 2026“ bleibt deutsch', g1.fakten.includes('seit 2026'), g1.fakten);
+pruefe('Eckdaten englisch: daraus wird „since 2026“', g2.fakten.includes('since 2026') && !/\bseit\b/.test(g2.fakten), g2.fakten);
 pruefe('og:locale englisch', g2.locale === 'en_US', g2.locale);
 pruefe('Name der Zeitleiste englisch', g2.navName === 'Sections of the letter', g2.navName);
 
