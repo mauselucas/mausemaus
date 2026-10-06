@@ -169,7 +169,7 @@ body {
    bekommt das nackte Bild. Die Rundung bleibt -- scharfe Ecken gibt es in
    dieser Bildsprache nirgends. */
 .mm-ohne-rahmen figure,
-.mm-ohne-rahmen img { box-shadow: none !important; border: 0 !important; }
+.mm-ohne-rahmen :is(img, video) { box-shadow: none !important; border: 0 !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .mm-kasten, .mm-zitat { transition: none; }

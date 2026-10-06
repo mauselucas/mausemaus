@@ -88,9 +88,9 @@ html.mm-bewegung .br-karte ~ .br-abschnitt:not(.br-karte) > .mm-blume { animatio
   .br-karte::before { border-radius:20px; }
   .br-karte .br-kopfbild { margin:0; }
   .br-karte .br-kopfbild img { border-radius:20px 20px 0 0; }
-  .br-karte .br-kopfbild + .br-karte-vorschau :is(.br-bild, .br-film, figure, .md-video, img) { border-radius:0 !important; }
+  .br-karte .br-kopfbild + .br-karte-vorschau :is(.br-bild, .br-film, figure, .md-video, img, video) { border-radius:0 !important; }
   .br-karte-vorschau :is(.br-bild, .br-film, .md-video) { border-radius:20px 20px 0 0; box-shadow:none; }
-  .br-karte-vorschau .md-gallery figure, .br-karte-vorschau .md-gallery img { border-radius:20px 20px 0 0; box-shadow:none; }
+  .br-karte-vorschau .md-gallery figure, .br-karte-vorschau .md-gallery :is(img, video) { border-radius:20px 20px 0 0; box-shadow:none; }
   .br-karte-text { position:relative; padding:18px 18px 20px; }
   .br-karte-text .br-rolle, .br-karte-text .br-titel { padding-right:62px; }
   .br-karte-text .br-titel { font-size:25px; margin-bottom:10px; }
@@ -196,7 +196,7 @@ html.mm-bewegung .bu * { animation:none !important; }
 .bu-medium .br-text > .md-gallery, .bu-medium .br-text > .md-video,
 .bu-medium .br-bild, .bu-medium .br-film { margin:0 !important; }
 .bu-medium .mm-baustein { margin:0 !important; max-width:none; }
-.bu-medium img { max-height:calc(90dvh - 230px); object-fit:contain; }
+.bu-medium :is(img, video) { max-height:calc(90dvh - 230px); object-fit:contain; }
 .bu-medium .br-bild img { object-fit:cover; max-height:none; }
 .bu-medium figcaption { margin-top:10px; }
 .bu-text > :last-child p:last-child { margin-bottom:0; }
@@ -229,7 +229,7 @@ html.mm-bewegung .bu * { animation:none !important; }
     padding:16px 18px; overflow-y:auto; }
   .bu-text { overflow:visible; max-height:none; justify-content:flex-start; }
   .bu-text > :first-child, .bu-text > :last-child { margin-block:0; }
-  .bu-medium img { max-height:46dvh; }
+  .bu-medium :is(img, video) { max-height:46dvh; }
   .bu-fuss { padding:10px 18px calc(16px + env(safe-area-inset-bottom, 0px)); border-top:1px solid #ECEAE2; }
 }
 

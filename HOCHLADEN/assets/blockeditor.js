@@ -785,13 +785,17 @@ export function mountBlockEditor(wurzel, {
         const wrap = document.createElement('div'); wrap.className = 'be-gif';
         wrap.innerHTML = `
           <input class="be-gif-alt" placeholder="Beschreibung (unsichtbar — für Blinde und Google)" value="${esc(gifText)}">
-          <button type="button" class="btn ghost">GIF wählen</button>
-          <input type="file" accept="image/gif,image/apng,image/webp" hidden>
-          <p class="klein grau">GIFs werden NICHT verkleinert — sonst bliebe nur das erste Einzelbild übrig.</p>`;
+          <button type="button" class="btn ghost">Video oder GIF wählen</button>
+          <input type="file" accept="video/*,.mov,.mp4,.m4v,.webm,image/gif,image/apng,image/webp" hidden>
+          <p class="klein grau">Am besten direkt das Video aus dem Schnittprogramm nehmen. Es wird automatisch
+            verkleinert, stumm geschaltet und läuft auf der Seite endlos wie ein GIF, nur viel schneller.
+            Ein GIF wird genauso umgewandelt.</p>`;
         wrap.querySelector('input[type=file]').addEventListener('change', async (e) => {
           const datei = e.target.files[0]; e.target.value = '';
           if (!datei) return;
-          const r = await api.bildHochladen(datei);
+          /* Animierte WebP/APNG kann der Umwandler nicht -- die gehen den alten Weg. */
+          const r = /^image\/(webp|apng|png)$/.test(datei.type) || !api.loopHochladen
+            ? await api.bildHochladen(datei) : await api.loopHochladen(datei);
           if (r && r.url) {
             const t = wrap.querySelector('.be-gif-alt').value;
             b.inhalt.roh = t ? `![](${r.url}){gross}{${t}}` : `![](${r.url})`;

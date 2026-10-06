@@ -62,8 +62,14 @@ const stand = `JSON.stringify({
     JSON.stringify(kap['istanbul-katzen']));
   /* Simplicissimus: kein Cover -- der Text vor dem ersten GIF gehoert zu
      dessen Kapitel, das Banner ist das Kopfbild, der letzte Trenner faellt weg. */
-  pruefe('Simplicissimus: 3 Kapitel, kein Kapitel ohne Bild',
-    kap.seite.length === 3 && kap.seite.every(x => !x.startsWith('-')), JSON.stringify(kap.seite));
+  /* Zahl aus dem Inhalt statt fest: Lucas ändert Simplicissimus im Admin
+     (am 06.10. das Banner entfernt). Geprüft wird die REGEL -- jedes
+     Medium ein Kapitel, keins ohne Bild. */
+  const simpliMedien = await s.werte(`window.mmProjekte[${nr('seite')}].bloecke
+    .filter(b => ['bild', 'gif', 'video'].includes(b.typ)).length`);
+  pruefe('Simplicissimus: ein Kapitel je Medium, kein Kapitel ohne Bild',
+    kap.seite.length === simpliMedien && simpliMedien >= 2 && kap.seite.every(x => !x.startsWith('-')),
+    JSON.stringify(kap.seite) + ' bei ' + simpliMedien + ' Medien');
 
   /* ---- Öffnen per Klick ---- */
   await s.werte(`document.querySelector('.br-karte[data-slug="istanbul-katzen"] .br-mehr-ansehen').click()`);
@@ -190,8 +196,17 @@ for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
     st.textContent = '*{animation:none !important}';
     document.head.appendChild(st);
     const a = document.querySelector('.br-kontakt a');
-    const k = document.querySelector('.br-karte[data-slug="seite"]');
-    const kb = k && k.querySelector('.br-kopfbild');
+    /* Die Karte mit Kopfbild; hat gerade kein Projekt eins (Lucas hat das
+       Simplicissimus-Banner am 06.10. geleert), wird eins genau so
+       eingesetzt, wie brief.js es baut -- geprüft wird hier die Gestaltung,
+       nicht der Inhalt. */
+    let kb = document.querySelector('.br-karte .br-kopfbild');
+    if (!kb) {
+      const ziel = document.querySelector('.br-karte');
+      ziel.insertAdjacentHTML('afterbegin', '<figure class="br-kopfbild"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" width="1600" height="400"></figure>');
+      kb = ziel.querySelector('.br-kopfbild');
+    }
+    const k = kb.closest('.br-karte');
     const cs = getComputedStyle(k, '::before');
     return JSON.stringify({
       linkBreite: a ? Math.round(a.getBoundingClientRect().width) : -1,

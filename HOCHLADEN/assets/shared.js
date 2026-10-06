@@ -103,6 +103,60 @@ function masseVon(url) {
 }
 const GROESSEN   = { klein: 'mm-klein', mittel: 'mm-mittel', gross: '' };
 
+/* Loop-Video statt GIF. Steht in einer Bildzeile eine .mp4/.webm statt
+   eines Bildes, wird daraus ein stummes Video, das endlos laeuft -- fuer
+   Besucher sieht das aus wie ein GIF, ist aber rund 25-mal kleiner.
+
+   Absichtlich OHNE autoplay und mit preload="none": So laedt die Seite
+   beim Oeffnen kein einziges Byte Video. Abgespielt wird erst, wenn es in
+   die Naehe des Bildschirms kommt (loopsBeobachten() unten). Bis dahin
+   steht das Poster da -- ein Standbild mit gleichem Namen, aber .webp,
+   das der Admin beim Hochladen gleich mit ablegt. */
+const IST_LOOP = /\.(mp4|webm|mov)(?:[?#]|$)/i;
+function loopVideo(url, alt) {
+  const poster = url.replace(/\.(mp4|webm|mov)((?:[?#].*)?)$/i, '.webp$2');
+  return `<video class="mm-loop" src="${esc(url)}" poster="${esc(poster)}" muted loop playsinline`
+    + ` preload="none" disablepictureinpicture${alt ? ` aria-label="${esc(alt)}"` : ' aria-hidden="true"'}`
+    + `${masseVon(url)}></video>`;
+}
+
+/* Spielt Loop-Videos ab, sobald sie in Sichtweite kommen, und haelt sie an,
+   wenn sie wieder herausscrollen (spart Akku und Datenvolumen). Ein
+   MutationObserver erwischt auch Videos, die spaeter dazukommen -- etwa in
+   der Buehne oder in der Admin-Vorschau. Bei "Bewegung reduzieren" bleibt
+   das Poster stehen. */
+function loopsBeobachten() {
+  if (loopsBeobachten.an || typeof IntersectionObserver === 'undefined' || typeof matchMedia === 'undefined') return;
+  loopsBeobachten.an = true;
+  const ruhig = matchMedia('(prefers-reduced-motion: reduce)');
+  const io = new IntersectionObserver((eintraege) => {
+    for (const e of eintraege) {
+      const v = e.target;
+      if (e.isIntersecting && !ruhig.matches) {
+        v.muted = true;  /* Pflicht fuer Autoplay; das Attribut allein reicht nicht in jedem Browser */
+        const p = v.play(); if (p) p.catch(() => {});
+      } else if (!v.paused) v.pause();
+    }
+  }, { rootMargin: '200px 0px' });
+  const anmelden = (wurzel) => {
+    if (wurzel.matches?.('video.mm-loop')) io.observe(wurzel);
+    wurzel.querySelectorAll?.('video.mm-loop').forEach(v => io.observe(v));
+  };
+  anmelden(document);
+  new MutationObserver((liste) => {
+    for (const m of liste) m.addedNodes.forEach(anmelden);
+  }).observe(document.documentElement, { childList: true, subtree: true });
+  ruhig.addEventListener?.('change', () => {
+    document.querySelectorAll('video.mm-loop').forEach(v => {
+      io.unobserve(v); if (ruhig.matches) v.pause(); io.observe(v);
+    });
+  });
+}
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loopsBeobachten);
+  else loopsBeobachten();
+}
+
 /* Etikett oben links am Code-Block. Schlüssel = was du hinter ``` schreibst. */
 const SPRACHEN = {
   jsx:          { label: 'ExtendScript · After Effects', hl: 'javascript' },
@@ -213,7 +267,8 @@ function renderMarkdown(src) {
         const url = /^(https?:|data:|\/)/.test(roh) ? roh : '/' + roh;
         const kl = GROESSEN[groesse] || '';
         return `<figure class="${kl}" data-bild="${nr}">`
-          + `<img src="${esc(url)}" alt="${esc(alt)}" loading="lazy"${masseVon(url)}>`
+          + (IST_LOOP.test(url) ? loopVideo(url, alt)
+            : `<img src="${esc(url)}" alt="${esc(alt)}" loading="lazy"${masseVon(url)}>`)
           + (unterschrift ? `<figcaption>${inline(unterschrift)}</figcaption>` : '') + '</figure>';
       };
       const eigeneGroesse = (z) => !!z.match(IMG_LINE)[3];
@@ -339,7 +394,7 @@ function splitBlocks(src) {
        (aus dem renderMarkdown() beim Anzeigen wieder eine Galerie macht). */
     if (IMG_LINE.test(line)) {
       flushText();
-      const istGif = z => /\.gif(\?|#|$)/i.test(z.match(IMG_LINE)[2]);
+      const istGif = z => /\.(gif|mp4|webm|mov)(\?|#|$)/i.test(z.match(IMG_LINE)[2]);
       const eigeneGroesse = z => !!z.match(IMG_LINE)[3];
       if (eigeneGroesse(line) || istGif(line)) {
         bloecke.push({ typ: istGif(line) ? 'gif' : 'bild', roh: line });

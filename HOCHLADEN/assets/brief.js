@@ -100,7 +100,13 @@
       const F = (feld) => (window.mmFeldVon ? window.mmFeldVon(seite, feld) : (seite[feld] || ''));
       const titel = F('titel'), untertitel = F('untertitel');
       const s = neuerAbschnitt(titel, 'beruflich', seite.farbe);
-      let bloecke = p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order);
+      /* Leere Bild-/GIF-/Video-Bloecke (im Admin angelegt oder geleert, aber
+         ohne Datei) fallen raus: Sonst stuende in der Karte ein leerer
+         Kasten statt des naechsten echten Bildes, und in der Buehne ein
+         Kapitel ohne Medium. */
+      const leer = (b) => (b.typ === 'bild' || b.typ === 'gif' || b.typ === 'video') &&
+        !String(((window.mmInhaltVon ? window.mmInhaltVon(b) : b.inhalt) || {}).roh || '').trim();
+      let bloecke = p.bloecke.slice().sort((a, b) => a.sort_order - b.sort_order).filter(b => !leer(b));
       let h = '';
 
       /* Kopfbild: Ist der ERSTE Block ein Bild in voller Breite ohne Rahmen

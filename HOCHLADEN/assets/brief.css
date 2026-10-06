@@ -86,11 +86,8 @@ html, body { background:#FBFAF6; }
    schmal, weil er sich so besser liest. */
 .br-film, .br-bild:not(.br-klein) { margin-inline:var(--mm-ausbruch); }
 
-/* Bilder INNERHALB von Fließtext (renderMarkdown() in .br-text, z. B. mitten
-   im Projekttext). site.css begrenzt sowas nur unter .prose (dem alten
-   Detail-Fenster) — .md-gallery selbst gilt zwar global, aber figure/img/
-   figcaption und {klein}/{mittel} nicht. Ohne diese Regeln laufen eingebettete
-   Bilder in Originalgröße über den Seitenrand hinaus. */
+/* Bilder im Fließtext (renderMarkdown() in .br-text). Ohne diese Regeln
+   laufen sie in Originalgröße über den Seitenrand hinaus. */
 /* Abstand an der Galerie, nicht an der figure: Grid-Kinder geben ihren
    Rand nicht nach aussen weiter. */
 .br-text .md-gallery, .br-text .md-video { margin:var(--abstand-medium) 0; }
@@ -115,7 +112,7 @@ html, body { background:#FBFAF6; }
     translate:0 -2px; box-shadow:var(--mm-schatten-hoch); }
   .mm-ohne-rahmen figure:hover { translate:none; }
 }
-.mm-ohne-rahmen .br-text img { min-height:0; background:none; }
+.mm-ohne-rahmen .br-text :is(img, video.mm-loop) { min-height:0; background:none; }
 .mm-ohne-rahmen figure::after { content:none; }
 
 /* Kopfbild (brief.js): Banner als Kopf des Eintrags, laeuft unten aus. */
@@ -133,7 +130,7 @@ html, body { background:#FBFAF6; }
    Attribut -- das Bild wäre gestaucht oder gezerrt. Mit height:auto rechnet
    der Browser die Höhe aus dem Seitenverhältnis und hält den Platz von
    Anfang an in der RICHTIGEN Größe frei, statt nur 120px zu raten. */
-.br-text img { display:block; width:100%; height:auto; border-radius:var(--mm-radius);
+.br-text :is(img, video.mm-loop) { display:block; width:100%; height:auto; border-radius:var(--mm-radius);
   min-height:120px; background:#F2EFE6; }
 .br-text figcaption { font-family:'Space Mono',monospace; font-size:10.5px;
   letter-spacing:.05em; color:#6E7873; margin-top:10px; text-align:center; }

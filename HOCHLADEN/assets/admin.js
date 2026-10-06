@@ -195,6 +195,63 @@ async function hochladen(datei) {
   } finally { laden(false); }
 }
 
+/* Loop-Video statt GIF: Video oder GIF rein, kleines stummes MP4 plus
+   Standbild raus (umgerechnet in loopvideo.js). Beide landen unter dem
+   GLEICHEN Namen, nur mit .mp4 bzw. .webp -- shared.js findet das Poster
+   über diesen Namen. Erst das Poster, dann das Video: So gibt es nie ein
+   Video ohne Standbild.
+
+   Scheitert die Umwandlung, wird das Original hochgeladen und das
+   gesagt. Ein GIF läuft dann über den alten Weg (hochladen()), ein Video
+   unverändert -- beides funktioniert auf der Seite, nur größer. */
+async function loopHochladen(datei) {
+  if (!datei) return null;
+  const { zuLoopVideo, istVideoDatei } = await import('/assets/loopvideo.js');
+  const istVideo = istVideoDatei(datei);
+  if (!istVideo && !/^image\//.test(datei.type || '')) { toast('Das ist weder Video noch GIF.', true); return null; }
+  laden(true);
+  const vorher = Math.round(datei.size / 1024);
+  const grund = slugify(datei.name.replace(/\.[^.]+$/, '')) || 'loop';
+  try {
+    let r;
+    try {
+      toast('Video wird verkleinert …');
+      r = await zuLoopVideo(datei, (p) => toast(`Video wird verkleinert … ${Math.round(p * 100)} %`));
+    } catch (e) {
+      console.warn('Umwandlung gescheitert:', e);
+      if (!istVideo) {
+        laden(false);
+        const alt = await hochladen(datei);
+        if (alt) toast(`Konnte das GIF hier nicht umwandeln (${e.message}) — es ist unverändert drin, ${vorher} kB. `
+          + 'Schneller wird es, wenn du statt des GIFs das Video hochlädst.', vorher > 3000);
+        return alt;
+      }
+      const name = `${Date.now()}-${grund}.${(datei.name.match(/\.([a-z0-9]+)$/i) || [, 'mp4'])[1].toLowerCase()}`;
+      const { error } = await sb.storage.from('media').upload(name, datei, {
+        contentType: datei.type || 'video/mp4', cacheControl: '31536000' });
+      if (error) throw error;
+      toast(`Konnte das Video hier nicht verkleinern (${e.message}) — es ist unverändert drin, ${vorher} kB. `
+        + 'In Chrome klappt das Verkleinern.', true);
+      return { url: sb.storage.from('media').getPublicUrl(name).data.publicUrl };
+    }
+    const basis = `${Date.now()}-${grund}-${r.breite}x${r.hoehe}`;
+    const posterFehler = (await sb.storage.from('media').upload(basis + '.webp', r.poster, {
+      contentType: r.poster.type, cacheControl: '31536000' })).error;
+    if (posterFehler) throw posterFehler;
+    const { error } = await sb.storage.from('media').upload(basis + '.mp4', r.mp4, {
+      contentType: 'video/mp4', cacheControl: '31536000' });
+    if (error) throw error;
+    const nachher = Math.round(r.mp4.size / 1024);
+    toast(`Loop-Video hochgeladen — ${r.breite}×${r.hoehe}, ${Math.round(r.sekunden * 10) / 10} s, `
+      + `${vorher} kB → ${nachher} kB`
+      + (nachher > 4000 ? ' · noch recht groß — ein kürzerer Ausschnitt lädt schneller' : ''));
+    return { url: sb.storage.from('media').getPublicUrl(basis + '.mp4').data.publicUrl };
+  } catch (e) {
+    toast('Upload fehlgeschlagen: ' + e.message, true);
+    return null;
+  } finally { laden(false); }
+}
+
 /* ---------- Daten: Seiten (Projekte / Welten) ---------- */
 
 let SEITEN = [];
@@ -478,6 +535,7 @@ async function oeffneEditor(seite) {
         if (error) throw error;
       },
       bildHochladen: hochladen,
+      loopHochladen,
     },
   });
 

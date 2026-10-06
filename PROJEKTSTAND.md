@@ -149,6 +149,7 @@ HOCHLADEN/
   favicon.svg  apple-touch-icon.png  og-bild.jpg   CNAME
   welt/<slug>.html  blog/<slug>.html   vorgebaute Fassungen (erzeugt)
   medien/<projekt>/   Bilder, die ohne Admin-Login hochgeladen wurden (z. B. istanbul-katzen)
+  medien/loops/       die drei frueheren GIFs als Loop-MP4 + Standbild (06.10.2026)
   vorschau/<slug>.jpg                  Teilen-Vorschaubilder 1200x630 (erzeugt)
   assets/
     fonts.css      Schriften (Tropi, Space Grotesk, Space Mono) — 171 kB
@@ -166,6 +167,8 @@ HOCHLADEN/
     sprache.js     Deutsch/Englisch: Sprachwahl, Umschalter, Rückfall
     texte.js       die festen Oberflächentexte in beiden Sprachen
     buehne.js/.css Projekte als Karten + "Bühne mit Kapiteln" (siehe Abschnitt unten)
+    loopvideo.js   Admin: Video/GIF -> kleines stummes Loop-MP4 + Standbild (siehe unten)
+    vendor/mediabunny-1.61.3.min.mjs  Video-Umwandlung im Browser (MPL-2.0), nur im Admin
     anfrage.js     Kontaktformular als geführte Anfrage (Frage für Frage, Brief zum Schluss).
                    Fragen/Antworten stehen in index.html, Englisch in texte.js ("anf-…").
                    Nicht im Admin änderbar.
@@ -618,3 +621,27 @@ Wer die Kapitel anders haben will, ändert die **Reihenfolge der Blöcke**.
 Adresse: `mausemaus.com/#slug` öffnet die Bühne direkt, `#slug/3` das
 dritte Kapitel — zum Verschicken einzelner Projekte. „Zurück“ im Browser
 schließt sie. Geprüft in `tests/pruefe-buehne.mjs`.
+
+## Loop-Videos statt GIFs (neu am 06.10.2026)
+
+Ein GIF ist riesig: Das Istanbul-Intro hatte 43,7 MB für 4 Sekunden, als
+MP4 sind es 0,76 MB. Darum:
+
+- Im Admin heißt der Block **„Loop-Video / GIF“**. Am besten direkt das
+  Video aus dem Schnittprogramm hineinziehen (MP4, MOV, WebM). Der Admin
+  rechnet es **im Browser** um: höchstens 1280 px breit, höchstens 30
+  Bilder/s, Ton raus, H.264, Faststart, dazu ein Standbild. Ein GIF wird
+  genauso umgewandelt. Danach steht im Hinweis „vorher → nachher“.
+- Video und Standbild liegen unter **gleichem Namen** (`…-1280x720.mp4` und
+  `….webp`); `shared.js` leitet das Poster aus dem Videonamen ab.
+- Auf der Seite wird daraus `<video muted loop playsinline preload="none">`
+  mit Poster. Es lädt erst, wenn es in die Nähe des Bildschirms kommt, und
+  hält an, wenn es herausscrollt. Bei „Bewegung reduzieren“ bleibt das
+  Standbild stehen.
+- **Durchsichtige GIFs bleiben GIFs.** MP4 kann keine Transparenz (siehe
+  Fallstrick 28); der Admin erkennt das und lädt sie unverändert hoch.
+- Klappt die Umwandlung in einem Browser nicht (alte Safaris), wird das
+  Original hochgeladen und das im Hinweis gesagt. In Chrome geht es immer.
+
+Geprüft in `tests/pruefe-loopvideo.mjs`, inklusive echter Umwandlung
+eines Full-HD-Videos mit Ton (`tests/feste/loop-probe-*.mov/.gif`).

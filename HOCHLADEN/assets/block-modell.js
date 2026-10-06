@@ -13,7 +13,7 @@ export const BLOCKARTEN = [
   { typ: 'ueberschrift',  label: 'Überschrift',             icon: 'H',   stichworte: ['ueberschrift', 'überschrift', 'titel', 'h2', 'h3'] },
   { typ: 'randnotiz',     label: 'Randnotiz',               icon: '▤',   stichworte: ['randnotiz', 'eckdaten', 'info', 'kasten'] },
   { typ: 'bild',          label: 'Bild',                    icon: '🖼',  stichworte: ['bild', 'foto', 'galerie', 'bilder'] },
-  { typ: 'gif',           label: 'GIF',                     icon: '🎞',  stichworte: ['gif', 'animation', 'bewegtbild'] },
+  { typ: 'gif',           label: 'Loop-Video / GIF',        icon: '🎞',  stichworte: ['gif', 'animation', 'bewegtbild', 'loop', 'mp4', 'clip'] },
   { typ: 'video',         label: 'Video',                   icon: '▶',   stichworte: ['video', 'youtube', 'vimeo', 'film'] },
   { typ: 'text_mit_bild', label: 'Text mit Bild daneben',   icon: '⿰',  stichworte: ['text mit bild', 'spalte', 'nebeneinander'] },
   { typ: 'code',          label: 'Code',                    icon: '⌗',  stichworte: ['code', 'programmcode', 'sprache'] },

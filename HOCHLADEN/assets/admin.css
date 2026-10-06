@@ -661,7 +661,7 @@ body.admin {
 .prose figure { margin: 0; }
 /* height:auto: siehe .br-text img in brief.css — ohne das verzerren Bilder,
    die ihre echten Maße als width/height tragen. */
-.prose img { width: 100%; height: auto; border: 1.5px solid var(--ink); border-radius: 12px; display: block; }
+.prose :is(img, video) { width: 100%; height: auto; border: 1.5px solid var(--ink); border-radius: 12px; display: block; }
 .prose figcaption {
   font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.5px;
   color: var(--muted); margin-top: 7px; text-align: center;
