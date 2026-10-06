@@ -201,6 +201,14 @@ for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
     const st = document.createElement('style');
     st.textContent = '*{animation:none !important}';
     document.head.appendChild(st);
+    /* Seit dem 06.10. stehen E-Mail und Telefon nicht mehr auf der Seite
+       (Lucas nutzt das Formular). Geprüft wird die GESTALTUNG für den
+       Fall, dass er sie im Admin wieder einträgt -- genau so, wie
+       brief.js die Zeile baut. */
+    if (!document.querySelector('.br-kontakt a')) {
+      [...document.querySelectorAll('section.br-abschnitt:not(.br-karte) > h2.br-titel')].pop()
+        .insertAdjacentHTML('afterend', '<p class="br-kontakt"><a href="mailto:a@b.de">probe@beispiel.de</a></p>');
+    }
     const a = document.querySelector('.br-kontakt a');
     /* Die Karte mit Kopfbild; hat gerade kein Projekt eins (Lucas hat das
        Simplicissimus-Banner am 06.10. geleert), wird eins genau so

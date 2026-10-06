@@ -53,6 +53,15 @@
         vorspann = '<h1 class="br-gruss">' + window.mm.esc(i.titel || '') +
           '<em>' + window.mm.esc(i.zusatz || '') + '</em></h1>' +
           (i.kicker ? '<p class="br-kicker">' + window.mm.esc(i.kicker) + '</p>' : '');
+        /* Foto zum Gruss, wie ein eingeklebtes Polaroid (im Admin: Feld
+           "Foto" am Gruss-Abschnitt). Masse aus dem Dateinamen, damit der
+           Platz von Anfang an frei ist. Nicht "lazy": es steht ganz oben. */
+        if (i.foto) {
+          const masse = typeof masseVon === 'function' ? masseVon(i.foto) : '';
+          vorspann = '<div class="br-hallo"><div class="br-hallo-text">' + vorspann + '</div>' +
+            '<figure class="br-polaroid"><img src="' + window.mm.esc(i.foto) + '" alt="' +
+            window.mm.esc(i.foto_text || '') + '"' + masse + ' decoding="async" fetchpriority="high"></figure></div>';
+        }
       } else if (i.rolle === 'profil') {
         vorspann = (i.kicker ? '<p class="br-rolle">' + window.mm.esc(i.kicker) + '</p>' : '') +
           (i.titel ? '<h2 class="br-titel">' + window.mm.esc(i.titel).replace(/\n/g, '<br>') + '</h2>' : '');
@@ -65,7 +74,9 @@
       const eckdaten = g.blocks.filter(b => b.typ === 'randnotiz');
       const rest = g.blocks.filter(b => b.typ !== 'randnotiz');
 
-      const nachspann = i.rolle === 'kontakt'
+      /* Ohne E-Mail und Telefon (seit dem Kontaktformular der Normalfall)
+         gar kein leerer Absatz -- der stuende sonst als Luecke da. */
+      const nachspann = i.rolle === 'kontakt' && (i.email || i.telefon)
         ? '<p class="br-kontakt">' +
             (i.email ? '<a href="mailto:' + window.mm.esc(i.email) + '">' + window.mm.esc(i.email) + '</a>' : '') +
             (i.telefon ? '<a href="tel:' + window.mm.esc(i.telefon.replace(/\s/g, '')) + '">' +

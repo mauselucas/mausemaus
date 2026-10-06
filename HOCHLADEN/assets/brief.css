@@ -62,6 +62,15 @@ html, body { background:#FBFAF6; }
 .br-gruss em { display:block; font-style:normal; color:#BFCC94; }
 .br-kicker { font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:.16em;
   text-transform:uppercase; color:var(--br-leise); margin:0 0 28px; }
+/* Foto zum Gruss: Polaroid, leicht schraeg, ragt rechts aus der Spalte. */
+.br-hallo { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:28px; }
+.br-polaroid { width:clamp(200px,24vw,280px); margin:0 calc(var(--mm-ausbruch) * .55) 18px 0; padding:9px 9px 34px;
+  background:#fff; border-radius:3px; rotate:3deg; box-shadow:var(--mm-schatten); }
+.br-polaroid img { display:block; width:100%; height:auto; border-radius:1px; }
+@media (max-width:620px) {
+  .br-hallo { grid-template-columns:1fr; }
+  .br-polaroid { order:-1; width:min(250px,72%); margin:0 0 22px; rotate:-2deg; }
+}
 
 .br-text { font-family:'Manrope',sans-serif; font-size:16.5px; line-height:1.8; color:#232c31; }
 .br-text p { margin:0 0 20px; }

@@ -909,6 +909,17 @@ export function mountBlockEditor(wurzel, {
             </select>
             <input type="text" class="be-ab-farbe" placeholder="#RRGGBB" value="${esc(b.inhalt.farbe || '')}" aria-label="Farbe">
             <input type="text" class="be-ab-kicker" placeholder="kleine Zeile darunter" value="${esc(b.inhalt.kicker || '')}" aria-label="Kleine Zeile">
+          </span>
+          <span class="ab-zusatz be-ab-foto">
+            ${b.inhalt.foto ? `<img class="be-bild-vorschau" src="${esc(b.inhalt.foto)}" alt="">` : ''}
+            <button type="button" class="btn ghost be-ab-foto-waehlen">${b.inhalt.foto ? 'Foto ersetzen' : 'Foto zum Gruß'}</button>
+            ${b.inhalt.foto ? '<button type="button" class="btn ghost be-ab-foto-weg" title="Foto entfernen">×</button>' : ''}
+            <input type="text" class="be-ab-foto-text" placeholder="Beschreibung (unsichtbar — für Blinde und Google)" value="${esc(b.inhalt.foto_text || '')}" aria-label="Beschreibung des Fotos">
+            <input type="file" accept="image/*" hidden>
+          </span>
+          <span class="ab-zusatz be-ab-kontakt">
+            <input type="text" class="be-ab-email" placeholder="E-Mail (leer = nicht anzeigen)" value="${esc(b.inhalt.email || '')}" aria-label="E-Mail">
+            <input type="text" class="be-ab-telefon" placeholder="Telefon (leer = nicht anzeigen)" value="${esc(b.inhalt.telefon || '')}" aria-label="Telefon">
           </span>`;
         const aendern = (patch, sofort) => {
           Object.assign(b.inhalt, patch);
@@ -919,6 +930,9 @@ export function mountBlockEditor(wurzel, {
            Rollen waere sie ein Feld ohne Wirkung. */
         const zusatzZeigen = () => {
           zusatzFeld.hidden = (b.inhalt.rolle || '') !== 'hallo';
+          /* Foto nur am Gruss, E-Mail/Telefon nur am Kontakt. */
+          wrap.querySelector('.be-ab-foto').hidden = (b.inhalt.rolle || '') !== 'hallo';
+          wrap.querySelector('.be-ab-kontakt').hidden = (b.inhalt.rolle || '') !== 'kontakt';
         };
         zusatzZeigen();
         wrap.querySelector('.be-ab-titel').addEventListener('input', (e) => aendern({ titel: e.target.value }));
@@ -930,6 +944,20 @@ export function mountBlockEditor(wurzel, {
         });
         wrap.querySelector('.be-ab-art').addEventListener('change', (e) => aendern({ art: e.target.value }, true));
         wrap.querySelector('.be-ab-farbe').addEventListener('input', (e) => aendern({ farbe: e.target.value || null }));
+        wrap.querySelector('.be-ab-email').addEventListener('input', (e) => aendern({ email: e.target.value.trim() }));
+        wrap.querySelector('.be-ab-telefon').addEventListener('input', (e) => aendern({ telefon: e.target.value.trim() }));
+        wrap.querySelector('.be-ab-foto-text').addEventListener('input', (e) => aendern({ foto_text: e.target.value }));
+        const fotoDatei = wrap.querySelector('.be-ab-foto input[type=file]');
+        wrap.querySelector('.be-ab-foto-waehlen').addEventListener('click', () => fotoDatei.click());
+        fotoDatei.addEventListener('change', async () => {
+          const datei = fotoDatei.files[0]; fotoDatei.value = '';
+          if (!datei) return;
+          const r = await api.bildHochladen(datei);
+          if (r && r.url) { aendern({ foto: r.url }, true); ersetzeZeile(b); }
+        });
+        wrap.querySelector('.be-ab-foto-weg')?.addEventListener('click', () => {
+          aendern({ foto: null }, true); ersetzeZeile(b);
+        });
         inhaltDiv.appendChild(wrap);
         return inhaltDiv;
       }

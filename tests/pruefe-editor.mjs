@@ -440,6 +440,31 @@ await s.warte(750);
     (await s.werte(`${GERENDERT}.filter(el => el.innerHTML.includes('Bitte sanft von unten einblenden lassen.')).length`)) === 0);
 }
 
+/* ---------- Gruß-Foto und Kontaktzeilen (06.10.2026) ----------
+   Foto nur am Gruß, E-Mail/Telefon nur am Kontakt -- und beides landet in
+   der Datenbank. Leer heißt: auf der Seite steht nichts davon. */
+
+{
+  const sichtbar = (sel) => `!document.querySelector('.be-zeile[data-typ="abschnitt"] ${sel}').hidden`;
+  const rolle = (r) => s.werte(`(() => { const w = document.querySelector('.be-zeile[data-typ="abschnitt"] .be-ab-rolle');
+    w.value = '${r}'; w.dispatchEvent(new Event('change')); })()`);
+  await rolle('kontakt');
+  pruefe('Kontakt-Abschnitt: Felder für E-Mail und Telefon', await s.werte(sichtbar('.be-ab-kontakt')));
+  pruefe('…aber kein Foto-Feld', !(await s.werte(sichtbar('.be-ab-foto'))));
+  await s.werte(`(() => { const f = document.querySelector('.be-zeile[data-typ="abschnitt"] .be-ab-email');
+    f.value = 'probe@beispiel.de'; f.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.warte(750);
+  const idK = await idVon('abschnitt');
+  pruefe('…die E-Mail wird gespeichert', (await zeileInDB(idK)).inhalt.email === 'probe@beispiel.de');
+  await rolle('hallo');
+  pruefe('Gruß-Abschnitt: Feld "Foto zum Gruß"', await s.werte(sichtbar('.be-ab-foto')));
+  pruefe('…aber keine Kontaktfelder', !(await s.werte(sichtbar('.be-ab-kontakt'))));
+  await s.werte(`(() => { const f = document.querySelector('.be-zeile[data-typ="abschnitt"] .be-ab-foto-text');
+    f.value = 'Probefoto'; f.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.warte(750);
+  pruefe('…die Fotobeschreibung wird gespeichert', (await zeileInDB(idK)).inhalt.foto_text === 'Probefoto');
+}
+
 /* ---------- Umsortieren per Ziehen verändert sort_order UND landet
    ebenfalls sicher in der "Datenbank" ---------- */
 
