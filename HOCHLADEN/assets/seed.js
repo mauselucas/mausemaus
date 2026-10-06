@@ -287,7 +287,7 @@ window.SEED_SEITEN = {
         },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 10,
-        "updated_at": "2026-09-04T15:35:17.471455+00:00"
+        "updated_at": "2026-10-06T19:03:56.680028+00:00"
       },
       {
         "id": "69222574-03b4-434a-b473-8a50d636d24c",
@@ -682,6 +682,19 @@ window.SEED_SEITEN = {
           "updated_at": "2026-09-04T22:27:16.058006+00:00"
         },
         {
+          "id": "6077105a-9b74-4b6d-b69c-37ddd6cab1a4",
+          "typ": "gif",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791310880932-mausemaus-simpli-1280x640.mp4)"
+          },
+          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
+          "inhalt_en": null,
+          "created_at": "2026-10-06T18:20:56.809776+00:00",
+          "sort_order": 11.5,
+          "updated_at": "2026-10-06T18:21:23.05541+00:00"
+        },
+        {
           "id": "829b7ce8-2eae-4c55-8a31-a44d827c44b6",
           "typ": "text",
           "breite": "normal",
@@ -790,7 +803,7 @@ window.SEED_SEITEN = {
       "untertitel": "Mediengestalter Bild & Ton · 33minutes für Joyn/ProSieben",
       "kunde": "33minutes · Joyn/ProSieben",
       "jahr": "2025",
-      "cover_url": "https://i.ytimg.com/vi/a852kZ4VCgk/maxresdefault.jpg",
+      "cover_url": null,
       "cover_pos": "50% 50%",
       "video_url": "https://www.youtube.com/watch?v=a852kZ4VCgk",
       "embed_ok": false,
@@ -799,7 +812,7 @@ window.SEED_SEITEN = {
       "status": "published",
       "sort_order": 0.5,
       "created_at": "2026-08-22T17:46:48.907163+00:00",
-      "updated_at": "2026-10-06T16:44:21.74719+00:00",
+      "updated_at": "2026-10-06T18:23:18.430815+00:00",
       "titel_en": "The Race — Season 3",
       "untertitel_en": "Audiovisual Media Designer · 33minutes for Joyn/ProSieben",
       "bloecke": [
@@ -817,6 +830,19 @@ window.SEED_SEITEN = {
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
           "updated_at": "2026-09-04T15:56:23.126412+00:00"
+        },
+        {
+          "id": "7565b3fa-dd1c-4fd4-925f-d5be1fa117e3",
+          "typ": "gif",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791310981246-mausemaus-therace-1280x640.mp4)"
+          },
+          "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
+          "created_at": "2026-10-06T18:22:41.003438+00:00",
+          "sort_order": 35,
+          "updated_at": "2026-10-06T18:23:02.114283+00:00"
         },
         {
           "id": "92a637a1-52b6-4364-8e13-6d8f3e6efd32",
@@ -943,6 +969,19 @@ window.SEED_SEITEN = {
       "untertitel_en": null,
       "bloecke": [
         {
+          "id": "af55ea4e-2378-4116-8611-77edb28930db",
+          "typ": "gif",
+          "breite": "voll",
+          "inhalt": {
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791311084968-mausemaus-bitbull-1280x640.mp4){gross}{Wenn ich als Trader neu starten müsste, würde ich DAS machen}"
+          },
+          "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
+          "inhalt_en": null,
+          "created_at": "2026-09-25T12:58:15.752992+00:00",
+          "sort_order": 25,
+          "updated_at": "2026-10-06T18:24:46.517071+00:00"
+        },
+        {
           "id": "5685165e-b8a2-4c4f-bf17-9320c8dfbbca",
           "typ": "text",
           "breite": "normal",
@@ -954,21 +993,8 @@ window.SEED_SEITEN = {
             "roh": "I work as a freelance video editor and motion designer for the content creator Bastian Keller in the Bitbull orbit. I started out with Instagram Reels for his main account, and now I also edit the big YouTube videos."
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
-          "sort_order": 24,
-          "updated_at": "2026-09-25T13:01:28.560473+00:00"
-        },
-        {
-          "id": "af55ea4e-2378-4116-8611-77edb28930db",
-          "typ": "gif",
-          "breite": "voll",
-          "inhalt": {
-            "roh": "![](/medien/loops/bastian-keller-800x450.mp4){gross}{Wenn ich als Trader neu starten müsste, würde ich DAS machen}"
-          },
-          "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
-          "inhalt_en": null,
-          "created_at": "2026-09-25T12:58:15.752992+00:00",
-          "sort_order": 25,
-          "updated_at": "2026-10-06T17:38:59.02999+00:00"
+          "sort_order": 27.5,
+          "updated_at": "2026-10-06T18:24:19.18487+00:00"
         },
         {
           "id": "005f30e0-2eae-4e4c-845f-dedd91e95525",
@@ -1051,16 +1077,16 @@ window.SEED_SEITEN = {
       "untertitel": "Freelance Motion Designer · Travell4llove",
       "kunde": "Travell4llove",
       "jahr": "2026",
-      "cover_url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791308774105-4-1536x864.webp",
+      "cover_url": null,
       "cover_pos": "50% 50%",
-      "video_url": "https://www.youtube.com/watch?v=xelwbWPUmEo",
+      "video_url": null,
       "embed_ok": true,
       "farbe": "#C0603A",
       "ist_aktuell": false,
       "status": "published",
       "sort_order": 2,
       "created_at": "2026-10-05T10:27:14.803521+00:00",
-      "updated_at": "2026-10-06T17:46:14.773682+00:00",
+      "updated_at": "2026-10-06T18:30:08.722004+00:00",
       "titel_en": "Intro & graphics for Travell4llove",
       "untertitel_en": "Freelance Motion Designer · Travell4llove",
       "bloecke": [
@@ -1069,7 +1095,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "**Travell4llove** macht Reisevideos, und für die Folge „Tote Katzen im Müll? Was in Istanbul wirklich passiert“ kam Josu mit zwei Wünschen zu mir: ein Intro, das sofort nach Istanbul und zum Thema passt, und Motion Graphics, die sein Team später selbst in Premiere Pro befüllen kann – ohne jedes Mal bei mir anzuklopfen."
+            "roh": "**Travell4llove** macht Reisevideos, und für die Folge  „Tote Katzen im Müll? Was in Istanbul wirklich passiert“ kam Josu mit zwei Wünschen zu mir: ein Intro, das sofort nach Istanbul und zum Thema passt, und Motion Graphics, die sein Team später selbst in Premiere Pro befüllen kann – ohne jedes Mal bei mir anzuklopfen."
           },
           "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
           "inhalt_en": {
@@ -1077,7 +1103,20 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-10-05T10:27:14.803521+00:00",
           "sort_order": 10,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+          "updated_at": "2026-10-06T18:28:42.124148+00:00"
+        },
+        {
+          "id": "e5fd69f7-fced-4ebf-b2c8-6b0ffc948763",
+          "typ": "gif",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791311234464-intro-v2-1280x720.mp4)"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": null,
+          "created_at": "2026-10-06T18:26:39.167046+00:00",
+          "sort_order": 15,
+          "updated_at": "2026-10-06T18:27:15.248633+00:00"
         },
         {
           "id": "b90f510a-5d86-438a-a638-fd287342c233",
@@ -1093,6 +1132,19 @@ window.SEED_SEITEN = {
           "created_at": "2026-10-05T10:27:14.803521+00:00",
           "sort_order": 20,
           "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "eff24bec-55aa-48c0-b58a-77e2c8b66bea",
+          "typ": "video",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "https://www.youtube.com/watch?v=xelwbWPUmEo"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": null,
+          "created_at": "2026-10-06T18:29:41.874825+00:00",
+          "sort_order": 25,
+          "updated_at": "2026-10-06T18:29:44.943476+00:00"
         },
         {
           "id": "d081f8d8-4288-4c57-b18d-b11844809fe9",
@@ -2073,3 +2125,41 @@ window.SEED_SEITEN = {
     }
   ]
 };
+window.SEED_EMOTES = [
+  {
+    "name": "GIGACHAD",
+    "url": "/emotes/GIGACHAD-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "HACKERMANS",
+    "url": "/emotes/HACKERMANS-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "peepoHey",
+    "url": "/emotes/peepoHey-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "peepoShy",
+    "url": "/emotes/peepoShy-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "PepeLaugh",
+    "url": "/emotes/PepeLaugh-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "Weirdge",
+    "url": "/emotes/Weirdge-84x64.avif",
+    "breite": 84,
+    "hoehe": 64
+  }
+];
