@@ -71,12 +71,12 @@
   if (!window.CSS || !CSS.supports) return;
   if (CSS.supports('animation-timeline: view()')) return;          /* kann es selbst */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* will es nicht */
-  document.write('<script src="/assets/scroll-timeline.js?v=1791236704"><\/script>');
+  document.write('<script src="/assets/scroll-timeline.js?v=1791302902"><\/script>');
   /* Das Polyfill zerstoert beim Umschreiben der Stylesheets die
      @font-face-Regeln. Diese Zeile registriert die Schriften danach
      ueber die JS-Schnittstelle neu -- siehe schriften-retten.js. */
-  document.write('<script src="/assets/schriften-retten.js?v=1791236704"><\/script>');
-  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1791236704">');
+  document.write('<script src="/assets/schriften-retten.js?v=1791302902"><\/script>');
+  document.write('<link rel="stylesheet" href="/assets/bewegung-nachbau.css?v=1791302902">');
   document.documentElement.className += ' mm-bewegung';
 })();
 </script>
@@ -90,26 +90,26 @@
      die Datei ein ZWEITES Mal, statt die vorgeladene zu nehmen. -->
 <link rel="preload" href="/assets/schriften/tropi-400-f3e64d11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/schriften/manrope-var-e310b55a.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/fonts.css?v=1791236704">
-<link rel="stylesheet" href="/assets/site.css?v=1791236704">
-<link rel="stylesheet" href="/assets/leiste.css?v=1791236704">
-<link rel="stylesheet" href="/assets/brief.css?v=1791236704">
-<link rel="stylesheet" href="/assets/blumen.css?v=1791236704">
-<link rel="stylesheet" href="/assets/bewegung.css?v=1791236704">
+<link rel="stylesheet" href="/assets/fonts.css?v=1791302902">
+<link rel="stylesheet" href="/assets/site.css?v=1791302902">
+<link rel="stylesheet" href="/assets/leiste.css?v=1791302902">
+<link rel="stylesheet" href="/assets/brief.css?v=1791302902">
+<link rel="stylesheet" href="/assets/blumen.css?v=1791302902">
+<link rel="stylesheet" href="/assets/bewegung.css?v=1791302902">
 <!-- Das Formular liegt ganz unten: seine Gestaltung darf das erste Zeichnen
      nicht aufhalten. media="print" laedt sie nebenher, onload schaltet sie
      scharf. Ohne JavaScript bleibt sie aus -- dann steht ohnehin nur der
      Hinweis aus <noscript> da, und das Formular funktioniert auch schlicht. -->
-<link rel="stylesheet" href="/assets/anfrage.css?v=1791236704" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/assets/anfrage.css?v=1791302902" media="print" onload="this.media='all'">
 <!-- Karten und Buehne: ebenfalls nebenher geladen. Der Ladeschirm wartet
      aber auf diese Datei (Skript unten), man sieht die Karten nie ungestaltet. -->
-<link rel="stylesheet" href="/assets/buehne.css?v=1791236704" media="print" onload="this.media='all'" id="mm-buehne-css">
+<link rel="stylesheet" href="/assets/buehne.css?v=1791302902" media="print" onload="this.media='all'" id="mm-buehne-css">
 <!-- Sprachwahl. Steht im KOPF, damit <html lang> richtig ist, bevor
      irgendetwas gezeichnet wird. Die Arbeit am Dokument selbst wartet auf
      DOMContentLoaded. Deutsch bleibt der Standard: ohne ?lang=en und ohne
      frueher getroffene Wahl aendern diese beiden Dateien gar nichts. -->
-<script src="/assets/texte.js?v=1791236704"></script>
-<script src="/assets/sprache.js?v=1791236704"></script>
+<script src="/assets/texte.js?v=1791302902"></script>
+<script src="/assets/sprache.js?v=1791302902"></script>
 <script>
 /* Der Ladeschirm darf NIEMALS Inhalt verstecken, wenn etwas schiefgeht.
    Deshalb wird die versteckende Klasse hier von JavaScript GESETZT statt im
@@ -397,15 +397,15 @@
   </main>
 </div>
 
-<script src="/assets/config.js?v=1791236704"></script>
-<script src="/assets/shared.js?v=1791236704"></script>
-<script src="/assets/bloecke.js?v=1791236704"></script>
-<script src="/assets/db.js?v=1791236704"></script>
-<script src="/assets/blumen.js?v=1791236704"></script>
-<script src="/assets/leiste.js?v=1791236704"></script>
-<script src="/assets/brief.js?v=1791236704"></script>
-<script src="/assets/tueren.js?v=1791236704"></script>
-<script src="/assets/buehne.js?v=1791236704"></script>
+<script src="/assets/config.js?v=1791302902"></script>
+<script src="/assets/shared.js?v=1791302902"></script>
+<script src="/assets/bloecke.js?v=1791302902"></script>
+<script src="/assets/db.js?v=1791302902"></script>
+<script src="/assets/blumen.js?v=1791302902"></script>
+<script src="/assets/leiste.js?v=1791302902"></script>
+<script src="/assets/brief.js?v=1791302902"></script>
+<script src="/assets/tueren.js?v=1791302902"></script>
+<script src="/assets/buehne.js?v=1791302902"></script>
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
@@ -483,7 +483,7 @@
 <!-- Die gefuehrte Anfrage: Ablauf, Absenden ohne Seitenwechsel, Katze.
      Faellt das Skript aus, bleibt das action-Attribut im <form> uebrig und
      der Browser schickt ganz normal ab -- die Anfrage kommt trotzdem an. -->
-<script src="/assets/anfrage.js?v=1791236704"></script>
+<script src="/assets/anfrage.js?v=1791302902"></script>
 
 <!-- Besucherstatistik (GoatCounter). Bewusst so und nicht anders:
      keine Cookies, keine personenbezogenen Daten, nichts, was ueber
