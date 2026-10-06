@@ -258,17 +258,24 @@ pruefe('und sie sind vollständig', notfall.intro && notfall.werkzeuge,
    abschalten und danach wieder freigeben. */
 const ausbruch = JSON.parse(await s.werte(`(() => {
   const text = document.querySelector('.br-text p').getBoundingClientRect().width;
-  const els = [...document.querySelectorAll('.br-bild:not(.br-klein), .br-film')];
+  /* Seit der Karte "2C Geteilt" (Lucas' Wahl, 05.10.) bricht die KARTE aus
+     der Lesespalte aus, und das Video nimmt darin die groessere Haelfte. */
+  const karten = [...document.querySelectorAll('.br-karte')];
+  const els = [...document.querySelectorAll('.br-karte-medium')];
   els.forEach(b => b.style.animation = 'none');
   const bilder = els.map(b => b.getBoundingClientRect());
+  const kartenR = karten.map(k => k.getBoundingClientRect());
   els.forEach(b => b.style.animation = '');
   return JSON.stringify({ text: Math.round(text), fenster: innerWidth,
-    breiten: bilder.map(r => Math.round(r.width)),
-    rechts: Math.round(Math.max(...bilder.map(r => r.right))) });
+    karten: kartenR.map(r => Math.round(r.width)),
+    anteil: bilder.map((r, i) => Math.round(r.width / kartenR[i].width * 100)),
+    rechts: Math.round(Math.max(...kartenR.map(r => r.right))) });
 })()`));
-pruefe('Projektvideos sind breiter als die Textspalte',
-  ausbruch.breiten.length > 0 && ausbruch.breiten.every(b => b >= ausbruch.text + 300),
-  'Text ' + ausbruch.text + ', Videos ' + ausbruch.breiten.join('/'));
+pruefe('Projektkarten sind breiter als die Textspalte',
+  ausbruch.karten.length > 0 && ausbruch.karten.every(b => b >= ausbruch.text + 300),
+  'Text ' + ausbruch.text + ', Karten ' + ausbruch.karten.join('/'));
+pruefe('…und das Video nimmt darin mehr als die Hälfte ein',
+  ausbruch.anteil.length > 0 && ausbruch.anteil.every(a => a > 50), ausbruch.anteil.join(' / ') + ' %');
 pruefe('…und ragen trotzdem nicht aus dem Fenster',
   ausbruch.rechts <= ausbruch.fenster, ausbruch.rechts + ' von ' + ausbruch.fenster);
 
@@ -288,10 +295,12 @@ const schliff = JSON.parse(await s.werte(`(() => {
   /* Abstand Text -> Medium und Medium -> Text, ueberall im Brief */
   /* Seit den Karten steht im Brief je Projekt EIN Medium und darunter der
      Anfang des Textes -- gemessen wird dieser Abstand. */
+  /* Auf dem Rechner stehen Video und Text NEBENEINANDER (2C): gemessen
+     wird die Luft zwischen Video und Textspalte. */
   const abstaende = [];
   document.querySelectorAll('.br-karte').forEach(k => {
-    const m = k.querySelector('.br-karte-medium'), a = k.querySelector('.br-anriss p');
-    if (m && a) abstaende.push(Math.round(a.getBoundingClientRect().top - m.getBoundingClientRect().bottom));
+    const m = k.querySelector('.br-karte-medium'), a = k.querySelector('.br-karte-text');
+    if (m && a) abstaende.push(Math.round(a.getBoundingClientRect().left - m.getBoundingClientRect().right));
   });
   const link = [...document.querySelectorAll('.br-text a:not(.mm-tuer)')][0];
   const ls = link ? getComputedStyle(link) : null;
@@ -302,8 +311,8 @@ const schliff = JSON.parse(await s.werte(`(() => {
 pruefe('alle großen Medien im Brief haben DIESELBE Breite',
   schliff.gross.length >= 4 && Math.max(...schliff.gross) - Math.min(...schliff.gross) <= 1,
   schliff.gross.join(' / '));
-pruefe('Text -> Medium und Medium -> Text: überall 36 px Luft (±2)',
-  schliff.abstaende.length > 3 && schliff.abstaende.every(a => Math.abs(a - 36) <= 2),
+pruefe('Video und Text stehen nebeneinander, überall mit derselben Luft (32 px ±2)',
+  schliff.abstaende.length > 3 && schliff.abstaende.every(a => Math.abs(a - 32) <= 2),
   schliff.abstaende.join(', '));
 pruefe('Links im Text sind weder Browser-blau noch unterstrichen',
   !!schliff.link && schliff.link.linie === 'none' && schliff.link.farbe === 'rgb(13, 24, 33)',

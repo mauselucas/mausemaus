@@ -26,6 +26,8 @@
 
     /* --- Karten und Buehne (assets/buehne.js) --- */
     'bu-mehr':            { de: 'Mehr ansehen', en: 'See more' },
+    'bu-kunde':           { de: 'Kunde', en: 'Client' },
+    'bu-jahr':            { de: 'Jahr', en: 'Year' },
     'bu-kapitel':         { de: 'Kapitel {a} von {b}', en: 'Chapter {a} of {b}' },
     'bu-weiter':          { de: 'Weiter', en: 'Next' },
     'bu-zurueck':         { de: 'Zurück', en: 'Back' },

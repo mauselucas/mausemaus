@@ -291,10 +291,13 @@ const TEXT_MESSUNG = `(() => {
        gefuehrte Anfrage steht -- sie ist hoeher als das alte Formular, die
        Blume blieb INNERHALB der Seite, und der Gegenbeweis war blind. */
     const ankerUnten = letzter.getBoundingClientRect().bottom - sc.getBoundingClientRect().top + sc.scrollTop;
+    /* top ausschalten: Blumen am Kontakt-Abschnitt stehen per "top" (buehne.css);
+       mit top UND bottom gewaenne top, und die Blume ruehrte sich nicht. */
+    b.style.top = 'auto'; b.style.translate = 'none';
     b.style.bottom = -(sc.scrollHeight - ankerUnten + 400) + 'px';   // hängt unter den Anker
     void sc.offsetHeight;
     const nachher = sc.scrollHeight;
-    b.style.bottom = '';
+    b.style.bottom = ''; b.style.top = ''; b.style.translate = '';
     return JSON.stringify({ vorher, nachher });
   })()`));
   pruefe('GEGENBEWEIS: eine Blume, die unter ihren Anker ragt, verlängert die Seite',

@@ -123,9 +123,11 @@
           bloecke = bloecke.slice(1);
         }
       }
-      if (untertitel) h += '<p class="br-rolle">' + window.mm.esc(untertitel) + '</p>';
-      h += '<h2 class="br-titel">' + window.mm.esc(titel) +
-           (seite.ist_aktuell ? '<span class="br-laeuft">' + T('laeuft-aktuell', 'läuft aktuell') + '</span>' : '') + '</h2>';
+      /* Rolle und Titel stehen in der Karte RECHTS neben dem Medium (Rechner)
+         bzw. darunter (Handy) -- darum erst hier gebaut, eingesetzt unten. */
+      const kopf = (untertitel ? '<p class="br-rolle">' + window.mm.esc(untertitel) + '</p>' : '') +
+        '<h2 class="br-titel">' + window.mm.esc(titel) +
+        (seite.ist_aktuell ? '<span class="br-laeuft">' + T('laeuft-aktuell', 'läuft aktuell') + '</span>' : '') + '</h2>';
 
       /* Das Coverbild ist das Vorschau-Medium der Karte. Einbettbare Videos
          laden erst beim Klick auf ▶ -- sonst holt die Startseite fünf fremde
@@ -155,14 +157,23 @@
       const anrissBlock = bloecke.find(b => b.typ === 'text');
       h += '<div class="br-karte-vorschau">' +
            (coverHtml || (vorschauBlock ? window.mmBloecke.render(vorschauBlock, 'br-text') : '')) + '</div>';
-      /* Eigene Huelle fuer alles UNTER dem Vorschau-Medium -- Anker fuer die
-         Deko-Blumen (blumen.js): am ganzen Abschnitt laegen die oberen
-         hinter dem breiten Cover und schauten nur mit einem Zipfel heraus. */
-      h += '<div class="br-projekt-rest">' +
+      /* Eckdaten wie im Profil oben: Kunde und Jahr, beide im Admin pflegbar
+         (Felder "Kunde" und "Jahr"). Leere Angaben fallen weg; fehlen beide,
+         gibt es gar keine Tabelle. */
+      const fakten = [[T('bu-kunde', 'Kunde'), seite.kunde], [T('bu-jahr', 'Jahr'), seite.jahr]]
+        .filter(([, w]) => w && String(w).trim());
+      /* Karte nach Lucas' Wahl aus den Entwuerfen (05.10.): auf dem Rechner
+         "2C Geteilt" -- Medium links, Text und Eckdaten rechts --, auf dem
+         Handy "1B Medium zuerst" -- Medium oben, Titel mit Pfeil darunter.
+         Dieselben Elemente, nur das CSS (buehne.css) ordnet sie anders an. */
+      h += '<div class="br-karte-text">' + kopf +
+           '<div class="br-projekt-rest">' +
            (anrissBlock ? '<div class="br-anriss">' + window.mmBloecke.render(anrissBlock, 'br-text') + '</div>' : '') +
+           (fakten.length ? '<dl class="br-fakten">' + fakten.map(([k, w]) =>
+             '<div><dt>' + window.mm.esc(k) + '</dt><dd>' + window.mm.esc(String(w)) + '</dd></div>').join('') + '</dl>' : '') +
            '<button type="button" class="br-mehr-ansehen" aria-haspopup="dialog">' +
-             T('bu-mehr', 'Mehr ansehen') + ' <span aria-hidden="true">→</span></button>' +
-           '</div>';
+             '<span class="br-mehr-text">' + T('bu-mehr', 'Mehr ansehen') + '</span> <span aria-hidden="true">→</span></button>' +
+           '</div></div>';
       s.innerHTML = h;
       s.classList.add('br-karte');
       s.dataset.slug = seite.slug || '';

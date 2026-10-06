@@ -7,37 +7,63 @@
 
 /* ===================== Die Karte ===================== */
 
-/* Eine helle, leicht erhabene Flaeche hinter dem ganzen Eintrag. Sie reicht
-   so weit wie die Medien (--mm-ausbruch) plus 22px Luft. isolation, damit
-   die Flaeche (z-index -1) VOR dem Seitengrund liegt, nicht dahinter. */
+/* Lucas' Wahl aus den Entwuerfen (05.10.): Rechner "2C Geteilt", Handy
+   "1B Medium zuerst". Dieselben Elemente (brief.js), nur anders angeordnet:
+     .br-kopfbild?  .br-karte-vorschau  .br-karte-text (Rolle, Titel, Rest)
+   Die Karte selbst ist so breit wie die Medien (--mm-ausbruch) und traegt
+   ihre Flaeche als ::before. isolation, damit die Flaeche (z-index -1) VOR
+   dem Seitengrund liegt und die Blumen (-2) dahinter. */
 .br-karte { position:relative; isolation:isolate; cursor:pointer;
-  padding:30px 0 34px; margin:0 0 56px; }
-.br-karte::before { content:''; position:absolute; z-index:-1;
-  inset:0 calc(var(--mm-ausbruch) - 22px);
-  background:linear-gradient(180deg, #FFFFFF 0%, #FDFCF8 100%);
-  border-radius:24px;
+  margin:0 var(--mm-ausbruch) 48px; padding:22px;
+  display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); column-gap:32px; align-items:center; }
+.br-karte::before { content:''; position:absolute; z-index:-1; inset:0;
+  background:#FFFFFF; border-radius:24px;
   box-shadow:0 1px 2px rgba(13,24,33,.05), 0 18px 40px -22px rgba(13,24,33,.22),
     inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(13,24,33,.045);
   transition:box-shadow .25s cubic-bezier(.23,1,.32,1); }
-.br-karte > :first-child { margin-top:0; }
 /* Die Deko-Blumen der Karte liegen HINTER ihrer Flaeche (-1) und schauen
    seitlich hervor -- wie Papier, das hinter einer Karte steckt. */
 .br-karte > .mm-blume { z-index:-2; }
-/* Kopfbild buendig oben in der Karte, so breit wie ihre Flaeche: Das Bild
-   hat einen eigenen Cremegrund -- mit Luft darueber stand ein weisser
-   Streifen ueber dem Banner. Jetzt ist es der Kopf der Karte. */
-.br-karte .br-kopfbild { margin:-30px calc(var(--mm-ausbruch) - 22px) -18px; }
-.br-karte .br-kopfbild img { border-radius:24px 24px 0 0; }
-@media (max-width:760px) { .br-karte .br-kopfbild { margin-inline:-14px; } .br-karte .br-kopfbild img { border-radius:20px 20px 0 0; } }
-/* Der Anfang des Textes: drei Zeilen, dann blendet er aus. */
-.br-anriss { max-height:calc(1.8em * 3.4); overflow:hidden; font-size:16.5px;
-  -webkit-mask-image:linear-gradient(#000 40%, transparent);
-  mask-image:linear-gradient(#000 40%, transparent); }
-.br-anriss .br-text p { margin:0; }
-.br-karte-vorschau .md-gallery, .br-karte-vorschau .md-video { margin-bottom:var(--abstand-medium); }
-.br-karte-vorschau .br-bild, .br-karte-vorschau .br-film { margin-top:22px; }
+/* Die Karten sind seit 2C niedrig (rund 360-480px). Die Blumen stehen darum
+   etwa mittig und bleiben in der Hoehe ihrer Karte: vorher ragten grosse
+   Blumen oben hinaus und lagen AUF der Karte darueber, sogar auf deren
+   Video. Ohne das Treiben beim Scrollen -- es trieb sie ueber die Kante. */
+.br-karte > .mm-blume,
+/* Dasselbe fuer den kurzen Abschnitt NACH den Karten ("Schreib mir!"):
+   seine grossen Blumen ragten sonst nach oben auf die letzte Karte. */
+.br-karte ~ .br-abschnitt:not(.br-karte) > .mm-blume {
+  bottom:auto; top:calc(30% + var(--y, 30%) * .3); translate:0 -50%;
+  max-width:150px; animation:none !important; }
+html.mm-bewegung .br-karte > .mm-blume,
+html.mm-bewegung .br-karte ~ .br-abschnitt:not(.br-karte) > .mm-blume { animation:none !important; }
 
-.br-mehr-ansehen { margin-top:14px; display:inline-flex; align-items:center; gap:10px;
+/* Kopfbild (Simplicissimus-Banner): buendig oben ueber beide Spalten. */
+.br-karte .br-kopfbild { grid-column:1 / -1; margin:-22px -22px 18px; }
+.br-karte .br-kopfbild img { border-radius:24px 24px 0 0; }
+
+/* Links das Medium -- ohne eigenen Aussenabstand, es fuellt seine Spalte. */
+.br-karte-vorschau { min-width:0; align-self:center; }
+.br-karte-vorschau .br-bild, .br-karte-vorschau .br-film,
+.br-karte-vorschau .md-gallery, .br-karte-vorschau .md-video,
+.br-karte-vorschau .mm-baustein { margin:0 !important; }
+
+/* Rechts: Rolle, Titel, Anfang des Textes, Eckdaten, Knopf */
+.br-karte-text { min-width:0; padding:6px 8px 6px 0; }
+.br-karte-text .br-rolle { margin:0 0 6px; }
+.br-karte-text .br-titel { margin:0 0 14px; }
+/* Nur der erste Absatz, nach vier Zeilen mit "…" -- die ganze Geschichte
+   steht in der Buehne. */
+.br-anriss .br-text { font-size:15.5px; line-height:1.75; }
+.br-anriss .br-text > :not(:first-child) { display:none; }
+.br-anriss .br-text > :first-child { margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+/* Eckdaten im Stil der Tabelle im Profil oben (.br-infos) */
+.br-fakten { margin:18px 0 0; display:grid; border-top:1px solid #E7E3D6; }
+.br-fakten > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  padding:9px 0; border-bottom:1px solid #E7E3D6; }
+.br-fakten dt { font-family:'Space Mono',monospace; font-size:9.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--br-leise); }
+.br-fakten dd { margin:0; font-family:'Manrope',sans-serif; font-size:14.5px; color:#232c31; text-align:right; }
+
+.br-mehr-ansehen { margin-top:20px; display:inline-flex; align-items:center; gap:10px;
   font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
   padding:13px 20px; border:0; border-radius:99px; cursor:pointer;
   background:#0D1821; color:#F0F4EF;
@@ -49,10 +75,32 @@
 @media (hover:hover) and (pointer:fine) {
   .br-karte:hover::before { box-shadow:0 2px 4px rgba(13,24,33,.06), 0 26px 52px -24px rgba(13,24,33,.30),
     inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(13,24,33,.05); }
-  .br-karte:hover .br-mehr-ansehen span { translate:4px 0; }
+  .br-karte:hover .br-mehr-ansehen span:last-child { translate:4px 0; }
 }
+
+/* ---- Handy: "1B Medium zuerst" ----
+   Medium randlos oben, darunter Rolle und Titel, rechts daneben ein runder
+   Pfeil; der Textanfang auf zwei Zeilen. Kein overflow:hidden an der Karte
+   -- sonst verschwaenden die Blumen dahinter --, die oberen Ecken rundet das
+   Medium selbst. */
 @media (max-width:760px) {
-  .br-karte::before { inset:0 -14px; border-radius:20px; }
+  .br-karte { display:block; padding:0; margin-bottom:32px; }
+  .br-karte::before { border-radius:20px; }
+  .br-karte .br-kopfbild { margin:0; }
+  .br-karte .br-kopfbild img { border-radius:20px 20px 0 0; }
+  .br-karte .br-kopfbild + .br-karte-vorschau :is(.br-bild, .br-film, figure, .md-video, img) { border-radius:0 !important; }
+  .br-karte-vorschau :is(.br-bild, .br-film, .md-video) { border-radius:20px 20px 0 0; box-shadow:none; }
+  .br-karte-vorschau .md-gallery figure, .br-karte-vorschau .md-gallery img { border-radius:20px 20px 0 0; box-shadow:none; }
+  .br-karte-text { position:relative; padding:18px 18px 20px; }
+  .br-karte-text .br-rolle, .br-karte-text .br-titel { padding-right:62px; }
+  .br-karte-text .br-titel { font-size:25px; margin-bottom:10px; }
+  .br-anriss .br-text { color:var(--br-leise); }
+  .br-anriss .br-text > :first-child { -webkit-line-clamp:2; }
+  .br-fakten { display:none; }
+  .br-mehr-ansehen { position:absolute; top:16px; right:16px; margin:0; width:48px; height:48px; padding:0;
+    justify-content:center; font-size:19px; letter-spacing:0; }
+  /* Die Beschriftung bleibt fuer Screenreader da, nur unsichtbar. */
+  .br-mehr-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 }
 
 /* ===================== Die Bühne ===================== */

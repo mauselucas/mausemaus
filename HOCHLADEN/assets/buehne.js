@@ -327,6 +327,12 @@
     if (!dialog || !dialog.open) return;
     var nr = zustand ? zustand.nr : -1;
     var ziel = vorschauVon(nr);
+    /* Fokus zurück dorthin, wo man herkam -- oder zum Knopf der Karte,
+       falls man über "Nächstes Projekt" woanders gelandet ist. ERST NACH
+       dialog.close(): Solange das Fenster offen ist, ist der Brief inert
+       und nimmt keinen Fokus an. Mit Verwandlung laeuft das Schliessen
+       verzoegert -- vorher landete der Fokus dann im Nichts (<body>). */
+    var knopf = (nr >= 0 && window.mmProjekte[nr].element.querySelector('.br-mehr-ansehen')) || karteZuletzt;
     var zumachen = function () {
       var kasten = document.getElementById('mm-vorschau-kasten');
       if (kasten) { kasten.hidden = true; document.body.appendChild(kasten); }
@@ -335,6 +341,7 @@
       dialog.querySelector('.bu-flaeche').innerHTML = '';   // Videos anhalten
       var z = dialog.querySelector('.bu-medium'); if (z) z.style.viewTransitionName = '';
       if (ziel) ziel.style.viewTransitionName = 'bu-medium';
+      if (knopf) knopf.focus({ preventScroll: true });
     };
     var quelle = dialog.querySelector('.bu-kapitel:not(.bu-geht) .bu-medium');
     if (document.startViewTransition && !ruhig() && ziel && quelle && zustand.i === 0) {
@@ -345,10 +352,6 @@
       if (ziel) ziel.style.viewTransitionName = '';
     }
     zustand = null;
-    /* Fokus zurück dorthin, wo man herkam -- oder zum Knopf der Karte,
-       falls man über "Nächstes Projekt" woanders gelandet ist. */
-    var knopf = (nr >= 0 && window.mmProjekte[nr].element.querySelector('.br-mehr-ansehen')) || karteZuletzt;
-    if (knopf) knopf.focus({ preventScroll: true });
     if (!ausVerlauf && eigenerEintrag) { eigenerEintrag = false; history.back(); }
     else if (!ausVerlauf && location.hash) history.replaceState(null, '', location.pathname + location.search);
   }
