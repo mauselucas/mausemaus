@@ -150,6 +150,7 @@ HOCHLADEN/
   welt/<slug>.html  blog/<slug>.html   vorgebaute Fassungen (erzeugt)
   medien/<projekt>/   Bilder, die ohne Admin-Login hochgeladen wurden (z. B. istanbul-katzen)
   medien/loops/       die drei frueheren GIFs als Loop-MP4 + Standbild (06.10.2026)
+  emotes/             die ersten sechs Emotes (7TV, 64 px, AVIF); neue kommen per Admin in den Speicher
   vorschau/<slug>.jpg                  Teilen-Vorschaubilder 1200x630 (erzeugt)
   assets/
     fonts.css      Schriften (Tropi, Space Grotesk, Space Mono) — 171 kB
@@ -168,6 +169,7 @@ HOCHLADEN/
     texte.js       die festen Oberflächentexte in beiden Sprachen
     buehne.js/.css Projekte als Karten + "Bühne mit Kapiteln" (siehe Abschnitt unten)
     loopvideo.js   Admin: Video/GIF -> kleines stummes Loop-MP4 + Standbild (siehe unten)
+    emotes-admin.js  Admin: Emote-Bibliothek (Knopf "Emotes") + Vorschläge beim Tippen von ":"
     vendor/mediabunny-1.61.3.min.mjs  Video-Umwandlung im Browser (MPL-2.0), nur im Admin
     anfrage.js     Kontaktformular als geführte Anfrage (Frage für Frage, Brief zum Schluss).
                    Fragen/Antworten stehen in index.html, Englisch in texte.js ("anf-…").
@@ -645,3 +647,30 @@ MP4 sind es 0,76 MB. Darum:
 
 Geprüft in `tests/pruefe-loopvideo.mjs`, inklusive echter Umwandlung
 eines Full-HD-Videos mit Ton (`tests/feste/loop-probe-*.mov/.gif`).
+
+## Emotes wie im Twitch-Chat (neu am 06.10.2026)
+
+Im Text `:PepeLaugh:` schreiben, dann steht dort das Emote als kleines Bild
+mitten in der Zeile, 1,75-mal so hoch wie die Schrift. Die Zeile wird
+dadurch nicht höher, weil das Bild negative Ränder hat.
+
+- **Welche es gibt:** Die stehen in der Tabelle `emotes` (Name, Adresse,
+  Maße). Im Admin legst du sie oben über **Emotes** an. Dateien
+  hineinziehen, der Name kommt aus dem Dateinamen (`PepeLaugh-2x.avif`
+  wird zu `PepeLaugh`). Die Dateien bleiben unverändert, also bewegt sie
+  sich weiter und bleibt durchsichtig.
+- **Beim Schreiben:** `:` plus Buchstaben zeigt Vorschläge. Pfeiltasten
+  wählen, Enter, Tab oder ein Klick setzen das Emote ein, Esc schließt die
+  Liste.
+- **Regeln:** Groß- und Kleinschreibung zählt. Ein unbekannter Name bleibt
+  als Text stehen. In Link-Adressen und HTML-Attributen wird nichts
+  ersetzt. In Vorschautexten für Google und beim Teilen fallen die Namen
+  weg.
+- **Laden:** `db.js` (`mmLoadEmotes`) lädt die Tabelle parallel zu den
+  Seiten. index.html und welt.html warten auf beides. Der Rückfall heißt
+  `SEED_EMOTES` in `seed.js` (schreibt `hochladen.mjs`).
+- **Grenze:** Bewegte AVIF-Bilder lassen sich nicht anhalten. Bei
+  „Bewegung reduzieren“ laufen Emotes also weiter.
+
+Geprüft in `tests/pruefe-emotes.mjs`, die Vorschläge mit echten Tastendrücken.
+

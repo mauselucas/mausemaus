@@ -194,7 +194,7 @@
   const ziel = document.getElementById('inhalt');
   const welt = document.getElementById('welt');
 
-  const seite = await window.mmLoadSeite('welt', slug);
+  const [seite] = await Promise.all([window.mmLoadSeite('welt', slug), window.mmLoadEmotes()]);
   if (!seite) {
     document.title = T('welt-nicht-gefunden', 'Nicht gefunden') + ' — mausemaus';
     ziel.innerHTML = '<h1 class="welt-titel">' + T('welt-nichts-titel', 'Hier ist nichts.') + '</h1>' +

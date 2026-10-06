@@ -56,7 +56,29 @@ function inline(t) {
     const url = linkZiel(ziel);
     return url ? `<a href="${url}" target="_blank" rel="noopener">${text}</a>` : ganz;
   });
-  return s;
+  return emotesEinsetzen(s);
+}
+
+/* Emotes wie im Twitch-Chat: :PepeLaugh: im Text wird zum kleinen Bild in
+   derselben Zeile. Welche es gibt, steht in der Tabelle `emotes` (im Admin
+   unter "Emotes" pflegbar); db.js legt sie als window.mmEmotes ab, BEVOR
+   der Text gezeichnet wird. Ein unbekannter Name bleibt einfach stehen --
+   lieber ":Tippfehler:" im Text als eine Lücke.
+
+   Ersetzt wird nur AUSSERHALB von HTML-Tags: Stünde :Name: in einer
+   Link-Adresse oder einem Attribut, ginge der Link sonst kaputt.
+   Groß-/Kleinschreibung zählt, wie auf Twitch. */
+const EMOTE = /(<[^>]*>)|:([A-Za-z0-9_]{2,40}):/g;
+function emotesEinsetzen(s) {
+  const alle = typeof window !== 'undefined' && window.mmEmotes;
+  if (!alle || s.indexOf(':') < 0) return s;
+  return s.replace(EMOTE, (ganz, tag, name) => {
+    if (tag) return tag;
+    const e = Object.prototype.hasOwnProperty.call(alle, name) && alle[name];
+    if (!e || !e.url) return ganz;
+    const masse = e.breite && e.hoehe ? ` width="${+e.breite}" height="${+e.hoehe}"` : '';
+    return `<img class="mm-emote" src="${esc(e.url)}" alt=":${name}:" title="${name}"${masse} decoding="async">`;
+  });
 }
 
 /* Prüft und vervollständigt eine Adresse. Fehlendes https:// wird ergänzt —
@@ -430,6 +452,7 @@ function excerpt(md, max = 150) {
   const plain = String(md ?? '')
     .replace(/^!\[.*$/gm, '').replace(/^https?:\/\/\S+$/gm, '')
     .replace(/^#{2,3}\s+/gm, '').replace(/^-{3,}$/gm, '')
+    .replace(/:[A-Za-z][A-Za-z0-9_]{1,39}:/g, '')
     .replace(/[*>_`]/g, '').replace(/\s+/g, ' ').trim();
   return plain.length > max ? plain.slice(0, max).replace(/\s\S*$/, '') + '…' : plain;
 }

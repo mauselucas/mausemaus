@@ -136,3 +136,23 @@ create policy "media oeffentlich lesbar" on storage.objects
 drop policy if exists "media schreiben nur angemeldet" on storage.objects;
 create policy "media schreiben nur angemeldet" on storage.objects
   for insert to authenticated with check (bucket_id = 'media');
+
+-- ---------- Emotes (06.10.2026) ----------
+-- :PepeLaugh: im Text wird zum kleinen Bild (shared.js, emotesEinsetzen).
+-- Im Admin unter "Emotes" pflegbar. Lesen darf jeder, schreiben nur eingeloggt.
+create table if not exists public.emotes (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique check (name ~ '^[A-Za-z0-9_]{2,40}$'),
+  url text not null,
+  breite int,
+  hoehe int,
+  created_at timestamptz not null default now()
+);
+alter table public.emotes enable row level security;
+drop policy if exists "eingeloggt darf alles" on public.emotes;
+create policy "eingeloggt darf alles" on public.emotes for all to authenticated using (true) with check (true);
+drop policy if exists "oeffentlich liest emotes" on public.emotes;
+create policy "oeffentlich liest emotes" on public.emotes for select to anon using (true);
+revoke all on public.emotes from anon;
+grant select (id, name, url, breite, hoehe) on public.emotes to anon;
+grant all on public.emotes to authenticated;

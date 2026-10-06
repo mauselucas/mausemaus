@@ -250,6 +250,11 @@ const alt = await readFile(new URL('./assets/seed.js', HOCH), 'utf8');
    sie stehen im alten seed.js und kosten nichts -- und sie zu entfernen ist
    Aufgabe des Aufraeumens, nicht dieses Skripts. */
 const altteil = alt.slice(alt.indexOf('window.SEED_SETTINGS'), alt.indexOf('window.SEED_SEITEN'));
+/* Emotes (:PepeLaugh:) -- ohne sie stünde im Notfall nur der Name im Text. */
+const emoteAntwort = await fetch(`${URL_DB}/rest/v1/emotes?select=name,url,breite,hoehe&order=name.asc`,
+  { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
+if (!emoteAntwort.ok) throw new Error('Emotes nicht lesbar: HTTP ' + emoteAntwort.status);
+const emotes = await emoteAntwort.json();
 const heute = new Date().toLocaleDateString('de-DE');
 const neu = `/* mausemaus — Notfall-Daten.
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
@@ -259,6 +264,7 @@ const neu = `/* mausemaus — Notfall-Daten.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 ${altteil}window.SEED_SEITEN = ${JSON.stringify({ brief, projekte, welten }, null, 2)};
+window.SEED_EMOTES = ${JSON.stringify(emotes, null, 2)};
 `;
 await writeFile(new URL('./assets/seed.js', HOCH), neu);
 console.log(`   ${Math.round(neu.length / 1024)} kB (vorher ${Math.round(alt.length / 1024)} kB)`);

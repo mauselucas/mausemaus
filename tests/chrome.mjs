@@ -124,6 +124,8 @@ export async function oeffne(url, { port = 9333, breite = 1280, hoehe = 900 } = 
       for (const type of ['keyDown', 'keyUp'])
         await ruf('Input.dispatchKeyEvent', { type, key, code, windowsVirtualKeyCode: keyCode });
     },
+    /* Echtes Tippen ins fokussierte Feld (löst ein echtes input-Ereignis aus). */
+    async tippe(text) { await ruf('Input.insertText', { text }); },
     fehlerAufSeite() { return fehler.slice(); },
     async zu() { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${ziel.id}`); },
   };

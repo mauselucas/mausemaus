@@ -130,7 +130,7 @@ html, body { background:#FBFAF6; }
    Attribut -- das Bild wäre gestaucht oder gezerrt. Mit height:auto rechnet
    der Browser die Höhe aus dem Seitenverhältnis und hält den Platz von
    Anfang an in der RICHTIGEN Größe frei, statt nur 120px zu raten. */
-.br-text :is(img, video.mm-loop) { display:block; width:100%; height:auto; border-radius:var(--mm-radius);
+.br-text :is(img:not(.mm-emote), video.mm-loop) { display:block; width:100%; height:auto; border-radius:var(--mm-radius);
   min-height:120px; background:#F2EFE6; }
 .br-text figcaption { font-family:'Space Mono',monospace; font-size:10.5px;
   letter-spacing:.05em; color:#6E7873; margin-top:10px; text-align:center; }

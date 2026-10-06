@@ -409,7 +409,7 @@
 <script>
 (async () => {
   const [brief, projekte] = await Promise.all([
-    window.mmLoadSeite('brief', 'brief'), window.mmLoadProjektSeiten(),
+    window.mmLoadSeite('brief', 'brief'), window.mmLoadProjektSeiten(), window.mmLoadEmotes(),
   ]);
   const briefBloecke = (brief && brief.bloecke) || [];
   const abschnitte = window.mmBrief(document.getElementById('brief'),

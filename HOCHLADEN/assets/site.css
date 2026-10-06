@@ -26,21 +26,13 @@ body {
 .tropi { font-family: 'TropiWeb', sans-serif; font-weight: 400; }
 .mono  { font-family: 'Space Mono', monospace; }
 
-/* Hier standen frueher rund 230 Zeilen fuer die Kachel-Startseite, die es
-   seit dem Umbau auf den Brief nicht mehr gibt: Header, Filterleiste,
-   Kachel-Raster, Instagram-Panel, "Laeuft aktuell", das Detail-Fenster
-   samt Bewegungsuebergang und die Persoenlichkeits-Pille. Nichts davon
-   wurde noch von irgendeiner Seite benutzt -- gemessen, nicht vermutet
-   (siehe pruefe-tempo.mjs) -- aber site.css wird von index.html,
-   welt.html, 404.html UND admin.html geladen, also trug jeder Besucher
-   die 10 kB mit.
-
-   BEHALTEN wurde alles, was noch jemand braucht: .wrap, .deko/.flower und
-   .md-* (der Editor und die Welten). .wrap, .deko/.flower, .meta und der
-   Footer stehen seit dem 05.10.2026 in seite404.css (nur die 404-Seite),
-   .prose in admin.css (nur die Editor-Vorschau) und das ganze mm-*-Blocksystem weiter unten -- dessen
-   Farbregeln greifen erst, WENN Lucas einen Block einfaerbt, sie duerfen
-   also nie nach "wird gerade nicht benutzt" weggeworfen werden. */
+/* Altlasten der Kachel-Startseite sind entfernt (Git-Verlauf). Das
+   mm-*-Blocksystem unten bleibt, auch wenn gerade kein Block eingefaerbt
+   ist. */
+/* Emotes wie im Twitch-Chat (shared.js: emotesEinsetzen). 1,75 x Schrift,
+   negative Raender: die Zeile wird dadurch kaum hoeher. */
+img.mm-emote { display:inline-block; height:1.75em; width:auto; vertical-align:middle;
+  margin:-.5em .06em; }
 .md-gallery { display: grid; gap: 12px; }
 .md-gallery-2 { grid-template-columns: repeat(2, 1fr); }
 .md-gallery-3 { grid-template-columns: repeat(3, 1fr); }

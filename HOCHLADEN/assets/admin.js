@@ -19,6 +19,7 @@ import {
 import { mountBlockEditor } from '/assets/blockeditor.js';
 import { mountUebersetzung } from '/assets/uebersetzen.js';
 import { richteAnleitungEin } from '/assets/anleitung.js';
+import { richteEmotesEin } from '/assets/emotes-admin.js';
 
 const CFG = window.MM_CONFIG || {};
 const { coverFromVideoUrl, slugify, esc } = window.mm;
@@ -94,12 +95,17 @@ $('#btn-logout').addEventListener('click', async () => {
   location.reload();
 });
 
+let EMOTES = null;
 async function starten() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return;
   $('#login').hidden = true;
   $('#app').hidden = false;
   $('#wer').textContent = user.email;
+  /* Emotes vor allem anderen: Die Vorschau im Editor braucht sie, sonst
+     stünde dort ":PepeLaugh:" statt des Bildes. */
+  if (!EMOTES) EMOTES = richteEmotesEin({ sb, toast, laden, esc });
+  await EMOTES.holen();
   wurzelReiter();
   await listeLaden();
 }

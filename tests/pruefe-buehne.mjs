@@ -56,10 +56,16 @@ const stand = `JSON.stringify({
   /* ---- Kapitel ---- */
   const kap = JSON.parse(await s.werte(`JSON.stringify(Object.fromEntries(window.mmProjekte.map(p =>
     [p.slug, window.mmKapitel(p.bloecke, !!p.coverHtml).map(k => (k.medium === 'cover' ? 'cover' : k.medium ? k.medium.typ : '-') + '+' + k.texte.length)])))`));
-  /* Istanbul: Cover + 2 Texte, dann je ein Bild/GIF mit seinem Text. */
-  pruefe('Istanbul: 5 Kapitel, jedes Medium beginnt eines',
-    JSON.stringify(kap['istanbul-katzen']) === JSON.stringify(['cover+2', 'bild+1', 'bild+1', 'gif+1', 'bild+2']),
-    JSON.stringify(kap['istanbul-katzen']));
+  /* Istanbul: Lucas baut das Projekt im Admin um (am 06.10. Cover raus,
+     Loop-Video und YouTube als Bloecke rein). Darum keine feste Liste,
+     sondern die REGEL: jedes Medium (und ein Cover) beginnt ein Kapitel,
+     keins ist ohne Medium. Die Zahl N gilt unten fuer alle Zaehler. */
+  const istMedien = await s.werte(`(p => p.bloecke.filter(b => ['bild', 'gif', 'video'].includes(b.typ)).length
+    + (p.coverHtml ? 1 : 0))(window.mmProjekte[${nr('istanbul-katzen')}])`);
+  const N = kap['istanbul-katzen'].length;
+  pruefe('Istanbul: ein Kapitel je Medium, keins ohne Medium',
+    N === istMedien && N >= 3 && kap['istanbul-katzen'].every(x => !x.startsWith('-')),
+    JSON.stringify(kap['istanbul-katzen']) + ' bei ' + istMedien + ' Medien');
   /* Simplicissimus: kein Cover -- der Text vor dem ersten GIF gehoert zu
      dessen Kapitel, das Banner ist das Kopfbild, der letzte Trenner faellt weg. */
   /* Zahl aus dem Inhalt statt fest: Lucas ändert Simplicissimus im Admin
@@ -76,7 +82,7 @@ const stand = `JSON.stringify({
   await s.warte(700);   // Verwandlung + Einblenden (0,46 s) -- echte Zeit, kein Zustand
   let st = JSON.parse(await s.werte(stand));
   pruefe('Klick auf "Mehr ansehen" öffnet die Bühne als MODALES Fenster', st.offen && st.modal, JSON.stringify(st));
-  pruefe('…mit Titel und "Kapitel 1 von 5"', st.titel.includes('Travell4llove') && st.zaehler === 'Kapitel 1 von 5', st.titel + ' · ' + st.zaehler);
+  pruefe('…mit Titel und "Kapitel 1 von N"', st.titel.includes('Travell4llove') && st.zaehler === `Kapitel 1 von ${N}`, st.titel + ' · ' + st.zaehler);
   pruefe('…die Adresse nennt das Projekt', st.hash === '#istanbul-katzen', st.hash);
   pruefe('…und der Fokus steht in der Bühne', st.fokus.includes('bu-titel'), st.fokus);
 
@@ -93,19 +99,19 @@ const stand = `JSON.stringify({
   await s.taste('ArrowRight', 'ArrowRight', 39);
   await s.warte(500);
   st = JSON.parse(await s.werte(stand));
-  pruefe('Pfeil rechts schaltet ein Kapitel weiter', st.zaehler === 'Kapitel 2 von 5', st.zaehler);
+  pruefe('Pfeil rechts schaltet ein Kapitel weiter', st.zaehler === `Kapitel 2 von ${N}`, st.zaehler);
   pruefe('…und die Adresse merkt sich das Kapitel', st.hash === '#istanbul-katzen/2', st.hash);
   const nachWechsel = Number(await s.werte(`document.querySelectorAll('.bu-kapitel').length`));
   pruefe('…das alte Kapitel ist danach wieder weg', nachWechsel === 1, nachWechsel + ' im Dokument');
   await s.taste('ArrowLeft', 'ArrowLeft', 37);
   await s.warte(500);
   st = JSON.parse(await s.werte(stand));
-  pruefe('Pfeil links geht zurück', st.zaehler === 'Kapitel 1 von 5', st.zaehler);
-  for (let i = 0; i < 4; i++) { await s.werte(`document.querySelector('.bu-weiter').click()`); await s.warte(120); }
+  pruefe('Pfeil links geht zurück', st.zaehler === `Kapitel 1 von ${N}`, st.zaehler);
+  for (let i = 0; i < N - 1; i++) { await s.werte(`document.querySelector('.bu-weiter').click()`); await s.warte(120); }
   await s.warte(500);
   const letzt = JSON.parse(await s.werte(`JSON.stringify({ z: document.querySelector('.bu-zaehler').textContent,
     w: document.querySelector('.bu-weiter').textContent })`));
-  pruefe('schnelles Klicken landet sauber im letzten Kapitel', letzt.z === 'Kapitel 5 von 5', letzt.z);
+  pruefe('schnelles Klicken landet sauber im letzten Kapitel', letzt.z === `Kapitel ${N} von ${N}`, letzt.z);
   pruefe('…dort heißt der Knopf "Nächstes Projekt: …"', letzt.w.startsWith('Nächstes Projekt: '), letzt.w);
   await s.werte(`document.querySelector('.bu-weiter').click()`);
   await s.warte(500);
@@ -227,7 +233,7 @@ for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
   await s.warte(700);
   const st = JSON.parse(await s.werte(stand));
   pruefe('ein geteilter Link /#istanbul-katzen/3 öffnet genau dieses Kapitel',
-    st.offen && st.zaehler === 'Kapitel 3 von 5', st.zaehler);
+    st.offen && /^Kapitel 3 von \d+$/.test(st.zaehler), st.zaehler);
   await s.zu();
 }
 

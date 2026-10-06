@@ -141,6 +141,37 @@
     }
   };
 
+  /* Emotes (:PepeLaugh: im Text, siehe emotesEinsetzen() in shared.js).
+     Muss VOR dem Zeichnen fertig sein, darum laden index.html und
+     welt.html es parallel zu den Seiten und warten auf beides. Scheitert
+     alles, bleibt mmEmotes leer -- dann steht im Text einfach :Name:, die
+     Seite selbst funktioniert unverändert. */
+  const CACHE_EMO = 'mm.emotes.v1';
+  const alsKarte = (liste) => {
+    const k = {};
+    for (const e of liste || []) if (e && e.name && e.url) k[e.name] = { url: e.url, breite: e.breite, hoehe: e.hoehe };
+    return (window.mmEmotes = k);
+  };
+  window.mmLoadEmotes = async function () {
+    if (!eingerichtet) { await seedHolen(); return alsKarte(window.SEED_EMOTES); }
+    try {
+      const r = await fetch(`${CFG.url}/rest/v1/emotes?select=name,url,breite,hoehe&order=name.asc`,
+        { headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const daten = await r.json();
+      try { localStorage.setItem(CACHE_EMO, JSON.stringify(daten)); } catch {}
+      return alsKarte(daten);
+    } catch (e) {
+      console.warn('[mausemaus] Emotes nicht erreichbar:', e.message);
+      try {
+        const c = JSON.parse(localStorage.getItem(CACHE_EMO) || 'null');
+        if (c) return alsKarte(c);
+      } catch {}
+      await seedHolen();
+      return alsKarte(window.SEED_EMOTES);
+    }
+  };
+
   /* ---------- Notfall-Daten erst holen, wenn sie gebraucht werden ----------
 
      seed.js ist 75 kB und lag frueher als festes <script> in jeder Seite --
