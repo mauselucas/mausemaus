@@ -273,21 +273,24 @@ window.SEED_SEITEN = {
         "breite": "normal",
         "inhalt": {
           "art": "persoenlich",
+          "foto": "/medien/lucas/lucas-blume-720x540.webp",
           "farbe": null,
           "rolle": "hallo",
           "titel": "Hallo ich bin",
           "kicker": "Video Editor & Motion Designer · Köln",
-          "zusatz": "Lucas :)"
+          "zusatz": "Lucas :)",
+          "foto_text": "Lucas liegt in einer Blumenwiese und hält lachend ein Gänseblümchen in die Kamera"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
         "inhalt_en": {
           "titel": "Hi, I'm",
           "kicker": "Video Editor & Motion Designer · Cologne",
-          "zusatz": "Lucas :)"
+          "zusatz": "Lucas :)",
+          "foto_text": "Lucas lying in a flower meadow, laughing and holding a daisy up to the camera"
         },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 10,
-        "updated_at": "2026-10-06T19:03:56.680028+00:00"
+        "updated_at": "2026-10-06T19:23:03.557477+00:00"
       },
       {
         "id": "69222574-03b4-434a-b473-8a50d636d24c",
@@ -614,11 +617,9 @@ window.SEED_SEITEN = {
         "breite": "normal",
         "inhalt": {
           "art": "kontakt",
-          "email": "lucasschoenwald03@gmail.com",
           "farbe": "#BFCC94",
           "rolle": "kontakt",
-          "titel": "Schreib mir!",
-          "telefon": "0151 68186659"
+          "titel": "Schreib mir!"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
         "inhalt_en": {
@@ -626,7 +627,7 @@ window.SEED_SEITEN = {
         },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 110,
-        "updated_at": "2026-09-04T15:40:01.640208+00:00"
+        "updated_at": "2026-10-06T19:23:03.557477+00:00"
       }
     ]
   },
