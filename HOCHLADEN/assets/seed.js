@@ -657,14 +657,14 @@ window.SEED_SEITEN = {
           "typ": "bild",
           "breite": "voll",
           "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1788561911491-simpli-kanal10-1600x397.webp){gross}{Simplicissimus}",
+            "roh": "",
             "ohne_rahmen": true
           },
           "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
           "inhalt_en": null,
           "created_at": "2026-09-04T22:04:47.538314+00:00",
           "sort_order": 9,
-          "updated_at": "2026-09-04T22:45:11.936555+00:00"
+          "updated_at": "2026-10-06T17:02:52.332431+00:00"
         },
         {
           "id": "0fcd0502-bc1f-4eeb-8a9b-bcafb6ea81d4",
@@ -680,20 +680,6 @@ window.SEED_SEITEN = {
           "created_at": "2026-09-04T17:48:51.112385+00:00",
           "sort_order": 10,
           "updated_at": "2026-09-04T22:27:16.058006+00:00"
-        },
-        {
-          "id": "6f7927cc-403e-4d79-be09-1fd37c674459",
-          "typ": "gif",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1788558236349-simpliintro-ezgif-com-video-to-gif-converter-800x450.gif)",
-            "ohne_rahmen": true
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-09-04T21:43:48.39825+00:00",
-          "sort_order": 11,
-          "updated_at": "2026-09-04T21:44:26.041065+00:00"
         },
         {
           "id": "829b7ce8-2eae-4c55-8a31-a44d827c44b6",
@@ -744,14 +730,14 @@ window.SEED_SEITEN = {
           "typ": "gif",
           "breite": "normal",
           "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1788555758886-ezgif-74e31e2cfc082377-800x450.gif){gross}{Simplicissimus \"Die gruseligste Waffe der CIA\" – 1,35M Aufrufe}",
+            "roh": "![](/medien/loops/simplicissimus-intro-800x450.mp4){gross}{Simplicissimus \"Die gruseligste Waffe der CIA\" – 1,35M Aufrufe}",
             "ohne_rahmen": true
           },
           "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
           "inhalt_en": null,
           "created_at": "2026-09-04T21:02:32.417678+00:00",
           "sort_order": 17.5,
-          "updated_at": "2026-09-04T21:35:20.064488+00:00"
+          "updated_at": "2026-10-06T17:38:59.02999+00:00"
         },
         {
           "id": "c96f1b4b-d0c4-400c-8636-a7b5d9780121",
@@ -767,6 +753,19 @@ window.SEED_SEITEN = {
           "created_at": "2026-09-04T18:48:22.105495+00:00",
           "sort_order": 17.625,
           "updated_at": "2026-09-04T22:32:09.724291+00:00"
+        },
+        {
+          "id": "704d1b69-c568-487e-8d56-8658df63fa0b",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": ""
+          },
+          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
+          "inhalt_en": null,
+          "created_at": "2026-10-06T17:21:21.763779+00:00",
+          "sort_order": 17.6875,
+          "updated_at": "2026-10-06T17:21:24.957067+00:00"
         },
         {
           "id": "54724b89-f3c5-463a-a6e6-d521423a1a9c",
@@ -963,13 +962,13 @@ window.SEED_SEITEN = {
           "typ": "gif",
           "breite": "voll",
           "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1790341118605-mausdemaus2-ezgif-com-video-to-gif-converter-800x450.gif){gross}{Wenn ich als Trader neu starten müsste, würde ich DAS machen}"
+            "roh": "![](/medien/loops/bastian-keller-800x450.mp4){gross}{Wenn ich als Trader neu starten müsste, würde ich DAS machen}"
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": null,
           "created_at": "2026-09-25T12:58:15.752992+00:00",
           "sort_order": 25,
-          "updated_at": "2026-09-25T13:00:19.928012+00:00"
+          "updated_at": "2026-10-06T17:38:59.02999+00:00"
         },
         {
           "id": "005f30e0-2eae-4e4c-845f-dedd91e95525",
@@ -1052,7 +1051,7 @@ window.SEED_SEITEN = {
       "untertitel": "Freelance Motion Designer · Travell4llove",
       "kunde": "Travell4llove",
       "jahr": "2026",
-      "cover_url": "https://i.ytimg.com/vi/xelwbWPUmEo/maxresdefault.jpg",
+      "cover_url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791308774105-4-1536x864.webp",
       "cover_pos": "50% 50%",
       "video_url": "https://www.youtube.com/watch?v=xelwbWPUmEo",
       "embed_ok": true,
@@ -1061,7 +1060,7 @@ window.SEED_SEITEN = {
       "status": "published",
       "sort_order": 2,
       "created_at": "2026-10-05T10:27:14.803521+00:00",
-      "updated_at": "2026-10-05T10:31:07.262934+00:00",
+      "updated_at": "2026-10-06T17:46:14.773682+00:00",
       "titel_en": "Intro & graphics for Travell4llove",
       "untertitel_en": "Freelance Motion Designer · Travell4llove",
       "bloecke": [
@@ -1162,15 +1161,15 @@ window.SEED_SEITEN = {
           "typ": "gif",
           "breite": "voll",
           "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196402621-intro-800x450.gif){gross}{Das fertige Intro}"
+            "roh": "![](/medien/loops/istanbul-intro-800x450.mp4){gross}{Das fertige Intro}"
           },
           "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
           "inhalt_en": {
-            "roh": "![The finished intro](/medien/istanbul-katzen/intro.webp){gross}{The finished intro}"
+            "roh": "![](/medien/loops/istanbul-intro-800x450.mp4){gross}{The finished intro}"
           },
           "created_at": "2026-10-05T10:27:14.803521+00:00",
           "sort_order": 70,
-          "updated_at": "2026-10-05T10:33:36.585859+00:00"
+          "updated_at": "2026-10-06T17:38:59.02999+00:00"
         },
         {
           "id": "46c496b8-111d-4b43-869e-b74f6a076b1d",
