@@ -26,6 +26,7 @@ const messen = `(async () => {
   return JSON.stringify({
     da: !!img, geladen: img ? img.naturalWidth : 0, alt: img ? img.alt : '',
     masse: img ? img.getAttribute('width') + 'x' + img.getAttribute('height') : '',
+    echt: img ? img.naturalWidth + 'x' + img.naturalHeight : '',
     foto, gruss, kicker,
     deckt: ueber(foto, gruss) || ueber(foto, kicker),
     schraeg: f ? getComputedStyle(f).rotate : 'none',
@@ -45,7 +46,9 @@ const messen = `(async () => {
   pruefe('das Foto steht beim Gruß', m.da);
   pruefe('…ist geladen', m.geladen > 0, String(m.geladen));
   pruefe('…mit Beschreibung für Screenreader', m.alt.length > 20, m.alt);
-  pruefe('…und Maßen (kein Springen beim Laden)', m.masse === '720x540', m.masse);
+  /* Die Maße kommen aus dem Dateinamen (…-720x720.webp) und müssen zum
+     echten Bild passen -- egal, welches Foto Lucas gerade drin hat. */
+  pruefe('…und Maßen (kein Springen beim Laden)', m.masse === m.echt && m.masse !== 'nullxnull', m.masse + ' / echt ' + m.echt);
   pruefe('…rechts neben "Hallo ich bin Lucas :)"', m.foto && m.foto.left > m.gruss.left + 200 &&
     m.foto.top < m.gruss.bottom && m.foto.bottom > m.gruss.top, m.foto && `${Math.round(m.foto.left)} / ${Math.round(m.gruss.left)}`);
   pruefe('…ohne Gruß oder Unterzeile zu verdecken', !m.deckt);
@@ -64,7 +67,7 @@ const messen = `(async () => {
   const s = await oeffne(ADR + '?lang=en', { port: 9375, breite: 1440, hoehe: 900 });
   await bereit(s);
   const m = JSON.parse(await s.werte(messen));
-  pruefe('Englisch: das Foto hat eine englische Beschreibung', /flower|daisy/i.test(m.alt), m.alt);
+  pruefe('Englisch: das Foto hat eine englische Beschreibung', /\b(the|and|a)\b/i.test(m.alt) && !/\b(und|die|der)\b/i.test(m.alt), m.alt);
   await s.zu();
 }
 

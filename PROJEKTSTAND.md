@@ -679,8 +679,9 @@ Geprüft in `tests/pruefe-emotes.mjs`, die Vorschläge mit echten Tastendrücken
 - Der Gruß-Abschnitt („Hallo ich bin Lucas :)“) hat im Admin das Feld
   **„Foto zum Gruß“** mit einer Beschreibung. Auf der Seite steht das Foto
   rechts als leicht schräges Polaroid, auf dem Handy über dem Gruß. Das
-  erste Foto liegt unter `medien/lucas/` und ist auf 4:3 zugeschnitten, mit
-  Blume und Gesicht.
+  Foto liegt unter `medien/lucas/` und ist seit dem 18.10. quadratisch
+  zugeschnitten (Peace-Zeichen und Gesicht). Jedes Seitenverhältnis geht,
+  die Maße stehen im Dateinamen.
 - Der Kontakt-Abschnitt hat im Admin jetzt die Felder **E-Mail** und
   **Telefon**. Leer bedeutet: Es steht nichts auf der Seite, kein leerer
   Absatz. Seit dem 06.10. sind beide leer, weil das Formular reicht. Die
