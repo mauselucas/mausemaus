@@ -46,7 +46,13 @@ pruefe('Brief-Seite zeigt trotz unerreichbarer Datenbank Inhalt (nicht leer)',
   briefHtml && briefHtml.trim().length > 200, 'Länge: ' + (briefHtml || '').length);
 pruefe('…und zwar den ECHTEN Begrüßungstext aus seed.js (SEED_SEITEN.brief)',
   briefHtml.includes('Hallo ich bin'), briefHtml.slice(0, 200));
-const briefKontakt = await brief.werte(`document.getElementById('brief').innerHTML.includes('lucasschoenwald03@gmail.com')`);
+/* Erkannt am Titel des Kontakt-Abschnitts, so wie er in seed.js steht --
+   nicht an der E-Mail-Adresse: die steht seit dem 06.10. bewusst nicht
+   mehr im Brief (Lucas nutzt das Formular). */
+const briefKontakt = await brief.werte(`(() => {
+  const k = (window.SEED_SEITEN.brief.bloecke || []).find(b => b.inhalt && b.inhalt.rolle === 'kontakt');
+  return !!k && !!k.inhalt.titel && document.getElementById('brief').textContent.includes(k.inhalt.titel);
+})()`);
 pruefe('…die Kontakt-Sektion aus dem Brief-Block ist ebenfalls da', briefKontakt === true);
 /* "Failed to load resource ... ERR_CONNECTION_REFUSED" ist hier ERWÜNSCHTES
    Rauschen: genau das beweist, dass der Aufruf wirklich versucht und

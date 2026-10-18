@@ -302,7 +302,16 @@ const schliff = JSON.parse(await s.werte(`(() => {
     const m = k.querySelector('.br-karte-medium'), a = k.querySelector('.br-karte-text');
     if (m && a) abstaende.push(Math.round(a.getBoundingClientRect().left - m.getBoundingClientRect().right));
   });
-  const link = [...document.querySelectorAll('.br-text a:not(.mm-tuer)')][0];
+  /* Steht gerade kein Link im Brief-Text (am 18.10. war der kurzgesagt-
+     Absatz weg), wird einer genau so eingesetzt, wie renderMarkdown ihn
+     baut -- geprüft wird die Gestaltung, nicht der Inhalt. */
+  let link = [...document.querySelectorAll('.br-text a:not(.mm-tuer)')][0];
+  if (!link) {
+    const probe = document.createElement('div'); probe.className = 'br-text';
+    probe.innerHTML = window.mm.renderMarkdown('Ein [Probelink](https://beispiel.de) im Text.');
+    document.querySelector('#brief .br-text').after(probe);
+    link = probe.querySelector('a');
+  }
   const ls = link ? getComputedStyle(link) : null;
   st.remove();
   return JSON.stringify({ gross, abstaende,

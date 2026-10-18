@@ -34,13 +34,19 @@ async function wirdWahr(seite, ausdruck, frist = 8000, takt = 120) {
     namen: Object.keys(window.mmEmotes || {}).sort(),
     pepe: (window.mmEmotes || {}).PepeLaugh
   })`));
-  pruefe('die Emotes kommen aus der Datenbank mit', d.namen.length >= 6 && d.namen.includes('PepeLaugh'), d.namen.join(', '));
+  pruefe('die Emotes kommen aus der Datenbank mit', d.namen.length >= 2, d.namen.join(', '));
+  /* Lucas pflegt die Emotes im Admin (am 18.10. waren es 22, peepoHey und
+     Weirdge gab es nicht mehr). Darum keine festen Namen: E ist ein
+     vorhandenes Emote, E2 ein zweites. */
+  const E = d.namen.includes('PepeLaugh') ? 'PepeLaugh' : d.namen[0];
+  const E2 = d.namen.find(n => n !== E);
+  const masseE = await s.werte(`(e => e.breite + 'x' + e.hoehe)(window.mmEmotes['${E}'])`);
 
   const u = JSON.parse(await s.werte(`(() => {
     const r = (t) => { const x = document.createElement('template'); x.innerHTML = window.mm.renderMarkdown(t); return x.content; };
-    const a = r('Haha :PepeLaugh: echt jetzt');
+    const a = r('Haha :${E}: echt jetzt');
     const img = a.querySelector('img.mm-emote');
-    const link = r('[Seite](https://beispiel.de/:PepeLaugh:/x)').querySelector('a');
+    const link = r('[Seite](https://beispiel.de/:${E}:/x)').querySelector('a');
     return JSON.stringify({
       bild: !!img, alt: img?.getAttribute('alt'), titel: img?.getAttribute('title'),
       src: img?.getAttribute('src'), masse: img ? img.getAttribute('width') + 'x' + img.getAttribute('height') : '',
@@ -49,26 +55,26 @@ async function wirdWahr(seite, ausdruck, frist = 8000, takt = 120) {
       klein: !!r('ein :pepelaugh: klein').querySelector('img'),
       uhr: r('um 10:30:00 Uhr').textContent,
       href: link?.getAttribute('href'),
-      zwei: r(':peepoHey: und :Weirdge:').querySelectorAll('img.mm-emote').length,
-      auszug: window.mm.excerpt('Haha :PepeLaugh: echt')
+      zwei: r(':${E}: und :${E2}:').querySelectorAll('img.mm-emote').length,
+      auszug: window.mm.excerpt('Haha :${E}: echt')
     });
   })()`));
-  pruefe(':PepeLaugh: im Text wird ein Bild', u.bild && /PepeLaugh/.test(u.src), u.src);
+  pruefe(`:${E}: im Text wird ein Bild`, u.bild && u.src.includes(E), u.src);
   pruefe('…mitten im Absatz, zwischen den Wörtern', u.imAbsatz === 'P' && u.text.replace(/\s+/g, ' ').trim() === 'Haha echt jetzt', u.imAbsatz + ' / ' + u.text);
-  pruefe('…mit dem Namen für Screenreader und beim Drüberfahren', u.alt === ':PepeLaugh:' && u.titel === 'PepeLaugh');
-  pruefe('…und seinen Maßen (kein Springen beim Laden)', u.masse === '64x64', u.masse);
+  pruefe('…mit dem Namen für Screenreader und beim Drüberfahren', u.alt === `:${E}:` && u.titel === E, u.alt + ' / ' + u.titel);
+  pruefe('…und seinen Maßen (kein Springen beim Laden)', u.masse === masseE, u.masse);
   pruefe('mehrere Emotes in einem Satz', u.zwei === 2, String(u.zwei));
   pruefe('ein unbekannter Name bleibt als Text stehen, keine Lücke', u.unbekannt === 'So :GibtsNicht: eben', u.unbekannt);
   pruefe('Groß-/Kleinschreibung zählt (:pepelaugh: bleibt Text)', !u.klein);
   pruefe('Uhrzeiten bleiben unangetastet', u.uhr === 'um 10:30:00 Uhr', u.uhr);
-  pruefe('in einer Link-Adresse wird nichts ersetzt', u.href === 'https://beispiel.de/:PepeLaugh:/x', u.href);
+  pruefe('in einer Link-Adresse wird nichts ersetzt', u.href === `https://beispiel.de/:${E}:/x`, u.href);
   pruefe('Vorschautexte (Google, Teilen) zeigen keine :Namen:', u.auszug === 'Haha echt', u.auszug);
 
   /* ---- So sieht es im Brief aus: echter Absatz, echte Schrift ---- */
   const m = JSON.parse(await s.werte(`(async () => {
     const ziel = document.querySelector('#brief .br-text');
     const mit = document.createElement('div'); mit.className = 'br-text';
-    mit.innerHTML = window.mm.renderMarkdown('Das war ein Spaß :PepeLaugh: wirklich.');
+    mit.innerHTML = window.mm.renderMarkdown('Das war ein Spaß :${E}: wirklich.');
     const ohne = document.createElement('div'); ohne.className = 'br-text';
     ohne.innerHTML = window.mm.renderMarkdown('Das war ein Spaß wirklich.');
     ziel.after(mit, ohne);
@@ -104,12 +110,21 @@ async function wirdWahr(seite, ausdruck, frist = 8000, takt = 120) {
       let frei = 0; for (let i = 3; i < px.length; i += 4) if (px[i] < 250) frei++;
       return { typ: r.headers.get('content-type'), bilder: dec.tracks.selectedTrack.frameCount, frei };
     };
-    return JSON.stringify({ pepe: await lies(window.mmEmotes.PepeLaugh.url), weird: await lies(window.mmEmotes.Weirdge.url) });
+    /* ALLE Emotes aus der Datenbank: Jedes muss laden. Bewegung und
+       Durchsichtigkeit bleiben erhalten -- mindestens eins zeigt beides. */
+    const alle = {};
+    for (const [n, e] of Object.entries(window.mmEmotes)) {
+      try { alle[n] = await lies(e.url); } catch (x) { alle[n] = { fehler: String(x.message || x) }; }
+    }
+    return JSON.stringify(alle);
   })()`));
-  pruefe('Emote-Dateien kommen als image/avif', f.pepe.typ === 'image/avif', f.pepe.typ);
-  pruefe('PepeLaugh bewegt sich (mehrere Einzelbilder)', f.pepe.bilder > 1, f.pepe.bilder + ' Bilder');
-  pruefe('…und ist durchsichtig (kein Kasten um das Emote)', f.pepe.frei > 0, f.pepe.frei + ' durchsichtige Pixel');
-  pruefe('Weirdge ist ein Standbild und wird trotzdem gezeigt', f.weird.bilder === 1);
+  const kaputt = Object.entries(f).filter(([, e]) => e.fehler || !/^image\//.test(e.typ || ''));
+  pruefe('jedes Emote aus der Datenbank lädt als Bild', kaputt.length === 0,
+    kaputt.length ? kaputt.map(([n, e]) => n + ': ' + (e.fehler || e.typ)).join(', ') : Object.keys(f).length + ' Emotes');
+  const bewegt = Object.entries(f).filter(([, e]) => e.bilder > 1).map(([n]) => n);
+  pruefe('bewegte Emotes bleiben bewegt (mehrere Einzelbilder)', bewegt.length >= 1, bewegt.join(', '));
+  const frei = Object.entries(f).filter(([, e]) => e.frei > 0).map(([n]) => n);
+  pruefe('…und durchsichtige bleiben durchsichtig (kein Kasten)', frei.length >= 1, frei.length + ' durchsichtig');
   pruefe('keine JS-Fehler', s.fehlerAufSeite().length === 0, s.fehlerAufSeite().join(' | '));
   await s.zu();
 }
