@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt von tests/hochladen.mjs — Stand: 6.10.2026.
+   Automatisch erzeugt von tests/hochladen.mjs — Stand: 18.10.2026.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 window.SEED_SETTINGS = {
@@ -273,24 +273,24 @@ window.SEED_SEITEN = {
         "breite": "normal",
         "inhalt": {
           "art": "persoenlich",
-          "foto": "/medien/lucas/lucas-blume-720x540.webp",
+          "foto": "/medien/lucas/lucas-peace-720x720.webp",
           "farbe": null,
           "rolle": "hallo",
           "titel": "Hallo ich bin",
           "kicker": "Video Editor & Motion Designer · Köln",
-          "zusatz": "Lucas :)",
-          "foto_text": "Lucas liegt in einer Blumenwiese und hält lachend ein Gänseblümchen in die Kamera"
+          "zusatz": "Lucas 🤠",
+          "foto_text": "Lucas liegt auf dem Sofa, macht ein Peace-Zeichen und grinst in die Kamera"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
         "inhalt_en": {
           "titel": "Hi, I'm",
           "kicker": "Video Editor & Motion Designer · Cologne",
           "zusatz": "Lucas :)",
-          "foto_text": "Lucas lying in a flower meadow, laughing and holding a daisy up to the camera"
+          "foto_text": "Lucas lying on the couch, flashing a peace sign and grinning at the camera"
         },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 10,
-        "updated_at": "2026-10-06T19:23:03.557477+00:00"
+        "updated_at": "2026-10-18T08:03:22.669648+00:00"
       },
       {
         "id": "69222574-03b4-434a-b473-8a50d636d24c",
@@ -396,15 +396,15 @@ window.SEED_SEITEN = {
         "typ": "text",
         "breite": "normal",
         "inhalt": {
-          "roh": "Das hier ist mein kleines Portfolio wo ich einfach meine Projekte sammle und kurz was dazu erzähle :) Ich sitz den Großteil des Tages in Resolve und After Effects und sonst zeichne ich auch ganz gerne! "
+          "roh": "Das hier ist mein kleines Portfolio wo ich einfach meine Projekte sammle und kurz was dazu erzähle :popCat: Ich sitz den Großteil des Tages in Resolve und After Effects und sonst zeichne ich auch ganz gerne! "
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
         "inhalt_en": {
-          "roh": "This is my little portfolio where I just collect my projects and say a bit about each of them :) I spend most of the day in Resolve and After Effects, and other than that I really like to draw!"
+          "roh": "This is my little portfolio where I just collect my projects and say a bit about each of them :popCat: I spend most of the day in Resolve and After Effects, and other than that I really like to draw!"
         },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 80,
-        "updated_at": "2026-09-04T15:37:46.716655+00:00"
+        "updated_at": "2026-10-07T09:52:36.773646+00:00"
       },
       {
         "id": "f4957b13-fe3b-4343-9017-5ddc02c8fe9d",
@@ -438,34 +438,19 @@ window.SEED_SEITEN = {
         "updated_at": "2026-09-04T15:38:22.956252+00:00"
       },
       {
-        "id": "5a9d9e70-1021-40a9-b60f-beb7711bee41",
-        "typ": "text",
-        "breite": "normal",
-        "inhalt": {
-          "roh": " Mein Traum ist es irgendwann für [kurzgesagt](https://www.youtube.com/@KurzgesagtDE) zu arbeiten!"
-        },
-        "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": {
-          "roh": "My dream is to work for [kurzgesagt](https://www.youtube.com/@KurzgesagtDE) someday!"
-        },
-        "created_at": "2026-08-26T15:19:13.6591+00:00",
-        "sort_order": 89.375,
-        "updated_at": "2026-09-04T15:38:40.425461+00:00"
-      },
-      {
         "id": "b6376f91-ca76-4acd-93f3-fe8e9057a196",
         "typ": "text",
         "breite": "normal",
         "inhalt": {
-          "roh": "Bin immer offen für Projekte also hmu falls du einen Editor suchst! 🫶"
+          "roh": "Bin immer offen für Projekte also hmu falls du einen Editor suchst! :PepeShy: "
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
         "inhalt_en": {
-          "roh": "Always open for projects, so hmu if you're looking for an editor! 🫶"
+          "roh": "Always open for projects, so hmu if you're looking for an editor! :PepeShy: "
         },
         "created_at": "2026-08-26T15:14:41.491829+00:00",
         "sort_order": 91.25,
-        "updated_at": "2026-09-04T15:38:46.907549+00:00"
+        "updated_at": "2026-10-07T09:52:44.115106+00:00"
       },
       {
         "id": "f0516e10-c656-4896-bef3-36ca7db28921",
@@ -672,7 +657,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "**Simplicissimus** macht die Dokus, die du wahrscheinlich schon mal um 2 Uhr nachts auf YouTube gesehen hast. Ich war dort als Freelancer Teil eines rund 45-köpfigen Teams. Man bekommt ein rohes Skript, das Voiceover und ein grobes Bildkonzept von der Creative Direction – und daraus baue ich Feinschnitt, 2D-Motion-Design und Sound-Design. Pacing ist hier alles: Wenn eine Doku 20 Minuten trägt, dann weil kein Schnitt zu lang ist."
+            "roh": "**Simplicissimus** macht die Dokus, die du wahrscheinlich schon mal um 2 Uhr nachts auf YouTube gesehen hast. Ich war dort als Freelancer Teil eines rund 45-köpfigen Teams. Man bekommt ein rohes Skript, das Voiceover und ein grobes Bildkonzept von der Creative Direction – und daraus baue ich Feinschnitt, 2D-Motion-Design und Sound-Design."
           },
           "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
           "inhalt_en": {
@@ -680,7 +665,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-09-04T17:48:51.112385+00:00",
           "sort_order": 10,
-          "updated_at": "2026-09-04T22:27:16.058006+00:00"
+          "updated_at": "2026-10-07T10:48:32.024572+00:00"
         },
         {
           "id": "6077105a-9b74-4b6d-b69c-37ddd6cab1a4",
@@ -700,7 +685,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Mein Schwerpunkt war von Anfang an Schnitt und Timing. Aber irgendwann sitzt du an einer Szene und merkst: Das braucht eine eigene 3D-Ebene, sonst kommt der Punkt nicht rüber. Und statt zu warten, bis jemand Zeit hat, hab ich angefangen, es selbst zu bauen."
+            "roh": "Mein Schwerpunkt war von Anfang an Schnitt und Timing. Aber irgendwann sitzt du an einer Szene und merkst: Das braucht eine eigene 3D-Ebene, sonst kommt der Punkt nicht rüber. Und statt zu warten, bis jemand Zeit hat, hab ich angefangen, es selbst zu bauen :PepeCrush: "
           },
           "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
           "inhalt_en": {
@@ -708,7 +693,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-09-04T18:43:48.91797+00:00",
           "sort_order": 13,
-          "updated_at": "2026-09-04T22:29:34.027871+00:00"
+          "updated_at": "2026-10-07T10:00:01.675943+00:00"
         },
         {
           "id": "62fe7b84-4395-4d8d-950b-a80d3aafef27",
@@ -729,7 +714,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "So hab ich mir mitten in laufenden Produktionen Blender beigebracht – aus Neugier, und weil die Animator:innen im Team mir extrem viel geholfen haben (ganz viel liebe an Lenz 🫶). Erst kleine Sachen, dann Schritt für Schritt eigene Szenen, die direkt in die finale Pipeline gewandert sind."
+            "roh": "So hab ich mir mitten in laufenden Produktionen Blender beigebracht – aus Neugier, und weil die Animator:innen im Team mir extrem viel geholfen haben (ganz viel liebe an Lenz :love:). Erst kleine Sachen, dann Schritt für Schritt eigene Szenen, die direkt in die finale Pipeline gewandert sind."
           },
           "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
           "inhalt_en": {
@@ -737,7 +722,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-09-04T18:47:24.895628+00:00",
           "sort_order": 17.125,
-          "updated_at": "2026-09-04T22:30:55.589055+00:00"
+          "updated_at": "2026-10-07T09:53:44.109389+00:00"
         },
         {
           "id": "36339603-087f-4a51-a82d-434ff2995afe",
@@ -754,32 +739,31 @@ window.SEED_SEITEN = {
           "updated_at": "2026-10-06T17:38:59.02999+00:00"
         },
         {
-          "id": "c96f1b4b-d0c4-400c-8636-a7b5d9780121",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Bei „The CIA’s Scariest Weapon“ hab ich neben dem Feinschnitt die Röhrenfernseher-Sequenz komplett in 3D gebaut: modelliert, texturiert, animiert. Die aufwendigeren 3D-Szenen im Video kommen von anderen aus dem Team – fair ist fair."
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": {
-            "roh": "On \"The CIA's Scariest Weapon\" I did the fine cut and built the CRT TV sequence completely in 3D: modeled, textured, animated. The more elaborate 3D scenes in the video are by other people on the team – *fair is fair*."
-          },
-          "created_at": "2026-09-04T18:48:22.105495+00:00",
-          "sort_order": 17.625,
-          "updated_at": "2026-09-04T22:32:09.724291+00:00"
-        },
-        {
           "id": "704d1b69-c568-487e-8d56-8658df63fa0b",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": ""
+            "roh": "Hier sieht man ganz gut wie es in Blender aussieht und wie es dann am Ende tatsächlich im Video aussieht. Bin sehr stolz :catJAM: "
           },
           "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
           "inhalt_en": null,
           "created_at": "2026-10-06T17:21:21.763779+00:00",
           "sort_order": 17.6875,
-          "updated_at": "2026-10-06T17:21:24.957067+00:00"
+          "updated_at": "2026-10-07T10:02:13.094385+00:00"
+        },
+        {
+          "id": "dd0b74e1-a50b-439a-8b54-deeb83f92078",
+          "typ": "zitat",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "\"Die gruseligste Waffe der CIA\" – 1,35M Aufrufe",
+            "farbe": "salbei"
+          },
+          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
+          "inhalt_en": null,
+          "created_at": "2026-10-07T10:04:16.125616+00:00",
+          "sort_order": 17.734375,
+          "updated_at": "2026-10-07T10:04:41.628992+00:00"
         },
         {
           "id": "54724b89-f3c5-463a-a6e6-d521423a1a9c",
@@ -850,13 +834,26 @@ window.SEED_SEITEN = {
           "typ": "bild",
           "breite": "normal",
           "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1786804948750-imdb.webp){klein}"
+            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791367850386-screenshot-2026-10-07-at-12-06-53-2x-1600x769.webp){mittel}"
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
           "inhalt_en": null,
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
-          "updated_at": "2026-08-22T17:46:48.907163+00:00"
+          "updated_at": "2026-10-07T10:10:54.659173+00:00"
+        },
+        {
+          "id": "92c714ed-0b2a-4ba1-bd9e-c2c0f13d97df",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Man findet mich einfach auf IMDb das ist so cool :PepeCrush: vielleicht wirkt das für Leserinnen total selbstverständlich wenn man an dem Projekt beteiligt war, aber das ganze Arbeitsumfeld hat mir super viel Spaß gemacht und bedeutet mir deshalb so viel. Einerseits weil ich die vorherigen Staffeln als Zuschauer geliebt habe, andererseits weil das ganze Team dort unglaublich mausig war und ich mich super wohl gefühlt habe. Insbesondere Basti und Julez, falls ihr das irgendwann mal lesen solltet: hab euch dolle lieb :love: "
+          },
+          "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": null,
+          "created_at": "2026-10-07T10:11:09.106858+00:00",
+          "sort_order": 45,
+          "updated_at": "2026-10-07T10:28:52.684439+00:00"
         },
         {
           "id": "0588d79e-8ed8-412b-8300-cb95392bfabe",
@@ -876,7 +873,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Ein zentraler Teil der Arbeit waren wiederkehrende Grafikeinblendungen – etwa Kontostand-Animationen, wenn Teilnehmende Geld erhalten oder verloren haben, dazu Uhrzeit-, Temperatur- und Sponsoring-Einblendungen, jeweils in der Teamfarbe der jeweiligen Teilnehmenden. Da ich im Team quasi der Einzige mit After-Effects-Erfahrung war und der Zeitdruck sehr hoch war, habe ich die komplette Pipeline automatisiert: Ein selbstgeschriebenes After-Effects-Script erzeugte die Animationen über ein einfaches Eingabe-Panel statt manueller Einzelbearbeitung. Darauf aufbauend habe ich eine eigene macOS-App entwickelt, die direkt die bestehende Excel-Tabelle mit allen Werten einlas und die Animationen vollautomatisch rendern ließ. "
+            "roh": "Ein zentraler Teil der Arbeit waren wiederkehrende Grafikeinblendungen – etwa Kontostand-Animationen, wenn Teilnehmende Geld erhalten oder verloren haben, dazu Uhrzeit-, Temperatur- und Sponsoring-Einblendungen, jeweils in der Teamfarbe der jeweiligen Teilnehmenden. Da der Zeitdruck sehr hoch war, habe ich die komplette Pipeline automatisiert: Ein selbstgeschriebenes After-Effects-Script erzeugte die Animationen über ein einfaches Eingabe-Panel statt manueller Einzelbearbeitung :HACKERMAN: Darauf aufbauend habe ich eine eigene macOS-App entwickelt, die direkt die bestehende Excel-Tabelle mit allen Werten einlas und die Animationen vollautomatisch rendern ließ. "
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
           "inhalt_en": {
@@ -884,7 +881,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 60,
-          "updated_at": "2026-09-04T15:57:59.34734+00:00"
+          "updated_at": "2026-10-07T10:50:54.847212+00:00"
         },
         {
           "id": "86d264ee-5b0b-486a-b023-5786b1469e43",
@@ -932,19 +929,6 @@ window.SEED_SEITEN = {
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 95,
           "updated_at": "2026-09-04T15:58:38.620037+00:00"
-        },
-        {
-          "id": "58c891c6-f027-4d4f-92d7-be0d421bbc1b",
-          "typ": "trenner",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "---"
-          },
-          "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
-          "inhalt_en": null,
-          "created_at": "2026-08-22T17:46:48.907163+00:00",
-          "sort_order": 100,
-          "updated_at": "2026-08-22T17:46:48.907163+00:00"
         }
       ]
     },
@@ -1002,7 +986,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Mit „Wenn ich als Trader neu starten müsste, würde ich DAS machen“ hat Bitbull mir zum ersten Mal ein Longform-Video überlassen, und ich hatte die Leitung: Ich habe den Schnitt gemacht, die Animationen gebaut und Musik und Sounddesign übernommen. Zwei weitere Cutter haben mich dabei unterstützt und ebenfalls Animationen beigesteuert."
+            "roh": "Mit „Wenn ich als Trader neu starten müsste, würde ich DAS machen“ hat Bitbull mir zum ersten Mal ein Longform-Video überlassen :o7: Ich habe den Schnitt gemacht, die Animationen gebaut und Musik und Sounddesign übernommen. Zwei weitere Cutter haben mich dabei unterstützt und ebenfalls Animationen beigesteuert."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": {
@@ -1010,14 +994,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 30,
-          "updated_at": "2026-09-25T12:52:10.197696+00:00"
+          "updated_at": "2026-10-07T10:33:34.143965+00:00"
         },
         {
           "id": "7ebb452f-8650-4869-b8d0-e6d0b494a801",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Das Video hatte in weniger als 24 Stunden über 10.000 Aufrufe und ist damit das bisher erfolgreichste auf dem Kanal – Tendenz steigend. In den Kommentaren werden vor allem die Animationen und das Sounddesign gelobt. Bei den nächsten Longform-Videos bin ich wieder mit dabei."
+            "roh": "Das Video hatte in weniger als 24 Stunden über 10.000 Aufrufe und ist damit das bisher erfolgreichste auf dem Kanal – Tendenz steigend :catJAM: In den Kommentaren werden vor allem die Animationen und das Sounddesign gelobt. Bei den nächsten Longform-Videos bin ich wieder mit dabei."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": {
@@ -1025,7 +1009,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 32.5,
-          "updated_at": "2026-09-25T13:06:59.451074+00:00"
+          "updated_at": "2026-10-07T10:32:53.506346+00:00"
         },
         {
           "id": "acb7c33d-c384-4489-8042-14830a144708",
@@ -1124,28 +1108,15 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Bevor ich irgendwas animiert habe, hab ich mir den Rohschnitt angeschaut. Das Thema ist eigentlich schwer – Straßenkatzen, die im Müll landen –, aber Josus Videos leben von Wärme und Neugier. Das Intro sollte also nicht düster werden, sondern einladen: Istanbul im Abendlicht, überall Katzen, und mittendrin Josu auf seinem Koffer. Die Idee hab ich zuerst gezeichnet, Bild für Bild und mit Zeitmarken. So konnten wir uns über den Ablauf einig werden, bevor in After Effects eine einzige Ebene existierte."
+            "roh": "Bevor ich irgendwas animiert habe, hab ich mir den Rohschnitt angeschaut. Das Thema ist eigentlich schwer (Straßenkatzen, die im Müll landen :NOOO:)  aber Josus Videos leben von Wärme und Neugier. Das Intro sollte also nicht düster werden, sondern einladen: Istanbul im Abendlicht, überall Katzen, und mittendrin Josu auf seinem Koffer. Die Idee hab ich zuerst gezeichnet, Bild für Bild und mit Zeitmarken. So konnten wir uns über den Ablauf einig werden, bevor in After Effects eine einzige Ebene existierte."
           },
           "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
           "inhalt_en": {
             "roh": "Before animating anything, I watched the rough cut. The topic is actually a heavy one – street cats ending up in the trash – but Josu's videos live on warmth and curiosity. So the intro shouldn't be gloomy, it should invite you in: Istanbul in the evening light, cats everywhere, and Josu right in the middle, sitting on his suitcase. I drew the idea first, frame by frame and with timecodes. That way we could agree on the flow before a single layer existed in After Effects."
           },
           "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 20,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
-        },
-        {
-          "id": "eff24bec-55aa-48c0-b58a-77e2c8b66bea",
-          "typ": "video",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "https://www.youtube.com/watch?v=xelwbWPUmEo"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": null,
-          "created_at": "2026-10-06T18:29:41.874825+00:00",
-          "sort_order": 25,
-          "updated_at": "2026-10-06T18:29:44.943476+00:00"
+          "sort_order": 22.5,
+          "updated_at": "2026-10-07T10:41:02.469193+00:00"
         },
         {
           "id": "d081f8d8-4288-4c57-b18d-b11844809fe9",
@@ -1169,7 +1140,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Aus der Skizze wurde in Photoshop eine Collage: der Bosporus im Sonnenuntergang als Hintergrund, davor jede Katze, jede Möwe, der Koffer und Josu einzeln freigestellt – damit sich in After Effects alles unabhängig voneinander bewegen lässt. Vorne die Mauer, hinten die Stadt: Weil alles auf eigenen Ebenen liegt, entsteht beim Bewegen echte Tiefe."
+            "roh": "Aus der Skizze wurde in Photoshop eine Collage: der Bosporus im Sonnenuntergang als Hintergrund, davor jede Katze, jede Möwe, der Koffer und Josu einzeln freigestellt  damit sich in After Effects alles unabhängig voneinander bewegen lässt. Vorne die Mauer, hinten die Stadt: Weil alles auf eigenen Ebenen liegt, entsteht beim Bewegen echte Tiefe."
           },
           "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
           "inhalt_en": {
@@ -1177,7 +1148,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-10-05T10:27:14.803521+00:00",
           "sort_order": 40,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+          "updated_at": "2026-10-07T10:36:06.196608+00:00"
         },
         {
           "id": "a13fe154-bb0a-4d40-87f2-cb25b798f5f0",
@@ -1274,7 +1245,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Dazu gab es eine elfseitige Anleitung: vom Installieren über das Austauschen von Clips bis zu dem, was man im After-Effects-Projekt besser nicht anfasst. Mein Ziel war, dass das Team mich für diese Grafiken nie wieder braucht – und trotzdem weiß, wo es mich findet, wenn es neue will."
+            "roh": "Dazu gab es eine elfseitige Anleitung: vom Installieren über das Austauschen von Clips bis zu dem, was man im After-Effects-Projekt besser nicht anfasst. Mein Ziel war, dass das Team mich für diese Grafiken nie wieder braucht – und trotzdem weiß, wo es mich findet, wenn es neue will :happie: "
           },
           "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
           "inhalt_en": {
@@ -1282,7 +1253,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-10-05T10:27:14.803521+00:00",
           "sort_order": 110,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
+          "updated_at": "2026-10-07T10:37:12.639019+00:00"
         },
         {
           "id": "1376bade-c47b-4d06-87c0-e580f94f6f67",
@@ -1296,6 +1267,19 @@ window.SEED_SEITEN = {
           "created_at": "2026-10-05T10:27:14.803521+00:00",
           "sort_order": 120,
           "updated_at": "2026-10-05T10:27:14.803521+00:00"
+        },
+        {
+          "id": "eff24bec-55aa-48c0-b58a-77e2c8b66bea",
+          "typ": "video",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "https://www.youtube.com/watch?v=xelwbWPUmEo"
+          },
+          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
+          "inhalt_en": null,
+          "created_at": "2026-10-06T18:29:41.874825+00:00",
+          "sort_order": 121,
+          "updated_at": "2026-10-07T10:38:13.513933+00:00"
         }
       ]
     },
@@ -1353,7 +1337,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Der Prozess lief iterativ: Erst ein grober Schnitt mit Grundkonzept und Platzhaltern, dann Verfeinerung. Stellen, für die noch keine passende Idee oder kein passendes Material da war, blieben zunächst offen und wurden in wöchentlichen Feedback-Runden mit dem ganzen Team weiterentwickelt – dort wurde gegenseitig geholfen, Ideen ausgetauscht und Jules selbst gab regelmäßig Input. Am Ende entscheidet Jules, was im finalen Video wie verwendet wird; Teile werden verschoben, angepasst oder von ihm selbst nachbearbeitet, da der Kanal seiner ist."
+            "roh": "Der Prozess lief iterativ: Erst ein grober Schnitt mit Grundkonzept und Platzhaltern, dann Verfeinerung. Stellen, für die noch keine passende Idee oder kein passendes Material da war, blieben zunächst offen und wurden in wöchentlichen Feedback-Runden mit dem ganzen Team weiterentwickelt – dort wurde gegenseitig geholfen, Ideen ausgetauscht und Jules selbst gab regelmäßig Input. Am Ende entscheidet Jules, was im finalen Video wie verwendet wird; Teile werden verschoben, angepasst oder von ihm selbst nachbearbeitet, da der Kanal seiner ist :See: "
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
           "inhalt_en": {
@@ -1361,14 +1345,27 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
-          "updated_at": "2026-09-04T16:00:21.953354+00:00"
+          "updated_at": "2026-10-07T10:43:11.690114+00:00"
+        },
+        {
+          "id": "04dc16c9-45d7-4250-8194-6d02cbad5d75",
+          "typ": "trenner",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "---"
+          },
+          "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
+          "inhalt_en": null,
+          "created_at": "2026-10-07T10:43:25.230691+00:00",
+          "sort_order": 55,
+          "updated_at": "2026-10-07T10:43:40.810569+00:00"
         },
         {
           "id": "ac4a484e-d3d8-4d1f-aec6-009aa20aa6a0",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Weil in einem Team-Editing-Prozess mit mehreren Überarbeitungsschritten kein einzelnes Video eindeutig einer Person zuzuordnen ist, hier stattdessen konkrete Timestamps, an denen mein Schnitt im finalen Video zu sehen ist:"
+            "roh": "Weil in einem Team-Editing-Prozess mit mehreren Überarbeitungsschritten kein einzelnes Video eindeutig einer Person zuzuordnen ist, hier stattdessen konkrete Timestamps, an denen mein Schnitt im finalen Video zu sehen ist :PepeCigarette: :"
           },
           "seite_id": "97dca571-1499-4149-88ae-837a2a86cf88",
           "inhalt_en": {
@@ -1376,7 +1373,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 70,
-          "updated_at": "2026-09-04T16:00:51.376817+00:00"
+          "updated_at": "2026-10-07T10:42:47.374519+00:00"
         },
         {
           "id": "dee608bc-4707-4885-889a-a95519e838fa",
@@ -1464,7 +1461,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Kilian, besser bekannt als Musiker absent, kannte ich bereits aus einer früheren Zusammenarbeit (und weil ich großer fan bin jaja), bei der ich YouTube-Videos aus seinen Twitch-Highlights geschnitten hatte. Nach einigen Monaten ohne Kontakt meldete er sich spontan per FaceTime: Er brauchte kurzfristig ein Musikvideo zu seinem Song \"Rockstar Selfish\", hatte aber kein professionelles Kameramaterial – nur den Wunsch, aktuelle Bilder und Videos von seiner Tour einzubauen."
+            "roh": "Kilian, besser bekannt als Musiker absent, kannte ich bereits aus einer früheren Zusammenarbeit (und weil ich großer fan bin jaja :PepeCrush:), bei der ich YouTube-Videos aus seinen Twitch-Highlights geschnitten hatte. Nach einigen Monaten ohne Kontakt meldete er sich spontan per FaceTime: Er brauchte kurzfristig ein Musikvideo zu seinem Song \"Rockstar Selfish\", hatte aber kein professionelles Kameramaterial – nur den Wunsch, aktuelle Bilder und Videos von seiner Tour einzubauen."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
           "inhalt_en": {
@@ -1472,7 +1469,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 20,
-          "updated_at": "2026-09-04T17:50:28.170248+00:00"
+          "updated_at": "2026-10-07T10:44:50.306571+00:00"
         },
         {
           "id": "8abae350-1c4a-41fc-b78a-35d8cc3ac495",
@@ -1492,7 +1489,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Da der Release-Tag für Musik freitags ist und er sich erst zwei Tage vorher gemeldet hatte (ganz viel liebe), blieb kaum Zeit."
+            "roh": "Da der Release-Tag für Musik freitags ist und er sich erst zwei Tage vorher gemeldet hatte (:PepeCigarette:), blieb kaum Zeit."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
           "inhalt_en": {
@@ -1500,7 +1497,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 40,
-          "updated_at": "2026-09-04T17:51:13.66263+00:00"
+          "updated_at": "2026-10-07T10:45:20.41393+00:00"
         },
         {
           "id": "41828090-c584-449b-8a44-2cfa74a95433",
@@ -1535,7 +1532,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Auf den ersten Blick wirkt das Konzept simpel – im Kontext von Absent als Künstler und einigen anderen Musikvideos passt der reduzierte, direkte macOS-Look aber bewusst zu seiner Ästhetik. Angesichts der extrem kurzen Produktionszeit und des minimalen Ausgangsmaterials ist das Ergebnis ein rundes, in sich stimmiges Musikvideo."
+            "roh": "Auf den ersten Blick wirkt das Konzept simpel – im Kontext von Absent als Künstler und einigen anderen Musikvideos passt der reduzierte, direkte macOS-Look aber bewusst zu seiner Ästhetik. Angesichts der extrem kurzen Produktionszeit (:PepeCigarette:) und des minimalen Ausgangsmaterials ist das Ergebnis ein rundes, in sich stimmiges Musikvideo."
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
           "inhalt_en": {
@@ -1543,14 +1540,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 70,
-          "updated_at": "2026-09-04T17:52:09.683118+00:00"
+          "updated_at": "2026-10-07T10:46:16.431442+00:00"
         },
         {
           "id": "710337df-9ec9-4fe3-aae2-a745b8566d4e",
           "typ": "zitat",
           "breite": "normal",
           "inhalt": {
-            "roh": "Sind nicht meine besten Animationen und ich würds wahrscheinlich gar nicht in mein Portfolio packen wenn das Projekt nicht so persönlich für mich wäre :D Jeder der mich privat kennt weiß wie gerne ich seine Musik höre und deshalb war es so eine coole experience ein Musikvideo für ihn zu schneiden!",
+            "roh": "Sind nicht meine besten Animationen und ich würds wahrscheinlich gar nicht in mein Portfolio packen wenn das Projekt nicht so persönlich für mich wäre :love: Jeder der mich privat kennt weiß wie gerne ich seine Musik höre und deshalb war es so eine coole experience ein Musikvideo für ihn zu schneiden!",
             "farbe": "salbei"
           },
           "seite_id": "35675e62-5c0e-4054-a9cf-83c8968ea1de",
@@ -1559,7 +1556,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T22:32:34.237043+00:00",
           "sort_order": 77.5,
-          "updated_at": "2026-09-04T17:52:20.089554+00:00"
+          "updated_at": "2026-10-07T10:46:10.027793+00:00"
         },
         {
           "id": "aa9a6e16-18b0-4c8b-b2c3-88ae0c4f620f",
@@ -1751,6 +1748,20 @@ window.SEED_SEITEN = {
       "untertitel_en": "My result on the 16Personalities test & what it has to do with the way I work.",
       "bloecke": [
         {
+          "id": "3e30e81a-fc72-4a89-8c41-d5f931353de9",
+          "typ": "kasten",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "Der Gedanke hinter diesem Beitrag ist, dass du vor einer potentiellen Zusammenarbeit ein Gefühl dafür bekommst wie es ist mit mir zu arbeiten. Bei vergangenden Projekten gab es manchmal Missverständnisse, und die versuche ich zu vermeiden. Mach dich also bereit für mein yapping :popCat: ",
+            "farbe": "salbei"
+          },
+          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
+          "inhalt_en": null,
+          "created_at": "2026-10-07T11:11:04.844635+00:00",
+          "sort_order": 998,
+          "updated_at": "2026-10-07T11:12:48.496886+00:00"
+        },
+        {
           "id": "dfc33a08-f40b-4de8-9f54-39cfad19a5c9",
           "typ": "text",
           "breite": "normal",
@@ -1769,7 +1780,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "16Personalities hat mich als ISFJ-T eingeordnet – \"Der Verteidiger\", aber in der turbulenten Variante. Die wissenschaftliche Basis bei solchen Tests ist zwar dünn, aber trotzdem standen da ein paar Sachen, bei denen ich mich unangenehm gut wiedererkannt hab (und weil ich den test cool finde🙂‍↕️) also nutze ich das hier mal als Anlass, um zu beschreiben, wie ich tatsächlich arbeite,  inklusive der Stellen, die nicht so schmeichelhaft sind!"
+            "roh": "16Personalities hat mich als ISFJ-T eingeordnet – \"Der Verteidiger\", aber in der turbulenten Variante :FeelsDumbMan:. Die wissenschaftliche Basis bei solchen Tests ist zwar dünn, aber trotzdem standen da ein paar Sachen, bei denen ich mich unangenehm gut wiedererkannt hab (und weil ich den Test cool finde :catJAM:) also nutze ich das hier mal als Anlass, um zu beschreiben, wie ich tatsächlich arbeite,  inklusive der Stellen, die nicht so schmeichelhaft sind! "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1777,7 +1788,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:09:10.896269+00:00",
           "sort_order": 1000,
-          "updated_at": "2026-09-04T15:42:50.98567+00:00"
+          "updated_at": "2026-10-07T11:15:10.190517+00:00"
         },
         {
           "id": "68e3bf17-d7b0-43d8-8cf4-cd272a3c0127",
@@ -1812,7 +1823,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Das \"**S**\" steht für Sensing: Ich denke von konkreten Details aus, nicht von abstrakten Konzepten. In der Praxis heißt das, ich seh den einen Frame, in dem der Cut zu früh sitzt. Ich seh, dass das Lower Third auf Video 12 zwei Pixel weiter links steht als auf Video 11. Das nervt manchmal (auch mich selbst🚬) aber es bedeutet auch, dass niemand hinter mir herräumen muss."
+            "roh": "Das \"**S**\" steht für Sensing: Ich denke von konkreten Details aus, nicht von abstrakten Konzepten. In der Praxis heißt das, ich seh den einen Frame, in dem der Schnitt zu früh sitzt. Das nervt manchmal (auch mich selbst :Grrr:) aber es bedeutet auch, dass niemand hinter mir herräumen muss."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1820,14 +1831,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:12:04.302091+00:00",
           "sort_order": 1002,
-          "updated_at": "2026-09-04T15:43:59.676217+00:00"
+          "updated_at": "2026-10-07T10:58:47.713198+00:00"
         },
         {
           "id": "462f6119-8833-499f-960e-9ebb5799c3b2",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Das \"**T**\" (turbulent) legt da nochmal einen drauf. Ich geh Sachen lieber doppelt durch, als drauf zu vertrauen, dass es schon passt. Verpasste Deadlines oder Exporte mit falscher Framerate hatte ich in Jahren Freelance-Arbeit nicht."
+            "roh": "Das \"**T**\" (turbulent) legt da nochmal einen drauf. Ich geh Sachen lieber doppelt durch, als drauf zu vertrauen, dass es schon passt :See:. Verpasste Deadlines oder Exporte mit falscher Framerate hatte ich in Jahren Freelance-Arbeit nicht."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1835,7 +1846,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:13:09.649064+00:00",
           "sort_order": 1003,
-          "updated_at": "2026-09-04T15:44:24.155875+00:00"
+          "updated_at": "2026-10-07T10:59:03.261684+00:00"
         },
         {
           "id": "96ec3cf3-ba2b-44ec-b8bd-49b9ff9e7732",
@@ -1857,7 +1868,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Der andere Teil ist das \"**F**\": Ich merk relativ früh, wenn bei einem Kunden was nicht stimmt. Wenn Feedback plötzlich knapper wird oder jemand dreimal um dieselbe Änderung bittet, ist meistens nicht die Änderung das Problem, sondern irgendwas darunter z.B eine Erwartung, die nie ausgesprochen wurde. Ich frag dann lieber einmal zu viel nach, bevor ich drei Versionen in die falsche Richtung baue."
+            "roh": "Der andere Teil ist das \"**F**\": Ich merk relativ früh, wenn bei einem Kunden was nicht stimmt. Wenn Feedback plötzlich knapper wird oder jemand dreimal um dieselbe Änderung bittet, ist meistens nicht die Änderung das Problem, sondern z.B eine Erwartung, die nie ausgesprochen wurde :CatScreaming:. Ich frag dann lieber einmal zu viel nach, bevor ich drei Versionen in die falsche Richtung baue."
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1865,14 +1876,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:14:19.193458+00:00",
           "sort_order": 1005,
-          "updated_at": "2026-09-04T15:45:03.64098+00:00"
+          "updated_at": "2026-10-07T11:00:31.201136+00:00"
         },
         {
           "id": "1adfe0fb-ea45-42f9-a2af-59604c926d4f",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Ich merk mir außerdem, was Leute wollen, ohne dass sie's nochmal sagen müssen. Welcher Kunde keine harten Cuts auf Beat mag, wer Untertitel grundsätzlich zu groß findet. Klingt banal, spart aber jedes Mal eine Feedback-Runde."
+            "roh": "Ich merk mir außerdem, was Leute wollen, ohne dass sie's nochmal sagen müssen. Welcher Kunde keine harten Cuts auf Beat mag, wer Untertitel grundsätzlich zu groß findet. Klingt banal, spart aber jedes Mal eine Feedback-Runde :See: "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1880,14 +1891,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:14:54.691073+00:00",
           "sort_order": 1006,
-          "updated_at": "2026-09-04T15:45:23.20452+00:00"
+          "updated_at": "2026-10-07T11:17:27.434564+00:00"
         },
         {
           "id": "b8603d3f-d005-428d-8b39-a49fb27793ef",
           "typ": "zitat",
           "breite": "normal",
           "inhalt": {
-            "roh": "Im Ergebnis stand außerdem dass ich mir gut Namen und Geburtstage merken kann, das stimmt aber nicht. Nimms mir nicht böse falls ich deinen Namen vergesse🫶",
+            "roh": "Im Ergebnis stand außerdem dass ich mir gut Namen und Geburtstage merken kann, das stimmt aber nicht. Nimms mir nicht böse falls ich deinen Namen vergesse :PepeWeird: ",
             "farbe": "salbei"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
@@ -1896,7 +1907,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T22:27:17.702643+00:00",
           "sort_order": 1006.25,
-          "updated_at": "2026-09-04T15:45:36.813157+00:00"
+          "updated_at": "2026-10-07T11:18:30.90961+00:00"
         },
         {
           "id": "e598ca0d-c59a-46a5-827a-dd5ce5cf44ac",
@@ -1933,7 +1944,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Umgekehrt gilt das aber genauso. Wenn ich sage, dass ein Format nicht laufen wird oder dass ein Weg uns unnötig Zeit kostet, dann ist das kein Bauchgefühl und keine Geschmacksfrage. Dann hab ich das schon dreimal gesehen und weiß, wie es ausgeht."
+            "roh": "Umgekehrt gilt das aber genauso. Wenn ich sage, dass ein Format nicht laufen wird oder dass ein Weg uns unnötig Zeit kostet, dann ist das kein Bauchgefühl und keine Geschmacksfrage. Dann hab ich das schon dreimal gesehen und weiß, wie es ausgeht :PepeCigarette: "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1941,14 +1952,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:42:24.713513+00:00",
           "sort_order": 1006.875,
-          "updated_at": "2026-09-04T15:46:10.157771+00:00"
+          "updated_at": "2026-10-07T11:19:06.671651+00:00"
         },
         {
           "id": "5fe6383d-2580-4baa-814f-7c53c198dd75",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Nur klingt es bei mir nicht so. Der Test hat dafür das \"**F**\", im Detail extravertiertes Fühlen: Ich krieg die Stimmung im Raum mit und gehe automatisch auf Harmonie. Widerspruch fühlt sich für mich an, als würde ich jemanden bloßstellen, deshalb verpacke ich ihn weich. Dazu kommt der turbulente Anteil, das \"**T**\": Wenn ich einmal Gegenwind kriege, ist mein erster Reflex, mich selbst zu hinterfragen statt nachzulegen. Zusammen sorgt das dafür, dass ich eine Warnung ausspreche und beim Gegenüber ein unverbindlicher Vorschlag ankommt. Also wird der Weg genommen, vor dem ich gewarnt habe. Und irgendwann doch der, den ich von Anfang an gemeint habe. "
+            "roh": "Nur klingt es bei mir nicht so. Der Test hat dafür das \"**F**\": Ich krieg die Stimmung im Raum mit und gehe automatisch auf Harmonie. Widerspruch fühlt sich für mich an, als würde ich jemanden bloßstellen, deshalb verpacke ich ihn weich :PepeShy:. Dazu kommt der turbulente Anteil, das \"**T**\": Wenn ich einmal Gegenwind kriege, ist mein erster Reflex, mich selbst zu hinterfragen statt nachzulegen :PepeCigarette: Zusammen sorgt das dafür, dass ich eine Warnung ausspreche und beim Gegenüber ein unverbindlicher Vorschlag ankommt. Also wird der Weg genommen, vor dem ich gewarnt habe. Und irgendwann doch der, den ich von Anfang an gemeint habe :NOOO: "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1956,30 +1967,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:42:36.166039+00:00",
           "sort_order": 1006.9375,
-          "updated_at": "2026-09-04T15:47:12.752039+00:00"
-        },
-        {
-          "id": "cffda484-9a1f-40fb-81d6-23c8bc062abb",
-          "typ": "kasten",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Das ist übrigens die klassische Falle für diesen Typ: still gute Arbeit machen und darauf vertrauen, dass sie für sich spricht. Tut sie nicht.",
-            "farbe": ""
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "That's the classic trap for this type, by the way: quietly do good work and trust that it speaks for itself. It doesn't."
-          },
-          "created_at": "2026-08-26T22:28:03.840891+00:00",
-          "sort_order": 1006.9609375,
-          "updated_at": "2026-09-04T15:48:37.69107+00:00"
+          "updated_at": "2026-10-07T11:21:55.562923+00:00"
         },
         {
           "id": "4a82b2ad-ebf4-4f79-a52c-eeb90736c8f0",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Ich hab trotzdem nicht vor, das zu ändern, indem ich lauter werde. Wer im Meeting am längsten redet, hat nicht recht, sondern nur geredet. Was ich stattdessen mache: Ich liefere die Begründung gleich mit und einen Weg, wie man mich schnell überprüfen kann. Zwei Wochen testen, Zahlen anschauen, danach entscheiden."
+            "roh": "Ich hab trotzdem nicht vor, das zu ändern, indem ich lauter werde :See:. Wer im Meeting am längsten redet, hat nicht recht, sondern nur geredet. Was ich stattdessen mache: Ich liefere die Begründung gleich mit und einen Weg, wie man mich schnell überprüfen kann. Zwei Wochen testen, Zahlen anschauen, danach entscheiden :veryCoolCat:"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -1987,7 +1982,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:45:00.944085+00:00",
           "sort_order": 1006.96875,
-          "updated_at": "2026-09-04T15:49:03.460271+00:00"
+          "updated_at": "2026-10-07T11:22:33.50233+00:00"
         },
         {
           "id": "f9fc40fd-86ab-4d58-b539-b35cac6c89bf",
@@ -2037,7 +2032,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Ich sag zu schnell ja. Wenn jemand fragt, ob noch was mehr geht, ist meine erste Reaktion \"safeee kriegen wir hin\" – und dann überarbeite ich mich. Ich arbeite dran, inzwischen erst zu rechnen und dann zu antworten. Wer mich also fragt, ob was bis Freitag geht, kriegt manchmal eine Stunde später die Antwort statt sofort. Das ist Absicht."
+            "roh": "Ich sag zu schnell ja. Wenn jemand fragt, ob noch was mehr geht, ist meine erste Reaktion \"safeee kriegen wir hin :o7:\" – und dann überarbeite ich mich. Ich arbeite dran, inzwischen erst zu rechnen und dann zu antworten. Wer mich also fragt, ob was bis Freitag geht, kriegt manchmal eine Stunde später die Antwort statt sofort :FeelsDumbMan:"
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -2045,14 +2040,14 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:17:15.21056+00:00",
           "sort_order": 1009,
-          "updated_at": "2026-09-04T15:49:34.494177+00:00"
+          "updated_at": "2026-10-07T11:23:36.985235+00:00"
         },
         {
           "id": "8d19a574-3cc6-4499-a2d7-1cbb07b5c79a",
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Und ich neige dazu, auch bei Sachen 110 % zu geben, wo 85 % völlig gereicht hätten. Bei einem Hero-Video ist das richtig. Bei der dritten Variante eines Social-Cutdowns ist es einfach nur Zeit, die woanders fehlt. Diese Grenze zu ziehen ist Übungssache, und ich bin noch nicht fertig damit."
+            "roh": "Und ich neige dazu, auch bei Sachen 110 % zu geben, wo 85 % völlig gereicht hätten :CatScreaming:. Bei einem Hero-Video ist das richtig. Bei der dritten Variante von nem Reel ist es einfach nur Zeit, die woanders fehlt. Diese Grenze zu ziehen übe ich noch, aber klare Kommunikation und Anweisungen helfen da enorm :love: "
           },
           "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
           "inhalt_en": {
@@ -2060,67 +2055,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-26T16:19:09.867162+00:00",
           "sort_order": 1010,
-          "updated_at": "2026-09-04T15:49:50.228635+00:00"
-        },
-        {
-          "id": "5a2ea5d5-31d5-47a3-8392-330410405daf",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "### Der Widerspruch, den ich mitnehme"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "### The contradiction I'm taking with me"
-          },
-          "created_at": "2026-08-26T16:19:56.903375+00:00",
-          "sort_order": 1012,
-          "updated_at": "2026-09-04T15:49:59.564264+00:00"
-        },
-        {
-          "id": "dace9e3f-5d5b-4ee4-bac7-b0d7a1d1a259",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Laut Test sollen ISFJ-Ts chaotische Umgebungen und schnelle Kurswechsel meiden. Ich arbeite freelance an Content in einem Feld, in dem sich die Nachrichtenlage täglich dreht und Themen manchmal innerhalb von Stunden erledigt sind."
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "According to the test, ISFJ-Ts should avoid chaotic environments and quick changes of course. I freelance on content in a field where the news cycle turns daily and topics are sometimes dead within hours."
-          },
-          "created_at": "2026-08-26T16:20:06.643724+00:00",
-          "sort_order": 1013,
-          "updated_at": "2026-09-04T15:50:23.374157+00:00"
-        },
-        {
-          "id": "704e35ce-b444-4fa8-adfd-ea14e38ba337",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Das war anfangs anstrengend. Was funktioniert hat, war nicht, das Chaos zu akzeptieren, sondern mir darin eigene Struktur zu bauen: feste Templates, wiederverwendbare Setups, eigene Skripte für alles, was ich mehr als dreimal mache. Ich kann mit Tempo umgehen. Ich brauch nur ein System darunter, das nicht jedes Mal neu erfunden wird."
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "That was exhausting at first. What worked wasn't accepting the chaos, but building my own structure inside it: fixed templates, reusable setups, my own scripts for anything I do more than three times. I can handle pace. I just need a system underneath that doesn't get reinvented every time."
-          },
-          "created_at": "2026-08-26T16:20:24.481493+00:00",
-          "sort_order": 1014,
-          "updated_at": "2026-09-04T15:50:39.84633+00:00"
-        },
-        {
-          "id": "3b79e170-8028-4583-b558-ab22402d2f72",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Wenn du dir überlegst, mit mir zu arbeiten: Du kriegst jemanden, der Dinge zu Ende bringt, mitdenkt und Bescheid sagt, bevor was schiefgeht. Was du nicht kriegst, ist jemand, der bei \"mach mal irgendwas Cooles\" ohne Rückfrage losläuft. "
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "If you're thinking about working with me: you get someone who finishes things, thinks along and speaks up before something goes wrong. What you don't get is someone who runs off on \"just make something cool\" without asking a question first."
-          },
-          "created_at": "2026-08-26T16:20:38.748924+00:00",
-          "sort_order": 1015,
-          "updated_at": "2026-09-04T15:50:56.441573+00:00"
+          "updated_at": "2026-10-07T11:26:25.377662+00:00"
         }
       ]
     }
@@ -2128,26 +2063,86 @@ window.SEED_SEITEN = {
 };
 window.SEED_EMOTES = [
   {
+    "name": "catJAM",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365427327-catJAM-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "CatScreaming",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365901912-TheVoices-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "Explaining",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365899717-Shiza-120x64.avif",
+    "breite": 120,
+    "hoehe": 64
+  },
+  {
+    "name": "FeelsDumbMan",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791371684103-FeelsDumbMan-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
     "name": "GIGACHAD",
     "url": "/emotes/GIGACHAD-64x64.avif",
     "breite": 64,
     "hoehe": 64
   },
   {
-    "name": "HACKERMANS",
+    "name": "Grrr",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365901580-UltraMad-76x64.avif",
+    "breite": 76,
+    "hoehe": 64
+  },
+  {
+    "name": "HACKERMAN",
     "url": "/emotes/HACKERMANS-64x64.avif",
     "breite": 64,
     "hoehe": 64
   },
   {
-    "name": "peepoHey",
-    "url": "/emotes/peepoHey-64x64.avif",
+    "name": "happie",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365902299-happie-66x64.avif",
+    "breite": 66,
+    "hoehe": 64
+  },
+  {
+    "name": "love",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791366632404-love-64x64.avif",
     "breite": 64,
     "hoehe": 64
   },
   {
-    "name": "peepoShy",
-    "url": "/emotes/peepoShy-64x64.avif",
+    "name": "NOOO",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365428684-NOOOO-68x64.avif",
+    "breite": 68,
+    "hoehe": 64
+  },
+  {
+    "name": "o7",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365902828-o7-82x64.avif",
+    "breite": 82,
+    "hoehe": 64
+  },
+  {
+    "name": "PepeCigarette",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365900559-Smoge-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "PepeCrush",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791366631964-PepeCrush-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "PepeHey",
+    "url": "/emotes/peepoHey-64x64.avif",
     "breite": 64,
     "hoehe": 64
   },
@@ -2158,9 +2153,45 @@ window.SEED_EMOTES = [
     "hoehe": 64
   },
   {
-    "name": "Weirdge",
+    "name": "PepeLove",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365429064-peepoLove-82x64.avif",
+    "breite": 82,
+    "hoehe": 64
+  },
+  {
+    "name": "PepeShy",
+    "url": "/emotes/peepoShy-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "PepeWeird",
     "url": "/emotes/Weirdge-84x64.avif",
     "breite": 84,
+    "hoehe": 64
+  },
+  {
+    "name": "popCat",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791365902577-popCat-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "See",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791367006599-See-64x64.avif",
+    "breite": 64,
+    "hoehe": 64
+  },
+  {
+    "name": "shrug",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791367005848-shrug-68x64.avif",
+    "breite": 68,
+    "hoehe": 64
+  },
+  {
+    "name": "veryCoolCat",
+    "url": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/emotes/1791367008054-veryCoolCat-64x64.avif",
+    "breite": 64,
     "hoehe": 64
   }
 ];
