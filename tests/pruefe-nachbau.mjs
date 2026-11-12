@@ -117,12 +117,27 @@ if (!firefoxDa()) {
 } else {
   const d = await messeInFirefox(MESS_EINBLENDUNG, { port: 8983 });
 
-  pruefe('Firefox kann Scroll-Animationen NICHT selbst — die Annahme, die alles ausgelöst hat',
-    d.kannSelbst === true,
-    'nach dem Nachladen meldet das Polyfill selbst true; ohne es wäre es false');
-  pruefe('Firefox: die Klasse mm-bewegung ist gesetzt', d.klasse === true);
-  pruefe('Firefox: das Nachbau-Stylesheet ist dazugekommen', d.blaetter === EIGENE + 1,
-    d.blaetter + ' Stylesheets (' + EIGENE + ' eigene + Nachbau; das Polyfill schreibt sie auf blob: um)');
+  /* Seit Firefox 160 (Nov. 2026) kann Firefox Scroll-Animationen selbst.
+     Dann laedt der Lader nichts nach, und Firefox muss sich verhalten wie
+     Chrome: keine Klasse, kein Nachbau -- und trotzdem animieren (die
+     Proben unten). Der Polyfill-Weg fuer aeltere Browser laesst sich mit
+     so einem Firefox nicht mehr echt nachstellen: Ein vorgetaeuschtes
+     "kann ich nicht" laesst eigene Animation UND Nachbau gleichzeitig
+     laufen (am 12.11. ausprobiert: alles blieb fast unsichtbar). Die
+     Polyfill-Proben werden dann ehrlich als "nicht pruefbar" gemeldet. */
+  const nativ = d.klasse === false;
+  if (nativ) {
+    console.log('  info  Firefox kann Scroll-Animationen selbst — Polyfill-Weg hier nicht prüfbar');
+    pruefe('Firefox (kann es selbst): lädt KEIN Polyfill und keinen Nachbau',
+      d.kannSelbst === true && d.blaetter === EIGENE, `${d.blaetter} Stylesheets`);
+  } else {
+    pruefe('Firefox kann Scroll-Animationen NICHT selbst — die Annahme, die alles ausgelöst hat',
+      d.kannSelbst === true,
+      'nach dem Nachladen meldet das Polyfill selbst true; ohne es wäre es false');
+    pruefe('Firefox: die Klasse mm-bewegung ist gesetzt', d.klasse === true);
+    pruefe('Firefox: das Nachbau-Stylesheet ist dazugekommen', d.blaetter === EIGENE + 1,
+      d.blaetter + ' Stylesheets (' + EIGENE + ' eigene + Nachbau; das Polyfill schreibt sie auf blob: um)');
+  }
 
   for (const p of d.proben) {
     if (p.fehlt) { pruefe(`Firefox: ${p.s} ist da`, false, 'Element fehlt'); continue; }
@@ -139,6 +154,7 @@ if (!firefoxDa()) {
   /* GEGENBEWEIS 1: Ohne das Nachbau-Stylesheet muss in Firefox nichts
      animieren -- das zeigt, dass die Prüfung oben wirklich den Nachbau
      misst und nicht irgendetwas anderes. */
+  if (!nativ) {
   const ohne = await messeInFirefox(MESS_EINBLENDUNG, {
     port: 8984,
     verbiegen: (html) => {
@@ -156,6 +172,7 @@ if (!firefoxDa()) {
      halbdurchsichtig. Das ist die eigentliche Zusage des Entwurfs. */
   pruefe('…und alles bleibt dabei vollständig sichtbar (Deckkraft 1)',
     totBeiOhne, 'kein Inhalt hängt von einem Skript ab');
+  }
 
   /* GEGENBEWEIS 2: Bei „Bewegung reduzieren" darf der Lader gar nicht erst
      anspringen -- kein Polyfill, keine Klasse, keine Animation. */
@@ -165,9 +182,12 @@ if (!firefoxDa()) {
       `<head><script>const _m=matchMedia;matchMedia=q=>q.includes('reduce')?{matches:true,addEventListener(){}}:_m(q);</script>`),
   });
   pruefe('GEGENBEWEIS: bei „Bewegung reduzieren“ lädt Firefox das Polyfill gar nicht erst',
-    reduziert.klasse === false && reduziert.kannSelbst === false && reduziert.blaetter === EIGENE,
+    reduziert.klasse === false && reduziert.kannSelbst === nativ && reduziert.blaetter === EIGENE,
     `Klasse ${reduziert.klasse}, kannSelbst ${reduziert.kannSelbst}, ${reduziert.blaetter} Stylesheets`);
-  pruefe('…und alles ist von Anfang an sichtbar',
+  /* Die Vortäuschung oben greift nur in JavaScript (matchMedia), nicht in
+     CSS. Animiert Firefox selbst, entscheidet allein CSS -- das prüft
+     pruefe-scroll-bewegung.mjs in Chrome mit echtem "Bewegung reduzieren". */
+  if (!nativ) pruefe('…und alles ist von Anfang an sichtbar',
     reduziert.proben.every(p => p.fehlt || (p.davor === 1 && p.fertig === 1)));
 }
 

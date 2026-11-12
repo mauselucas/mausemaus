@@ -1,0 +1,96 @@
+/* Die Leseseite (/lesen.html): ein PDF-Leser im Stil der Seite.
+   Oben eine ruhige Leiste, darunter die Blätter wie Papier auf dem Tisch. */
+:root {
+  --ink: #0D1821;
+  --paper: #F0F4EF;
+  --tisch: #E4E8E1;
+  --line: #D5D9D2;
+  --leise: #6D7571;
+  --sage: #BFCC94;
+  --kurve: cubic-bezier(.50, 0, .12, 1);
+  --blatt-schatten: 0 1px 2px rgba(13,24,33,.08),
+    0 12px 26px -10px rgba(13,24,33,.22),
+    0 34px 60px -28px rgba(13,24,33,.26);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--tisch); color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column;
+}
+
+/* ---------- Leiste ---------- */
+.le-leiste {
+  flex: none; position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 18px;
+  padding: 12px 22px; min-height: 64px;
+  background: rgba(240,244,239,.92);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.le-heim { flex: none; display: grid; place-items: center; width: 36px; height: 36px;
+  border-radius: 50%; color: var(--ink); transition: background .2s var(--kurve), rotate .5s var(--kurve); }
+.le-heim svg { width: 22px; fill: currentColor; }
+.le-heim:hover { background: rgba(13,24,33,.06); rotate: 30deg; }
+.le-titelblock { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.le-art { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--leise); }
+.le-titel { margin: 0; font-family: 'TropiWeb', 'Manrope', sans-serif; font-weight: 400;
+  font-size: 22px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.le-werkzeuge { flex: none; display: flex; align-items: center; gap: 4px;
+  padding: 4px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.le-seiten, .le-zoom { font-family: 'Space Mono', monospace; font-size: 11px;
+  letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.le-seiten { padding: 0 10px 0 12px; color: var(--leise); white-space: nowrap; }
+.le-trenner { width: 1px; height: 18px; background: var(--line); }
+.le-knopf, .le-zoom { border: 0; background: none; color: var(--ink); cursor: pointer;
+  height: 32px; border-radius: 999px; transition: background .15s var(--kurve); }
+.le-knopf { width: 32px; display: grid; place-items: center; }
+.le-knopf svg { width: 14px; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; fill: none; }
+.le-zoom { min-width: 64px; padding: 0 8px; }
+.le-knopf:hover, .le-zoom:hover { background: rgba(13,24,33,.06); }
+.le-knopf:focus-visible, .le-zoom:focus-visible, .le-heim:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 2px; }
+.le-knopf:disabled { opacity: .3; cursor: default; background: none; }
+
+/* ---------- Bühne mit den Blättern ---------- */
+.le-buehne { flex: 1; overflow: auto; outline: none; overscroll-behavior: contain; }
+.le-blaetter { display: flex; flex-direction: column; align-items: center; gap: 28px;
+  padding: 40px 24px 72px; min-width: max-content; }
+.le-blatt { position: relative; background: #fff; border-radius: 2px;
+  box-shadow: var(--blatt-schatten);
+  opacity: 0; translate: 0 10px;
+  transition: opacity .5s var(--kurve), translate .6s var(--kurve); }
+.le-blatt.da { opacity: 1; translate: 0 0; }
+.le-blatt canvas { display: block; width: 100%; height: 100%; border-radius: 2px;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+.le-hinweis { max-width: 420px; margin: 18vh auto 0; padding: 0 24px; text-align: center;
+  font-size: 15px; line-height: 1.6; color: #2c343b; }
+.le-hinweis strong { display: block; font-family: 'TropiWeb', 'Manrope', sans-serif;
+  font-weight: 400; font-size: 28px; margin-bottom: 8px; color: var(--ink); }
+.le-hinweis a { color: var(--ink); }
+
+/* Lädt noch: eine sanft pulsierende Blattfläche. */
+.le-blaetter[aria-busy="true"]:empty::before { content: ''; width: min(760px, 100%);
+  aspect-ratio: 641 / 911; background: #fff; border-radius: 2px; box-shadow: var(--blatt-schatten);
+  animation: le-atmen 1.4s ease-in-out infinite alternate; }
+@keyframes le-atmen { from { opacity: .45; } to { opacity: .85; } }
+
+@media (max-width: 620px) {
+  .le-leiste { gap: 10px; padding: 10px 12px; flex-wrap: wrap; }
+  .le-titel { font-size: 19px; }
+  .le-werkzeuge { margin-left: auto; }
+  .le-seiten { display: none; }
+  .le-trenner { display: none; }
+  .le-blaetter { padding: 20px 12px 48px; gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .le-blatt, .le-heim { transition: none; }
+  .le-blaetter[aria-busy="true"]:empty::before { animation: none; }
+}
+/* Drucken ist kein Weg, an das Dokument zu kommen. */
+@media print { body { display: none !important; } }

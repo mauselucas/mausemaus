@@ -21,6 +21,11 @@
    ihrer viewBox passt. */
 import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
+/* Welche Welt geprüft wird, steht im Inhalt, nicht hier: die erste aus der
+   Sitemap (die schreibt tests/hochladen.mjs aus den veröffentlichten Welten). */
+const WELT = (await import('node:fs')).readFileSync(new URL('../HOCHLADEN/sitemap.xml', import.meta.url), 'utf8')
+  .match(/\/welt\/([a-z0-9-]+)</)[1];
+
 
 const wurzel = new URL('../HOCHLADEN/', import.meta.url).pathname;
 const server = await starteServer({ wurzel, port: 8917 });
@@ -313,11 +318,13 @@ const TEXT_MESSUNG = `(() => {
 
 /* ================= Eine Welt ================= */
 {
-  const s = await oeffne(ADR + '/welt/verteidiger-isfj-t', { port: 9357, breite: 1440, hoehe: 900 });
+  const s = await oeffne(ADR + '/welt/' + WELT, { port: 9357, breite: 1440, hoehe: 900 });
   await s.warte(3000);
 
   const anzahl = Number(await s.werte(`document.querySelectorAll('.mm-blume').length`));
-  pruefe('auch eine Welt bekommt Blumen', anzahl >= 3, String(anzahl));
+  /* "mindestens eine" statt fester Zahl: Wie viele Blumen Platz haben, hängt
+     an der Länge der Welt -- und welche Welt geprüft wird, am Inhalt. */
+  pruefe('auch eine Welt bekommt Blumen', anzahl >= 1, String(anzahl));
 
   const m = JSON.parse(await s.werte(TEXT_MESSUNG));
   pruefe('Welt: keine Blume liegt hinter Text', m.treffer.length === 0,

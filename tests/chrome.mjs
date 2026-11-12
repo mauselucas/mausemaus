@@ -1,11 +1,25 @@
 /* Chrome fernsteuern — ohne eine einzige fremde Abhängigkeit.
    Node bringt WebSocket seit v22 mit, Chrome spricht das DevTools-Protokoll. */
 import { spawn } from 'node:child_process';
-import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+/* Normales Chrome, falls installiert -- sonst "Chrome for Testing" aus
+   tests/.werkzeug/browser (nicht im Repo; neu holen mit
+   cd tests/.werkzeug && npx -y @puppeteer/browsers@latest install chrome@stable --path ./browser). */
+function findeChrome() {
+  const normal = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  if (existsSync(normal)) return normal;
+  const basis = new URL('./.werkzeug/browser/chrome/', import.meta.url).pathname;
+  const versionen = existsSync(basis) ? readdirSync(basis).sort().reverse() : [];
+  for (const v of versionen) {
+    const p = join(basis, v, 'chrome-mac-arm64', 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing');
+    if (existsSync(p)) return p;
+  }
+  throw new Error('Kein Chrome gefunden. Installieren oder Chrome for Testing holen (siehe tests/chrome.mjs).');
+}
+const CHROME = findeChrome();
 /* Das Chrome-Profil gehört NICHT unter tests/: Dieser Projektordner liegt
    auf dem Schreibtisch und wird mit iCloud abgeglichen. Die Ablage hält
    Dateien offen, das Aufräumen scheitert dann mit ENOTEMPTY und reißt den

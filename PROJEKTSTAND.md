@@ -709,3 +709,26 @@ schon verkleinerte `scroll-timeline.js`.
 - esbuild wird bei Bedarf nach `tests/.werkzeug/` geladen (nicht im Repo).
 - Wichtig: Die Prüfungen laufen gegen HOCHLADEN, nicht gegen die
   aufgeräumte Fassung -- nur `pruefe-aufraeumen` vergleicht beide.
+
+## Leseseite für PDFs / Arbeitszeugnis (neu am 12.11.2026)
+
+`/lesen.html?d=<name>&t=<Titel>` zeigt `HOCHLADEN/dokumente/<name>.pdf` wie
+ein PDF-Leser (pdf.js 4.10.38 in `assets/vendor/pdfjs-4.10.38/`, gezeichnet
+auf `<canvas>`): Leiste mit Titel, Seitenzahl, Zoom −/+/Breite, Strg+Mausrad,
+Tasten + − 0. Kein Download-/Druckweg (Rechtsklick, Strg+S/P abgefangen,
+Druck leer). Ehrlich: Über die Entwicklerwerkzeuge kommt man trotzdem ran.
+Nicht bei Google: `robots.txt` sperrt `/dokumente/`, `lesen.html` ist noindex.
+
+- Arbeitszeugnis 33minutes: `dokumente/zeugnis-33minutes.pdf`, verlinkt als
+  eigener Textblock in Kapitel 1 der The-Race-Karte (Markdown-Link, öffnet
+  neuen Tab). Text/Link im Admin änderbar.
+- Neue PDF: `node tests/pdf-saeubern.mjs <datei.pdf> <name>` baut sie OHNE
+  Metadaten neu (exiftool reicht bei PDFs nicht: alte Fassung bleibt drin).
+  Nur für Bild-PDFs (Scan/Screenshot); bricht sonst ab.
+- `tests/pruefe-lesen.mjs` prüft JEDE PDF in /dokumente/ auf Metadaten.
+
+## Chrome für die Prüfungen
+
+Ist kein normales Chrome installiert, nehmen die Prüfungen „Chrome for
+Testing“ aus `tests/.werkzeug/browser` (nicht im Repo). Neu holen:
+`cd tests/.werkzeug && npx -y @puppeteer/browsers@latest install chrome@stable --path ./browser`

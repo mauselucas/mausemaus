@@ -19,6 +19,11 @@
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { pruefe, bericht } from './chrome.mjs';
+/* Welche Welt geprüft wird, steht im Inhalt, nicht hier: die erste aus der
+   Sitemap (die schreibt tests/hochladen.mjs aus den veröffentlichten Welten). */
+const WELT = (await import('node:fs')).readFileSync(new URL('../HOCHLADEN/sitemap.xml', import.meta.url), 'utf8')
+  .match(/\/welt\/([a-z0-9-]+)</)[1];
+
 
 const BASIS = 'https://mausemaus.com';
 
@@ -137,7 +142,7 @@ pruefe('bekannt und hingenommen: GitHub Pages setzt keine Sicherheits-Kopfzeilen
 
 /* ---------- 5. Adressen: dass die schoenen Adressen ohne _redirects gehen ---------- */
 
-for (const [pfad, erwartet] of [['/welt/verteidiger-isfj-t', 200], ['/blog/verteidiger-isfj-t', 200]]) {
+for (const [pfad, erwartet] of [['/welt/' + WELT, 200], ['/blog/' + WELT, 200]]) {
   const r = await hole(pfad);
   pruefe(`${pfad} antwortet ohne jede Umschreibungsregel`, r.status === erwartet,
     'HTTP ' + r.status);

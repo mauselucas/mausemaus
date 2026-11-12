@@ -2,7 +2,7 @@
    Werden NUR benutzt, wenn die Datenbank nicht erreichbar ist und auch kein
    Zwischenspeicher im Browser vorliegt. Damit geht die Seite nie leer auf.
 
-   Automatisch erzeugt von tests/hochladen.mjs — Stand: 18.10.2026.
+   Automatisch erzeugt von tests/hochladen.mjs — Stand: 12.11.2026.
    NICHT von Hand aendern: der naechste Aufruf ueberschreibt alles. */
 
 window.SEED_SETTINGS = {
@@ -273,24 +273,24 @@ window.SEED_SEITEN = {
         "breite": "normal",
         "inhalt": {
           "art": "persoenlich",
-          "foto": "/medien/lucas/lucas-peace-720x720.webp",
+          "foto": "https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1794443925778-img-0085-1200x1600.webp",
           "farbe": null,
           "rolle": "hallo",
           "titel": "Hallo ich bin",
           "kicker": "Video Editor & Motion Designer · Köln",
-          "zusatz": "Lucas 🤠",
-          "foto_text": "Lucas liegt auf dem Sofa, macht ein Peace-Zeichen und grinst in die Kamera"
+          "zusatz": "lucas",
+          "foto_text": "Lucas mit grauer Kapuze und durchsichtiger Brille, oben drauf ein kleiner Kapitänshut mit Anker, vor dunkelgrüner Wand"
         },
         "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
         "inhalt_en": {
           "titel": "Hi, I'm",
           "kicker": "Video Editor & Motion Designer · Cologne",
           "zusatz": "Lucas :)",
-          "foto_text": "Lucas lying on the couch, flashing a peace sign and grinning at the camera"
+          "foto_text": "Lucas in a grey hood and clear glasses, a tiny captain's hat with an anchor on top, in front of a dark green wall"
         },
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 10,
-        "updated_at": "2026-10-18T08:03:22.669648+00:00"
+        "updated_at": "2026-11-12T02:07:07.448059+00:00"
       },
       {
         "id": "69222574-03b4-434a-b473-8a50d636d24c",
@@ -372,26 +372,6 @@ window.SEED_SEITEN = {
         "updated_at": "2026-09-04T15:37:23.13498+00:00"
       },
       {
-        "id": "92e89161-07c9-41ff-938a-39ba7b5dce81",
-        "typ": "abschnitt",
-        "breite": "normal",
-        "inhalt": {
-          "art": "persoenlich",
-          "farbe": null,
-          "rolle": "profil",
-          "titel": "Lucas (22) aus Ehrenfeld",
-          "kicker": "Wer schneidet da"
-        },
-        "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": {
-          "titel": "Lucas (22) from Ehrenfeld",
-          "kicker": "Who's doing the editing here"
-        },
-        "created_at": "2026-08-22T17:46:48.907163+00:00",
-        "sort_order": 70,
-        "updated_at": "2026-09-04T15:37:34.736782+00:00"
-      },
-      {
         "id": "00739d3e-4948-4d63-8373-c6c91a5f584b",
         "typ": "text",
         "breite": "normal",
@@ -405,22 +385,6 @@ window.SEED_SEITEN = {
         "created_at": "2026-08-22T17:46:48.907163+00:00",
         "sort_order": 80,
         "updated_at": "2026-10-07T09:52:36.773646+00:00"
-      },
-      {
-        "id": "f4957b13-fe3b-4343-9017-5ddc02c8fe9d",
-        "typ": "zitat",
-        "breite": "normal",
-        "inhalt": {
-          "roh": "Mein 16Personalities Ergebnis ist **ISFJ-T** - falls du lesen möchtest wie es ist mit mir zu arbeiten lies dir [[hier|verteidiger-isfj-t]] meinen Beitrag dazu durch!",
-          "farbe": "salbei"
-        },
-        "seite_id": "531b2bec-20b2-4348-9bbf-5be8d308d9a0",
-        "inhalt_en": {
-          "roh": "My 16Personalities result is ISFJ-T – if you want to read about what it's like to work with me, check out my post on it [[here|verteidiger-isfj-t]]!"
-        },
-        "created_at": "2026-08-26T22:29:15.662511+00:00",
-        "sort_order": 85.625,
-        "updated_at": "2026-09-04T15:38:13.343442+00:00"
       },
       {
         "id": "94000ae3-512e-4d80-9379-532f5c86c129",
@@ -618,169 +582,6 @@ window.SEED_SEITEN = {
   },
   "projekte": [
     {
-      "id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-      "slug": "seite",
-      "typ": "projekt",
-      "titel": "Simplicissimus",
-      "untertitel": "Freelance Editor & 3D · Simplicissimus / fern",
-      "kunde": "Simplicissimus",
-      "jahr": "2024",
-      "cover_url": null,
-      "cover_pos": "50% 50%",
-      "video_url": null,
-      "embed_ok": false,
-      "farbe": "#669bbc",
-      "ist_aktuell": false,
-      "status": "published",
-      "sort_order": 0,
-      "created_at": "2026-09-04T17:48:51.017177+00:00",
-      "updated_at": "2026-09-05T02:57:16.360811+00:00",
-      "titel_en": "",
-      "untertitel_en": "",
-      "bloecke": [
-        {
-          "id": "e181919f-edfe-4c07-9796-f9899bde4fe6",
-          "typ": "bild",
-          "breite": "voll",
-          "inhalt": {
-            "roh": "",
-            "ohne_rahmen": true
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-09-04T22:04:47.538314+00:00",
-          "sort_order": 9,
-          "updated_at": "2026-10-06T17:02:52.332431+00:00"
-        },
-        {
-          "id": "0fcd0502-bc1f-4eeb-8a9b-bcafb6ea81d4",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "**Simplicissimus** macht die Dokus, die du wahrscheinlich schon mal um 2 Uhr nachts auf YouTube gesehen hast. Ich war dort als Freelancer Teil eines rund 45-köpfigen Teams. Man bekommt ein rohes Skript, das Voiceover und ein grobes Bildkonzept von der Creative Direction – und daraus baue ich Feinschnitt, 2D-Motion-Design und Sound-Design."
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": {
-            "roh": "**Simplicissimus** makes the kind of documentaries you've probably already watched on YouTube at 2 a.m. I was a freelancer there, part of a team of around 45 people. You get a raw script, the voiceover and a rough visual concept from the creative direction – and from that I build the fine cut, 2D motion design and sound design. Pacing is everything here: if a doc holds you for 20 minutes, it's because not a single cut runs too long."
-          },
-          "created_at": "2026-09-04T17:48:51.112385+00:00",
-          "sort_order": 10,
-          "updated_at": "2026-10-07T10:48:32.024572+00:00"
-        },
-        {
-          "id": "6077105a-9b74-4b6d-b69c-37ddd6cab1a4",
-          "typ": "gif",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791310880932-mausemaus-simpli-1280x640.mp4)"
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-10-06T18:20:56.809776+00:00",
-          "sort_order": 11.5,
-          "updated_at": "2026-10-06T18:21:23.05541+00:00"
-        },
-        {
-          "id": "829b7ce8-2eae-4c55-8a31-a44d827c44b6",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Mein Schwerpunkt war von Anfang an Schnitt und Timing. Aber irgendwann sitzt du an einer Szene und merkst: Das braucht eine eigene 3D-Ebene, sonst kommt der Punkt nicht rüber. Und statt zu warten, bis jemand Zeit hat, hab ich angefangen, es selbst zu bauen :PepeCrush: "
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": {
-            "roh": "My focus was editing and timing from day one. But at some point you're sitting on a scene and realize: *this needs its own 3D layer, or the point just won't land.* And instead of waiting until someone had time, I started building it myself."
-          },
-          "created_at": "2026-09-04T18:43:48.91797+00:00",
-          "sort_order": 13,
-          "updated_at": "2026-10-07T10:00:01.675943+00:00"
-        },
-        {
-          "id": "62fe7b84-4395-4d8d-950b-a80d3aafef27",
-          "typ": "bild",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "![Röhrenfernseher ab 0:07](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1788557872718-screenshot-2026-09-04-at-22-37-1600x911.webp){mittel}",
-            "ohne_rahmen": true
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-09-04T18:50:21.627052+00:00",
-          "sort_order": 16.75,
-          "updated_at": "2026-09-04T22:21:11.485951+00:00"
-        },
-        {
-          "id": "917e6649-68c2-4512-a46d-0cfbba400b88",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "So hab ich mir mitten in laufenden Produktionen Blender beigebracht – aus Neugier, und weil die Animator:innen im Team mir extrem viel geholfen haben (ganz viel liebe an Lenz :love:). Erst kleine Sachen, dann Schritt für Schritt eigene Szenen, die direkt in die finale Pipeline gewandert sind."
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": {
-            "roh": "That's how I taught myself Blender in the middle of running productions – out of curiosity, and because the animators on the team helped me out insane (lots of love to *Lenz* 🫶). Small things first, then step by step my own scenes that **went straight into the final pipeline**😎."
-          },
-          "created_at": "2026-09-04T18:47:24.895628+00:00",
-          "sort_order": 17.125,
-          "updated_at": "2026-10-07T09:53:44.109389+00:00"
-        },
-        {
-          "id": "36339603-087f-4a51-a82d-434ff2995afe",
-          "typ": "gif",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "![](/medien/loops/simplicissimus-intro-800x450.mp4){gross}{Simplicissimus \"Die gruseligste Waffe der CIA\" – 1,35M Aufrufe}",
-            "ohne_rahmen": true
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-09-04T21:02:32.417678+00:00",
-          "sort_order": 17.5,
-          "updated_at": "2026-10-06T17:38:59.02999+00:00"
-        },
-        {
-          "id": "704d1b69-c568-487e-8d56-8658df63fa0b",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Hier sieht man ganz gut wie es in Blender aussieht und wie es dann am Ende tatsächlich im Video aussieht. Bin sehr stolz :catJAM: "
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-10-06T17:21:21.763779+00:00",
-          "sort_order": 17.6875,
-          "updated_at": "2026-10-07T10:02:13.094385+00:00"
-        },
-        {
-          "id": "dd0b74e1-a50b-439a-8b54-deeb83f92078",
-          "typ": "zitat",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "\"Die gruseligste Waffe der CIA\" – 1,35M Aufrufe",
-            "farbe": "salbei"
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-10-07T10:04:16.125616+00:00",
-          "sort_order": 17.734375,
-          "updated_at": "2026-10-07T10:04:41.628992+00:00"
-        },
-        {
-          "id": "54724b89-f3c5-463a-a6e6-d521423a1a9c",
-          "typ": "trenner",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "---"
-          },
-          "seite_id": "57c30613-2fdc-4c6b-aa99-9602aceee861",
-          "inhalt_en": null,
-          "created_at": "2026-09-04T18:47:47.997332+00:00",
-          "sort_order": 17.75,
-          "updated_at": "2026-09-04T22:21:53.48713+00:00"
-        }
-      ]
-    },
-    {
       "id": "1652536a-4971-440d-8fb2-a50396e70652",
       "slug": "the-race-staffel-3",
       "typ": "projekt",
@@ -817,6 +618,21 @@ window.SEED_SEITEN = {
           "updated_at": "2026-09-04T15:56:23.126412+00:00"
         },
         {
+          "id": "63286d84-49b1-45f3-a198-91652b6332e8",
+          "typ": "text",
+          "breite": "normal",
+          "inhalt": {
+            "roh": "[Hier kannst du dir mein Arbeitszeugnis durchlesen](/lesen.html?d=zeugnis-33minutes&t=Arbeitszeugnis%20%C2%B7%2033minutes)"
+          },
+          "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
+          "inhalt_en": {
+            "roh": "[Read my reference letter here](/lesen.html?d=zeugnis-33minutes&t=Reference%20letter%20%C2%B7%2033minutes)"
+          },
+          "created_at": "2026-11-12T01:54:58.424656+00:00",
+          "sort_order": 32,
+          "updated_at": "2026-11-12T01:54:58.424656+00:00"
+        },
+        {
           "id": "7565b3fa-dd1c-4fd4-925f-d5be1fa117e3",
           "typ": "gif",
           "breite": "normal",
@@ -847,13 +663,13 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Man findet mich einfach auf IMDb das ist so cool :PepeCrush: vielleicht wirkt das für Leserinnen total selbstverständlich wenn man an dem Projekt beteiligt war, aber das ganze Arbeitsumfeld hat mir super viel Spaß gemacht und bedeutet mir deshalb so viel. Einerseits weil ich die vorherigen Staffeln als Zuschauer geliebt habe, andererseits weil das ganze Team dort unglaublich mausig war und ich mich super wohl gefühlt habe. Insbesondere Basti und Julez, falls ihr das irgendwann mal lesen solltet: hab euch dolle lieb :love: "
+            "roh": "Man findet mich einfach auf IMDb das ist so cool :PepeCrush: vielleicht wirkt das für Leserinnen total selbstverständlich wenn man an dem Projekt beteiligt war, aber das ganze Arbeitsumfeld hat mir super viel Spaß gemacht und bedeutet mir deshalb so viel. Einerseits weil ich die vorherigen Staffeln als Zuschauer geliebt habe, andererseits weil das ganze Team dort unglaublich mausig war und ich mich super wohl gefühlt habe. Insbesondere Basti und Julez, falls ihr das irgendwann mal lesen solltet: hab euch lieb :love: "
           },
           "seite_id": "1652536a-4971-440d-8fb2-a50396e70652",
           "inhalt_en": null,
           "created_at": "2026-10-07T10:11:09.106858+00:00",
           "sort_order": 45,
-          "updated_at": "2026-10-07T10:28:52.684439+00:00"
+          "updated_at": "2026-11-12T01:44:57.621136+00:00"
         },
         {
           "id": "0588d79e-8ed8-412b-8300-cb95392bfabe",
@@ -1001,7 +817,7 @@ window.SEED_SEITEN = {
           "typ": "text",
           "breite": "normal",
           "inhalt": {
-            "roh": "Das Video hatte in weniger als 24 Stunden über 10.000 Aufrufe und ist damit das bisher erfolgreichste auf dem Kanal – Tendenz steigend :catJAM: In den Kommentaren werden vor allem die Animationen und das Sounddesign gelobt. Bei den nächsten Longform-Videos bin ich wieder mit dabei."
+            "roh": "Das Video hatte in weniger als 24 Stunden über 10.000 Aufrufe und ist damit das bisher erfolgreichste auf dem Kanal – Tendenz steigend :catJAM: In den Kommentaren werden vor allem die Animationen und das Sounddesign gelobt."
           },
           "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
           "inhalt_en": {
@@ -1009,7 +825,7 @@ window.SEED_SEITEN = {
           },
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 32.5,
-          "updated_at": "2026-10-07T10:32:53.506346+00:00"
+          "updated_at": "2026-11-12T01:37:29.414611+00:00"
         },
         {
           "id": "acb7c33d-c384-4489-8042-14830a144708",
@@ -1025,21 +841,6 @@ window.SEED_SEITEN = {
           "updated_at": "2026-09-25T13:01:51.469274+00:00"
         },
         {
-          "id": "17e05551-f8bc-4771-bb5e-6142510cf246",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Außerdem führe ich den Account [bastiankeller.clips](https://www.instagram.com/bastiankeller.clips/) komplett selbst: Dort laden wir täglich Reels hoch, die ich alle selbst erstelle. Der Account ist noch ganz frisch und wächst gerade."
-          },
-          "seite_id": "49d10ffd-fe38-4014-8988-50736affedcc",
-          "inhalt_en": {
-            "roh": "I also run the account [bastiankeller.clips](https://www.instagram.com/bastiankeller.clips/) entirely on my own: we post Reels there every day, all of them made by me. The account is still brand new and growing."
-          },
-          "created_at": "2026-09-25T13:06:59.451074+00:00",
-          "sort_order": 40,
-          "updated_at": "2026-09-25T13:06:59.451074+00:00"
-        },
-        {
           "id": "32893fba-7ce0-45cc-a549-1405df370275",
           "typ": "trenner",
           "breite": "normal",
@@ -1051,235 +852,6 @@ window.SEED_SEITEN = {
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 50,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
-        }
-      ]
-    },
-    {
-      "id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-      "slug": "istanbul-katzen",
-      "typ": "projekt",
-      "titel": "Intro & Grafiken für Travell4llove",
-      "untertitel": "Freelance Motion Designer · Travell4llove",
-      "kunde": "Travell4llove",
-      "jahr": "2026",
-      "cover_url": null,
-      "cover_pos": "50% 50%",
-      "video_url": null,
-      "embed_ok": true,
-      "farbe": "#C0603A",
-      "ist_aktuell": false,
-      "status": "published",
-      "sort_order": 2,
-      "created_at": "2026-10-05T10:27:14.803521+00:00",
-      "updated_at": "2026-10-06T18:30:08.722004+00:00",
-      "titel_en": "Intro & graphics for Travell4llove",
-      "untertitel_en": "Freelance Motion Designer · Travell4llove",
-      "bloecke": [
-        {
-          "id": "b197c68b-a7b6-437c-8963-10e29539fabf",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "**Travell4llove** macht Reisevideos, und für die Folge  „Tote Katzen im Müll? Was in Istanbul wirklich passiert“ kam Josu mit zwei Wünschen zu mir: ein Intro, das sofort nach Istanbul und zum Thema passt, und Motion Graphics, die sein Team später selbst in Premiere Pro befüllen kann – ohne jedes Mal bei mir anzuklopfen."
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "**Travell4llove** makes travel videos, and for the episode “Tote Katzen im Müll? Was in Istanbul wirklich passiert” (“Dead cats in the trash? What's really happening in Istanbul”), Josu came to me with two wishes: an intro that instantly says Istanbul and fits the topic, and motion graphics his team could fill in themselves in Premiere Pro later – without knocking on my door every time."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 10,
-          "updated_at": "2026-10-06T18:28:42.124148+00:00"
-        },
-        {
-          "id": "e5fd69f7-fced-4ebf-b2c8-6b0ffc948763",
-          "typ": "gif",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791311234464-intro-v2-1280x720.mp4)"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": null,
-          "created_at": "2026-10-06T18:26:39.167046+00:00",
-          "sort_order": 15,
-          "updated_at": "2026-10-06T18:27:15.248633+00:00"
-        },
-        {
-          "id": "b90f510a-5d86-438a-a638-fd287342c233",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Bevor ich irgendwas animiert habe, hab ich mir den Rohschnitt angeschaut. Das Thema ist eigentlich schwer (Straßenkatzen, die im Müll landen :NOOO:)  aber Josus Videos leben von Wärme und Neugier. Das Intro sollte also nicht düster werden, sondern einladen: Istanbul im Abendlicht, überall Katzen, und mittendrin Josu auf seinem Koffer. Die Idee hab ich zuerst gezeichnet, Bild für Bild und mit Zeitmarken. So konnten wir uns über den Ablauf einig werden, bevor in After Effects eine einzige Ebene existierte."
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "Before animating anything, I watched the rough cut. The topic is actually a heavy one – street cats ending up in the trash – but Josu's videos live on warmth and curiosity. So the intro shouldn't be gloomy, it should invite you in: Istanbul in the evening light, cats everywhere, and Josu right in the middle, sitting on his suitcase. I drew the idea first, frame by frame and with timecodes. That way we could agree on the flow before a single layer existed in After Effects."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 22.5,
-          "updated_at": "2026-10-07T10:41:02.469193+00:00"
-        },
-        {
-          "id": "d081f8d8-4288-4c57-b18d-b11844809fe9",
-          "typ": "bild",
-          "breite": "voll",
-          "inhalt": {
-            "roh": "![Storyboard für das Intro](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196338785-storyboard-1536x864.webp){mittel}{Das Storyboard: Josu fällt auf den Koffer, die Katzen springen auf, der Sticker klebt – danach läuft alles in einer Schleife.}",
-            "ohne_rahmen": true
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "![Storyboard for the intro](/medien/istanbul-katzen/storyboard.webp){gross}{The storyboard: Josu drops onto the suitcase, the cats jump up, the sticker lands – then everything runs in a loop.}",
-            "ohne_rahmen": true
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 30,
-          "updated_at": "2026-10-05T10:32:24.828204+00:00"
-        },
-        {
-          "id": "20c82315-62b5-4cae-995d-6de2b3f44a4c",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Aus der Skizze wurde in Photoshop eine Collage: der Bosporus im Sonnenuntergang als Hintergrund, davor jede Katze, jede Möwe, der Koffer und Josu einzeln freigestellt  damit sich in After Effects alles unabhängig voneinander bewegen lässt. Vorne die Mauer, hinten die Stadt: Weil alles auf eigenen Ebenen liegt, entsteht beim Bewegen echte Tiefe."
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "In Photoshop, the sketch turned into a collage: the Bosphorus at sunset as the background, and in front of it every cat, every seagull, the suitcase and Josu, each cut out on its own – so everything could move independently in After Effects. The wall up front, the city behind: because everything sits on its own layer, the movement creates real depth."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 40,
-          "updated_at": "2026-10-07T10:36:06.196608+00:00"
-        },
-        {
-          "id": "a13fe154-bb0a-4d40-87f2-cb25b798f5f0",
-          "typ": "bild",
-          "breite": "voll",
-          "inhalt": {
-            "roh": "![Die Intro-Collage in Photoshop](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196390318-photoshop-1600x835.webp){mittel}{Die Intro-Collage in Photoshop – jedes Element auf seiner eigenen Ebene.}"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "![The intro collage in Photoshop](/medien/istanbul-katzen/photoshop.webp){gross}{The intro collage in Photoshop – every element on its own layer.}"
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 50,
-          "updated_at": "2026-10-05T10:33:13.473418+00:00"
-        },
-        {
-          "id": "727be1b3-7575-4dcf-8d66-8eba769778a2",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "In After Effects kam dann das Timing dazu: Josu fällt in die Szene und landet mit einem kleinen Squash auf dem Koffer und zum Schluss klebt der Travel-4-Love-Sticker ins Bild. Danach geht das Intro in eine ruhige Schleife über, sodass der Titel so lange stehen bleiben kann, wie der Schnitt es braucht."
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "After Effects is where the timing came in: Josu drops into the scene and lands on the suitcase with a little squash, the cats get startled, and finally the Travel 4 Love sticker slaps onto the frame. After that the intro settles into a calm loop, so the title can stay up for as long as the edit needs."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 60,
-          "updated_at": "2026-10-05T10:34:15.127475+00:00"
-        },
-        {
-          "id": "b6fd7a5e-8be6-4b93-bb11-c3593104e633",
-          "typ": "gif",
-          "breite": "voll",
-          "inhalt": {
-            "roh": "![](/medien/loops/istanbul-intro-800x450.mp4){gross}{Das fertige Intro}"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "![](/medien/loops/istanbul-intro-800x450.mp4){gross}{The finished intro}"
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 70,
-          "updated_at": "2026-10-06T17:38:59.02999+00:00"
-        },
-        {
-          "id": "46c496b8-111d-4b43-869e-b74f6a076b1d",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Der zweite Teil waren acht Grafiken für das Video: Bauchbinde, Ortsmarke, Quellenangabe, eine Einblendung für heimlich gefilmte Szenen, eine große Zahl und drei Rahmen für Fremdmaterial – Tape, Pin und Handy. Der Look kommt aus demselben Gedanken wie das Intro: Papier, Stempel und Sticker, in den Farben vom Sonnenuntergang über dem Bosporus."
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "The second part was eight graphics for the video: a lower third, a location stamp, a source credit, an overlay for secretly filmed scenes, a big number and three frames for third-party footage – tape, pin and phone. The look comes from the same idea as the intro: paper, stamps and stickers, in the colours of the sunset over the Bosphorus."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 80,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
-        },
-        {
-          "id": "165e5c35-1103-48d9-bd40-eb5c46184d0f",
-          "typ": "bild",
-          "breite": "voll",
-          "inhalt": {
-            "roh": "![Motion-Graphics-Vorlage mit der Zahl 750.000](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1791196416335-motion-graphics-1600x922.webp){mittel}{Eine der acht Vorlagen: die große Zahl.}"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "![Motion graphics template showing the number 750,000](/medien/istanbul-katzen/motion-graphics.webp){gross}{One of the eight templates: the big number.}"
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 90,
-          "updated_at": "2026-10-05T10:33:48.057993+00:00"
-        },
-        {
-          "id": "66404ca9-1f75-40fc-b713-771c1fb6470b",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Der eigentliche Aufwand steckt aber in dem, was man nicht sieht. Gebaut habe ich alles in After Effects, ausgeliefert als Vorlagen für Premiere Pro. Das Team tippt Namen und Orte einfach ein, zieht Clips in die Rahmen, und die Grafik passt sich selbst an: Lange Texte werden kleiner, die Ortsmarke füllt ihren Stempel immer aus, und egal wie lang man die Grafik in der Timeline zieht – Ein- und Ausblendung bleiben gleich schnell, nur die Standzeit dazwischen wächst mit."
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "The real work, though, is in what you don't see. I built everything in After Effects and delivered it as templates for Premiere Pro. The team just types in names and places, drags clips into the frames, and the graphic adapts on its own: long texts get smaller, the location stamp always fills its frame, and no matter how long you stretch the graphic on the timeline, the in and out animations stay just as fast – only the hold time in between grows."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 100,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
-        },
-        {
-          "id": "117b5690-1be2-4b02-96b3-d71e2382369f",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Dazu gab es eine elfseitige Anleitung: vom Installieren über das Austauschen von Clips bis zu dem, was man im After-Effects-Projekt besser nicht anfasst. Mein Ziel war, dass das Team mich für diese Grafiken nie wieder braucht – und trotzdem weiß, wo es mich findet, wenn es neue will :happie: "
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": {
-            "roh": "On top of that came an eleven-page guide: from installing the templates to swapping in clips to what you'd better not touch in the After Effects project. My goal was for the team to never need me for these graphics again – and still know where to find me when they want new ones."
-          },
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 110,
-          "updated_at": "2026-10-07T10:37:12.639019+00:00"
-        },
-        {
-          "id": "1376bade-c47b-4d06-87c0-e580f94f6f67",
-          "typ": "trenner",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "---"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": null,
-          "created_at": "2026-10-05T10:27:14.803521+00:00",
-          "sort_order": 120,
-          "updated_at": "2026-10-05T10:27:14.803521+00:00"
-        },
-        {
-          "id": "eff24bec-55aa-48c0-b58a-77e2c8b66bea",
-          "typ": "video",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "https://www.youtube.com/watch?v=xelwbWPUmEo"
-          },
-          "seite_id": "0bf82d2b-868e-4f1f-8502-99ae0387840e",
-          "inhalt_en": null,
-          "created_at": "2026-10-06T18:29:41.874825+00:00",
-          "sort_order": 121,
-          "updated_at": "2026-10-07T10:38:13.513933+00:00"
         }
       ]
     },
@@ -1723,339 +1295,6 @@ window.SEED_SEITEN = {
           "created_at": "2026-08-22T17:46:48.907163+00:00",
           "sort_order": 90,
           "updated_at": "2026-08-22T17:46:48.907163+00:00"
-        }
-      ]
-    },
-    {
-      "id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-      "slug": "verteidiger-isfj-t",
-      "typ": "welt",
-      "titel": "Verteidiger (ISFJ-T)",
-      "untertitel": "Mein Ergebnis beim 16Personalities-Test — und was das mit der Art zu tun hat, wie ich arbeite.",
-      "kunde": null,
-      "jahr": null,
-      "cover_url": null,
-      "cover_pos": "50% 50%",
-      "video_url": null,
-      "embed_ok": true,
-      "farbe": null,
-      "ist_aktuell": false,
-      "status": "published",
-      "sort_order": 1000,
-      "created_at": "2026-08-22T17:46:48.907163+00:00",
-      "updated_at": "2026-09-04T15:41:26.206411+00:00",
-      "titel_en": "Defender (ISFJ-T)",
-      "untertitel_en": "My result on the 16Personalities test & what it has to do with the way I work.",
-      "bloecke": [
-        {
-          "id": "3e30e81a-fc72-4a89-8c41-d5f931353de9",
-          "typ": "kasten",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Der Gedanke hinter diesem Beitrag ist, dass du vor einer potentiellen Zusammenarbeit ein Gefühl dafür bekommst wie es ist mit mir zu arbeiten. Bei vergangenden Projekten gab es manchmal Missverständnisse, und die versuche ich zu vermeiden. Mach dich also bereit für mein yapping :popCat: ",
-            "farbe": "salbei"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
-          "created_at": "2026-10-07T11:11:04.844635+00:00",
-          "sort_order": 998,
-          "updated_at": "2026-10-07T11:12:48.496886+00:00"
-        },
-        {
-          "id": "dfc33a08-f40b-4de8-9f54-39cfad19a5c9",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "![](https://mqkggwvcositmpemtqot.supabase.co/storage/v1/object/public/media/1787771581020-isfj-t-2.webp)",
-            "ohne_rahmen": true
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
-          "created_at": "2026-08-26T19:11:10.273155+00:00",
-          "sort_order": 999,
-          "updated_at": "2026-09-04T15:41:37.058918+00:00"
-        },
-        {
-          "id": "6b155c60-a8a4-4a21-8093-f8018dbdec50",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "16Personalities hat mich als ISFJ-T eingeordnet – \"Der Verteidiger\", aber in der turbulenten Variante :FeelsDumbMan:. Die wissenschaftliche Basis bei solchen Tests ist zwar dünn, aber trotzdem standen da ein paar Sachen, bei denen ich mich unangenehm gut wiedererkannt hab (und weil ich den Test cool finde :catJAM:) also nutze ich das hier mal als Anlass, um zu beschreiben, wie ich tatsächlich arbeite,  inklusive der Stellen, die nicht so schmeichelhaft sind! "
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "16Personalities put me down as an ISFJ-T – \"The Defender\", but the turbulent variant. The scientific basis for tests like this is admittedly thin, but there were still a few things in there where I recognized myself uncomfortably well (and because I think the test is cool🙂‍↕️), so I'm using this as an excuse to describe how I actually work, including the parts that aren't so flattering!"
-          },
-          "created_at": "2026-08-26T16:09:10.896269+00:00",
-          "sort_order": 1000,
-          "updated_at": "2026-10-07T11:15:10.190517+00:00"
-        },
-        {
-          "id": "68e3bf17-d7b0-43d8-8cf4-cd272a3c0127",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "---"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
-          "created_at": "2026-08-26T16:47:02.537266+00:00",
-          "sort_order": 1000.5,
-          "updated_at": "2026-08-26T16:47:05.486499+00:00"
-        },
-        {
-          "id": "88f46ed7-c219-424e-aaa5-c5a8fdf33fcd",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "### Das Detail-Ding"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "### The detail thing"
-          },
-          "created_at": "2026-08-26T16:11:53.28108+00:00",
-          "sort_order": 1001,
-          "updated_at": "2026-09-04T15:43:08.813456+00:00"
-        },
-        {
-          "id": "28deaca0-86c6-477f-85c9-5061d12f6019",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Das \"**S**\" steht für Sensing: Ich denke von konkreten Details aus, nicht von abstrakten Konzepten. In der Praxis heißt das, ich seh den einen Frame, in dem der Schnitt zu früh sitzt. Das nervt manchmal (auch mich selbst :Grrr:) aber es bedeutet auch, dass niemand hinter mir herräumen muss."
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "The \"**S**\" stands for Sensing: I think from concrete details, not from abstract concepts. In practice that means I see the one frame where the cut lands too early. I see that the lower third in video 12 sits two pixels further left than in video 11. That's annoying sometimes (for me too🚬), but it also means nobody has to clean up after me."
-          },
-          "created_at": "2026-08-26T16:12:04.302091+00:00",
-          "sort_order": 1002,
-          "updated_at": "2026-10-07T10:58:47.713198+00:00"
-        },
-        {
-          "id": "462f6119-8833-499f-960e-9ebb5799c3b2",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Das \"**T**\" (turbulent) legt da nochmal einen drauf. Ich geh Sachen lieber doppelt durch, als drauf zu vertrauen, dass es schon passt :See:. Verpasste Deadlines oder Exporte mit falscher Framerate hatte ich in Jahren Freelance-Arbeit nicht."
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "The \"**T**\" (turbulent) adds another layer on top. I'd rather go through things twice than trust that it's probably fine. Missed deadlines or exports with the wrong framerate haven't happened to me in years of freelance work."
-          },
-          "created_at": "2026-08-26T16:13:09.649064+00:00",
-          "sort_order": 1003,
-          "updated_at": "2026-10-07T10:59:03.261684+00:00"
-        },
-        {
-          "id": "96ec3cf3-ba2b-44ec-b8bd-49b9ff9e7732",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "### Was das für Leute bedeutet, mit denen ich arbeite"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "### What that means for the people I work with"
-          },
-          "created_at": "2026-08-26T16:14:11.011612+00:00",
-          "sort_order": 1004,
-          "updated_at": "2026-09-04T15:44:28.119615+00:00"
-        },
-        {
-          "id": "963e4975-a5c8-4590-ba65-218bfe4ad00c",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Der andere Teil ist das \"**F**\": Ich merk relativ früh, wenn bei einem Kunden was nicht stimmt. Wenn Feedback plötzlich knapper wird oder jemand dreimal um dieselbe Änderung bittet, ist meistens nicht die Änderung das Problem, sondern z.B eine Erwartung, die nie ausgesprochen wurde :CatScreaming:. Ich frag dann lieber einmal zu viel nach, bevor ich drei Versionen in die falsche Richtung baue."
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "The other part is the \"**F**\": I notice fairly early when something's off with a client. When feedback suddenly gets shorter or someone asks for the same change three times, the change usually isn't the problem – it's something underneath, like an expectation that was never said out loud. I'd rather ask one time too many than build three versions in the wrong direction."
-          },
-          "created_at": "2026-08-26T16:14:19.193458+00:00",
-          "sort_order": 1005,
-          "updated_at": "2026-10-07T11:00:31.201136+00:00"
-        },
-        {
-          "id": "1adfe0fb-ea45-42f9-a2af-59604c926d4f",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Ich merk mir außerdem, was Leute wollen, ohne dass sie's nochmal sagen müssen. Welcher Kunde keine harten Cuts auf Beat mag, wer Untertitel grundsätzlich zu groß findet. Klingt banal, spart aber jedes Mal eine Feedback-Runde :See: "
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "I also remember what people want without them having to say it again. Which client doesn't like hard cuts on the beat, who always thinks subtitles are too big. Sounds trivial, but it saves a feedback round every single time."
-          },
-          "created_at": "2026-08-26T16:14:54.691073+00:00",
-          "sort_order": 1006,
-          "updated_at": "2026-10-07T11:17:27.434564+00:00"
-        },
-        {
-          "id": "b8603d3f-d005-428d-8b39-a49fb27793ef",
-          "typ": "zitat",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Im Ergebnis stand außerdem dass ich mir gut Namen und Geburtstage merken kann, das stimmt aber nicht. Nimms mir nicht böse falls ich deinen Namen vergesse :PepeWeird: ",
-            "farbe": "salbei"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "The result also said I'm good at remembering names and birthdays, but that's not true. Don't take it personally if I forget your name🫶"
-          },
-          "created_at": "2026-08-26T22:27:17.702643+00:00",
-          "sort_order": 1006.25,
-          "updated_at": "2026-10-07T11:18:30.90961+00:00"
-        },
-        {
-          "id": "e598ca0d-c59a-46a5-827a-dd5ce5cf44ac",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "### Leise heißt nicht unsicher"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "### Quiet doesn't mean unsure"
-          },
-          "created_at": "2026-08-26T16:41:39.999796+00:00",
-          "sort_order": 1006.5,
-          "updated_at": "2026-09-04T15:45:41.740737+00:00"
-        },
-        {
-          "id": "e957bac7-ef4c-440d-8d09-fd1a9f9092fb",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Ich sage nichts, wovon ich keine Ahnung habe. Wenn jemand anderes in einer Sache besser ist als ich, halte ich mein Mund und höre zu"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "I don't talk about things I have no clue about. If someone else is better at something than me, I keep my mouth shut and listen"
-          },
-          "created_at": "2026-08-26T16:41:50.613245+00:00",
-          "sort_order": 1006.75,
-          "updated_at": "2026-09-04T15:45:57.251116+00:00"
-        },
-        {
-          "id": "6bd50421-e3de-49d4-87db-c7c4fbc380e9",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Umgekehrt gilt das aber genauso. Wenn ich sage, dass ein Format nicht laufen wird oder dass ein Weg uns unnötig Zeit kostet, dann ist das kein Bauchgefühl und keine Geschmacksfrage. Dann hab ich das schon dreimal gesehen und weiß, wie es ausgeht :PepeCigarette: "
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "But the reverse is just as true. When I say a format won't work or that a certain route is going to cost us unnecessary time, that's not a gut feeling and not a matter of taste. It means I've seen it three times already and know how it ends."
-          },
-          "created_at": "2026-08-26T16:42:24.713513+00:00",
-          "sort_order": 1006.875,
-          "updated_at": "2026-10-07T11:19:06.671651+00:00"
-        },
-        {
-          "id": "5fe6383d-2580-4baa-814f-7c53c198dd75",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Nur klingt es bei mir nicht so. Der Test hat dafür das \"**F**\": Ich krieg die Stimmung im Raum mit und gehe automatisch auf Harmonie. Widerspruch fühlt sich für mich an, als würde ich jemanden bloßstellen, deshalb verpacke ich ihn weich :PepeShy:. Dazu kommt der turbulente Anteil, das \"**T**\": Wenn ich einmal Gegenwind kriege, ist mein erster Reflex, mich selbst zu hinterfragen statt nachzulegen :PepeCigarette: Zusammen sorgt das dafür, dass ich eine Warnung ausspreche und beim Gegenüber ein unverbindlicher Vorschlag ankommt. Also wird der Weg genommen, vor dem ich gewarnt habe. Und irgendwann doch der, den ich von Anfang an gemeint habe :NOOO: "
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "It just doesn't sound like that coming from me. The test has the \"**F**\" for that, more precisely extraverted feeling: I pick up on the mood in the room and automatically go for harmony. Disagreeing feels like I'm putting someone on the spot, so I wrap it up softly. Add the turbulent part, the \"**T**\": once I get pushback, my first reflex is to question myself instead of doubling down. Together, that means I voice a warning and what lands on the other side is a non-committal suggestion. So the route I warned about gets taken. And eventually the one I meant from the start anyway."
-          },
-          "created_at": "2026-08-26T16:42:36.166039+00:00",
-          "sort_order": 1006.9375,
-          "updated_at": "2026-10-07T11:21:55.562923+00:00"
-        },
-        {
-          "id": "4a82b2ad-ebf4-4f79-a52c-eeb90736c8f0",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Ich hab trotzdem nicht vor, das zu ändern, indem ich lauter werde :See:. Wer im Meeting am längsten redet, hat nicht recht, sondern nur geredet. Was ich stattdessen mache: Ich liefere die Begründung gleich mit und einen Weg, wie man mich schnell überprüfen kann. Zwei Wochen testen, Zahlen anschauen, danach entscheiden :veryCoolCat:"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "I still don't plan on fixing that by getting louder. Whoever talks the longest in a meeting isn't right, they've just talked. What I do instead: I deliver the reasoning right along with it, plus a quick way to check whether I'm right. Test for two weeks, look at the numbers, then decide."
-          },
-          "created_at": "2026-08-26T16:45:00.944085+00:00",
-          "sort_order": 1006.96875,
-          "updated_at": "2026-10-07T11:22:33.50233+00:00"
-        },
-        {
-          "id": "f9fc40fd-86ab-4d58-b539-b35cac6c89bf",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "---"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": null,
-          "created_at": "2026-08-26T16:46:33.288256+00:00",
-          "sort_order": 1006.984375,
-          "updated_at": "2026-08-26T16:46:39.08916+00:00"
-        },
-        {
-          "id": "e32655ac-ca03-4b84-ac55-3d1057b94f09",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "### Wo es hakt"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "### Where it gets bumpy"
-          },
-          "created_at": "2026-08-26T16:16:48.111948+00:00",
-          "sort_order": 1007,
-          "updated_at": "2026-09-04T15:49:08.43024+00:00"
-        },
-        {
-          "id": "08e219a4-a2c4-423b-adb1-4910732d7b77",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Wenn ich das hier ehrlich machen will, gehört der Teil dazu:"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "If I want to be honest here, this part belongs too:"
-          },
-          "created_at": "2026-08-26T16:17:03.249549+00:00",
-          "sort_order": 1008,
-          "updated_at": "2026-09-04T15:49:15.290434+00:00"
-        },
-        {
-          "id": "71557177-718a-46f3-a3eb-ad82ce3e22fc",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Ich sag zu schnell ja. Wenn jemand fragt, ob noch was mehr geht, ist meine erste Reaktion \"safeee kriegen wir hin :o7:\" – und dann überarbeite ich mich. Ich arbeite dran, inzwischen erst zu rechnen und dann zu antworten. Wer mich also fragt, ob was bis Freitag geht, kriegt manchmal eine Stunde später die Antwort statt sofort :FeelsDumbMan:"
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "I say yes too fast. When someone asks if there's room for a bit more, my first reaction is \"sureee, we got this\" – and then I overwork myself. I'm working on doing the math first and answering second. So if you ask me whether something can be done by Friday, you might get the answer an hour later instead of right away. That's on purpose."
-          },
-          "created_at": "2026-08-26T16:17:15.21056+00:00",
-          "sort_order": 1009,
-          "updated_at": "2026-10-07T11:23:36.985235+00:00"
-        },
-        {
-          "id": "8d19a574-3cc6-4499-a2d7-1cbb07b5c79a",
-          "typ": "text",
-          "breite": "normal",
-          "inhalt": {
-            "roh": "Und ich neige dazu, auch bei Sachen 110 % zu geben, wo 85 % völlig gereicht hätten :CatScreaming:. Bei einem Hero-Video ist das richtig. Bei der dritten Variante von nem Reel ist es einfach nur Zeit, die woanders fehlt. Diese Grenze zu ziehen übe ich noch, aber klare Kommunikation und Anweisungen helfen da enorm :love: "
-          },
-          "seite_id": "16616468-e7d5-4cf3-80c9-0266d89cb58b",
-          "inhalt_en": {
-            "roh": "And I tend to give 110% on things where 85% would've been totally fine. On a hero video, that's the right call. On the third variant of a social cutdown, it's just time that's missing somewhere else. Drawing that line takes practice, and I'm not done with it yet."
-          },
-          "created_at": "2026-08-26T16:19:09.867162+00:00",
-          "sort_order": 1010,
-          "updated_at": "2026-10-07T11:26:25.377662+00:00"
         }
       ]
     }

@@ -29,6 +29,11 @@
 import { readFile } from 'node:fs/promises';
 import { starteChrome, oeffne, pruefe, bericht } from './chrome.mjs';
 import { starteServer } from './server.mjs';
+/* Welche Welt geprüft wird, steht im Inhalt, nicht hier: die erste aus der
+   Sitemap (die schreibt tests/hochladen.mjs aus den veröffentlichten Welten). */
+const WELT = (await import('node:fs')).readFileSync(new URL('../HOCHLADEN/sitemap.xml', import.meta.url), 'utf8')
+  .match(/\/welt\/([a-z0-9-]+)</)[1];
+
 
 const wurzel = new URL('../HOCHLADEN/', import.meta.url).pathname;
 const server = await starteServer({ wurzel, port: 8919 });
@@ -277,7 +282,7 @@ await s.zu();
 
 /* ================= 5. Eine Welt animiert genauso ================= */
 {
-  const w = await oeffne(ADR + '/welt/verteidiger-isfj-t', { port: 9359, breite: 1440, hoehe: 900 });
+  const w = await oeffne(ADR + '/welt/' + WELT, { port: 9359, breite: 1440, hoehe: 900 });
   await w.warte(3000);
   /* site.css setzt html { scroll-behavior: smooth }. Ohne das Abschalten
      GLEITET window.scrollTo() ans Ziel, und direkt danach steht die Seite

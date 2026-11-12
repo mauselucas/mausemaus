@@ -22,6 +22,12 @@ const aufgeglitten = (s) => s.bisWahr(
      return !!d && d.open && d.getAnimations().every(a => a.playState === 'finished'); })()`, 5000)
   .then(() => true, () => false);
 const nr = (slug) => `window.mmProjekte.findIndex(p => p.slug === '${slug}')`;
+/* Welche Projekte geprüft werden, steht im Inhalt, nicht hier: Lucas
+   archiviert und baut um (Istanbul und Simplicissimus am 12.11. raus).
+   VIEL = das Projekt mit den meisten Kapiteln (nicht das letzte -- dahinter
+   muss ein "Nächstes Projekt" kommen), MEIST = das mit den meisten Blöcken.
+   Ermittelt gleich nach dem ersten Laden. */
+let VIEL, VIEL_TITEL, N_VIEL, MEIST;
 const stand = `JSON.stringify({
   offen: !!document.querySelector('dialog.bu')?.open,
   modal: !!document.querySelector('dialog.bu:modal'),
@@ -35,6 +41,12 @@ const stand = `JSON.stringify({
 {
   const s = await oeffne(ADR, { port: 9371, breite: 1440, hoehe: 900 });
   await bereit(s);
+  ({ VIEL, VIEL_TITEL, N_VIEL, MEIST } = JSON.parse(await s.werte(`JSON.stringify((() => {
+    const P = window.mmProjekte, kap = P.map(p => window.mmKapitel(p.bloecke, !!p.coverHtml).length);
+    let i = 0; for (let j = 0; j < P.length - 1; j++) if (kap[j] > kap[i]) i = j;
+    let m = 0; P.forEach((p, j) => { if (p.bloecke.length > P[m].bloecke.length) m = j; });
+    return { VIEL: P[i].slug, VIEL_TITEL: P[i].titel, N_VIEL: kap[i], MEIST: P[m].slug }; })())`)));
+  console.log(`  info  geprüft an: ${VIEL} (${N_VIEL} Kapitel), meiste Blöcke: ${MEIST}`);
 
   /* ---- Die Karten ---- */
   const k = JSON.parse(await s.werte(`JSON.stringify({
@@ -43,11 +55,11 @@ const stand = `JSON.stringify({
     knoepfe: document.querySelectorAll('.br-karte .br-mehr-ansehen').length,
     medien: document.querySelectorAll('.br-karte .br-karte-medium').length,
     /* Der Rest eines Projekts steht NICHT im Dokument -- keine versteckten
-       Tab-Fallen. Simplicissimus hat 7 Bloecke, die Karte zeigt davon 2-3. */
-    simpliBloecke: window.mmProjekte[${nr('seite')}].bloecke.length,
-    simpliImBrief: document.querySelectorAll('.br-karte[data-slug="seite"] .br-text').length
+       Tab-Fallen. Geprüft am Projekt mit den meisten Blöcken. */
+    simpliBloecke: window.mmProjekte[${nr(MEIST)}].bloecke.length,
+    simpliImBrief: document.querySelectorAll('.br-karte[data-slug="${MEIST}"] .br-text').length
   })`));
-  pruefe('jedes Projekt steht als Karte im Brief', k.karten === k.projekte && k.karten >= 5, k.karten + ' / ' + k.projekte);
+  pruefe('jedes Projekt steht als Karte im Brief', k.karten === k.projekte && k.karten >= 2, k.karten + ' / ' + k.projekte);
   pruefe('…jede mit "Mehr ansehen"', k.knoepfe === k.karten, String(k.knoepfe));
   pruefe('…und einem Vorschau-Medium', k.medien === k.karten, String(k.medien));
   pruefe('zugeklappt steht nur der Anfang im Dokument, nicht alles',
@@ -56,34 +68,34 @@ const stand = `JSON.stringify({
   /* ---- Kapitel ---- */
   const kap = JSON.parse(await s.werte(`JSON.stringify(Object.fromEntries(window.mmProjekte.map(p =>
     [p.slug, window.mmKapitel(p.bloecke, !!p.coverHtml).map(k => (k.medium === 'cover' ? 'cover' : k.medium ? k.medium.typ : '-') + '+' + k.texte.length)])))`));
-  /* Istanbul: Lucas baut das Projekt im Admin um (am 06.10. Cover raus,
-     Loop-Video und YouTube als Bloecke rein). Darum keine feste Liste,
-     sondern die REGEL: jedes Medium (und ein Cover) beginnt ein Kapitel,
-     keins ist ohne Medium. Die Zahl N gilt unten fuer alle Zaehler. */
-  const istMedien = await s.werte(`(p => p.bloecke.filter(b => ['bild', 'gif', 'video'].includes(b.typ)).length
-    + (p.coverHtml ? 1 : 0))(window.mmProjekte[${nr('istanbul-katzen')}])`);
-  const N = kap['istanbul-katzen'].length;
-  pruefe('Istanbul: ein Kapitel je Medium, keins ohne Medium',
-    N === istMedien && N >= 3 && kap['istanbul-katzen'].every(x => !x.startsWith('-')),
-    JSON.stringify(kap['istanbul-katzen']) + ' bei ' + istMedien + ' Medien');
-  /* Simplicissimus: kein Cover -- der Text vor dem ersten GIF gehoert zu
-     dessen Kapitel, das Banner ist das Kopfbild, der letzte Trenner faellt weg. */
-  /* Zahl aus dem Inhalt statt fest: Lucas ändert Simplicissimus im Admin
-     (am 06.10. das Banner entfernt). Geprüft wird die REGEL -- jedes
-     Medium ein Kapitel, keins ohne Bild. */
-  const simpliMedien = await s.werte(`window.mmProjekte[${nr('seite')}].bloecke
-    .filter(b => ['bild', 'gif', 'video'].includes(b.typ)).length`);
-  pruefe('Simplicissimus: ein Kapitel je Medium, kein Kapitel ohne Bild',
-    kap.seite.length === simpliMedien && simpliMedien >= 2 && kap.seite.every(x => !x.startsWith('-')),
-    JSON.stringify(kap.seite) + ' bei ' + simpliMedien + ' Medien');
+  /* Die REGEL, an jedem veröffentlichten Projekt: jedes Medium (und ein
+     Cover) beginnt genau ein Kapitel. Ein Kapitel ganz ohne Bild entsteht
+     nur durch einen Trenner (so ist z. B. The Race gebaut). */
+  const regel = JSON.parse(await s.werte(`JSON.stringify(window.mmProjekte.map(p => ({ slug: p.slug,
+    medien: p.bloecke.filter(b => ['bild', 'gif', 'video'].includes(b.typ)).length + (p.coverHtml ? 1 : 0),
+    trenner: p.bloecke.filter(b => b.typ === 'trenner').length })))`));
+  const falsch = regel.filter(r => kap[r.slug].filter(x => !x.startsWith('-')).length !== r.medien
+    || kap[r.slug].filter(x => x.startsWith('-')).length > r.trenner);
+  pruefe('jedes Projekt: ein Kapitel je Medium, ohne Bild nur nach einem Trenner', falsch.length === 0,
+    falsch.map(r => r.slug + ' ' + JSON.stringify(kap[r.slug]) + ' bei ' + r.medien + ' Medien').join('; '));
+  const N = N_VIEL;
+  pruefe(`es gibt ein Projekt mit mehreren Kapiteln zum Blättern`, N >= 2, `${VIEL}: ${N}`);
+  /* Ohne Cover gehört der Text vor dem ersten Medium zu dessen Kapitel, und
+     ein Trenner am Ende fällt weg. Gerade hat kein Projekt "ohne Cover" --
+     darum mit erfundenen Blöcken, unabhängig vom Inhalt. */
+  const ohneCover = await s.werte(`JSON.stringify(window.mmKapitel([
+    { typ: 'text' }, { typ: 'gif' }, { typ: 'text' }, { typ: 'bild' }, { typ: 'text' }, { typ: 'trenner' }], false)
+    .map(k => (k.medium ? k.medium.typ : '-') + '+' + k.texte.length))`);
+  pruefe('ohne Cover: Text davor gehört zum ersten Medium, Trenner am Ende fällt weg',
+    ohneCover === '["gif+2","bild+1"]', ohneCover);
 
   /* ---- Öffnen per Klick ---- */
-  await s.werte(`document.querySelector('.br-karte[data-slug="istanbul-katzen"] .br-mehr-ansehen').click()`);
+  await s.werte(`document.querySelector('.br-karte[data-slug="${VIEL}"] .br-mehr-ansehen').click()`);
   await s.warte(700);   // Verwandlung + Einblenden (0,46 s) -- echte Zeit, kein Zustand
   let st = JSON.parse(await s.werte(stand));
   pruefe('Klick auf "Mehr ansehen" öffnet die Bühne als MODALES Fenster', st.offen && st.modal, JSON.stringify(st));
-  pruefe('…mit Titel und "Kapitel 1 von N"', st.titel.includes('Travell4llove') && st.zaehler === `Kapitel 1 von ${N}`, st.titel + ' · ' + st.zaehler);
-  pruefe('…die Adresse nennt das Projekt', st.hash === '#istanbul-katzen', st.hash);
+  pruefe('…mit Titel und "Kapitel 1 von N"', st.titel === VIEL_TITEL && st.zaehler === `Kapitel 1 von ${N}`, st.titel + ' · ' + st.zaehler);
+  pruefe('…die Adresse nennt das Projekt', st.hash === '#' + VIEL, st.hash);
   pruefe('…und der Fokus steht in der Bühne', st.fokus.includes('bu-titel'), st.fokus);
 
   /* Hintergrund stumm: nichts außerhalb des Fensters ist erreichbar. */
@@ -100,7 +112,7 @@ const stand = `JSON.stringify({
   await s.warte(500);
   st = JSON.parse(await s.werte(stand));
   pruefe('Pfeil rechts schaltet ein Kapitel weiter', st.zaehler === `Kapitel 2 von ${N}`, st.zaehler);
-  pruefe('…und die Adresse merkt sich das Kapitel', st.hash === '#istanbul-katzen/2', st.hash);
+  pruefe('…und die Adresse merkt sich das Kapitel', st.hash === '#' + VIEL + '/2', st.hash);
   const nachWechsel = Number(await s.werte(`document.querySelectorAll('.bu-kapitel').length`));
   pruefe('…das alte Kapitel ist danach wieder weg', nachWechsel === 1, nachWechsel + ' im Dokument');
   await s.taste('ArrowLeft', 'ArrowLeft', 37);
@@ -114,10 +126,13 @@ const stand = `JSON.stringify({
   pruefe('schnelles Klicken landet sauber im letzten Kapitel', letzt.z === `Kapitel ${N} von ${N}`, letzt.z);
   pruefe('…dort heißt der Knopf "Nächstes Projekt: …"', letzt.w.startsWith('Nächstes Projekt: '), letzt.w);
   await s.werte(`document.querySelector('.bu-weiter').click()`);
-  await s.warte(500);
+  /* Auf den Zustand warten statt auf die Uhr: der Wechsel zum nächsten
+     Projekt ist eine Verwandlung, deren Dauer unter Last schwankt. */
+  await s.bisWahr(`(() => { const d = document.querySelector('dialog.bu');
+    return !!d && d.open && (document.querySelector('.bu-titel')?.textContent || '') !== ${JSON.stringify(VIEL_TITEL ?? '')}; })()`, 5000).catch(() => {});
   st = JSON.parse(await s.werte(stand));
   pruefe('"Nächstes Projekt" wechselt in der Bühne zum nächsten Eintrag',
-    st.offen && !st.titel.includes('Travell4llove') && st.zaehler.startsWith('Kapitel 1 von'), st.titel + ' · ' + st.zaehler);
+    st.offen && st.titel !== VIEL_TITEL && st.zaehler.startsWith('Kapitel 1 von'), st.titel + ' · ' + st.zaehler);
 
   /* ---- Schließen mit echtem Esc ---- */
   await s.taste('Escape', 'Escape', 27);
@@ -236,12 +251,13 @@ for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
 
 /* ================= Direkt verlinkt: /#slug/2 ================= */
 {
-  const s = await oeffne(ADR + '#istanbul-katzen/3', { port: 9371, breite: 1440, hoehe: 900 });
+  const K = Math.min(3, N_VIEL);
+  const s = await oeffne(ADR + `#${VIEL}/${K}`, { port: 9371, breite: 1440, hoehe: 900 });
   await bereit(s);
   await s.warte(700);
   const st = JSON.parse(await s.werte(stand));
-  pruefe('ein geteilter Link /#istanbul-katzen/3 öffnet genau dieses Kapitel',
-    st.offen && /^Kapitel 3 von \d+$/.test(st.zaehler), st.zaehler);
+  pruefe(`ein geteilter Link /#${VIEL}/${K} öffnet genau dieses Kapitel`,
+    st.offen && st.zaehler === `Kapitel ${K} von ${N_VIEL}`, st.zaehler);
   await s.zu();
 }
 
@@ -249,7 +265,7 @@ for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
 {
   const s = await oeffne(ADR, { port: 9371, breite: 520, hoehe: 900 });
   await bereit(s);
-  await s.werte(`document.querySelector('.br-karte[data-slug="istanbul-katzen"] .br-mehr-ansehen').click()`);
+  await s.werte(`document.querySelector('.br-karte[data-slug="${VIEL}"] .br-mehr-ansehen').click()`);
   await aufgeglitten(s);
   const m = JSON.parse(await s.werte(`(() => {
     const d = document.querySelector('dialog.bu').getBoundingClientRect();
@@ -270,7 +286,7 @@ for (const [breite, hoehe] of [[1440, 900], [1280, 760]]) {
   await s.medien({ 'prefers-reduced-motion': 'reduce' });
   await s.werte('location.reload()').catch(() => {});
   await bereit(s);
-  await s.werte(`document.querySelector('.br-karte[data-slug="istanbul-katzen"] .br-mehr-ansehen').click()`);
+  await s.werte(`document.querySelector('.br-karte[data-slug="${VIEL}"] .br-mehr-ansehen').click()`);
   await s.warte(300);
   await s.werte(`document.querySelector('.bu-weiter').click()`);
   const r = JSON.parse(await s.werte(`(() => {

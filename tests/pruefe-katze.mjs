@@ -203,8 +203,12 @@ if (!firefoxDa()) {
   })();`;
   /* messeInFirefox liefert bereits ein Objekt -- nicht noch einmal parsen. */
   const ff = await messeInFirefox(skript, { port: 8922 });
-  pruefe('Firefox: das Polyfill laeuft dort ueberhaupt', ff.polyfill === true, String(ff.polyfill));
-  pruefe('Firefox: die Katze ist geladen, trotz Polyfill',
+  /* Seit Firefox 160 (Nov. 2026) kann Firefox Scroll-Animationen selbst,
+     das Polyfill laedt dort nicht mehr. Die Katze wird dann ohne Polyfill
+     geprueft -- der Polyfill-Fall (aeltere Browser) laesst sich mit diesem
+     Firefox nicht mehr echt nachstellen und wird nur gemeldet. */
+  if (!ff.polyfill) console.log('  info  Firefox kann Scroll-Animationen selbst — Polyfill-Fall hier nicht prüfbar');
+  pruefe('Firefox: die Katze ist geladen' + (ff.polyfill ? ', trotz Polyfill' : ''),
     ff.geladen > 0, ff.quelle + ', ' + ff.geladen + ' px Rohbreite');
   pruefe('Firefox: …in denselben Massen wie in Chrome',
     ff.breit === 160 && ff.hoch === 116, ff.breit + 'x' + ff.hoch);

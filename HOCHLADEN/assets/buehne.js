@@ -147,7 +147,9 @@
      eine eigene Seite (ohne Medium, mit breiterer Textspalte). Man blaettert
      nur noch mit "Weiter". Auf dem Handy bleibt es beim Blatt, das man von
      oben nach unten liest -- dort ist Scrollen das Normale. */
+  var zuletztUmbrochen = '';
   function umbrechen(seiten) {
+    zuletztUmbrochen = innerWidth + 'x' + innerHeight;
     if (window.innerWidth <= 760) return seiten;
     var flaeche = dialog.querySelector('.bu-flaeche');
     var mess = document.createElement('div');
@@ -159,7 +161,17 @@
       var el = kapitelHtml(zustand.p, s, true);
       mess.appendChild(el);
       var t = el.querySelector('.bu-text');
-      return !t || t.scrollHeight <= t.clientHeight + 2;
+      /* Etwas Luft lassen: Die echte Seite kam auf einem 1280×760-Bildschirm
+         10 px höher heraus als die Messung (The Race, Seite mit Emote und
+         Türchen, 12.11.) -- und bekam prompt einen Rollbalken. Lieber eine
+         Zeile früher umbrechen. */
+      if (!t) return true;
+      var platz = t.clientHeight;
+      if (t.scrollHeight > platz + 2) return false;
+      /* Die Spalte ist so hoch wie die Bühne -- wie hoch der Text WIRKLICH
+         ist, zeigt sie erst, wenn sie sich nach ihm richten darf. */
+      t.style.cssText = 'height:auto;max-height:none;align-self:start';
+      return t.scrollHeight <= platz - 16;
     };
     var raus = [];
     seiten.forEach(function (s) {
@@ -364,6 +376,11 @@
     clearTimeout(ruhe);
     ruhe = setTimeout(function () {
       if (!dialog || !dialog.open || !zustand) return;
+      /* Nur bei einer ECHTEN Größenänderung neu umbrechen. Manche Browser
+         melden "resize" auch ohne (z. B. beim Laden mit #slug/3) -- dann
+         sprang man aus Kapitel 3 von 3 nach "4 von 4". */
+      var groesse = innerWidth + 'x' + innerHeight;
+      if (groesse === zuletztUmbrochen) return;
       var anteil = zustand.i / Math.max(1, zustand.kapitel.length - 1);
       fuellen(zustand.nr, 0);
       zustand.i = Math.round(anteil * (zustand.kapitel.length - 1));

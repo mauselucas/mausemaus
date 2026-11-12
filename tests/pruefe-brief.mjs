@@ -43,6 +43,7 @@ const d = JSON.parse(await s.werte(`(async () => {
   return JSON.stringify({
     projekte: projekte.length,
     abschnitte: abschnitte.length,
+    karten: abschnitte.filter(a => a.classList.contains('br-karte')).length,
     /* jeder Projekttext muss WÖRTLICH auf der Seite stehen */
     fehlendeTexte: projekte.filter(p => p.summary && !text.includes(p.summary.trim()))
                            .map(p => p.slug),
@@ -59,9 +60,13 @@ const d = JSON.parse(await s.werte(`(async () => {
 
 /* "mindestens", nicht "genau": Die Zahl kommt aus der LEBENDEN Datenbank,
    und Lucas legt neue Projekte an. Mit "=== 5" wurde die Pruefung bei jedem
-   neuen Projekt rot, ohne dass etwas kaputt war. */
-pruefe('mindestens fünf veröffentlichte Projekte gefunden', d.projekte >= 5, String(d.projekte));
-pruefe('Abschnitte = Einstieg + Profil + Projekte + Kontakt', d.abschnitte === d.projekte + 3, String(d.abschnitte));
+   neuen Projekt rot, ohne dass etwas kaputt war.
+   Ebenso die festen Abschnitte: Lucas hat "Profil" am 12.11. entfernt --
+   gezählt wird deshalb nicht mehr eine feste Zahl, sondern: jedes Projekt
+   hat genau eine Karte, und davor/danach stehen mindestens Gruß und Kontakt. */
+pruefe('veröffentlichte Projekte gefunden', d.projekte >= 1, String(d.projekte));
+pruefe('jedes Projekt hat genau eine Karte', d.karten === d.projekte, `${d.karten} Karten / ${d.projekte} Projekte`);
+pruefe('…dazu mindestens Gruß und Kontakt', d.abschnitte - d.karten >= 2, `${d.abschnitte - d.karten} weitere Abschnitte`);
 pruefe('KEIN Projekttext wurde verändert', d.fehlendeTexte.length === 0, d.fehlendeTexte.join(','));
 pruefe('KEIN Projekttitel wurde verändert', d.fehlendeTitel.length === 0, d.fehlendeTitel.join(','));
 pruefe('KEIN Coverbild fehlt', d.fehlendeBilder.length === 0, d.fehlendeBilder.join(','));

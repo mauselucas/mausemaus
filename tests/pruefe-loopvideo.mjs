@@ -97,17 +97,20 @@ const bereit = (s) => s.bisWahr(`!document.getElementById('mm-laden') && !!windo
   pruefe('beim Wegscrollen hält es an (spart Akku)', await wirdWahr(s,
     `document.querySelector('video.mm-loop').paused`, 6000));
 
-  /* In der Bühne: Istanbul hat das Intro als Loop-Video in einem Kapitel.
-     Geblättert wird mit dem echten Weiter-Knopf, bis es dasteht -- die
-     Seitenzahl hängt davon ab, wie der Text umbricht. */
+  /* In der Bühne: irgendein Projekt mit einem Loop-Video als Kapitel-Medium
+     (welches, steht im Inhalt -- Lucas archiviert und baut um). Geblättert
+     wird mit dem echten Weiter-Knopf, bis es dasteht -- die Seitenzahl
+     hängt davon ab, wie der Text umbricht. */
   const kap = await s.werte(`(() => {
-    const p = window.mmProjekte.findIndex(p => p.slug === 'istanbul-katzen');
-    const k = window.mmKapitel(window.mmProjekte[p].bloecke, !!window.mmProjekte[p].coverHtml)
-      .findIndex(k => k.medium && k.medium !== 'cover' && /\\.mp4/.test(k.medium.inhalt?.roh || ''));
-    window.mmBuehneOeffnen(p, 0);
-    return k;
+    const P = window.mmProjekte;
+    for (let p = 0; p < P.length; p++) {
+      const k = window.mmKapitel(P[p].bloecke, !!P[p].coverHtml)
+        .findIndex(k => k.medium && k.medium !== 'cover' && /\\.mp4/.test(k.medium.inhalt?.roh || ''));
+      if (k >= 0) { window.mmBuehneOeffnen(p, 0); return k; }
+    }
+    return -1;
   })()`);
-  pruefe('Istanbul: das Intro ist ein Loop-Video in einem Kapitel', kap >= 0, String(kap));
+  pruefe('ein Projekt hat ein Loop-Video als Kapitel', kap >= 0, String(kap));
   const sichtbar = `!!document.querySelector('dialog.bu[open] .bu-kapitel:not(.bu-geht) video.mm-loop')`;
   for (let i = 0; i < 12 && !(await wirdWahr(s, sichtbar, 900)); i++) {
     await s.werte(`document.querySelector('dialog.bu .bu-weiter').click()`);

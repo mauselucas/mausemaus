@@ -50,9 +50,12 @@ const skript = `
 /* messeInFirefox liefert bereits ein Objekt -- nicht noch einmal parsen. */
 const d = await messeInFirefox(skript, { port: 8971 });
 
-/* Ohne diese Zusicherung waere alles Weitere wertlos: laeuft das Polyfill
-   nicht, kann es auch nichts kaputtmachen und die Pruefung waere hohl. */
-pruefe('das Polyfill läuft in Firefox überhaupt', d.polyfill === true, String(d.polyfill));
+/* Frueher stand hier: "das Polyfill laeuft in Firefox ueberhaupt".
+   Seit Firefox 160 (Nov. 2026) kann Firefox Scroll-Animationen selbst und
+   laedt das Polyfill gar nicht mehr. Dann werden die Schriften trotzdem
+   geprueft (sie muessen ja ankommen), nur die Gegenprobe zum Polyfill
+   entfaellt -- ehrlich gemeldet statt still uebersprungen. */
+if (!d.polyfill) console.log('  info  Firefox kann Scroll-Animationen selbst — das Polyfill läuft hier nicht mehr, Gegenprobe entfällt');
 
 for (const [name, wert] of [['TropiWeb', d.TropiWeb], ['Manrope', d.Manrope], ['Space Mono', d.SpaceMono]]) {
   pruefe(`${name} zeichnet in Firefox — nicht die Ersatzschrift`,
@@ -64,10 +67,12 @@ pruefe('die drei Schriften unterscheiden sich auch voneinander',
 
 /* Gegenprobe: ohne den Rettungsanker MUSS es wieder brechen. Bleibt es
    auch dann gruen, misst diese Datei etwas anderes als sie behauptet. */
+if (d.polyfill) {
 const ohneRettung = (html) => html.replace(/document\.write\('<script src="\/assets\/schriften-retten\.js[^']*'\);/, '');
 const o = await messeInFirefox(skript, { port: 8972, verbiegen: ohneRettung });
 pruefe('ohne schriften-retten.js fallen sie nachweislich aus',
   o.TropiWeb === o.serif && o.Manrope === o.serif,
   `TropiWeb ${o.TropiWeb}, Manrope ${o.Manrope}, Ersatzschrift ${o.serif}`);
+}
 
 bericht();
