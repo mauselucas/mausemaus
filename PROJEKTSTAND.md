@@ -690,3 +690,22 @@ Geprüft in `tests/pruefe-emotes.mjs`, die Vorschläge mit echten Tastendrücken
 
 Geprüft in `tests/pruefe-gruss.mjs`, die Admin-Felder in `pruefe-editor.mjs`.
 
+
+## Online ohne Kommentare (neu am 12.11.2026)
+
+Im Repo stehen die Kommentare weiter -- sie erklären, WARUM etwas so gebaut
+ist. Online geht eine aufgeräumte Kopie: Beim Veröffentlichen auf GitHub
+läuft `node tests/aufraeumen.mjs HOCHLADEN _site` und lädt `_site` hoch.
+Alle Kommentare aus HTML, CSS und JS fliegen raus, der Code wird einheitlich
+eingerückt (esbuild, zwei Durchgänge: erst zusammenpressen, dann lesbar
+setzen; nichts wird umbenannt). Unangetastet: `vendor/` (Lizenzen) und die
+schon verkleinerte `scroll-timeline.js`.
+
+- `tests/pruefe-aufraeumen.mjs`: kein Kommentar übrig, und die aufgeräumte
+  Seite zeigt wörtlich denselben Brief wie das Original (DE und EN), dazu
+  Welt, 404 und Admin ohne Fehler.
+- Ansehen: Vorschau „aufgeraeumt“ in `.claude/launch.json`
+  (`node tests/vorschau.mjs _site 8898`, vorher `aufraeumen` laufen lassen).
+- esbuild wird bei Bedarf nach `tests/.werkzeug/` geladen (nicht im Repo).
+- Wichtig: Die Prüfungen laufen gegen HOCHLADEN, nicht gegen die
+  aufgeräumte Fassung -- nur `pruefe-aufraeumen` vergleicht beide.

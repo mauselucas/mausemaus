@@ -37,8 +37,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Online geht eine aufgeraeumte Kopie von HOCHLADEN: ohne Kommentare,
+      # einheitlich formatiert. Im Repo bleiben die Kommentare stehen.
+      # Geprueft wird das von tests/pruefe-aufraeumen.mjs.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tests/aufraeumen.mjs HOCHLADEN _site
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: HOCHLADEN          # <- nur dieser Ordner geht online
+          path: _site              # <- nur das geht online
       - id: deployment
         uses: actions/deploy-pages@v4

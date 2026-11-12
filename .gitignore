@@ -2,6 +2,8 @@
 .superpowers/
 node_modules/
 tests/.profil/
+tests/.werkzeug/
+_site/
 tests/bilder/
 HOCHLADEN/tests-feste
 

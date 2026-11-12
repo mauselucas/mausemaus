@@ -4,8 +4,20 @@
     {
       "name": "brief",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["tests/vorschau.mjs"],
+      "runtimeArgs": [
+        "tests/vorschau.mjs"
+      ],
       "port": 8899
+    },
+    {
+      "name": "aufgeraeumt",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tests/vorschau.mjs",
+        "_site",
+        "8898"
+      ],
+      "port": 8898
     }
   ]
 }
